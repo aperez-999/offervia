@@ -1,0 +1,143 @@
+{
+  "project_name": "Offervia",
+  "goal": "Build a free, student-friendly AI career assistant (web-only) that tailors resumes to job descriptions, scans JDs for keywords, provides an interview coach, and tracks job applications.",
+  "non_goals": [
+    "No payments/Stripe in MVP",
+    "No mobile app",
+    "No OpenAI usage (Groq only)",
+    "No third-party UI kits beyond shadcn/ui",
+    "Do not invent features, files, or endpoints not listed"
+  ],
+  "tech_stack": {
+    "frontend": "Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui",
+    "backend": "Next.js API routes (server actions), Zod validation",
+    "auth_db": "Supabase (Auth + Postgres + RLS)",
+    "ai": "Groq API (llama-3.1-70b-versatile) server-side only",
+    "deploy": "Vercel"
+  },
+  "env_vars": [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "GROQ_API_KEY",
+    "NEXT_PUBLIC_APP_NAME"
+  ],
+  "file_structure": [
+    "app/(public)/page.tsx",
+    "app/(auth)/login/page.tsx",
+    "app/(auth)/signup/page.tsx",
+    "app/(protected)/dashboard/page.tsx",
+    "app/(protected)/resume/page.tsx",
+    "app/(protected)/scanner/page.tsx",
+    "app/(protected)/coach/page.tsx",
+    "app/(protected)/tracker/page.tsx",
+    "app/api/ai/tailor/route.ts",
+    "app/api/ai/scan/route.ts",
+    "app/api/ai/coach/route.ts",
+    "app/api/tracker/route.ts",
+    "lib/supabase/server.ts",
+    "lib/supabase/client.ts",
+    "lib/groq.ts",
+    "lib/prompts.ts",
+    "lib/auth.ts",
+    "db/schema.sql",
+    "db/policies.sql",
+    "styles/globals.css",
+    ".env.example",
+    "README.md"
+  ],
+  "database_schema_sql": "/* Use exactly this schema; do not change column names */\nCREATE TABLE IF NOT EXISTS public.applications (\n  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n  company text NOT NULL,\n  role text NOT NULL,\n  source text CHECK (source IN ('LinkedIn','Handshake','Indeed','Company','Other')) DEFAULT 'Other',\n  resume_used text CHECK (resume_used IN ('Frontend','Full-Stack','AI','General')) DEFAULT 'Full-Stack',\n  status text CHECK (status IN ('Applied','Interviewing','Assessment','Offer','Rejected')) DEFAULT 'Applied',\n  date_applied date DEFAULT now(),\n  follow_up_date date,\n  notes text,\n  created_at timestamptz DEFAULT now(),\n  updated_at timestamptz DEFAULT now()\n);\n\nCREATE TABLE IF NOT EXISTS public.messages (\n  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n  role text CHECK (role IN ('system','user','assistant')) NOT NULL,\n  content text NOT NULL,\n  meta jsonb DEFAULT '{}'::jsonb,\n  created_at timestamptz DEFAULT now()\n);\n\nCREATE TABLE IF NOT EXISTS public.prompts (\n  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,\n  kind text CHECK (kind IN ('tailor','scan','coach')) NOT NULL,\n  system_prompt text NOT NULL,\n  created_at timestamptz DEFAULT now()\n);\n\nALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;\nALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;\nALTER TABLE public.prompts ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY apps_owner ON public.applications FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);\nCREATE POLICY msgs_owner ON public.messages FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);\nCREATE POLICY prompts_owner ON public.prompts FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);\n",
+  "api_routes": [
+    {
+      "path": "/api/ai/tailor",
+      "method": "POST",
+      "input": "{ \"resumeBullets\": string[], \"jobDescription\": string }",
+      "output": "{ \"tailoredBullets\": string[], \"summary\": string, \"keywords\": string[] }",
+      "rules": [
+        "Call Groq via lib/groq.ts",
+        "Temperature 0.2",
+        "No hallucinated tools/companies/metrics",
+        "If input is empty, return 400"
+      ]
+    },
+    {
+      "path": "/api/ai/scan",
+      "method": "POST",
+      "input": "{ \"jobDescription\": string }",
+      "output": "{ \"requiredSkills\": string[], \"missingFromResume\": string[], \"level\": \"intern\" | \"newgrad\" | \"other\" }",
+      "rules": [
+        "Extract only from JD text; no imaginary skills",
+        "Return arrays; no prose paragraphs"
+      ]
+    },
+    {
+      "path": "/api/ai/coach",
+      "method": "POST",
+      "input": "{ \"messages\": {\"role\":\"system\"|\"user\"|\"assistant\", \"content\": string}[] }",
+      "output": "{ \"messages\": any[], \"suggestions\"?: string[] }",
+      "rules": [
+        "Use a STAR-structured system prompt",
+        "Limit default assistant answers to <=120 words"
+      ]
+    },
+    {
+      "path": "/api/tracker",
+      "method": "GET|POST|PATCH|DELETE",
+      "rules": [
+        "Use Supabase server client with RLS",
+        "Only operate on rows where user_id = auth.uid()"
+      ]
+    }
+  ],
+  "ui_pages": [
+    {
+      "route": "/",
+      "sections": ["Hero with tagline", "Feature grid", "CTA button to /signup", "Footer 'A PerezDev Product'"]
+    },
+    {
+      "route": "/dashboard",
+      "widgets": ["Quick actions (Tailor, Scan, Coach, Add Application)", "Weekly summary card", "Recently edited applications table"]
+    },
+    {
+      "route": "/resume",
+      "components": ["Textarea JD", "Bullets editor list", "Tailor button", "Side-by-side diff", "Copy buttons"]
+    },
+    {
+      "route": "/scanner",
+      "components": ["Textarea JD", "Required skills chips", "Missing keyword chips", "Export to notes"]
+    },
+    {
+      "route": "/coach",
+      "components": ["Chat window", "Prompt presets (Behavioral, Frontend, Backend, System Design)", "STAR toggle"]
+    },
+    {
+      "route": "/tracker",
+      "components": ["Table (company, role, status, dates, notes)", "Filters", "Add/Edit modal"]
+    }
+  ],
+  "coding_standards": [
+    "TypeScript strict mode",
+    "Server-side Groq calls only",
+    "Zod validate every API input",
+    "No client-side secrets",
+    "ESLint + Prettier clean"
+  ],
+  "acceptance_tests": [
+    "Auth: unauthenticated users are redirected from /dashboard to /login",
+    "Tailor: returns 3-6 bullets and a summary; none contain tools not in resume/JD",
+    "Scan: returns arrays with at least 10 JD keywords for typical SWE JD",
+    "Coach: responses under 120 words unless user asks for more",
+    "Tracker: CRUD works and RLS prevents cross-user access"
+  ],
+  "security_privacy": [
+    "Do not log PII or raw resumes in console",
+    "Store AI prompts and messages under user_id in messages table",
+    "RLS must be enabled and enforced"
+  ],
+  "instructions_for_ai": [
+    "Follow the provided file paths; do not rename or invent directories",
+    "If a dependency or API is ambiguous, stop and output a clarification request",
+    "Prefer small, composable components",
+    "Keep UI minimal, student-friendly, and clean (Tailwind + shadcn)"
+  ]
+}

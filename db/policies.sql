@@ -1,0 +1,1 @@
+-- TODO: Add RLS policies for applications and messages tables as specified in README/spec.
