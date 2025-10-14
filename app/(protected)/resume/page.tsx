@@ -1,15 +1,17 @@
-import { requireAuth } from "@/lib/auth";
-import SignOutLink from "../signout";
+"use client";
 
-export default async function ResumePage() {
-  await requireAuth();
+import AuthGuard from "@/components/AuthGuard";
+import AppLayout from "@/components/layout/AppLayout";
+import ResumeWizard from "@/components/resume/ResumeWizard";
+
+export default function ResumePage() {
   return (
-    <main className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Resume Tailor</h1>
-        <SignOutLink />
-      </div>
-      <p className="text-sm text-gray-500">Protected page.</p>
-    </main>
+    <AuthGuard>
+      <AppLayout>
+        <div className="p-6 space-y-6">
+          <ResumeWizard />
+        </div>
+      </AppLayout>
+    </AuthGuard>
   );
 }

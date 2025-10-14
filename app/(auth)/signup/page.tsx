@@ -1,14 +1,13 @@
-import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getPublicSupabase } from "@/lib/supabase/server";
 import SignupForm from "./_form";
 
 export default async function SignupPage() {
-  const user = await getCurrentUser();
-  if (user) {
-    return (
-      <main className="p-8">
-        <script dangerouslySetInnerHTML={{ __html: 'window.location.replace("/dashboard")' }} />
-      </main>
-    );
+  const supabase = getPublicSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
+    redirect("/dashboard");
   }
 
   return (

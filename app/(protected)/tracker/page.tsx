@@ -1,15 +1,15 @@
-import { requireAuth } from "@/lib/auth";
-import SignOutLink from "../signout";
+"use client";
 
-export default async function TrackerPage() {
-  await requireAuth();
+import AuthGuard from "@/components/AuthGuard";
+import AppLayout from "@/components/layout/AppLayout";
+
+export default function TrackerPage() {
   return (
-    <main className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Application Tracker</h1>
-        <SignOutLink />
-      </div>
-      <p className="text-sm text-gray-500">Protected page.</p>
-    </main>
+    <AuthGuard>
+      <AppLayout>
+        <h1 className="text-xl font-semibold text-gray-900">Job Tracker</h1>
+        {/* TODO: Add breadcrumb trail here */}
+      </AppLayout>
+    </AuthGuard>
   );
 }

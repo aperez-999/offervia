@@ -1,15 +1,15 @@
-import { requireAuth } from "@/lib/auth";
-import SignOutLink from "../signout";
+"use client";
 
-export default async function CoachPage() {
-  await requireAuth();
+import AuthGuard from "@/components/AuthGuard";
+import AppLayout from "@/components/layout/AppLayout";
+import CoachHub from "@/components/coach/CoachHub";
+
+export default function CoachPage() {
   return (
-    <main className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Interview Coach</h1>
-        <SignOutLink />
-      </div>
-      <p className="text-sm text-gray-500">Protected page.</p>
-    </main>
+    <AuthGuard>
+      <AppLayout>
+        <CoachHub />
+      </AppLayout>
+    </AuthGuard>
   );
 }

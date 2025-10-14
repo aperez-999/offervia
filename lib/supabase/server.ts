@@ -1,43 +1,25 @@
-import { cookies, headers } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getServerSupabase(): Promise<SupabaseClient> {
-  const cookieStore = await cookies();
-  const hdrs = await headers();
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+// Service-role client (admin/server-side tasks only)
+export function getServerSupabase(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+  if (!url || !serviceKey) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
-
-  const authHeader = (hdrs.get("authorization") || hdrs.get("Authorization") || "").toString();
-
-  const supabase = createServerClient(url, anon, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options: any) {
-        try {
-          cookieStore.set({ name, value, ...options });
-        } catch {}
-      },
-      remove(name: string, options: any) {
-        try {
-          cookieStore.set({ name, value: "", ...options });
-        } catch {}
-      },
-    },
-    headers: hdrs,
-    global: {
-      headers: {
-        Authorization: authHeader,
-      },
-    },
+  return createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { "X-Client-Info": "server-service-role" } },
   });
+}
 
-  console.log("DEBUG: global auth header passed:", authHeader ? "yes" : "no");
-
-  return supabase;
+// Public anon client configured to read incoming cookies via headers() for SSR session detection
+export function getPublicSupabase(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+  if (!url || !anon) {
+    throw new Error("Missing Supabase URL or Anon Key");
+  }
+  return createClient(url, anon);
 }

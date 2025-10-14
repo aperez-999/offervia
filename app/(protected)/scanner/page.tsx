@@ -1,15 +1,17 @@
-import { requireAuth } from "@/lib/auth";
-import SignOutLink from "../signout";
+"use client";
 
-export default async function ScannerPage() {
-  await requireAuth();
+import AuthGuard from "@/components/AuthGuard";
+import AppLayout from "@/components/layout/AppLayout";
+import ScannerWizard from "@/components/scanner/ScannerWizard";
+
+export default function ScannerPage() {
   return (
-    <main className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">JD Scanner</h1>
-        <SignOutLink />
-      </div>
-      <p className="text-sm text-gray-500">Protected page.</p>
-    </main>
+    <AuthGuard>
+      <AppLayout>
+        <div className="p-6">
+          <ScannerWizard />
+        </div>
+      </AppLayout>
+    </AuthGuard>
   );
 }

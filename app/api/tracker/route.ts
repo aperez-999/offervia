@@ -4,18 +4,8 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { headers } from "next/headers";
-
-async function debugLogHeaders() {
-  const hdrs = await headers();
-  const auth = hdrs.get("authorization") ?? hdrs.get("Authorization") ?? null;
-  const masked = auth ? auth.slice(0, 8) + "…" + auth.slice(-6) : null;
-  console.log("DEBUG: incoming Authorization header (masked):", masked);
-  console.log("DEBUG: other headers present:", {
-    host: hdrs.get("host"),
-    origin: hdrs.get("origin"),
-    cookie: !!hdrs.get("cookie"),
-  });
-}
+/*
+*/
 
 function decodeToken(token: string): any | null {
   try {
@@ -84,7 +74,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  await debugLogHeaders();
   const userId = await getUserIdFromAuthHeader();
   if (!userId) return badRequest("unauthorized", null, 401);
 
