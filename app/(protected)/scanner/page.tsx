@@ -2,14 +2,14 @@
 
 import AuthGuard from "@/components/AuthGuard";
 import AppLayout from "@/components/layout/AppLayout";
-import ScannerWizard from "@/components/scanner/ScannerWizard";
+import ScannerPanel from "@/components/scanner/ScannerPanel";
 
 export default function ScannerPage() {
   return (
     <AuthGuard>
       <AppLayout>
         <div className="p-6">
-          <ScannerWizard />
+          <ScannerPanel />
         </div>
       </AppLayout>
     </AuthGuard>

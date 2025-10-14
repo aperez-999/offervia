@@ -7,13 +7,11 @@ import { MessageSquare, FileText, Mail, Compass } from "lucide-react";
 const items = [
   { key: "interview", label: "Interview Coach", icon: MessageSquare },
   { key: "resume", label: "Resume Feedback", icon: FileText },
-  { key: "cover", label: "Cover Letter Help", icon: Mail },
+  { key: "cover_letter", label: "Cover Letter Help", icon: Mail },
   { key: "career", label: "Career Advice", icon: Compass },
 ] as const;
 
-export default function CoachSidebar() {
-  const [active, setActive] = useState<typeof items[number]["key"]>("interview");
-
+export default function CoachSidebar({ active, onChange }: { active: typeof items[number]["key"]; onChange: (k: typeof items[number]["key"]) => void; }) {
   return (
     <aside className="w-[260px] shrink-0">
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-3">
@@ -25,7 +23,7 @@ export default function CoachSidebar() {
               <Button
                 key={key}
                 variant="ghost"
-                onClick={() => setActive(key)}
+                onClick={() => onChange(key)}
                 className={`justify-start gap-2 px-2 py-2 text-sm hover:bg-gray-50 ${
                   isActive ? "bg-gray-50 font-medium" : ""
                 }`}
