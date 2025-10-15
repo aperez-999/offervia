@@ -7,17 +7,17 @@ export default function Why() {
   const items = [
     {
       title: "Built for Job Seekers",
-      desc: "No fluff. Practical tools that help you prepare and apply with confidence.",
+      desc: "Purpose‑built AI tools for candidates — not HR. Get focused help that speeds up applications and interview prep.",
       icon: Sparkles,
     },
     {
       title: "ATS‑friendly outputs",
-      desc: "Clean, scannable text that recruiters and systems can parse easily.",
+      desc: "Clean, scannable formatting with the right keywords so your resume shows up clearly to recruiters and systems.",
       icon: CheckCircle2,
     },
     {
       title: "Private & secure",
-      desc: "Your data stays with you. Start free and upgrade only if needed.",
+      desc: "Your uploads aren’t shared. Tailor resumes with confidence — your data stays with you.",
       icon: Shield,
     },
   ];

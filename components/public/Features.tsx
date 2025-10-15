@@ -7,22 +7,22 @@ export default function Features() {
   const items = [
     {
       title: "AI Interview Coach",
-      desc: "Practice realistic questions and get concise, practical feedback.",
+      desc: "Prepare faster with realistic practice questions and concise coaching — get interview‑ready in less time.",
       icon: MessageSquare,
     },
     {
       title: "Job Description Scanner",
-      desc: "Extract required skills, gaps, and keywords from any JD.",
+      desc: "Scan any posting to extract required skills, keywords, and gaps so you can target your resume effectively.",
       icon: FileText,
     },
     {
       title: "Resume Tailor",
-      desc: "Generate an ATS-friendly resume aligned to a specific role.",
+      desc: "Use the AI resume builder to tailor content to the role and stay ATS‑friendly for better visibility.",
       icon: ClipboardList,
     },
     {
       title: "Cover Letter Builder (Coming Soon)",
-      desc: "Craft personalized letters that show motivation and fit.",
+      desc: "Quickly draft focused cover letters that highlight motivation and fit — no fluff.",
       icon: Stamp,
     },
   ];

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function LayoutPublic({ children }: { children: React.ReactNode }) {
@@ -22,8 +23,15 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
         scrolled ? "bg-white/90 border-b border-gray-200" : "bg-white/60"
       }`}>
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="text-base font-semibold tracking-tight">
-            Offervia
+          <Link href="/" className="flex items-center text-base font-semibold tracking-tight">
+          <Image
+            src="/logo.png"
+            alt="Offervia"
+            width={32}
+            height={32}
+            style={{ width: "auto", height: "32px" }}
+          />
+            <span className="ml-2 font-semibold">Offervia</span>
           </Link>
           <nav className="flex items-center gap-4">
             <a

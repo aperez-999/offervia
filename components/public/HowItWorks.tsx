@@ -4,9 +4,18 @@ import { motion } from "framer-motion";
 
 export default function HowItWorks() {
   const steps = [
-    { title: "Upload", desc: "Add your resume or paste a job description." },
-    { title: "Tailor", desc: "Get AI suggestions aligned to the role." },
-    { title: "Apply", desc: "Send stronger applications with confidence." },
+    {
+      title: "Upload",
+      desc: "Upload your resume or paste a job description—no formatting needed. Start in seconds.",
+    },
+    {
+      title: "Tailor",
+      desc: "AI analyzes the role, surfaces keywords, and aligns your content for clarity and fit—fast.",
+    },
+    {
+      title: "Apply",
+      desc: "Send polished, focused applications with confidence. Export your updates and apply right away.",
+    },
   ];
   return (
     <section className="bg-gradient-to-b from-white to-indigo-50/60">
