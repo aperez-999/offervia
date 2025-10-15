@@ -66,7 +66,7 @@ export default function SignupForm() {
         <label className="block text-sm font-medium">Password</label>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input type={showPw ? "text" : "password"} className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]" {...register("password")} />
+          <input type={showPw ? "text" : "password"} className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]" placeholder="Enter at least 6 characters" {...register("password")} />
           <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline">
             {showPw ? "Hide" : "Show"}
           </button>
@@ -77,7 +77,7 @@ export default function SignupForm() {
         <label className="block text-sm font-medium">Confirm password</label>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input type={showPw2 ? "text" : "password"} className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]" {...register("confirm")} />
+          <input type={showPw2 ? "text" : "password"} className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]" placeholder="Make sure passwords match" {...register("confirm")} />
           <button type="button" onClick={() => setShowPw2((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline">
             {showPw2 ? "Hide" : "Show"}
           </button>
