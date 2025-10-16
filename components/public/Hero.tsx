@@ -6,14 +6,20 @@ import BetaBanner from "@/components/public/BetaBanner";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      {/* abstract gradient background */}
+    <section className="relative overflow-hidden bg-background">
+      {/* Abstract gradient backdrop: separate light/dark layers, behind content */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200 via-indigo-100 to-transparent blur-3xl" />
-        <div className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-indigo-100/60 blur-2xl" />
+        {/* Light theme glow */}
+        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200/60 via-indigo-100/40 to-transparent blur-3xl dark:hidden" />
+        <div className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-indigo-100/50 blur-2xl dark:hidden" />
+        {/* Dark theme glow */}
+        <div className="hidden dark:block absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-900/30 via-indigo-800/20 to-transparent blur-3xl" />
+        <div className="hidden dark:block absolute top-40 -left-40 h-56 w-56 rounded-full bg-indigo-950/30 blur-2xl" />
       </div>
+
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:pt-10">
         <BetaBanner />
+
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -21,19 +27,28 @@ export default function Hero() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto max-w-3xl text-center"
         >
-          <div className="mx-auto w-fit rounded-full border border-indigo-200 bg-white/90 px-3 py-1 text-xs font-medium text-indigo-700 shadow-sm">
+          {/* Beta pill — readable in both themes */}
+          <div className="mt-4 sm:mt-4 mx-auto w-fit rounded-full border border-black/5 bg-white/90 px-3 py-1 text-xs font-medium text-indigo-700 shadow-sm dark:border-white/10 dark:bg-neutral-900/80 dark:text-indigo-300">
             Free for Job Seekers • No credit card required
           </div>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl">
             AI resume builder, interview coach, and job search tools — built for job seekers.
           </h1>
-          <p className="mt-4 text-lg text-gray-600">
-            Tailor your resume to any job description, practice interviews with realistic prompts, and scan postings for skills and keywords to land offers faster.
+
+          <p className="mt-4 text-lg text-muted-foreground dark:text-white">
+            Tailor your resume to any job description, practice interviews with realistic prompts, and scan postings
+            for skills and keywords to land offers faster.
           </p>
+
           <div className="mt-8 flex items-center justify-center gap-3">
-            <Link href="/signup" className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500">
+            <Link
+              href="/signup"
+              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+            >
               Get Started – Free
             </Link>
+
             <a
               href="#features"
               onClick={(e) => {
@@ -41,15 +56,25 @@ export default function Hero() {
                 const el = document.getElementById("features");
                 if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
-              className="rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/5"
             >
               Explore Features
             </a>
           </div>
-          {/* muted mockup placeholder */}
-          <div className="mt-10 rounded-2xl border border-gray-200 bg-white/60 p-4 shadow-lg backdrop-blur">
-            <div className="aspect-[16/9] w-full rounded-xl border border-dashed border-gray-300 bg-gradient-to-b from-gray-50 to-white" />
-            <p className="mt-2 text-xs text-gray-500">Product preview placeholder</p>
+
+          {/* Video placeholder (drop your file at /public/demo.mp4 and optional poster at /public/hero-poster.png) */}
+          <div className="mt-10 rounded-2xl border border-border bg-white/60 p-4 shadow-lg backdrop-blur ring-1 ring-indigo-500/10 dark:bg-neutral-900/40">
+            <video
+              className="aspect-[16/9] w-full rounded-xl border border-dashed border-border object-cover"
+              controls
+              playsInline
+              muted
+              // Replace with your poster or remove the prop
+              poster="#"
+            >
+              {/* <source src="/demo.mp4" type="video/mp4" /> */}
+              Your browser does not support the video tag.
+            </video>
           </div>
         </motion.div>
       </div>

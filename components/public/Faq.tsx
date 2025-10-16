@@ -29,21 +29,49 @@ const QA_ITEMS: QA[] = [
   },
 ];
 
-function Item({ q, a }: QA) {
+// Subtle per-item accent tints (light & dark), matching your other sections
+const ACCENTS = [
+  { lightBg: "bg-indigo-50", darkBg: "dark:bg-indigo-500/5", ring: "ring-indigo-500/20" },
+  { lightBg: "bg-sky-50",    darkBg: "dark:bg-sky-500/5",    ring: "ring-sky-500/20" },
+  { lightBg: "bg-violet-50", darkBg: "dark:bg-violet-500/5", ring: "ring-violet-500/20" },
+  { lightBg: "bg-fuchsia-50",darkBg: "dark:bg-fuchsia-500/5",ring: "ring-fuchsia-500/20" },
+  { lightBg: "bg-teal-50",   darkBg: "dark:bg-teal-500/5",   ring: "ring-teal-500/20" },
+];
+
+function Item({ q, a, idx }: QA & { idx: number }) {
   const [open, setOpen] = useState(false);
+  const acc = ACCENTS[idx % ACCENTS.length];
+
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.35, delay: idx * 0.03 }}
+      className={[
+        "rounded-xl border border-border shadow-sm backdrop-blur-sm ring-2",
+        // base glass
+        "bg-white/70 dark:bg-neutral-900/40",
+        // subtle tinted overlay
+        acc.lightBg,
+        acc.darkBg,
+        acc.ring,
+      ].join(" ")}
+    >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        onClick={() => setOpen(v => !v)}
         aria-expanded={open}
+        className="flex w-full items-center justify-between px-4 py-3 text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
       >
-        <span className="text-sm font-medium text-gray-900">{q}</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-white">
+          {q}
+        </span>
         <ChevronDown
-          className={`h-4 w-4 text-gray-600 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
+          className={`h-4 w-4 transition-transform text-gray-500 dark:text-white ${open ? "rotate-180" : "rotate-0"}`}
         />
       </button>
+
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
@@ -51,24 +79,35 @@ function Item({ q, a }: QA) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className="px-4 pb-4 text-sm text-gray-600">{a}</div>
+            <div className="px-4 pb-4 text-sm text-gray-700 dark:text-white">
+              {a}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
 export default function Faq() {
   return (
-    <section className="bg-white">
+    <section className="bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
-        <h2 className="text-center text-2xl font-semibold text-gray-900">Frequently Asked Questions</h2>
+        <motion.h2
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="text-center text-2xl font-semibold text-foreground dark:text-white"
+        >
+          Frequently Asked Questions
+        </motion.h2>
+
         <div className="mx-auto mt-8 grid max-w-3xl gap-3">
-          {QA_ITEMS.map((qa) => (
-            <Item key={qa.q} {...qa} />
+          {QA_ITEMS.map((qa, i) => (
+            <Item key={qa.q} idx={i} {...qa} />
           ))}
         </div>
       </div>

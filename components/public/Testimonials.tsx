@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { User2 } from "lucide-react";
 
 export default function Testimonials() {
   const items = [
@@ -21,32 +22,82 @@ export default function Testimonials() {
     },
   ];
 
+  // Per-card accents to differentiate pills (light & dark)
+  const accents = [
+    {
+      icon: "text-indigo-500 dark:text-indigo-400",
+      lightBg: "bg-indigo-50",
+      darkBg: "dark:bg-indigo-500/5",
+      ring: "ring-indigo-500/20",
+    },
+    {
+      icon: "text-emerald-500 dark:text-emerald-400",
+      lightBg: "bg-emerald-50",
+      darkBg: "dark:bg-emerald-500/5",
+      ring: "ring-emerald-500/20",
+    },
+    {
+      icon: "text-amber-500 dark:text-amber-300",
+      lightBg: "bg-amber-50",
+      darkBg: "dark:bg-amber-500/5",
+      ring: "ring-amber-500/20",
+    },
+  ];
+
   return (
-    <section className="bg-white">
+    <section className="bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-2xl font-semibold text-gray-900"
+          className="text-center text-2xl font-semibold text-foreground dark:text-white"
         >
           Real job seekers. Real results.
         </motion.h2>
+
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {items.map((t, i) => (
-            <motion.blockquote
-              key={i}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.45, delay: i * 0.05 }}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
-            >
-              <p className="text-sm text-gray-700">“{t.quote}”</p>
-              <footer className="mt-3 text-xs font-medium text-gray-500">— {t.role}</footer>
-            </motion.blockquote>
-          ))}
+          {items.map((t, i) => {
+            const a = accents[i % accents.length];
+            return (
+              <motion.blockquote
+                key={i}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: i * 0.05 }}
+                className={[
+                  // pill container
+                  "rounded-xl border border-border p-5 shadow-sm backdrop-blur-sm",
+                  // base backgrounds
+                  "bg-white/70 dark:bg-neutral-900/40",
+                  // accented backgrounds (override base subtly)
+                  a.lightBg,
+                  a.darkBg,
+                ].join(" ")}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={[
+                      "h-9 w-9 rounded-full flex items-center justify-center",
+                      "bg-white dark:bg-neutral-900",
+                      "ring-2", a.ring,
+                    ].join(" ")}
+                  >
+                    <User2 className={`h-5 w-5 ${a.icon}`} />
+                  </div>
+                  <div className="text-xs font-medium text-gray-900 dark:text-white">
+                    {t.role}
+                  </div>
+                </div>
+
+                <p className="mt-3 text-sm text-gray-800 dark:text-white">
+                  “{t.quote}”
+                </p>
+              </motion.blockquote>
+            );
+          })}
         </div>
       </div>
     </section>

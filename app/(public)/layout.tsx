@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Offervia – AI Career Suite",
   description: "AI resume builder, interview coach, and job search tools built for job seekers.",
   keywords: ["resume tailoring", "interview prep", "job description scanner", "job search AI", "ATS resume"],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
     title: "Offervia – AI Career Suite",
     description: "AI resume builder, interview coach, and job search tools built for job seekers.",
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Offervia – AI Career Suite",
     description: "AI resume builder, interview coach, and job search tools built for job seekers.",
-    images: ["/og-image.png"],
+    images: [`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/og-image.png`],
   },
   icons: { icon: "/favicon.ico" },
 };

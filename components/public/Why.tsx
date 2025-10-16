@@ -7,35 +7,63 @@ export default function Why() {
   const items = [
     {
       title: "Built for Job Seekers",
-      desc: "Purpose‑built AI tools for candidates — not HR. Get focused help that speeds up applications and interview prep.",
+      desc:
+        "Purpose-built AI tools for candidates — not HR. Get focused help that speeds up applications and interview prep.",
       icon: Sparkles,
     },
     {
-      title: "ATS‑friendly outputs",
-      desc: "Clean, scannable formatting with the right keywords so your resume shows up clearly to recruiters and systems.",
+      title: "ATS-friendly outputs",
+      desc:
+        "Clean, scannable formatting with the right keywords so your resume shows up clearly to recruiters and systems.",
       icon: CheckCircle2,
     },
     {
       title: "Private & secure",
-      desc: "Your uploads aren’t shared. Tailor resumes with confidence — your data stays with you.",
+      desc:
+        "Your uploads aren’t shared. Tailor resumes with confidence — your data stays with you.",
       icon: Shield,
     },
   ];
+
+  // Subtle per-card tints (light & dark) for consistent “pill” look
+  const accents = [
+    {
+      icon: "text-indigo-600 dark:text-indigo-400",
+      lightBg: "bg-indigo-50",
+      darkBg: "dark:bg-indigo-500/5",
+      ring: "ring-indigo-500/20",
+    },
+    {
+      icon: "text-emerald-600 dark:text-emerald-400",
+      lightBg: "bg-emerald-50",
+      darkBg: "dark:bg-emerald-500/5",
+      ring: "ring-emerald-500/20",
+    },
+    {
+      icon: "text-amber-600 dark:text-amber-300",
+      lightBg: "bg-amber-50",
+      darkBg: "dark:bg-amber-500/5",
+      ring: "ring-amber-500/20",
+    },
+  ];
+
   return (
-    <section className="bg-white">
+    <section className="bg-background">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-2xl font-semibold text-gray-900"
+          className="text-center text-2xl font-semibold text-foreground dark:text-white"
         >
           Why Offervia?
         </motion.h2>
+
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {items.map((it, idx) => {
             const Icon = it.icon;
+            const a = accents[idx % accents.length];
             return (
               <motion.div
                 key={it.title}
@@ -43,11 +71,26 @@ export default function Why() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
-                className="rounded-lg border border-gray-200 bg-white p-5 text-center shadow-sm"
+                className={[
+                  "rounded-xl border border-border p-5 text-center shadow-sm backdrop-blur-sm",
+                  // base glass
+                  "bg-white/70 dark:bg-neutral-900/40",
+                  // subtle tint overlays
+                  a.lightBg,
+                  a.darkBg,
+                ].join(" ")}
               >
-                <Icon className="mx-auto h-5 w-5 text-indigo-600" />
-                <h3 className="mt-2 text-base font-medium text-gray-900">{it.title}</h3>
-                <p className="mt-2 text-sm text-gray-600">{it.desc}</p>
+                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2"
+                  style={{ boxShadow: "0 0 0 0" }}
+                >
+                  <Icon className={`h-5 w-5 ${a.icon}`} />
+                </div>
+                <h3 className="mt-1 text-base font-medium text-gray-900 dark:text-white">
+                  {it.title}
+                </h3>
+                <p className="mt-2 text-sm text-gray-700 dark:text-white">
+                  {it.desc}
+                </p>
               </motion.div>
             );
           })}
