@@ -10,7 +10,8 @@ import type { CoachMode } from "./system-prompts";
 import { SYSTEM_PROMPTS, MODE_LABELS } from "./system-prompts";
 import MessageBubble from "./MessageBubble";
 import ClearChatButton from "./ClearChatButton";
-import { Bot, User, MessageSquare, FileText, Mail, Compass } from "lucide-react";
+import { Bot, User, Mail, Compass, MessageSquare, FileText } from "lucide-react";
+import CoachSidebar from "./CoachSidebar";
 
 interface MsgRow {
   id: string;
@@ -23,7 +24,30 @@ interface MsgRow {
 
 type DayGroup = { label: string; items: MsgRow[] };
 
-export default function Chat({ mode }: { mode: CoachMode }) {
+function formatTime(iso: string) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
+function dayLabel(date: Date) {
+  const today = new Date();
+  const yday = new Date(Date.now() - 86400000);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+  if (sameDay(date, today)) return "Today";
+  if (sameDay(date, yday)) return "Yesterday";
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/* ------------------------------ Inner chat UI ----------------------------- */
+
+function InnerChat({ mode }: { mode: CoachMode }) {
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
@@ -68,31 +92,6 @@ export default function Chat({ mode }: { mode: CoachMode }) {
     }
   }, [messages, sending]);
 
-  function formatTime(iso: string) {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return "";
-    }
-  }
-
-  function dayLabel(date: Date) {
-    const today = new Date();
-    const yday = new Date(Date.now() - 86400000);
-    const sameDay = (a: Date, b: Date) =>
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate();
-    if (sameDay(date, today)) return "Today";
-    if (sameDay(date, yday)) return "Yesterday";
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    });
-  }
-
   const grouped: DayGroup[] = useMemo(() => {
     const byDay = new Map<string, MsgRow[]>();
     for (const m of messages) {
@@ -121,7 +120,7 @@ export default function Chat({ mode }: { mode: CoachMode }) {
       mode,
       role: "user",
       content,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticUser]);
     setInput("");
@@ -143,7 +142,7 @@ export default function Chat({ mode }: { mode: CoachMode }) {
       const res = await fetch("/api/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       const reply: string = data?.content || "";
@@ -154,7 +153,7 @@ export default function Chat({ mode }: { mode: CoachMode }) {
         mode,
         role: "assistant",
         content: reply || "(no reply)",
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, optimisticAssistant]);
 
@@ -172,33 +171,50 @@ export default function Chat({ mode }: { mode: CoachMode }) {
   }
 
   return (
-    <Card className="flex h-[70vh] min-h-[420px] flex-col rounded-lg border bg-white shadow-sm">
+    <Card className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
       <CardHeader>
-        <CardTitle className="text-gray-900">{MODE_LABELS[mode]} Mode</CardTitle>
-        <div className="text-sm text-gray-600">
+        <CardTitle className="text-foreground">{MODE_LABELS[mode]} Mode</CardTitle>
+        <div className="text-sm text-foreground/70">
           {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
         </div>
       </CardHeader>
+
       <CardContent className="flex-1 overflow-y-auto" ref={listRef}>
         {loading ? (
-          <div className="h-full grid place-items-center text-sm text-gray-600">
-            Loading...
-          </div>
+          <div className="grid h-full place-items-center text-sm text-foreground/70">Loading…</div>
         ) : messages.length === 0 ? (
-          <div className="h-full grid place-items-center text-center text-sm text-gray-600">
+          <div className="grid h-full place-items-center text-center text-sm text-foreground/70">
             <div>
               {mode === "interview" && (
                 <>
                   <p className="mb-2">Get tailored help for interview prep and practice.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Help me prepare for a behavioral interview."); setTimeout(() => send(), 0); }}>
-                      <MessageSquare className="h-4 w-4" /> Help me prepare for a behavioral interview.
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Help me prepare for a behavioral interview."); setTimeout(() => send(), 0); }}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Help me prepare for a behavioral interview.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Ask me a mock interview question."); setTimeout(() => send(), 0); }}>
-                      <MessageSquare className="h-4 w-4" /> Ask me a mock interview question.
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Ask me a mock interview question."); setTimeout(() => send(), 0); }}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Ask me a mock interview question.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("How do I explain a resume gap?"); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" /> How do I explain a resume gap?
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("How do I explain a resume gap?"); setTimeout(() => send(), 0); }}
+                    >
+                      <FileText className="h-4 w-4" />
+                      How do I explain a resume gap?
                     </Button>
                   </div>
                 </>
@@ -208,14 +224,20 @@ export default function Chat({ mode }: { mode: CoachMode }) {
                 <>
                   <p className="mb-2">Refine your resume bullets, structure, and impact.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Rewrite this bullet in STAR format."); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" /> Rewrite this bullet in STAR format.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Rewrite this bullet in STAR format."); setTimeout(() => send(), 0); }}>
+                      <FileText className="h-4 w-4" />
+                      Rewrite this bullet in STAR format.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("How do I list freelance experience?"); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" /> How do I list freelance experience?
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("How do I list freelance experience?"); setTimeout(() => send(), 0); }}>
+                      <FileText className="h-4 w-4" />
+                      How do I list freelance experience?
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Fix grammar in this bullet."); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" /> Fix grammar in this bullet.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Fix grammar in this bullet."); setTimeout(() => send(), 0); }}>
+                      <FileText className="h-4 w-4" />
+                      Fix grammar in this bullet.
                     </Button>
                   </div>
                 </>
@@ -225,14 +247,20 @@ export default function Chat({ mode }: { mode: CoachMode }) {
                 <>
                   <p className="mb-2">Craft personalized and engaging cover letters.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Write a cover letter intro."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" /> Write a cover letter intro.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Write a cover letter intro."); setTimeout(() => send(), 0); }}>
+                      <Mail className="h-4 w-4" />
+                      Write a cover letter intro.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Explain why I want to join this company."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" /> Explain why I want to join this company.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Explain why I want to join this company."); setTimeout(() => send(), 0); }}>
+                      <Mail className="h-4 w-4" />
+                      Explain why I want to join this company.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Improve this paragraph."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" /> Improve this paragraph.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Improve this paragraph."); setTimeout(() => send(), 0); }}>
+                      <Mail className="h-4 w-4" />
+                      Improve this paragraph.
                     </Button>
                   </div>
                 </>
@@ -242,14 +270,20 @@ export default function Chat({ mode }: { mode: CoachMode }) {
                 <>
                   <p className="mb-2">Career strategy, growth, and decision support.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setInput("How do I choose between two job offers?"); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" /> How do I choose between two job offers?
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("How do I choose between two job offers?"); setTimeout(() => send(), 0); }}>
+                      <Compass className="h-4 w-4" />
+                      How do I choose between two job offers?
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("Help me plan a promotion roadmap."); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" /> Help me plan a promotion roadmap.
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("Help me plan a promotion roadmap."); setTimeout(() => send(), 0); }}>
+                      <Compass className="h-4 w-4" />
+                      Help me plan a promotion roadmap.
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setInput("How do I negotiate salary?"); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" /> How do I negotiate salary?
+                    <Button size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      onClick={() => { setInput("How do I negotiate salary?"); setTimeout(() => send(), 0); }}>
+                      <Compass className="h-4 w-4" />
+                      How do I negotiate salary?
                     </Button>
                   </div>
                 </>
@@ -260,24 +294,19 @@ export default function Chat({ mode }: { mode: CoachMode }) {
           <div className="space-y-4">
             {grouped.map((group, gi) => (
               <div key={gi} className="space-y-3">
-                <div className="sticky top-0 z-10 mx-auto w-fit rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-600">
+                <div className="sticky top-0 z-10 mx-auto w-fit rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-foreground/70 backdrop-blur">
                   {group.label}
                 </div>
                 {group.items.map((m) => (
                   <div key={m.id} className="flex items-start gap-2">
                     {m.role === "assistant" ? (
-                      <Bot className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     ) : (
-                      <User className="h-5 w-5 text-gray-600 mt-0.5 ml-auto order-2" />
+                      <User className="order-2 ml-auto mt-0.5 h-5 w-5 text-foreground/70" />
                     )}
                     <div className="flex-1">
                       <MessageBubble role={m.role} content={m.content} />
-                      <div
-                        className={
-                          "mt-1 text-[11px] text-gray-500 " +
-                          (m.role === "user" ? "text-right" : "text-left")
-                        }
-                      >
+                      <div className={"mt-1 text-[11px] text-foreground/50 " + (m.role === "user" ? "text-right" : "text-left")}>
                         {formatTime(m.created_at)}
                       </div>
                     </div>
@@ -287,10 +316,10 @@ export default function Chat({ mode }: { mode: CoachMode }) {
             ))}
             {sending && (
               <div className="flex items-start gap-2">
-                <Bot className="h-5 w-5 text-blue-600 mt-0.5" />
+                <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 <div>
-                  <div className="mb-1 text-xs text-gray-500">Coach</div>
-                  <div className="inline-block max-w-[85%] rounded-xl px-3 py-2 text-sm border border-gray-200 bg-blue-50 text-gray-700 animate-pulse">
+                  <div className="mb-1 text-xs text-foreground/60">Coach</div>
+                  <div className="inline-block max-w-[85%] animate-pulse rounded-xl border border-border bg-indigo-500/10 px-3 py-2 text-sm text-foreground">
                     Coach is typing…
                   </div>
                 </div>
@@ -300,28 +329,30 @@ export default function Chat({ mode }: { mode: CoachMode }) {
           </div>
         )}
       </CardContent>
+
       <CardFooter className="flex items-center justify-between gap-2">
         <ClearChatButton
           disabled={!userId || loading || messages.length === 0}
           onConfirm={async () => {
             if (!userId) return;
-            const { error } = await supabase
+            const { error } = await getBrowserSupabase()
               .from("messages")
               .delete()
               .eq("user_id", userId)
               .eq("mode", mode);
             if (!error) {
-              setMessages([]);
               toast({ title: "Conversation cleared" });
+              setMessages([]);
             } else {
               toast({ title: "Failed to clear", variant: "destructive" });
             }
           }}
         />
-        <div className="flex items-center gap-2 flex-1">
+
+        <div className="flex flex-1 items-center gap-2">
           <Textarea
             placeholder={userId ? "Type your message..." : "Sign in to chat"}
-            className="min-h-[44px]"
+            className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={!userId || loading || sending}
@@ -332,11 +363,60 @@ export default function Chat({ mode }: { mode: CoachMode }) {
               }
             }}
           />
-          <Button onClick={send} disabled={!userId || loading || sending || !input.trim()}>
+          <Button
+            onClick={send}
+            disabled={!userId || loading || sending || !input.trim()}
+            className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+          >
             {sending ? "Sending..." : "Send"}
           </Button>
         </div>
       </CardFooter>
     </Card>
+  );
+}
+
+/* ------------------------- Default export with sidebar -------------------- */
+
+export default function Chat({ mode = "interview" as CoachMode }: { mode?: CoachMode }) {
+  const [active, setActive] = useState<CoachMode>(mode);
+
+  // Get the icon for the active mode from the sidebar items
+  const getActiveIcon = () => {
+    switch (active) {
+      case "interview": return MessageSquare;
+      case "resume": return FileText;
+      case "cover_letter": return Mail;
+      case "career": return Compass;
+      default: return MessageSquare;
+    }
+  };
+
+  const getActiveLabel = () => {
+    switch (active) {
+      case "interview": return "Interview Coach";
+      case "resume": return "Resume Feedback";
+      case "cover_letter": return "Cover Letter Help";
+      case "career": return "Career Advice";
+      default: return "Interview Coach";
+    }
+  };
+
+  const ActiveIcon = getActiveIcon();
+
+  return (
+    <div className="flex gap-6">
+      <CoachSidebar active={active} onChange={setActive} />
+      {/* Chat panel */}
+      <section className="min-w-0 flex-1">
+        <header className="mb-3 flex items-center gap-2">
+          <ActiveIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <h1 className="text-lg font-semibold text-foreground">
+            {getActiveLabel()}
+          </h1>
+        </header>
+        <InnerChat mode={active} />
+      </section>
+    </div>
   );
 }

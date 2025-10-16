@@ -12,15 +12,15 @@ export default function MessageBubble({
   const isUser = role === "user";
   return (
     <div className={isUser ? "text-right" : "text-left"}>
-      <div className="mb-1 text-xs text-gray-500">
+      <div className="mb-1 text-xs text-foreground/60">
         {isUser ? "You" : "Coach"}
       </div>
       <div
         className={
-          "inline-block max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm " +
+          "inline-block max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm border " +
           (isUser
-            ? "bg-gray-50 text-gray-800 border border-gray-200"
-            : "bg-white text-gray-900 border border-gray-200")
+            ? "bg-background/80 text-foreground border-border"
+            : "bg-card/60 text-foreground border-border")
         }
       >
         {content}

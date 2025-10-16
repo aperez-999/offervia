@@ -1,39 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, FileText, Mail, Compass } from "lucide-react";
+import { MessageSquare, FileText, Mail, Compass, ChevronRight } from "lucide-react";
+import type { CoachMode } from "./system-prompts";
 
-const items = [
-  { key: "interview", label: "Interview Coach", icon: MessageSquare },
-  { key: "resume", label: "Resume Feedback", icon: FileText },
-  { key: "cover_letter", label: "Cover Letter Help", icon: Mail },
-  { key: "career", label: "Career Advice", icon: Compass },
-] as const;
+type Item = {
+  key: CoachMode;
+  label: string;
+  desc: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
 
-export default function CoachSidebar({ active, onChange }: { active: typeof items[number]["key"]; onChange: (k: typeof items[number]["key"]) => void; }) {
+const ITEMS: Item[] = [
+  {
+    key: "interview",
+    label: "Interview Coach",
+    desc: "Prep, practice, concise answers.",
+    icon: MessageSquare,
+  },
+  {
+    key: "resume",
+    label: "Resume Feedback",
+    desc: "Bullets, structure, STAR impact.",
+    icon: FileText,
+  },
+  {
+    key: "cover_letter",
+    label: "Cover Letter Help",
+    desc: "Intros, proof points, tone.",
+    icon: Mail,
+  },
+  {
+    key: "career",
+    label: "Career Advice",
+    desc: "Decisions, growth, negotiation.",
+    icon: Compass,
+  },
+];
+
+export default function CoachSidebar({
+  active,
+  onChange,
+}: {
+  active: CoachMode;
+  onChange: (k: CoachMode) => void;
+}) {
   return (
-    <aside className="w-[260px] shrink-0">
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-3">
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Modules</div>
-        <div className="flex flex-col gap-1">
-          {items.map(({ key, label, icon: Icon }) => {
-            const isActive = active === key;
+    <aside className="w-[280px] shrink-0">
+      <div className="rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 backdrop-blur-sm dark:ring-black/10">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          Modules
+        </div>
+
+        <nav className="flex flex-col">
+          {ITEMS.map(({ key, label, desc, icon: Icon }) => {
+            const selected = key === active;
             return (
-              <Button
+              <button
                 key={key}
-                variant="ghost"
+                type="button"
+                aria-current={selected ? "page" : undefined}
                 onClick={() => onChange(key)}
-                className={`justify-start gap-2 px-2 py-2 text-sm hover:bg-gray-50 ${
-                  isActive ? "bg-gray-50 font-medium" : ""
-                }`}
+                className={`group mb-1 flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors
+                  ${selected
+                    ? "border-indigo-500/30 bg-indigo-500/10"
+                    : "border-transparent hover:bg-foreground/[0.06]"}
+                `}
               >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Button>
+                <span
+                  className={`grid h-8 w-8 place-items-center rounded-lg border
+                    ${selected
+                      ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
+                      : "border-border bg-background/80 text-foreground/70"}
+                  `}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+
+                <span className="flex-1">
+                  <span
+                    className={`block text-sm ${selected ? "font-medium text-foreground" : "text-foreground"}`}
+                  >
+                    {label}
+                  </span>
+                  <span className="block text-xs text-foreground/60">{desc}</span>
+                </span>
+
+                <ChevronRight
+                  className={`h-4 w-4 transition-colors
+                    ${selected ? "text-indigo-400" : "text-foreground/30 group-hover:text-foreground/50"}
+                  `}
+                />
+              </button>
             );
           })}
-        </div>
+        </nav>
       </div>
     </aside>
   );

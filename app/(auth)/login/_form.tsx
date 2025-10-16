@@ -35,7 +35,7 @@ export default function LoginForm() {
       setError(error.message);
       return;
     }
-    router.replace("/dashboard");
+    router.replace("/dashboard?login=1");
     router.refresh();
   };
 
