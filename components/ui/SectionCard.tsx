@@ -1,4 +1,5 @@
 import * as React from "react";
+import { JSX } from "react";
 
 type Tone = "slate" | "indigo" | "blue" | "neutral";
 
@@ -18,9 +19,11 @@ type Props = {
   className?: string;
   tone?: Tone;
   as?: keyof JSX.IntrinsicElements;
+  id?: string;
+  title?: string;
 };
 
-export function SectionCard({ children, className, tone = "slate", as = "div" }: Props) {
+export function SectionCard({ children, className, tone = "slate", as = "div", id, title }: Props) {
   const Comp = as as any;
   const base = [
     "rounded-xl border border-white/10 shadow-sm ring-1 ring-white/5",
@@ -28,5 +31,5 @@ export function SectionCard({ children, className, tone = "slate", as = "div" }:
     "p-5",
     toneBg[tone],
   ].join(" ");
-  return <Comp className={[base, className || ""].join(" ")}>{children}</Comp>;
+  return <Comp id={id} title={title} className={[base, className || ""].join(" ")}>{children}</Comp>;
 }

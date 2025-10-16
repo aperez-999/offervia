@@ -35,7 +35,7 @@ export default function Chat({ mode }: { mode: CoachMode }) {
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       if (!user) {
         setUserId(null);
         setLoading(false);
@@ -49,7 +49,7 @@ export default function Chat({ mode }: { mode: CoachMode }) {
         .eq("user_id", user.id)
         .eq("mode", mode)
         .order("created_at", { ascending: true })
-        .then(({ data, error }) => {
+        .then(({ data, error }: { data: any; error: any }) => {
           if (error) {
             toast({ title: "Failed to load chat", variant: "destructive" });
           } else if (data) {

@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
       }
 
       // Listen briefly for auth events that indicate a valid recovery session.
-      const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      const { data: listener } = supabase.auth.onAuthStateChange((event: any) => {
         if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
           setStatus("ready");
         }
