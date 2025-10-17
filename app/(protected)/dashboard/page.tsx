@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import AppLayout from "@/components/layout/AppLayout";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 
 import {
@@ -207,7 +206,6 @@ export default function DashboardPage() {
   }, [appsThisWeek, recentChats.length]);
 
   return (
-    <AppLayout>
       <div className="space-y-6">
         {/* Greeting */}
         <section>
@@ -461,7 +459,6 @@ export default function DashboardPage() {
           </Card>
         </section>
       </div>
-    </AppLayout>
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import AppLayout from "@/components/layout/AppLayout";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -162,7 +161,6 @@ export default function ProfilePage() {
   }
 
   return (
-    <AppLayout>
       <div className="space-y-6">
         <section>
           <h1 className="text-2xl font-semibold text-foreground">Profile</h1>
@@ -245,6 +243,5 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
   );
 }

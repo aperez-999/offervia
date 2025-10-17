@@ -15,6 +15,7 @@ import {
   ClipboardList,
   BookOpen,
   GraduationCap,
+  Mail, // <- add this
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { label: "Scanner", href: "/scanner", icon: Search },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
+  { label: "Templates", href: "/templates", icon: Mail }, // <- new
   { label: "Resources", href: "/resources", icon: BookOpen },
   { label: "Student Exclusives", href: "/students", icon: GraduationCap },
 ];
@@ -42,7 +44,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => setMounted(true), []);
 
-  // Show login-success toast once, then clean the URL
   useEffect(() => {
     if (search.get("login") === "1") {
       toast({ title: "Signed in — welcome back!" });
@@ -60,7 +61,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top Navbar */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
@@ -68,7 +68,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Theme toggle with animated icon swap */}
             <button
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
@@ -104,16 +103,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </button>
 
-            {/* User avatar dropdown (Profile / Settings / Sign out / Theme radios) */}
             <UserMenu onSignOut={onSignOut} />
           </div>
         </div>
       </header>
 
-      {/* Shell */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex gap-6 py-6">
-          {/* Sidebar */}
           <aside className="w-56 shrink-0">
             <div className="rounded-xl border border-border bg-background p-3">
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
@@ -146,7 +142,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </aside>
 
-          {/* Main content */}
           <main className="min-w-0 flex-1">
             <motion.div
               initial={{ opacity: 0, y: 8 }}

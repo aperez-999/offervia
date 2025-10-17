@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
-import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -242,7 +241,6 @@ export default function TrackerPage() {
 
   return (
     <AuthGuard>
-      <AppLayout>
         <div className="space-y-6 p-6">
           {/* Header */}
           <div className="flex items-start justify-between">
@@ -483,7 +481,6 @@ export default function TrackerPage() {
             </ConfirmContent>
           </ConfirmDialog>
         </div>
-      </AppLayout>
     </AuthGuard>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -118,7 +117,6 @@ export default function ResourcesPage() {
   }, [q, cat, activeTags]);
 
   return (
-    <AppLayout>
       <div className="space-y-6">
         <section>
           <h1 className="text-2xl font-semibold text-foreground">Resources</h1>
@@ -247,6 +245,5 @@ export default function ResourcesPage() {
           ))}
         </section>
       </div>
-    </AppLayout>
   );
 }

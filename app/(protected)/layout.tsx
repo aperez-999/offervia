@@ -1,6 +1,5 @@
-// app/(protected)/layout.tsx
-import type { ReactNode } from "react";
+import AppLayout from "@/components/layout/AppLayout";
 
-export default function ProtectedLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  return <AppLayout>{children}</AppLayout>;
 }
