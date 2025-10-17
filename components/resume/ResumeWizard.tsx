@@ -165,7 +165,7 @@ export default function ResumeWizard() {
                       setGenerating(false);
                     }
                   }}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                 >
                   {generating ? "Generating..." : "Generate with AI"}
                 </Button>
@@ -173,7 +173,7 @@ export default function ResumeWizard() {
                 <Button
                   variant="outline"
                   disabled={!aiText}
-                  className="border-border text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                   onClick={() => {
                     if (!aiText) return;
                     const blob = new Blob([aiText], { type: "text/plain;charset=utf-8" });
@@ -191,7 +191,7 @@ export default function ResumeWizard() {
                 <Button
                   variant="outline"
                   disabled={!aiText}
-                  className="border-border text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                   onClick={() => {
                     alert("Accepted. You can copy or download the tailored version.");
                   }}
@@ -216,7 +216,7 @@ export default function ResumeWizard() {
               variant="outline"
               onClick={onBack}
               disabled={step === 1}
-              className="border-border text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             >
               Back
             </Button>
@@ -226,7 +226,7 @@ export default function ResumeWizard() {
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 2 && !step2Valid)}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                 >
                   Continue
                 </Button>

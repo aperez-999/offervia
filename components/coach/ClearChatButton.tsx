@@ -9,7 +9,7 @@ export default function ClearChatButton({ onConfirm, disabled }: { onConfirm: ()
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" disabled={disabled}>Clear Conversation</Button>
+        <Button variant="outline" className="cursor-pointer" disabled={disabled}>Clear Conversation</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

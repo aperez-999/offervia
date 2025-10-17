@@ -317,7 +317,7 @@ export default function DashboardPage() {
                 <Link href="/tracker">
                   <Button
                     variant="outline"
-                    className="border-border text-foreground hover:bg-foreground/[0.06]"
+                    className=" cursor-pointer border-border text-foreground hover:bg-foreground/[0.06]"
                   >
                     View all
                   </Button>
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                 <Link href="/coach">
                   <Button
                     variant="outline"
-                    className="border-border text-foreground hover:bg-foreground/[0.06]"
+                    className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
                   >
                     Open coach
                   </Button>
@@ -401,7 +401,7 @@ export default function DashboardPage() {
                   text="No chats yet. Ask the coach for quick practice or resume help."
                   cta={
                     <Link href="/coach">
-                      <Button>Start chatting</Button>
+                      <Button className="cursor-pointer">Start chatting</Button>
                     </Link>
                   }
                 />

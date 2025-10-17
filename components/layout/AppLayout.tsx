@@ -5,9 +5,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon, LayoutDashboard, FileText, Search, MessageSquare, ClipboardList, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  Sun,
+  Moon,
+  LayoutDashboard,
+  FileText,
+  Search,
+  MessageSquare,
+  ClipboardList,
+  BookOpen,
+  GraduationCap,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import UserMenu from "@/components/layout/UserMenu";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<any> };
 
@@ -17,10 +28,12 @@ const navItems: NavItem[] = [
   { label: "Scanner", href: "/scanner", icon: Search },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
+  { label: "Resources", href: "/resources", icon: BookOpen },
+  { label: "Student Exclusives", href: "/students", icon: GraduationCap },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const search = useSearchParams();
   const router = useRouter();
@@ -53,28 +66,46 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold tracking-tight">Offervia</span>
           </div>
+
           <div className="flex items-center gap-2">
-            {/* Theme toggle */}
+            {/* Theme toggle with animated icon swap */}
             <button
               aria-label="Toggle theme"
+              aria-pressed={mounted && resolvedTheme === "dark"}
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-foreground/[0.06]"
+              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border bg-background hover:bg-foreground/[0.06]"
             >
-              {mounted && resolvedTheme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
+              {mounted && (
+                <AnimatePresence mode="wait" initial={false}>
+                  {resolvedTheme === "dark" ? (
+                    <motion.span
+                      key="sun"
+                      initial={{ rotate: -90, scale: 0.8, opacity: 0 }}
+                      animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                      exit={{ rotate: 90, scale: 0.8, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                      className="text-foreground"
+                    >
+                      <Sun className="h-4 w-4" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="moon"
+                      initial={{ rotate: 90, scale: 0.8, opacity: 0 }}
+                      animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                      exit={{ rotate: -90, scale: 0.8, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                      className="text-foreground"
+                    >
+                      <Moon className="h-4 w-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               )}
             </button>
 
-            {/* Sign Out button */}
-            <button
-              onClick={onSignOut}
-              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </button>
+            {/* User avatar dropdown (Profile / Settings / Sign out / Theme radios) */}
+            <UserMenu onSignOut={onSignOut} />
           </div>
         </div>
       </header>

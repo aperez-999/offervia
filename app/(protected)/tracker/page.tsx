@@ -266,7 +266,7 @@ export default function TrackerPage() {
               <DialogTrigger asChild>
                 <Button
                   onClick={openCreate}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                 >
                   Add Job
                 </Button>
@@ -439,14 +439,14 @@ export default function TrackerPage() {
                           <Button
                             variant="outline"
                             onClick={() => openEdit(app)}
-                            className="border-border text-foreground hover:bg-foreground/[0.06]"
+                            className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
                           >
                             Edit
                           </Button>
                           <Button
                             variant="outline"
                             onClick={() => confirmDelete(app.id)}
-                            className="border-border text-foreground hover:bg-foreground/[0.06]"
+                            className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
                           >
                             Delete
                           </Button>

@@ -60,7 +60,7 @@ export default function CoachSidebar({
                 type="button"
                 aria-current={selected ? "page" : undefined}
                 onClick={() => onChange(key)}
-                className={`group mb-1 flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors
+                className={`group mb-1 cursor-pointer flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors
                   ${selected
                     ? "border-indigo-500/30 bg-indigo-500/10"
                     : "border-transparent hover:bg-foreground/[0.06]"}

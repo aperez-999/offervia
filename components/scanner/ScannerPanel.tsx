@@ -103,7 +103,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
             <Button
               onClick={analyze}
               disabled={loading || jd.trim().length < 20}
-              className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             >
               {loading ? "Analyzing..." : "Analyze Job Description"}
             </Button>
@@ -111,7 +111,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               variant="outline"
               onClick={clearAll}
               disabled={loading && !result}
-              className="border-border text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             >
               Clear Analysis
             </Button>
@@ -119,7 +119,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
 
           <button
             type="button"
-            className="text-xs text-foreground/70 underline underline-offset-4 hover:text-foreground"
+            className="text-xs text-foreground/70 cursor-pointer underline underline-offset-4 hover:text-foreground"
             onClick={() => setJd(exampleJD)}
           >
             Paste example job description
