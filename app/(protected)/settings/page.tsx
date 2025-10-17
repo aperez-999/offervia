@@ -10,6 +10,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
+type UserPrefsRow = {
+  user_id: string;
+  default_mode: CoachMode | null;
+  weekly_goal: number | null;
+  email_digest: boolean | null;
+};
 
 export default function SettingsPage() {
   const supabase = useMemo(() => getBrowserSupabase(), []);
@@ -19,48 +25,67 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
-  // preferences (stored locally for now)
+  // preferences (DB-backed)
   const [weeklyGoal, setWeeklyGoal] = useState<number>(5);
   const [defaultMode, setDefaultMode] = useState<CoachMode>("interview");
   const [emailDigest, setEmailDigest] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      setLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         setEmail(user.email ?? "");
         const meta = user.user_metadata || {};
         setName(meta.full_name || meta.name || "");
-      }
-      // load local prefs
-      try {
-        const raw = localStorage.getItem("offervia:prefs");
-        if (raw) {
-          const p = JSON.parse(raw);
-          if (typeof p.weeklyGoal === "number") setWeeklyGoal(p.weeklyGoal);
-          if (p.defaultMode) setDefaultMode(p.defaultMode);
-          if (typeof p.emailDigest === "boolean") setEmailDigest(p.emailDigest);
+
+        // Load prefs from DB (if row missing, defaults stay as-is)
+        const { data: prefs } = await supabase
+          .from("user_prefs")
+          .select("default_mode, weekly_goal, email_digest")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (prefs) {
+          if (prefs.default_mode) setDefaultMode(prefs.default_mode as CoachMode);
+          if (typeof prefs.weekly_goal === "number") setWeeklyGoal(prefs.weekly_goal);
+          if (typeof prefs.email_digest === "boolean") setEmailDigest(prefs.email_digest);
         }
-      } catch {}
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [supabase]);
 
-  function persistLocal() {
-    localStorage.setItem(
-      "offervia:prefs",
-      JSON.stringify({ weeklyGoal, defaultMode, emailDigest })
-    );
-  }
-
   async function onSave() {
-    persistLocal();
+    setSaving(true);
     try {
-      await supabase.auth.updateUser({
-        data: { full_name: name }, // avatar_url handled on Profile page
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+
+      // Update auth metadata name
+      await supabase.auth.updateUser({ data: { full_name: name } });
+
+      // Upsert DB prefs
+      const payload: Partial<UserPrefsRow> & { user_id: string } = {
+        user_id: user.id,
+        default_mode: defaultMode,
+        weekly_goal: weeklyGoal,
+        email_digest: emailDigest,
+      };
+
+      const { error } = await supabase.from("user_prefs").upsert(payload, { onConflict: "user_id" });
+      if (error) throw error;
+
       toast({ title: "Settings saved" });
-    } catch {
+    } catch (e) {
       toast({ title: "Could not save settings", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -87,6 +112,7 @@ export default function SettingsPage() {
                 onChange={(e) => setName(e.target.value)}
                 className="bg-background/80 text-foreground border-border"
                 placeholder="Your name"
+                disabled={loading}
               />
             </div>
             <div className="grid gap-1">
@@ -94,7 +120,11 @@ export default function SettingsPage() {
               <Input value={email} disabled className="bg-background/60 text-foreground/70 border-border" />
             </div>
             <div className="pt-1">
-              <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]" asChild>
+              <Button
+                variant="outline"
+                className="border-border text-foreground hover:bg-foreground/[0.06]"
+                asChild
+              >
                 <a href="/profile">Edit avatar</a>
               </Button>
             </div>
@@ -112,9 +142,7 @@ export default function SettingsPage() {
             <div className="grid gap-1">
               <label className="text-sm text-foreground/80">Default coach mode</label>
               <Select value={defaultMode} onValueChange={(v) => setDefaultMode(v as CoachMode)}>
-                <SelectTrigger className="border-border">
-                  <SelectValue placeholder="Select a mode" />
-                </SelectTrigger>
+                <SelectTrigger className="border-border"><SelectValue placeholder="Select a mode" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="interview">Interview Coach</SelectItem>
                   <SelectItem value="resume">Resume Feedback</SelectItem>
@@ -133,10 +161,9 @@ export default function SettingsPage() {
                 value={weeklyGoal}
                 onChange={(e) => setWeeklyGoal(Number(e.target.value || 0))}
                 className="border-border bg-background/80 text-foreground"
+                disabled={loading}
               />
-              <div className="text-xs text-foreground/60">
-                Used on the dashboard for progress nudges.
-              </div>
+              <div className="text-xs text-foreground/60">Used on the dashboard for progress nudges.</div>
             </div>
 
             <div className="grid gap-2 sm:col-span-2">
@@ -148,6 +175,7 @@ export default function SettingsPage() {
                   checked={emailDigest}
                   onChange={(e) => setEmailDigest(e.target.checked)}
                   className="h-4 w-4 rounded border-border bg-background accent-indigo-600"
+                  disabled={loading}
                 />
                 <label htmlFor="digest" className="text-sm text-foreground/80">
                   Send a weekly summary (applications & reminders)
@@ -158,9 +186,10 @@ export default function SettingsPage() {
             <div className="sm:col-span-2">
               <Button
                 onClick={onSave}
+                disabled={saving || loading}
                 className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
               >
-                Save settings
+                {saving ? "Saving…" : "Save settings"}
               </Button>
             </div>
           </CardContent>

@@ -12,12 +12,17 @@ import { useToast } from "@/hooks/use-toast";
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const MAX_SIZE_MB = 4;
 
+function urlToAvatarsPath(url: string | null | undefined) {
+  if (!url) return null;
+  const m = url.match(/\/storage\/v1\/object\/public\/avatars\/(.+)$/);
+  return m?.[1] ?? null; // "<uid>/<file>"
+}
+
 export default function ProfilePage() {
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // auth + profile state
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -32,59 +37,31 @@ export default function ProfilePage() {
       setLoading(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          return;
-        }
+        if (!user) return;
 
         setEmail(user.email ?? "");
         const meta = user.user_metadata || {};
         const authName = meta.full_name || meta.name || "";
         const authAvatar = meta.avatar_url || "";
 
-        // Try profiles first; fall back to auth metadata.
-        const { data: prof, error } = await supabase
+        const { data: prof } = await supabase
           .from("profiles")
           .select("full_name, avatar_url")
           .eq("id", user.id)
-          .maybeSingle(); // <-- prevents 406 when no row yet
+          .maybeSingle();
 
-        if (error) {
-          // If you see this, RLS is probably blocking; check policies again.
-          // We still fall back to auth metadata so the UI renders.
-          console.warn("profiles select error:", error);
-        }
-
-        if (!prof) {
-          // If row doesn't exist yet, create one (allowed by the RLS we added).
-          await supabase
-            .from("profiles")
-            .insert({
-              id: user.id,
-              full_name: authName || null,
-              avatar_url: authAvatar || null,
-            })
-            .select()
-            .maybeSingle()
-            .catch(() => {/* ignore if race-condition */});
-
-          setName(authName);
-          setAvatarUrl(authAvatar);
-        } else {
-          setName(prof.full_name ?? authName);
-          setAvatarUrl(prof.avatar_url ?? authAvatar);
-        }
+        setName(prof?.full_name ?? authName);
+        setAvatarUrl(prof?.avatar_url ?? authAvatar);
       } finally {
         setLoading(false);
       }
     })();
   }, [supabase]);
 
-  async function syncProfile(partial: { full_name?: string | null; avatar_url?: string | null }) {
+  async function syncProfile(partial: { full_name?: string | null; avatar_url?: string | null; }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not signed in");
 
-    // 1) Update auth metadata
     await supabase.auth.updateUser({
       data: {
         ...(partial.full_name !== undefined ? { full_name: partial.full_name } : {}),
@@ -92,7 +69,6 @@ export default function ProfilePage() {
       },
     });
 
-    // 2) Upsert into profiles (RLS policies allow owner-only)
     await supabase
       .from("profiles")
       .upsert(
@@ -100,7 +76,6 @@ export default function ProfilePage() {
           id: user.id,
           ...(partial.full_name !== undefined ? { full_name: partial.full_name } : {}),
           ...(partial.avatar_url !== undefined ? { avatar_url: partial.avatar_url } : {}),
-          updated_at: new Date().toISOString(),
         },
         { onConflict: "id" }
       );
@@ -133,9 +108,7 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
 
-      // Upload to avatars/<uid>/<timestamp>.<ext>
-      const rawExt = file.name.split(".").pop() || "png";
-      const ext = rawExt.toLowerCase();
+      const ext = file.name.split(".").pop() || "png";
       const path = `${user.id}/${Date.now()}.${ext}`;
 
       const { error: upErr } = await supabase.storage
@@ -143,12 +116,18 @@ export default function ProfilePage() {
         .upload(path, file, {
           cacheControl: "3600",
           upsert: true,
-          contentType: file.type || "application/octet-stream", // <- defensive default
+          contentType: file.type,
         });
       if (upErr) throw upErr;
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       const publicUrl = data.publicUrl;
+
+      // best-effort cleanup of old file
+      const oldPath = urlToAvatarsPath(avatarUrl);
+      if (oldPath) {
+        supabase.storage.from("avatars").remove([oldPath]).catch(() => {});
+      }
 
       await syncProfile({ avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
@@ -157,8 +136,7 @@ export default function ProfilePage() {
       console.error(e?.message || e);
       toast({
         title: "Upload failed",
-        description:
-          "Check the 'avatars' bucket exists and your Storage policies allow authenticated users to upload to their own folder.",
+        description: "Check the 'avatars' bucket and Storage policies.",
         variant: "destructive",
       });
     } finally {
@@ -169,6 +147,10 @@ export default function ProfilePage() {
   async function removeAvatar() {
     try {
       setUploading(true);
+      const oldPath = urlToAvatarsPath(avatarUrl);
+      if (oldPath) {
+        await supabase.storage.from("avatars").remove([oldPath]);
+      }
       await syncProfile({ avatar_url: null });
       setAvatarUrl("");
       toast({ title: "Avatar removed" });
@@ -187,18 +169,17 @@ export default function ProfilePage() {
           <p className="mt-1 text-sm text-foreground/70">Manage your avatar and public details.</p>
         </section>
 
-        {/* Avatar */}
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Avatar</CardTitle>
             <CardDescription className="text-foreground/70">
-              Square images work best. (Max {MAX_SIZE_MB}MB)
+              Square images work best. We’ll resize automatically. (Max {MAX_SIZE_MB}MB)
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Avatar className="h-20 w-20 ring-1 ring-white/10">
               <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-              <AvatarFallback className="bg-indigo-600 text-xl text-white">{initial}</AvatarFallback>
+              <AvatarFallback className="bg-indigo-600 text-white text-xl">{initial}</AvatarFallback>
             </Avatar>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -232,13 +213,10 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Public info */}
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Public info</CardTitle>
-            <CardDescription className="text-foreground/70">
-              What others may see in shared artifacts
-            </CardDescription>
+            <CardDescription className="text-foreground/70">What others may see in shared artifacts</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:max-w-md">
             <div className="grid gap-1">
@@ -246,14 +224,14 @@ export default function ProfilePage() {
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="border-border bg-background/80 text-foreground"
+                className="bg-background/80 text-foreground border-border"
                 placeholder="Your name"
                 disabled={loading}
               />
             </div>
             <div className="grid gap-1">
               <label className="text-sm text-foreground/80">Email</label>
-              <Input value={email} disabled className="border-border bg-background/60 text-foreground/70" />
+              <Input value={email} disabled className="bg-background/60 text-foreground/70 border-border" />
             </div>
             <div className="pt-1">
               <Button
