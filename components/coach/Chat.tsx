@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import type { CoachMode } from "./system-prompts";
 import { SYSTEM_PROMPTS, MODE_LABELS } from "./system-prompts";
 import MessageBubble from "./MessageBubble";
 import ClearChatButton from "./ClearChatButton";
-import { Bot, User, Mail, Compass, MessageSquare, FileText } from "lucide-react";
+import { Bot, User, Mail, Compass, MessageSquare, FileText, CornerDownRight, RotateCcw, ChevronsDown } from "lucide-react";
 import CoachSidebar from "./CoachSidebar";
 
 interface MsgRow {
@@ -55,42 +55,77 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState<MsgRow[]>([]);
   const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const listRef = useRef<HTMLDivElement | null>(null);
+  const [showJump, setShowJump] = useState(false);
+  const [controller, setController] = useState<AbortController | null>(null);
 
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+
+  // draft persistence per mode
+  const DRAFT_KEY = `offervia:coachDraft:${mode}`;
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
+    try {
+      const d = localStorage.getItem(DRAFT_KEY);
+      if (d) setInput(d);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, input);
+    } catch {}
+  }, [DRAFT_KEY, input]);
+
+  // initial load
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!mounted) return;
       if (!user) {
         setUserId(null);
+        setMessages([]);
         setLoading(false);
         return;
       }
       setUserId(user.id);
       setLoading(true);
-      supabase
+      const { data, error } = await supabase
         .from("messages")
         .select("id,user_id,mode,role,content,created_at")
         .eq("user_id", user.id)
         .eq("mode", mode)
-        .order("created_at", { ascending: true })
-        .then(({ data, error }: { data: any; error: any }) => {
-          if (error) {
-            toast({ title: "Failed to load chat", variant: "destructive" });
-          } else if (data) {
-            setMessages(data as MsgRow[]);
-          }
-          setLoading(false);
-        });
+        .order("created_at", { ascending: true });
+      if (error) {
+        toast({ title: "Failed to load chat", variant: "destructive" });
+      } else {
+        setMessages((data || []) as MsgRow[]);
+      }
+      setLoading(false);
     });
+    return () => {
+      mounted = false;
+    };
   }, [mode, supabase, toast]);
 
+  // auto-scroll & jump button
+  const scrollToBottom = useCallback((smooth = true) => {
+    const node = listRef.current;
+    if (!node) return;
+    node.scrollTo({ top: node.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  }, []);
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-    } else {
-      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, [messages, sending]);
+    scrollToBottom(true);
+  }, [messages, sending, scrollToBottom]);
+  useEffect(() => {
+    const node = listRef.current;
+    if (!node) return;
+    const onScroll = () => {
+      const nearBottom = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+      setShowJump(!nearBottom);
+    };
+    node.addEventListener("scroll", onScroll, { passive: true });
+    return () => node.removeEventListener("scroll", onScroll);
+  }, []);
 
   const grouped: DayGroup[] = useMemo(() => {
     const byDay = new Map<string, MsgRow[]>();
@@ -109,11 +144,29 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       });
   }, [messages]);
 
-  async function send() {
+  // find the last user message (for regenerate)
+  const lastUserMessage = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") return messages[i];
+    }
+    return null;
+  }, [messages]);
+
+  const stop = useCallback(() => {
+    if (controller) {
+      controller.abort();
+      setController(null);
+      setSending(false);
+    }
+  }, [controller]);
+
+  const send = useCallback(async () => {
     const content = input.trim();
     if (!content || !userId || sending) return;
+
     setSending(true);
 
+    // optimistic user msg
     const optimisticUser: MsgRow = {
       id: `tmp_user_${Date.now()}`,
       user_id: userId,
@@ -125,16 +178,30 @@ function InnerChat({ mode }: { mode: CoachMode }) {
     setMessages((prev) => [...prev, optimisticUser]);
     setInput("");
 
-    const { error: insertUserErr } = await supabase
+    // save to db and swap id
+    const { data: insUser, error: insertUserErr } = await supabase
       .from("messages")
-      .insert({ user_id: userId, mode, role: "user", content });
+      .insert({ user_id: userId, mode, role: "user", content })
+      .select("id,created_at")
+      .single();
     if (insertUserErr) {
       toast({ title: "Failed to send message", variant: "destructive" });
       setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
       setSending(false);
       return;
+    } else if (insUser) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === optimisticUser.id
+            ? { ...m, id: insUser.id, created_at: insUser.created_at }
+            : m
+        )
+      );
     }
 
+    // call AI (abortable)
+    const ctrl = new AbortController();
+    setController(ctrl);
     try {
       const system = { role: "system", content: SYSTEM_PROMPTS[mode] } as const;
       const history = messages.map((m) => ({ role: m.role, content: m.content }));
@@ -143,7 +210,10 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: ctrl.signal,
       });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const reply: string = data?.content || "";
 
@@ -157,18 +227,43 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       };
       setMessages((prev) => [...prev, optimisticAssistant]);
 
-      const { error: insertAsstErr } = await supabase
+      const { data: insAsst, error: insertAsstErr } = await supabase
         .from("messages")
-        .insert({ user_id: userId, mode, role: "assistant", content: reply || "" });
+        .insert({ user_id: userId, mode, role: "assistant", content: reply || "" })
+        .select("id,created_at")
+        .single();
       if (insertAsstErr) {
         toast({ title: "Failed to save reply", variant: "destructive" });
+      } else if (insAsst) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === optimisticAssistant.id
+              ? { ...m, id: insAsst.id, created_at: insAsst.created_at }
+              : m
+          )
+        );
       }
-    } catch {
-      toast({ title: "AI is temporarily unavailable. Try again soon.", variant: "destructive" });
+    } catch (e: any) {
+      if (e?.name === "AbortError") {
+        toast({ title: "Generation stopped" });
+      } else {
+        toast({ title: "AI is temporarily unavailable. Try again soon.", variant: "destructive" });
+      }
     } finally {
+      setController(null);
       setSending(false);
     }
-  }
+  }, [input, messages, mode, sending, supabase, toast, userId]);
+
+  // regenerate last assistant reply (re-send last user message)
+  const regenerate = useCallback(() => {
+    if (!lastUserMessage) return;
+    setInput(lastUserMessage.content);
+    // small delay to allow Textarea state to update before send()
+    setTimeout(() => {
+      void send();
+    }, 0);
+  }, [lastUserMessage, send]);
 
   return (
     <Card className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
@@ -179,7 +274,18 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto" ref={listRef}>
+      <CardContent className="relative flex-1 overflow-y-auto" ref={listRef}>
+        {/* jump to latest */}
+        {showJump && (
+          <Button
+            size="sm"
+            onClick={() => scrollToBottom(true)}
+            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-indigo-600 text-white hover:bg-indigo-500"
+          >
+            <ChevronsDown className="mr-1 h-4 w-4" /> Jump to latest
+          </Button>
+        )}
+
         {loading ? (
           <div className="grid h-full place-items-center text-sm text-foreground/70">Loading…</div>
         ) : messages.length === 0 ? (
@@ -193,27 +299,27 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                       size="sm"
                       variant="outline"
                       className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Help me prepare for a behavioral interview."); setTimeout(() => send(), 0); }}
+                      onClick={() => { setInput("Help me prepare for a behavioral interview."); setTimeout(() => void send(), 0); }}
                     >
-                      <MessageSquare className="h-4 w-4" />
+                      <MessageSquare className="mr-1 h-4 w-4" />
                       Help me prepare for a behavioral interview.
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Ask me a mock interview question."); setTimeout(() => send(), 0); }}
+                      onClick={() => { setInput("Ask me a mock interview question."); setTimeout(() => void send(), 0); }}
                     >
-                      <MessageSquare className="h-4 w-4" />
+                      <MessageSquare className="mr-1 h-4 w-4" />
                       Ask me a mock interview question.
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("How do I explain a resume gap?"); setTimeout(() => send(), 0); }}
+                      onClick={() => { setInput("How do I explain a resume gap?"); setTimeout(() => void send(), 0); }}
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="mr-1 h-4 w-4" />
                       How do I explain a resume gap?
                     </Button>
                   </div>
@@ -225,18 +331,18 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                   <p className="mb-2">Refine your resume bullets, structure, and impact.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Rewrite this bullet in STAR format."); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" />
+                      onClick={() => { setInput("Rewrite this bullet in STAR format."); setTimeout(() => void send(), 0); }}>
+                      <FileText className="mr-1 h-4 w-4" />
                       Rewrite this bullet in STAR format.
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("How do I list freelance experience?"); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" />
+                      onClick={() => { setInput("How do I list freelance experience?"); setTimeout(() => void send(), 0); }}>
+                      <FileText className="mr-1 h-4 w-4" />
                       How do I list freelance experience?
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Fix grammar in this bullet."); setTimeout(() => send(), 0); }}>
-                      <FileText className="h-4 w-4" />
+                      onClick={() => { setInput("Fix grammar in this bullet."); setTimeout(() => void send(), 0); }}>
+                      <FileText className="mr-1 h-4 w-4" />
                       Fix grammar in this bullet.
                     </Button>
                   </div>
@@ -248,18 +354,18 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                   <p className="mb-2">Craft personalized and engaging cover letters.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Write a cover letter intro."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" />
+                      onClick={() => { setInput("Write a cover letter intro."); setTimeout(() => void send(), 0); }}>
+                      <Mail className="mr-1 h-4 w-4" />
                       Write a cover letter intro.
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Explain why I want to join this company."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" />
+                      onClick={() => { setInput("Explain why I want to join this company."); setTimeout(() => void send(), 0); }}>
+                      <Mail className="mr-1 h-4 w-4" />
                       Explain why I want to join this company.
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Improve this paragraph."); setTimeout(() => send(), 0); }}>
-                      <Mail className="h-4 w-4" />
+                      onClick={() => { setInput("Improve this paragraph."); setTimeout(() => void send(), 0); }}>
+                      <Mail className="mr-1 h-4 w-4" />
                       Improve this paragraph.
                     </Button>
                   </div>
@@ -271,18 +377,18 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                   <p className="mb-2">Career strategy, growth, and decision support.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("How do I choose between two job offers?"); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" />
+                      onClick={() => { setInput("How do I choose between two job offers?"); setTimeout(() => void send(), 0); }}>
+                      <Compass className="mr-1 h-4 w-4" />
                       How do I choose between two job offers?
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("Help me plan a promotion roadmap."); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" />
+                      onClick={() => { setInput("Help me plan a promotion roadmap."); setTimeout(() => void send(), 0); }}>
+                      <Compass className="mr-1 h-4 w-4" />
                       Help me plan a promotion roadmap.
                     </Button>
                     <Button size="sm" variant="outline" className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => { setInput("How do I negotiate salary?"); setTimeout(() => send(), 0); }}>
-                      <Compass className="h-4 w-4" />
+                      onClick={() => { setInput("How do I negotiate salary?"); setTimeout(() => void send(), 0); }}>
+                      <Compass className="mr-1 h-4 w-4" />
                       How do I negotiate salary?
                     </Button>
                   </div>
@@ -297,21 +403,36 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 <div className="sticky top-0 z-10 mx-auto w-fit rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-foreground/70 backdrop-blur">
                   {group.label}
                 </div>
-                {group.items.map((m) => (
-                  <div key={m.id} className="flex items-start gap-2">
-                    {m.role === "assistant" ? (
-                      <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                    ) : (
-                      <User className="order-2 ml-auto mt-0.5 h-5 w-5 text-foreground/70" />
-                    )}
-                    <div className="flex-1">
-                      <MessageBubble role={m.role} content={m.content} />
-                      <div className={"mt-1 text-[11px] text-foreground/50 " + (m.role === "user" ? "text-right" : "text-left")}>
-                        {formatTime(m.created_at)}
+                {group.items.map((m, idx) => {
+                  const isLastAssistant =
+                    m.role === "assistant" &&
+                    gi === grouped.length - 1 &&
+                    idx === group.items.length - 1;
+                  return (
+                    <div key={m.id} className="flex items-start gap-2">
+                      {m.role === "assistant" ? (
+                        <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                      ) : (
+                        <User className="order-2 ml-auto mt-0.5 h-5 w-5 text-foreground/70" />
+                      )}
+                      <div className="flex-1">
+                        <MessageBubble role={m.role} content={m.content} />
+                        <div className={"mt-1 flex items-center justify-between text-[11px] text-foreground/50 " + (m.role === "user" ? "flex-row-reverse" : "")}>
+                          <span>{formatTime(m.created_at)}</span>
+                          {isLastAssistant && lastUserMessage && (
+                            <button
+                              onClick={regenerate}
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-400"
+                              title="Regenerate reply"
+                            >
+                              <RotateCcw className="h-3 w-3" /> Regenerate
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
             {sending && (
@@ -325,7 +446,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 </div>
               </div>
             )}
-            <div ref={scrollRef} />
+            <div ref={endRef} />
           </div>
         )}
       </CardContent>
@@ -349,7 +470,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           }}
         />
 
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-start gap-2">
           <Textarea
             placeholder={userId ? "Type your message..." : "Sign in to chat"}
             className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
@@ -359,17 +480,28 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                send();
+                void send();
               }
             }}
           />
-          <Button
-            onClick={send}
-            disabled={!userId || loading || sending || !input.trim()}
-            className="bg-indigo-600 text-white cursor-pointer hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
-          >
-            {sending ? "Sending..." : "Send"}
-          </Button>
+          {!sending ? (
+            <Button
+              onClick={() => void send()}
+              disabled={!userId || loading || !input.trim()}
+              className="bg-indigo-600 text-white cursor-pointer hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+            >
+              <CornerDownRight className="mr-1 h-4 w-4" />
+              Send
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={stop}
+              className="border-border text-foreground hover:bg-foreground/[0.06]"
+            >
+              Stop
+            </Button>
+          )}
         </div>
       </CardFooter>
     </Card>
@@ -381,7 +513,6 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 export default function Chat({ mode = "interview" as CoachMode }: { mode?: CoachMode }) {
   const [active, setActive] = useState<CoachMode>(mode);
 
-  // Get the icon for the active mode from the sidebar items
   const getActiveIcon = () => {
     switch (active) {
       case "interview": return MessageSquare;
@@ -391,7 +522,6 @@ export default function Chat({ mode = "interview" as CoachMode }: { mode?: Coach
       default: return MessageSquare;
     }
   };
-
   const getActiveLabel = () => {
     switch (active) {
       case "interview": return "Interview Coach";
@@ -407,7 +537,6 @@ export default function Chat({ mode = "interview" as CoachMode }: { mode?: Coach
   return (
     <div className="flex gap-6">
       <CoachSidebar active={active} onChange={setActive} />
-      {/* Chat panel */}
       <section className="min-w-0 flex-1">
         <header className="mb-3 flex items-center gap-2">
           <ActiveIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
