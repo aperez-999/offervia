@@ -1,7 +1,7 @@
 // app/(protected)/scanner/page.tsx
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import {
   ClipboardCopy,
@@ -22,6 +22,7 @@ import {
   Search as SearchIcon,
   Sparkles,
 } from "lucide-react";
+import { postJson } from "@/lib/safe-fetch";
 
 type ScanEntry = {
   id: string;
@@ -37,51 +38,13 @@ const LS_DRAFT_KEY = "offervia:scannerDraft_v1";
 
 // naïve tech/keyword detection (fast + client-only)
 const TECH_DICT = [
-  "react",
-  "next.js",
-  "typescript",
-  "javascript",
-  "node",
-  "node.js",
-  "graphql",
-  "rest",
-  "api",
-  "html",
-  "css",
-  "tailwind",
-  "redux",
-  "jest",
-  "rtl",
-  "cypress",
-  "testing",
-  "vitest",
-  "playwright",
-  "webpack",
-  "vite",
-  "rollup",
-  "aws",
-  "gcp",
-  "azure",
-  "docker",
-  "kubernetes",
-  "sql",
-  "postgres",
-  "mysql",
-  "mongodb",
-  "python",
-  "go",
-  "java",
-  "c++",
-  "a11y",
-  "accessibility",
-  "performance",
+  "react","next.js","typescript","javascript","node","node.js","graphql","rest","api","html","css","tailwind","redux","jest","rtl","cypress","testing","vitest","playwright","webpack","vite","rollup","aws","gcp","azure","docker","kubernetes","sql","postgres","mysql","mongodb","python","go","java","c++","a11y","accessibility","performance",
 ];
 
 function detectTechs(text: string): string[] {
   const hay = text.toLowerCase();
   const set = new Set<string>();
   for (const t of TECH_DICT) {
-    // match whole-ish words (loose for symbols like c++)
     const rx =
       t === "c++"
         ? /\bc\+\+\b/i
@@ -92,7 +55,9 @@ function detectTechs(text: string): string[] {
 }
 
 function titleFromJD(text: string): string {
-  const first = (text || "").split("\n").map((s) => s.trim()).find(Boolean) || "Untitled scan";
+  const first =
+    (text || "").split("\n").map((s) => s.trim()).find(Boolean) ||
+    "Untitled scan";
   return first.length > 90 ? first.slice(0, 87) + "…" : first;
 }
 
@@ -107,6 +72,10 @@ export default function ScannerPanel() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string>("");
   const [history, setHistory] = useState<ScanEntry[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const canceledRef = useRef(false);
 
   // draft + history bootstrap
   useEffect(() => {
@@ -164,39 +133,62 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
   async function analyze() {
     const text = jd.trim();
     if (text.length < 20) {
+      setError("Please paste a longer job description.");
       toast({
         title: "Please paste a longer job description",
         variant: "destructive",
       });
       return;
     }
+
     setLoading(true);
     setResult("");
-    try {
-      const res = await fetch("/api/job-scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jd: text }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Scan failed");
-      const formatted = formatForReadability(String(data.content || ""));
-      setResult(formatted);
-      addToHistory(text, formatted);
-      toast({ title: "Scan complete" });
-    } catch {
-      toast({
-        title: "AI is temporarily unavailable. Try again soon.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    setError(null);
+
+    canceledRef.current = false;
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const res = await postJson<{ content?: string; error?: string }>(
+      "/api/job-scan",
+      { jd: text },
+      { timeoutMs: 20000, retries: 0, signal: controller.signal }
+    );
+
+    abortRef.current = null;
+    setLoading(false);
+
+    // If user canceled during the request
+    if (canceledRef.current) {
+      setError("Canceled.");
+      canceledRef.current = false;
+      return;
     }
+
+    if (!res.ok) {
+      const friendly =
+        res.cause === "timeout"
+          ? "The scan timed out. Try again with a shorter JD."
+          : res.cause === "network"
+          ? "Network error. Check your connection and try again."
+          : res.cause === "server"
+          ? "Service is having trouble. Try again shortly."
+          : res.error || "Scan failed.";
+      setError(friendly);
+      toast({ title: "Scan failed", description: friendly, variant: "destructive" });
+      return;
+    }
+
+    const formatted = formatForReadability(String((res.data as any)?.content || ""));
+    setResult(formatted);
+    addToHistory(text, formatted);
+    toast({ title: "Scan complete" });
   }
 
   function clearAll() {
     setJd("");
     setResult("");
+    setError(null);
   }
 
   function copy(text: string, label = "Copied") {
@@ -234,7 +226,18 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       <Card className="max-w-3xl rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <CardHeader className="pb-2">
           <CardTitle className="text-foreground">Paste Job Description</CardTitle>
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
+
+          {/* Error surface */}
+          {error && (
+            <div className="mt-2">
+              <Alert variant="destructive">
+                <AlertTitle>Unable to analyze</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
             <span>
               Characters: <span className="text-foreground/80">{jd.length}</span>
             </span>
@@ -243,6 +246,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
             </span>
           </div>
         </CardHeader>
+
         <CardContent className="space-y-3">
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-foreground/50" />
@@ -283,6 +287,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
             You can paste raw text from PDF, DOCX, or job posting links.
           </p>
         </CardContent>
+
         <CardFooter className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
             <Button
@@ -302,6 +307,20 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                 </>
               )}
             </Button>
+
+            {loading && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  canceledRef.current = true;
+                  abortRef.current?.abort();
+                }}
+                className="border-border text-foreground hover:bg-foreground/[0.06]"
+              >
+                Cancel
+              </Button>
+            )}
+
             <Button
               variant="outline"
               onClick={clearAll}
@@ -437,6 +456,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                       onClick={() => {
                         setJd(h.jd);
                         setResult(h.result);
+                        setError(null);
                         toast({ title: "Loaded scan" });
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}

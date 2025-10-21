@@ -26,6 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { postForm } from "@/lib/safe-fetch"; // ⬅️ use postForm from your helper
 
 /* ---------------------------------- Data --------------------------------- */
 
@@ -227,17 +228,24 @@ export default function ResumeWizard() {
       fd.append("companyUrl", companyUrl);
       fd.append("template", templateMode ? "1" : "0");
 
-      const res = await fetch("/api/resume-tailor", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed");
-      setAiText(String(data.content || ""));
+      // use helper that returns a typed result object
+      const resp = await postForm<{ content?: string; error?: string }>(
+        "/api/resume-tailor",
+        fd,
+        { timeoutMs: 45_000 }
+      );
+
+      if (!resp.ok) {
+        throw new Error(resp.error || "Failed");
+      }
+
+      setAiText(String(resp.data?.content || ""));
       toast({ title: "Tailored draft generated" });
     } catch (e: any) {
-      toast({
-        title: "Failed to generate",
-        description: "AI might be busy, or your input is too large. Please try again.",
-        variant: "destructive",
-      });
+      const msg =
+        e?.message?.toLowerCase?.().includes("time") ? "The request timed out. Please try again." :
+        "AI might be busy, or your input is too large. Please try again.";
+      toast({ title: "Failed to generate", description: msg, variant: "destructive" });
     } finally {
       setGenerating(false);
     }
