@@ -105,7 +105,7 @@ export async function safeFetchJson<T = any>(
 export async function postJson<T = any>(
   url: string,
   json: any,
-  opts?: Omit<SafeFetchOptions, "body" | "headers" | "method">
+  opts?: Omit<SafeFetchOptions, "body" | "method">
 ) {
   return safeFetchJson<T>(url, {
     method: "POST",

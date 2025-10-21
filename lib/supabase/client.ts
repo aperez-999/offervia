@@ -14,7 +14,11 @@ export function getBrowserSupabase(): SupabaseClient {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
 
-  browserClient = createBrowserClient(url, anon);
+  browserClient = createBrowserClient(url, anon, {
+    auth: {
+      flowType: 'implicit'
+    }
+  });
 
   return browserClient;
 }

@@ -1,4 +1,4 @@
-// app/(auth)/callback/page.tsx
+// app/auth/callback/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,14 +7,16 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AuthCallbackPage() {
-  const supabase = getBrowserSupabase();
   const router = useRouter();
   const params = useSearchParams();
+  const supabase = getBrowserSupabase();
+
   const [status, setStatus] = useState<"loading" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    const doExchange = async () => {
+    (async () => {
+      // Provider bounced us back with an error?
       const err = params.get("error_description") || params.get("error");
       if (err) {
         setStatus("error");
@@ -23,28 +25,37 @@ export default function AuthCallbackPage() {
       }
 
       try {
-        // Complete the PKCE exchange (?code=...) -> session
-        const { error } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
+        const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           setStatus("error");
           setErrorMsg(error.message || "Failed to sign in.");
           return;
         }
+        
+        if (!session) {
+          setStatus("error");
+          setErrorMsg("No session found. Please try signing in again.");
+          return;
+        }
 
-        // Redirect to where the user came from (if we saved it), else dashboard
-        const key = "offervia:postAuthRedirect";
-        const next = localStorage.getItem(key) || "/dashboard";
-        localStorage.removeItem(key);
+        // Redirect to where we planned to go
+        let next = "/dashboard?login=1";
+        try {
+          const key = "offervia:postAuthRedirect";
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            next = stored;
+            localStorage.removeItem(key);
+          }
+        } catch {}
+
         router.replace(next);
+        router.refresh();
       } catch (e: any) {
         setStatus("error");
         setErrorMsg(e?.message || "Unexpected error.");
       }
-    };
-
-    void doExchange();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

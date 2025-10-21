@@ -6,7 +6,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import AuthLayout from "@/components/auth/AuthLayout";
 import SignupForm from "./_form";
 import Link from "next/link";
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Github, Linkedin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type OAuthProvider = "google" | "github" | "linkedin_oidc";
@@ -33,7 +33,7 @@ export default function SignupPage() {
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo,
+          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined,
         },
       });
@@ -89,17 +89,6 @@ export default function SignupPage() {
           title="Sign up with LinkedIn"
         >
           <Linkedin className="h-4 w-4 text-gray-900 dark:text-white" aria-hidden="true" />
-        </button>
-
-        {/* X / Twitter (coming soon) */}
-        <button
-          type="button"
-          aria-label="Sign up with X (coming soon)"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white dark:border-neutral-700 dark:bg-neutral-900"
-          title="X (Twitter) — coming soon"
-          disabled
-        >
-          <Twitter className="h-4 w-4 text-gray-400" aria-hidden="true" />
         </button>
       </div>
 

@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
-  // Let the request continue; we'll modify cookies on `res` if Supabase needs to refresh.
+  // Absolute passthrough for the OAuth callback (keeps ?code & ?state intact)
+  if (req.nextUrl.pathname.startsWith("/auth/")) {
+    return NextResponse.next();
+  }
+
+  // Only protect the routes matched below (same idea as your config)
   const res = NextResponse.next();
 
   const supabase = createServerClient(
@@ -15,7 +20,6 @@ export async function middleware(req: NextRequest) {
           return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          // Supabase may refresh tokens; persist them to the response
           res.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
@@ -25,24 +29,18 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
     const login = new URL("/login", req.url);
-    // preserve where the user was going
-    login.searchParams.set(
-      "next",
-      req.nextUrl.pathname + req.nextUrl.search
-    );
+    login.searchParams.set("next", req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(login);
   }
 
   return res;
 }
 
-// Protect all signed-in routes (add/remove as needed)
+// Same protected routes you had
 export const config = {
   matcher: [
     "/dashboard/:path*",

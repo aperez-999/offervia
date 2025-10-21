@@ -7,7 +7,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import AuthLayout from "@/components/auth/AuthLayout";
 import LoginForm from "./_form";
 import Link from "next/link";
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Github, Linkedin } from "lucide-react";
 
 // NOTE: LinkedIn is "linkedin_oidc" in Supabase
 type OAuthProvider = "google" | "github" | "linkedin_oidc";
@@ -34,13 +34,19 @@ export default function LoginPage() {
       const supabase = getBrowserSupabase();
       const redirectTo = `${window.location.origin}/auth/callback`;
 
-      await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo,
-          queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined,
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: provider === "google" 
+            ? { access_type: "offline", prompt: "consent" } 
+            : undefined,
         },
       });
+      
+      if (error) {
+        throw error;
+      }
     } catch {
       toast({ title: "Could not start sign-in", description: "Please try again.", variant: "destructive" });
     }
@@ -94,17 +100,6 @@ export default function LoginPage() {
           title="Sign in with LinkedIn"
         >
           <Linkedin className="h-4 w-4 text-gray-900 dark:text-white" aria-hidden="true" />
-        </button>
-
-        {/* X / Twitter (coming soon) */}
-        <button
-          type="button"
-          aria-label="Sign in with X (coming soon)"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white dark:border-neutral-700 dark:bg-neutral-900"
-          title="X (Twitter) — coming soon"
-          disabled
-        >
-          <Twitter className="h-4 w-4 text-gray-400" aria-hidden="true" />
         </button>
       </div>
 
