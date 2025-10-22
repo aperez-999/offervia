@@ -26,7 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { postForm } from "@/lib/safe-fetch"; // ⬅️ use postForm from your helper
+import { postForm } from "@/lib/safe-fetch"; // uses your safeFetch helper
 
 /* ---------------------------------- Data --------------------------------- */
 
@@ -228,23 +228,45 @@ export default function ResumeWizard() {
       fd.append("companyUrl", companyUrl);
       fd.append("template", templateMode ? "1" : "0");
 
-      // use helper that returns a typed result object
       const resp = await postForm<{ content?: string; error?: string }>(
         "/api/resume-tailor",
         fd,
         { timeoutMs: 45_000 }
       );
 
+      // --- Rate-limit & other friendly errors ---
       if (!resp.ok) {
-        throw new Error(resp.error || "Failed");
+        if (resp.status === 429) {
+          const msg = resp.error || "You've hit today's free limit for tailoring.";
+          setError(msg);
+          toast({
+            title: "Rate limit reached",
+            description: msg,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (resp.status === 413) {
+          const msg = "Your file is too large. Try a shorter resume or DOCX/text.";
+          setError(msg);
+          toast({ title: "File too large", description: msg, variant: "destructive" });
+          return;
+        }
+        const generic =
+          resp.error ||
+          "AI might be busy, or your input is too large. Please try again.";
+        setError(generic);
+        toast({ title: "Failed to generate", description: generic, variant: "destructive" });
+        return;
       }
 
       setAiText(String(resp.data?.content || ""));
       toast({ title: "Tailored draft generated" });
     } catch (e: any) {
-      const msg =
-        e?.message?.toLowerCase?.().includes("time") ? "The request timed out. Please try again." :
-        "AI might be busy, or your input is too large. Please try again.";
+      const msg = e?.name === "AbortError"
+        ? "The request timed out. Please try again."
+        : "AI might be busy, or your input is too large. Please try again.";
+      setError(msg);
       toast({ title: "Failed to generate", description: msg, variant: "destructive" });
     } finally {
       setGenerating(false);
@@ -452,26 +474,6 @@ export default function ResumeWizard() {
                     </Button>
                   </div>
                 )}
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-border text-foreground hover:bg-foreground/[0.06]"
-                    onClick={() => setJd(EXAMPLE_JD)}
-                  >
-                    Paste example
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-border text-foreground hover:bg-foreground/[0.06]"
-                    onClick={() => setJd((v) => normalizeText(v))}
-                  >
-                    <Wand2 className="mr-2 h-4 w-4" />
-                    Normalize text
-                  </Button>
-                </div>
 
                 {error && step === 3 && (
                   <Alert variant="destructive">
@@ -707,6 +709,7 @@ export default function ResumeWizard() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+        {/* NOTE: if you want to also surface rate-limit errors here on Step 4, you could add a banner similar to above. */}
 
           {/* Wizard nav */}
           <div className="flex items-center justify-between">

@@ -3,6 +3,33 @@ import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
 
 export async function POST(req: Request) {
+  // ---- Rate limit (job-scan) ----
+  try {
+    const mod = await import("@/lib/rate-limit");
+    const enforceRateLimit = (mod as any).enforceRateLimit as
+      | ((kind: string, req: Request, limits: any) => Promise<any>)
+      | undefined;
+
+    if (enforceRateLimit) {
+      const rl = await enforceRateLimit("job-scan", req, {
+        perMinute: 6,
+        perDay: 150,
+      });
+      const limited =
+        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
+      if (limited) {
+        const retry =
+          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
+        return NextResponse.json(
+          { error: "Rate limit reached. Please try again soon." },
+          { status: 429, headers: { "Retry-After": String(retry) } }
+        );
+      }
+    }
+  } catch {
+    // no-op
+  }
+
   try {
     const { jd } = (await req.json()) as { jd?: string };
     if (!jd || typeof jd !== "string" || jd.trim().length < 20) {

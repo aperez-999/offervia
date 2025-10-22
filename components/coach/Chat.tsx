@@ -232,6 +232,21 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         signal: ctrl.signal,
       });
 
+      // NEW: show toast when daily/hourly/minute caps hit
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        const retry = res.headers.get("Retry-After");
+        const mins = retry ? Math.ceil(Number(retry) / 60) : null;
+        toast({
+          title: data?.error || "Rate limit reached",
+          description: mins ? `Try again in ~${mins} min.` : "Please try again later.",
+          variant: "destructive",
+        });
+        setController(null);
+        setSending(false);
+        return;
+      }
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const reply: string = data?.content || "";

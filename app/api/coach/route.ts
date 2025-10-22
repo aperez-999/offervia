@@ -11,6 +11,34 @@ interface ChatMessage {
 }
 
 export async function POST(req: Request) {
+  // ---- Rate limit (coach) ----
+  try {
+    const mod = await import("@/lib/rate-limit");
+    const enforceRateLimit = (mod as any).enforceRateLimit as
+      | ((kind: string, req: Request, limits: any) => Promise<any>)
+      | undefined;
+
+    if (enforceRateLimit) {
+      const rl = await enforceRateLimit("coach", req, {
+        perMinute: 8,
+        perHour: 100,
+        perDay: 300,
+      });
+      const limited =
+        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
+      if (limited) {
+        const retry =
+          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
+        return NextResponse.json(
+          { error: "Rate limit reached. Please try again soon." },
+          { status: 429, headers: { "Retry-After": String(retry) } }
+        );
+      }
+    }
+  } catch {
+    // no-op: if rate-limit module can’t be loaded, don’t block the request
+  }
+
   try {
     const { mode, messages } = (await req.json()) as {
       mode: CoachMode;

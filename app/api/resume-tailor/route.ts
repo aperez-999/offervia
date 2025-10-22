@@ -56,6 +56,33 @@ async function extractFromPdf(buffer: Buffer): Promise<string> {
 
 /* ---------------- Route ---------------- */
 export async function POST(req: Request) {
+  // ---- Rate limit (resume-tailor) ----
+  try {
+    const mod = await import("@/lib/rate-limit");
+    const enforceRateLimit = (mod as any).enforceRateLimit as
+      | ((kind: string, req: Request, limits: any) => Promise<any>)
+      | undefined;
+
+    if (enforceRateLimit) {
+      const rl = await enforceRateLimit("resume-tailor", req, {
+        perMinute: 4,
+        perDay: 75,
+      });
+      const limited =
+        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
+      if (limited) {
+        const retry =
+          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
+        return NextResponse.json(
+          { error: "Rate limit reached. Please try again soon." },
+          { status: 429, headers: { "Retry-After": String(retry) } }
+        );
+      }
+    }
+  } catch {
+    // no-op
+  }
+
   try {
     const contentType = req.headers.get("content-type") || "";
 

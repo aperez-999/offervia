@@ -11,19 +11,76 @@ export default function ContactPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "ok" | "err">("idle");
+  const [errMsg, setErrMsg] = useState<string>("");
 
-  async function onSubmit(e: React.FormEvent) {
+  // honeypot (bots will fill it; humans won't)
+  const [website, setWebsite] = useState("");
+
+  function validate() {
+    const n = name.trim();
+    const e = email.trim();
+    const m = message.trim();
+    if (!n || !e || !m) {
+      setErrMsg("Please include your name, email, and a message.");
+      return false;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) {
+      setErrMsg("Please enter a valid email address.");
+      return false;
+    }
+    if (m.length > 5000) {
+      setErrMsg("Message is too long (max 5000 characters).");
+      return false;
+    }
+    return true;
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitting(true);
+    if (submitting) return;
     setStatus("idle");
+    setErrMsg("");
+
+    if (!validate()) {
+      setStatus("err");
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      console.log({ name, email, message });
-      await new Promise((r) => setTimeout(r, 700));
-      setStatus("ok");
-      setName("");
-      setEmail("");
-      setMessage("");
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          subject: `Feedback from ${name.trim()}`,
+          message: message.trim(),
+          website, // hidden honeypot
+        }),
+      });
+
+      if (res.ok) {
+        setStatus("ok");
+        setName("");
+        setEmail("");
+        setMessage("");
+        setWebsite("");
+      } else {
+        let serverMsg = "Something went wrong. Please try again.";
+        try {
+          const j = await res.json();
+          if (j?.error) serverMsg = String(j.error);
+        } catch {}
+        if (res.status === 429) {
+          const ra = res.headers.get("Retry-After");
+          serverMsg = `You're sending messages too fast. Try again in ${ra ?? "a few"} seconds.`;
+        }
+        setErrMsg(serverMsg);
+        setStatus("err");
+      }
     } catch {
+      setErrMsg("Network error. Please check your connection and try again.");
       setStatus("err");
     } finally {
       setSubmitting(false);
@@ -72,7 +129,7 @@ export default function ContactPage() {
             <p>
               {status === "ok"
                 ? "Thanks for reaching out — we’ll get back to you soon."
-                : "Something went wrong. Please try again."}
+                : errMsg || "Something went wrong. Please try again."}
             </p>
           </div>
         )}
@@ -89,6 +146,8 @@ export default function ContactPage() {
             placeholder="Your name"
             required
             disabled={submitting}
+            name="name"
+            autoComplete="name"
           />
           <InputField
             label="Email"
@@ -100,19 +159,34 @@ export default function ContactPage() {
             placeholder="you@example.com"
             required
             disabled={submitting}
+            name="email"
+            autoComplete="email"
           />
         </div>
 
         {/* Message */}
         <TextareaField
-            label="Message"
-            id="contact-message"
-            icon={<MessageSquareText className="h-4 w-4" />}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="How can we help?"
-            required
-            disabled={submitting}
+          label="Message"
+          id="contact-message"
+          icon={<MessageSquareText className="h-4 w-4" />}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="How can we help?"
+          required
+          disabled={submitting}
+          name="message"
+        />
+
+        {/* Honeypot (hidden) */}
+        <input
+          type="text"
+          name="website"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          className="hidden"
+          aria-hidden="true"
         />
 
         {/* Submit */}
