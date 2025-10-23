@@ -13,7 +13,18 @@ type Deal = {
   title: string;
   desc: string;
   url: string;
-  category: "AI" | "Dev Tools" | "Productivity" | "Cloud";
+  category:
+    | "AI"
+    | "Dev Tools"
+    | "Productivity"
+    | "Cloud"
+    | "Design"
+    | "Learning"
+    | "Engineering"
+    | "Collaboration"
+    | "STEM Tools"
+    | "Career"
+    | "Coding";
   requiresEdu?: boolean;
   percentOff?: number;
   notes?: string;
@@ -34,7 +45,7 @@ const DEALS: Deal[] = [
     id: "github-student-pack",
     vendor: "GitHub",
     title: "Student Developer Pack",
-    desc: "Free access to popular dev tools, credits, and learning resources.",
+    desc: "Free access to popular dev tools, cloud credits, and learning resources.",
     url: "https://education.github.com/pack",
     category: "Dev Tools",
     requiresEdu: true,
@@ -43,9 +54,9 @@ const DEALS: Deal[] = [
     id: "figma-edu",
     vendor: "Figma",
     title: "Figma Education",
-    desc: "Professional plan for students & educators—design, whiteboarding.",
+    desc: "Professional plan for students & educators—design, prototype, and collaborate.",
     url: "https://www.figma.com/education/",
-    category: "Productivity",
+    category: "Design",
     requiresEdu: true,
     percentOff: 100,
   },
@@ -53,31 +64,126 @@ const DEALS: Deal[] = [
     id: "jetbrains-edu",
     vendor: "JetBrains",
     title: "IDEs for Students",
-    desc: "Free professional IDE licenses while you’re a student.",
-    url: "https://www.jetbrains.com/community/education/",
+    desc: "Professional JetBrains IDEs (like IntelliJ, PyCharm, WebStorm) free for students.",
+    url: "https://www.jetbrains.com/community/education/#students",
     category: "Dev Tools",
     requiresEdu: true,
   },
   {
-    id: "openai-edu-tips",
-    vendor: "AI Tools",
-    title: "Popular EDU-friendly AI tool picks",
-    desc: "A handy list of AI tools many campuses allow—with tips to use responsibly.",
-    url: "https://github.com/",
-    category: "AI",
+    id: "google-cloud-student",
+    vendor: "Google Cloud",
+    title: "Google Cloud for Students",
+    desc: "Get $50–$100 in cloud credits and access to Google Cloud training paths.",
+    url: "https://cloud.google.com/edu/students",
+    category: "Cloud",
+    requiresEdu: true,
   },
   {
-    id: "aws-educate",
-    vendor: "AWS",
-    title: "AWS Educate",
-    desc: "Free cloud learning resources and promo credits for students.",
-    url: "https://aws.amazon.com/education/awseducate/",
+    id: "microsoft-azure-student",
+    vendor: "Microsoft Azure",
+    title: "Azure for Students",
+    desc: "Free $100 credit and 25+ Azure services for students, no credit card required.",
+    url: "https://azure.microsoft.com/en-us/free/students/",
     category: "Cloud",
+    requiresEdu: true,
+  },
+  {
+    id: "canva-edu",
+    vendor: "Canva",
+    title: "Canva for Education",
+    desc: "Free Pro features for teachers and students to create stunning visuals easily.",
+    url: "https://www.canva.com/education/",
+    category: "Design",
+    requiresEdu: true,
+  },
+  {
+    id: "wolfram-alpha",
+    vendor: "Wolfram Alpha",
+    title: "Wolfram Alpha Pro for Students",
+    desc: "Get advanced problem-solving tools and step-by-step explanations with discounts.",
+    url: "https://www.wolframalpha.com/pro/",
+    category: "STEM Tools",
+    requiresEdu: false,
+  },
+  {
+    id: "autodesk-edu",
+    vendor: "Autodesk",
+    title: "Autodesk Education Access",
+    desc: "Free access to AutoCAD, Fusion 360, Revit, Maya, and more design tools.",
+    url: "https://www.autodesk.com/education/edu-software/overview",
+    category: "Engineering",
+    requiresEdu: true,
+  },
+  {
+    id: "notion-ai-trial",
+    vendor: "AI Tools",
+    title: "Notion AI (Free Trial)",
+    desc: "Try Notion AI to summarize, brainstorm, and write faster directly in your notes.",
+    url: "https://www.notion.so/product/ai",
+    category: "AI",
+    requiresEdu: false,
+  },
+  {
+    id: "replit-edu",
+    vendor: "Replit",
+    title: "Replit Hacker Plan for Students",
+    desc: "Get Replit’s premium plan free through the GitHub Student Pack for online coding.",
+    url: "https://replit.com/site/github-students",
+    category: "Coding",
+    requiresEdu: true,
+  },
+  {
+    id: "coursera-edu",
+    vendor: "Coursera",
+    title: "Coursera for Students",
+    desc: "Free access to online courses, certificates, and career-ready learning paths.",
+    url: "https://www.coursera.org/career-academy/programs/learning-program-students-ig5jd",
+    category: "Learning",
+    requiresEdu: true,
+  },
+  {
+    id: "edu-ai-tools",
+    vendor: "Red Hat",
+    title: "Popular EDU-Friendly AI Tools",
+    desc: "A curated list of AI study and writing tools that universities often allow.",
+    url: "https://www.redhat.com/en/engage/implement-mlops-processes-help-teams-collaborate-checklist?sc_cid=RHCTN0250000436781&gad_source=1&gad_campaignid=22134705836&gbraid=0AAAAADsbVMTbUScRwCNjnA72kfnHI0VH2&gclid=CjwKCAjwpOfHBhAxEiwAm1SwEgGSLAAolOmC0TbUrC65twxtldo-skM9mOtKUFTGEF9nyFnVmKZAhRoC05UQAvD_BwE",
+    category: "AI",
+    requiresEdu: false,
+  },
+  {
+    id: "slack-student",
+    vendor: "Slack",
+    title: "Slack for Student Teams",
+    desc: "Free workspace upgrades for student groups collaborating on projects.",
+    url: "https://slack.com/education",
+    category: "Collaboration",
+    requiresEdu: true,
+  },
+  {
+    id: "todoist-edu",
+    vendor: "Todoist",
+    title: "Todoist Premium for Students",
+    desc: "Free upgrade to organize assignments, projects, and personal tasks.",
+    url: "https://www.todoist.com/pricing",
+    category: "Productivity",
     requiresEdu: true,
   },
 ];
 
-const CATS = ["All", "AI", "Dev Tools", "Productivity", "Cloud"] as const;
+const CATS = [
+  "All",
+  "AI",
+  "Dev Tools",
+  "Productivity",
+  "Cloud",
+  "Design",
+  "Learning",
+  "Engineering",
+  "Collaboration",
+  "STEM Tools",
+  "Career",
+  "Coding",
+] as const;
 
 export default function StudentsPage() {
   const [q, setQ] = useState("");
@@ -97,102 +203,102 @@ export default function StudentsPage() {
   }, [q, cat]);
 
   return (
-      <div className="space-y-6">
-        <section>
-          <h1 className="text-2xl font-semibold text-foreground">
-            Student Exclusives
-          </h1>
-          <p className="mt-1 text-sm text-foreground/70">
-            Verified discounts and perks for students. Look for the{" "}
-            <span className="inline-flex items-center gap-1">
-              <ShieldCheck className="h-3 w-3 text-emerald-500" />
-              <span>“.edu required”</span>
-            </span>{" "}
-            badge where applicable.
-          </p>
-        </section>
+    <div className="space-y-6">
+      <section>
+        <h1 className="text-2xl font-semibold text-foreground">
+          Student Exclusives
+        </h1>
+        <p className="mt-1 text-sm text-foreground/70">
+          Verified discounts and perks for students. Look for the{" "}
+          <span className="inline-flex items-center gap-1">
+            <ShieldCheck className="h-3 w-3 text-emerald-500" />
+            <span>“.edu required”</span>
+          </span>{" "}
+          badge where applicable.
+        </p>
+      </section>
 
-        {/* Controls */}
-        <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            {CATS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCat(c)}
-                className={`rounded-full px-3 py-1 text-sm border transition ${
-                  cat === c
-                    ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
-                    : "border-border hover:bg-foreground/[0.06] text-foreground/80"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-          <Input
-            placeholder="Search deals…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="w-full sm:w-72 bg-background/80 text-foreground border-border"
-          />
-        </section>
-
-        {/* Grid */}
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((d) => (
-            <Card
-              key={d.id}
-              className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+      {/* Controls */}
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+          {CATS.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCat(c)}
+              className={`rounded-full px-3 py-1 text-sm border transition ${
+                cat === c
+                  ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
+                  : "border-border hover:bg-foreground/[0.06] text-foreground/80"
+              }`}
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-foreground">{d.vendor}</CardTitle>
-                  {d.requiresEdu && (
-                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 inline-flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3" />
-                      .edu required
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription className="text-foreground/70">
-                  {d.title}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-foreground/80">{d.desc}</p>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-foreground/60">
-                    {typeof d.percentOff === "number" ? `${d.percentOff}% off` : ""}
-                  </div>
-                  <Button
-                    asChild
-                    className="bg-indigo-600 text-white hover:bg-indigo-500"
-                  >
-                    <a href={d.url} target="_blank" rel="noopener noreferrer">
-                      View <ExternalLink className="ml-1 h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              {c}
+            </button>
           ))}
-        </section>
+        </div>
+        <Input
+          placeholder="Search deals…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="w-full sm:w-72 bg-background/80 text-foreground border-border"
+        />
+      </section>
 
-        {/* Tip box */}
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardContent className="flex items-start gap-3 p-4">
-            <GraduationCap className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            <div>
-              <div className="text-sm font-medium text-foreground">
-                Pro tip
+      {/* Grid */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((d) => (
+          <Card
+            key={d.id}
+            className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+          >
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-foreground">{d.vendor}</CardTitle>
+                {d.requiresEdu && (
+                  <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" />
+                    .edu required
+                  </Badge>
+                )}
               </div>
-              <div className="text-sm text-foreground/70">
-                Many vendors verify via a .edu email or SheerID. If you’ve graduated,
-                check alumni options—some schools keep email forwarding active.
+              <CardDescription className="text-foreground/70">
+                {d.title}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col h-full">
+              <div className="flex-1 space-y-3">
+                <p className="text-sm text-foreground/80">{d.desc}</p>
               </div>
+              <div className="flex items-center justify-between mt-4 pt-2">
+                <div className="text-xs text-foreground/60">
+                  {typeof d.percentOff === "number" ? `${d.percentOff}% off` : ""}
+                </div>
+                <Button
+                  asChild
+                  className="bg-indigo-600 text-white hover:bg-indigo-500"
+                >
+                  <a href={d.url} target="_blank" rel="noopener noreferrer">
+                    View <ExternalLink className="ml-1 h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </section>
+
+      {/* Tip box */}
+      <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <CardContent className="flex items-start gap-3 p-4">
+          <GraduationCap className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <div>
+            <div className="text-sm font-medium text-foreground">Pro tip</div>
+            <div className="text-sm text-foreground/70">
+              Many vendors verify via a .edu email or SheerID. If you’ve graduated,
+              check alumni options—some schools keep email forwarding active.
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import type { Metadata } from "next";
 import AuthGuard from "@/components/AuthGuard";
 import ScannerPanel from "@/components/scanner/ScannerPanel";
