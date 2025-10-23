@@ -1,9 +1,52 @@
 "use client";
 
+import type { Metadata } from "next";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, MessageSquareText, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { InputField, TextareaField } from "@/components/ui/FormFields";
+
+export const metadata: Metadata = {
+  title: "Contact Offervia – Feedback & Support",
+  description:
+    "Get in touch with Offervia for feedback, support, or questions about our AI resume builder and job tailoring tools.",
+  keywords: [
+    "AI resume builder",
+    "job description scanner",
+    "resume tailoring",
+    "career coach",
+    "interview preparation",
+    "Offervia",
+    "contact",
+    "support",
+    "feedback"
+  ],
+  openGraph: {
+    title: "Contact Offervia – Feedback & Support",
+    description:
+      "Get in touch with Offervia for feedback, support, or questions about our AI resume builder and job tailoring tools.",
+    url: "https://offervia.com/contact",
+    siteName: "Offervia",
+    images: [
+      {
+        url: "https://offervia.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Offervia – AI Resume Builder"
+      }
+    ],
+    locale: "en_US",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Offervia – Feedback & Support",
+    description:
+      "Get in touch with Offervia for feedback, support, or questions about our AI resume builder and job tailoring tools.",
+    images: ["https://offervia.com/og-image.png"],
+    creator: "@offervia"
+  }
+};
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -97,7 +140,7 @@ export default function ContactPage() {
         className="mb-8 text-center"
       >
         <h1 className="text-3xl font-semibold tracking-tight text-foreground dark:text-white">
-          Contact Offervia
+          Contact Offervia – AI Resume Builder Support
         </h1>
         <p className="mt-2 text-sm text-muted-foreground dark:text-white">
           Have feedback or questions? We’d love to hear from you.
