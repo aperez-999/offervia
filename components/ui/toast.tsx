@@ -23,13 +23,16 @@ export type ToastProps = {
 }
 
 const toastVariants = cva(
-  "pointer-events-auto relative w-full rounded-md border p-4 pr-10 shadow-sm transition-colors",
+  // ✅ Use theme-aware tokens
+  "pointer-events-auto relative w-full rounded-md border p-4 pr-10 shadow-sm transition-colors " +
+    "bg-background text-foreground border-border",
   {
     variants: {
       variant: {
-        default: "bg-white border-gray-200 text-gray-900",
+        default:
+          "bg-background text-foreground border-border shadow-sm",
         destructive:
-          "destructive group border-red-200 bg-red-50 text-red-700"
+          "border-red-300/60 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700/50"
       }
     },
     defaultVariants: {
@@ -40,13 +43,17 @@ const toastVariants = cva(
 
 export function Toast({ title, description, variant = "default" }: ToastProps) {
   return (
-    <div className={cn(toastVariants({ variant }))} role="status" aria-live="polite">
+    <div
+      className={cn(toastVariants({ variant }))}
+      role="status"
+      aria-live="polite"
+    >
       {title ? <div className="text-sm font-medium">{title}</div> : null}
       {description ? (
-        <div className="mt-1 text-sm text-gray-600">{description}</div>
+        <div className="mt-1 text-sm opacity-80">{description}</div>
       ) : null}
       <button
-        className="absolute right-2 top-2 rounded p-1 text-gray-500 hover:bg-gray-100"
+        className="absolute right-2 top-2 rounded p-1 text-foreground/60 hover:bg-foreground/[0.06]"
         aria-label="Close"
         data-close="true"
       >

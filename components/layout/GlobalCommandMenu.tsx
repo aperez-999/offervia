@@ -30,6 +30,8 @@ import {
   Moon,
   Sun,
   Monitor,
+  Mail,
+  Rocket,
   Command as CmdIcon,
 } from "lucide-react";
 
@@ -41,17 +43,20 @@ const NAV_ITEMS: Nav[] = [
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
+  { label: "Templates", href: "/templates", icon: Mail },
   { label: "Resources", href: "/resources", icon: BookOpen },
   { label: "Student Exclusives", href: "/students", icon: GraduationCap },
+  { label: "Contact", href: "/contact", icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Profile", href: "/profile", icon: UserRound },
+  { label: "Coming Soon", href: "/upcoming", icon: Rocket },
 ];
 
 export default function GlobalCommandMenu() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const supabase = useMemo(() => getBrowserSupabase(), []);
 
   // ⌘K / Ctrl+K to open
@@ -96,6 +101,7 @@ export default function GlobalCommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
 
+          {/* Navigation */}
           <CommandGroup heading="Navigate">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
               <CommandItem key={href} onSelect={() => go(href)}>
@@ -107,6 +113,7 @@ export default function GlobalCommandMenu() {
 
           <CommandSeparator />
 
+          {/* Quick Actions */}
           <CommandGroup heading="Quick actions">
             <CommandItem onSelect={() => go("/resume")}>
               <FileText className="mr-2 h-4 w-4" />
@@ -127,6 +134,7 @@ export default function GlobalCommandMenu() {
 
           <CommandSeparator />
 
+          {/* Theme Switching */}
           <CommandGroup heading="Theme">
             <CommandItem onSelect={() => setTheme("light")}>
               <Sun className="mr-2 h-4 w-4" />
@@ -147,6 +155,7 @@ export default function GlobalCommandMenu() {
 
           <CommandSeparator />
 
+          {/* Account */}
           <CommandGroup heading="Account">
             <CommandItem onSelect={() => go("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
