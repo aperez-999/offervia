@@ -7,10 +7,9 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import AuthLayout from "@/components/auth/AuthLayout";
 import LoginForm from "./_form";
 import Link from "next/link";
-import { Github, Linkedin } from "lucide-react";
+import { Linkedin } from "lucide-react";
 
-// NOTE: LinkedIn is "linkedin_oidc" in Supabase
-type OAuthProvider = "google" | "github" | "linkedin_oidc";
+type OAuthProvider = "google" | "linkedin_oidc";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -78,17 +77,6 @@ export default function LoginPage() {
             <path fill="#4CAF50" d="M24 45c5.166 0 9.86-1.977 13.409-5.197l-6.198-5.237C29.024 36.488 26.671 37 24 37c-5.241 0-9.709-3.355-11.303-8H6.27l-6.2 4.785C3.895 39.981 13.076 45 24 45z" />
             <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.36 4.012-5.125 7-9.303 7-5.241 0-9.709-3.355-11.303-8H6.27l-6.2 4.785C3.895 39.981 13.076 45 24 45c12.15 0 22-9.85 22-22 0-1.477-.153-2.918-.389-4.417z" />
           </svg>
-        </button>
-
-        {/* GitHub */}
-        <button
-          type="button"
-          aria-label="Sign in with GitHub"
-          onClick={() => startOAuth("github")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
-          title="Sign in with GitHub"
-        >
-          <Github className="h-4 w-4 text-gray-900 dark:text-white" aria-hidden="true" />
         </button>
 
         {/* LinkedIn (OIDC) */}

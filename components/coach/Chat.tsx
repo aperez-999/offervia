@@ -73,6 +73,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   const [input, setInput] = useState("");
   const [showJump, setShowJump] = useState(false);
   const [controller, setController] = useState<AbortController | null>(null);
+  const [responseMode, setResponseMode] = useState<"brief" | "detailed">("brief");
 
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -223,7 +224,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       const trimmedHistory = messages
         .slice(-MAX_CONTEXT_TURNS)
         .map((m) => ({ role: m.role, content: m.content }));
-      const payload = { mode, messages: [system, ...trimmedHistory, { role: "user", content }] };
+      const payload = { mode, responseMode, messages: [system, ...trimmedHistory, { role: "user", content }] };
 
       const res = await fetch("/api/coach", {
         method: "POST",
@@ -308,9 +309,38 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   return (
     <Card className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
       <CardHeader>
-        <CardTitle className="text-foreground">{MODE_LABELS[mode]} Mode</CardTitle>
-        <div className="text-sm text-foreground/70">
-          {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-foreground">{MODE_LABELS[mode]} Mode</CardTitle>
+            <div className="text-sm text-foreground/70">
+              {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-foreground/60">Response:</span>
+            <div className="flex rounded-lg border border-border bg-background/50 p-1">
+              <button
+                onClick={() => setResponseMode("brief")}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  responseMode === "brief"
+                    ? "bg-indigo-600 text-white"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                Brief
+              </button>
+              <button
+                onClick={() => setResponseMode("detailed")}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  responseMode === "detailed"
+                    ? "bg-indigo-600 text-white"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                Detailed
+              </button>
+            </div>
+          </div>
         </div>
       </CardHeader>
 
@@ -529,6 +559,9 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                       )}
                       <div className="flex-1">
                         <MessageBubble role={m.role} content={m.content} />
+                        {m.role === "assistant" && (
+                          <p className="text-[11px] text-foreground/50 mt-1">💬 Mode: {responseMode}</p>
+                        )}
                         <div
                           className={
                             "mt-1 flex items-center justify-between text-[11px] text-foreground/50 " +
