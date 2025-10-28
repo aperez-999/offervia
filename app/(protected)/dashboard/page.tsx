@@ -452,7 +452,7 @@ export default function DashboardPage() {
                 <div className="text-xs text-foreground/70">{nextAction.desc}</div>
               </div>
               <Link href={nextAction.href}>
-                <Button className="w-full sm:w-auto bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
+                <Button className="w-full sm:w-auto cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
                   {nextAction.cta}
                 </Button>
               </Link>

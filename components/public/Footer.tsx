@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Linkedin, Twitter, Github, InstagramIcon } from "lucide-react";
+import { Linkedin, Twitter, Github, MessageCircleIcon } from "lucide-react";
 
 const YEAR = new Date().getFullYear();
 
@@ -39,6 +39,7 @@ export default function Footer() {
           <a
             href="https://www.linkedin.com/in/aperezrivero/"
             aria-label="LinkedIn"
+            target="_blank"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border bg-background text-foreground hover:bg-foreground/[0.06] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             rel="noopener noreferrer"
           >
@@ -47,6 +48,7 @@ export default function Footer() {
           <a
             href="https://x.com/aperez_999"
             aria-label="Twitter / X"
+            target="_blank"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border bg-background text-foreground hover:bg-foreground/[0.06] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             rel="noopener noreferrer"
           >
@@ -55,18 +57,20 @@ export default function Footer() {
           <a
             href="https://github.com/aperez-999"
             aria-label="GitHub"
+            target="_blank"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border bg-background text-foreground hover:bg-foreground/[0.06] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             rel="noopener noreferrer"
           >
             <Github className="h-4 w-4" />
           </a>
           <a
-            href="https://www.instagram.com/aperezzz/"
-            aria-label="Instagram"
+            href="https://discord.com/users/505408019035586562"
+            aria-label="Discord"
+            target="_blank"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border bg-background text-foreground hover:bg-foreground/[0.06] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             rel="noopener noreferrer"
           >
-            <InstagramIcon className="h-4 w-4" />
+            <MessageCircleIcon className="h-4 w-4" />
           </a>
         </div>
 
