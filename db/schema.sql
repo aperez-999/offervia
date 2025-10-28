@@ -1,1 +1,0 @@
--- TODO: Apply the exact schema from offervia-spec.json (do not alter column names)

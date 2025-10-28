@@ -1,205 +1,161 @@
-0) Elevator pitch
+# 🧠 Offervia — Your AI Co-Pilot From Application to Offer
 
-Offervia — Your AI co-pilot from application to offer.
-A student-friendly web app that helps students and early professionals tailor resumes to job descriptions, scan JDs for keywords, prep interviews with an AI coach, and track applications in a clean dashboard — all on a free stack (Groq + Supabase + Next.js + Vercel).
+**Offervia** is an AI-powered web app that helps students and early professionals navigate the job search — from tailoring resumes to tracking applications — all in one clean, secure, and free platform.
 
-1) Core features (MVP)
+Built with 💜 by **PerezDev** (Alejandro Perez-Rivero), leveraging **Groq + Supabase + Next.js** to deliver a fast, modern, privacy-focused experience.
 
-	•	Resume Tailor: paste a JD → generate tailored bullets/summary + ATS keyword match.
-	•	JD Scanner: highlights required skills, missing keywords, seniority, location, visa hints.
-	•	AI Career Coach: chat mode for behavioral/technical Q&A, STAR structuring.
-	•	Job Tracker: CRUD table with status (Applied / Interviewing / Take-Home / Offer / Rejected), follow-up date, notes.
-	•	Insights (v1.1): weekly recap (“You applied to 12 roles; follow up on 4.”).
+---
 
-2) Tech stack (free tiers only)
+## 🚀 Elevator Pitch
 
-	•	Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui.
-	•	Auth + DB: Supabase (Auth, Postgres, Row Level Security).
-	•	AI: Groq API (e.g., llama-3.1-70b-versatile) — no paid keys.
-	•	Deployment: Vercel.
-	•	Form/State: React Hook Form + Zod.
-	•	Analytics (optional): PostHog free plan.
-	•	Lint/Format: ESLint + Prettier + Husky (pre-commit).
+> **Offervia — Your AI Co-Pilot From Application to Offer**  
+> Tailor resumes, analyze job descriptions, chat with an AI interview coach, and track your job hunt — all powered by open AI technology and modern web infrastructure.
 
-3) High-level architecture
+---
 
+## ✨ Core Features (MVP)
+
+| Feature | Description |
+|----------|--------------|
+| 🎯 **Resume Tailor** | Paste a job description → instantly get tailored resume bullets, summary, and ATS keyword match. |
+| 🧠 **JD Scanner** | Highlights required skills, missing keywords, seniority level, and visa hints. |
+| 💬 **AI Career Coach** | Chat for behavioral, technical, or STAR-based interview prep. |
+| 📊 **Job Tracker** | Manage job applications with CRUD, filters, and follow-up reminders. |
+| 📈 **Weekly Insights** | Auto-recap: “You applied to 12 roles; follow up on 4.” |
+
+---
+
+## 🧩 Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | Next.js 14 (App Router) + TypeScript + Tailwind CSS + shadcn/ui |
+| **Backend / Auth / DB** | Supabase (Auth, Postgres, RLS) |
+| **AI Layer** | Groq API (`llama-3.1-70b-versatile`) |
+| **Deployment** | Vercel (Free Tier) |
+| **State / Forms** | React Hook Form + Zod |
+| **Analytics (optional)** | PostHog (Free Plan) |
+| **Tooling** | ESLint + Prettier + Husky (pre-commit) |
+
+---
+
+## 🧱 Architecture Overview
 Next.js (app/)
-  ├─ Public routes: landing (/) + auth (/login, /signup)
-  ├─ Protected routes: /dashboard, /tracker, /coach, /resume
-API routes (app/api/*) server actions & edge handlers
-Supabase: auth, tables (applications, prompts, messages)
-Groq: server-side calls only (no API key in client)
+├─ Public:      /, /login, /signup
+├─ Protected:   /dashboard, /tracker, /coach, /resume
+├─ API routes:  /api/ai/*, /api/tracker
+│
+├─ Supabase:    Auth + Tables (applications, prompts, messages)
+└─ Groq:        Server-side inference only
 
-4) Recommended file structure
+---
 
+## 🗂 Recommended Folder Structure
 offervia/
 ├─ app/
-│  ├─ (public)/
-│  │  ├─ page.tsx                     # Landing
-│  │  └─ pricing/page.tsx             # (future)
-│  ├─ (auth)/
-│  │  ├─ login/page.tsx
-│  │  └─ signup/page.tsx
-│  ├─ (protected)/
-│  │  ├─ dashboard/page.tsx
-│  │  ├─ resume/page.tsx              # Resume Tailor
-│  │  ├─ scanner/page.tsx             # JD Scanner
-│  │  ├─ coach/page.tsx               # AI Coach chat
-│  │  └─ tracker/page.tsx             # Job Tracker
-│  ├─ api/
-│  │  ├─ ai/tailor/route.ts           # POST -> tailored bullets/summary
-│  │  ├─ ai/scan/route.ts             # POST -> JD keyword extraction
-│  │  ├─ ai/coach/route.ts            # POST -> chat turns
-│  │  └─ tracker/route.ts             # GET/POST/PATCH/DELETE (REST-ish)
+│  ├─ (public)/            → Landing, Pricing
+│  ├─ (auth)/              → Login, Signup
+│  ├─ (protected)/         → Dashboard, Resume, Scanner, Coach, Tracker
+│  ├─ api/ai/              → Tailor / Scan / Coach endpoints
+│  ├─ api/tracker/         → CRUD job applications
 │  └─ layout.tsx
-├─ components/
-│  ├─ ui/*                            # shadcn
-│  ├─ navbar.tsx, sidebar.tsx
-│  ├─ forms/*
-│  ├─ charts/*
-│  └─ table/*
-├─ lib/
-│  ├─ supabase/server.ts              # server client
-│  ├─ supabase/client.ts              # browser client (protected pages)
-│  ├─ auth.ts                         # middleware helpers
-│  ├─ groq.ts                         # Groq fetch wrapper
-│  └─ prompts.ts                      # system prompts for AI
-├─ db/
-│  ├─ schema.sql                      # Supabase SQL
-│  └─ policies.sql                    # RLS policies
-├─ styles/
-│  └─ globals.css
+│
+├─ components/             → UI (shadcn), layout, forms, tables
+├─ lib/                    → Supabase, Groq, Auth utilities
+├─ db/                     → schema.sql + policies.sql
+├─ styles/                 → globals.css
 ├─ .env.example
 ├─ package.json
-├─ README.md
-└─ LICENSE
+└─ README.md
 
-5) Database schema (Supabase SQL)
+---
 
--- Users via auth.users
+## 🧮 Database Schema (Supabase)
 
-create table if not exists public.applications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  company text not null,
-  role text not null,
-  source text check (source in ('LinkedIn','Handshake','Indeed','Company','Other')) default 'Other',
-  resume_used text check (resume_used in ('Frontend','Full-Stack','AI','General')) default 'Full-Stack',
-  status text check (status in ('Applied','Interviewing','Assessment','Offer','Rejected')) default 'Applied',
-  date_applied date default now(),
-  follow_up_date date,
-  notes text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
+**Tables**
 
-create table if not exists public.messages (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  role text check (role in ('system','user','assistant')) not null,
-  content text not null,
-  meta jsonb default '{}'::jsonb,
-  created_at timestamptz default now()
-);
+- `applications` — job applications per user  
+- `messages` — AI chat history  
+- `prompts` — system prompts per user  
 
-create table if not exists public.prompts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  kind text check (kind in ('tailor','scan','coach')) not null,
-  system_prompt text not null,
-  created_at timestamptz default now()
-);
+**Row Level Security**
 
--- RLS
-alter table public.applications enable row level security;
-alter table public.messages enable row level security;
-alter table public.prompts enable row level security;
+Each table enforces `auth.uid()` ownership for full data privacy.
 
-create policy "apps_owner" on public.applications
-for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+---
 
-create policy "msgs_owner" on public.messages
-for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+## ⚙️ API Endpoints
 
-create policy "prompts_owner" on public.prompts
-for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+| Endpoint | Method | Description |
+|-----------|---------|-------------|
+| `/api/ai/tailor` | `POST` | Returns tailored bullets & summary for a resume |
+| `/api/ai/scan` | `POST` | Extracts required skills and keyword gaps |
+| `/api/ai/coach` | `POST` | Chat-based Q&A with AI coach |
+| `/api/tracker` | `GET/POST/PATCH/DELETE` | CRUD operations for job applications |
 
-6) API spec (minimal)
+---
 
-	•	POST /api/ai/tailor
-Body: { resumeBullets: string[], jobDescription: string }
-Resp: { tailoredBullets: string[], summary: string, keywords: string[] }
-	•	POST /api/ai/scan
-Body: { jobDescription: string }
-Resp: { requiredSkills: string[], missingFromResume: string[], level: 'intern'|'newgrad'|'other' }
-	•	POST /api/ai/coach
-Body: { messages: {role:'user'|'assistant'|'system', content:string}[] }
-Resp: { messages: [...], suggestions?: string[] }
-	•	GET /api/tracker → list user applications
-	•	POST /api/tracker → create application
-	•	PATCH /api/tracker?id=... → update fields
-	•	DELETE /api/tracker?id=... → delete
+## 🔐 Environment Variables
 
-All API routes: server-only; validate input with Zod; require Supabase auth session.
+| Variable | Description |
+|-----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase key |
+| `GROQ_API_KEY` | Server-only Groq API key |
+| `GROQ_MODEL` | Model version |
+| `NEXT_PUBLIC_APP_NAME` | “Offervia” |
+| `NEXT_PUBLIC_SITE_URL` | Base domain |
+| `SMTP_*` | Gmail SMTP config |
+| `CONTACT_*` | Contact email routing |
 
-7) Environment variables (.env.local)
+---
 
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=          # only on server (Vercel env), not exposed
-GROQ_API_KEY=
-NEXT_PUBLIC_APP_NAME=Offervia
+## 💬 AI System Prompts
 
-8) System prompts (guardrails—non-hallucination)
+| Module | Role |
+|---------|------|
+| 🧩 **Tailor** | Rewrites resume bullets concisely with measurable impact, using JD keywords. |
+| 🔍 **Scanner** | Extracts only factual skills & keywords without hallucination. |
+| 🎙 **Coach** | Acts as an interview coach using STAR; brief answers by default. |
 
-	•	Tailor (system): “You rewrite bullets concisely with measurable impact, only using details present in the user’s original bullet or the provided job description. Do not invent tools, companies, or metrics. Prefer active verbs; 1 line each; include role-relevant keywords exactly as in the JD.”
-	•	Scan (system): “Extract keywords/skills from the JD; return arrays only. Do not add technologies not present unless they are obvious synonyms (e.g., JavaScript ↔ JS).”
-	•	Coach (system): “Interview coach for students/early professionals. Use STAR. Keep answers under 120 words unless asked. No confidential or private info. If unsure, ask a clarifying question.”
+---
 
-9) Setup — local
+## 🧰 Local Setup
 
-# 1) create app
-npx create-next-app@latest offervia --ts --eslint --tailwind --app
-
-# 2) install deps
+```bash
+# 1️⃣ Clone project
+git clone https://github.com/perezdev/offervia.git
 cd offervia
-pnpm add @supabase/supabase-js zod react-hook-form @tanstack/react-table
-pnpm add -D @types/node @types/react @types/react-dom husky lint-staged
 
-# 3) shadcn
-pnpm dlx shadcn-ui@latest init
-pnpm dlx shadcn-ui@latest add button input textarea card table alert dialog
+# 2️⃣ Install dependencies
+npm install
 
-# 4) env
-cp .env.example .env.local  # fill with Supabase + Groq keys
+# 3️⃣ Configure environment
+cp .env.example .env.local
+# Fill Supabase + Groq credentials
 
-# 5) db: create tables (Supabase SQL editor) using /db/schema.sql + policies.sql
+# 4️⃣ Setup Supabase schema
+# Paste /db/schema.sql into Supabase SQL Editor
 
-# 6) run
+# 5️⃣ Start dev server
 pnpm dev
 
-10) Deployment — Vercel
-	•	Connect GitHub repo, set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, GROQ_API_KEY in Vercel project settings.
-	•	Protect /dashboard et al. with server-side session check (redirect to /login if not signed in).
+## Deployment (Vercel)
+	1.	Connect GitHub repo → Vercel
+	2.	Add all .env variables under Project → Settings → Environment Variables
+	3.	Deploy production build
 
-11) Pages to implement (MVP)
-	•	/ Landing: hero “From application to offer”, CTA → Sign up.
-	•	/dashboard: quick actions (Tailor, Scan, Coach, Tracker); weekly summary.
-	•	/resume: textarea JD + bullets list → “Tailor” results side-by-side diff + copy buttons.
-	•	/scanner: paste JD → keyword chips, “missing skills”.
-	•	/coach: chat with prebuilt prompts (Behavioral, Frontend, Backend, System Design).
-	•	/tracker: table with filters, inline edit; add application modal.
+vercel --prod
 
-12) Acceptance criteria (MVP is “done” when…)
-	•	Auth works; protected pages redirect unauth’d users.
-	•	Tailor returns 3–6 concise bullets + summary section; no hallucinated tech.
-	•	Scanner returns arrays with 90%+ precision on obvious keywords.
-	•	Coach answers in STAR under 120 words by default.
-	•	Tracker supports full CRUD, filtered by user_id via RLS.
-	•	CI passes: typecheck, lint, build.
+Credits & License
 
-⸻
+Developed by PerezDev
+Created by Alejandro Perez-Rivero
+© 2025 Offervia / PerezDev — All Rights Reserved
+Licensed under the MIT License
 
-13) License
 
-MIT — © 2025 PerezDev (Alejandro Perez-Rivero)
+
+
+Built for students, by a student — empowering every career journey.”

@@ -21,11 +21,11 @@ export const metadata: Metadata = {
     title: "Career AI Coach – Interview Prep and Job Strategy",
     description:
       "Get personalized career coaching with Offervia's AI career coach. Practice interviews, get job strategy advice, and accelerate your career growth.",
-    url: "https://offervia.com/coach",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/coach`,
     siteName: "Offervia",
     images: [
       {
-        url: "https://offervia.com/og-image.png",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "Offervia – AI Resume Builder"
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "Career AI Coach – Interview Prep and Job Strategy",
     description:
       "Get personalized career coaching with Offervia's AI career coach. Practice interviews, get job strategy advice, and accelerate your career growth.",
-    images: ["https://offervia.com/og-image.png"],
+    images: [`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`],
     creator: "@offervia"
   }
 };

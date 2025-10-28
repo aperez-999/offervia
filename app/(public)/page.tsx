@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     title: "Offervia – Smarter Career Tools",
     description:
       "AI-powered resume tailoring, job scan insights, and interview coaching to help you land your dream job.",
-    url: "https://offervia.com",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
     siteName: "Offervia",
     images: [
       {
-        url: "https://offervia.com/og-image.png",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "Offervia – AI Resume Builder"
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: "Offervia – AI Resume Builder & Job Tailoring",
     description:
       "Build your dream career with AI-powered resume tailoring and job scanning tools.",
-    images: ["https://offervia.com/og-image.png"],
+    images: [`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`],
     creator: "@offervia"
   }
 };
