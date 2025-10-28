@@ -310,10 +310,10 @@ export default function ResumeWizard() {
   /* -------------------------------- Render -------------------------------- */
 
   return (
-    <div className="space-y-6 w-full max-w-[2000px] mx-auto px-2 md:px-4">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-[2000px] mx-auto px-2 md:px-4">
       {/* Header */}
       <section>
-        <h1 className="text-2xl font-semibold text-foreground">Resume Tailor</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Follow the steps to tailor your resume to a job posting.
         </p>
@@ -321,11 +321,11 @@ export default function ResumeWizard() {
 
       <Progress value={progress} className="h-2" />
 
-      {/* Force a wide two-column page layout */}
-      <div className="grid grid-cols-[18rem_minmax(0,1fr)] gap-8">
+      {/* Responsive two-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 lg:gap-8">
         <WizardSidebar steps={steps} current={step} />
 
-        <div className="space-y-6 min-w-0">
+        <div className="space-y-4 sm:space-y-6 min-w-0">
           {/* Step 1 */}
           {step === 1 && (
             <StepContainer title="Upload Resume" description="Upload a PDF or DOCX file.">
@@ -757,7 +757,7 @@ function WizardSidebar({
   current: number;
 }) {
   return (
-    <aside className="w-72 shrink-0">
+    <aside className="w-full lg:w-72 shrink-0">
       <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
           Wizard
@@ -777,7 +777,7 @@ function WizardSidebar({
               >
                 <span
                   className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-xs",
+                    "flex h-6 w-6 items-center justify-center rounded-full text-xs flex-shrink-0",
                     active ? "bg-indigo-600 text-white" : "bg-foreground/10 text-foreground/80"
                   )}
                 >

@@ -307,21 +307,21 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   }, [lastUserMessage, send, sending]);
 
   return (
-    <Card className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-foreground">{MODE_LABELS[mode]} Mode</CardTitle>
+    <Card className="flex h-[60vh] sm:h-[70vh] min-h-[400px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <CardHeader className="pb-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-foreground text-lg sm:text-xl">{MODE_LABELS[mode]} Mode</CardTitle>
             <div className="text-sm text-foreground/70">
               {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs text-foreground/60">Response:</span>
             <div className="flex rounded-lg border border-border bg-background/50 p-1">
               <button
                 onClick={() => setResponseMode("brief")}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "brief"
                     ? "bg-indigo-600 text-white"
                     : "text-foreground/70 hover:text-foreground"
@@ -331,7 +331,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
               </button>
               <button
                 onClick={() => setResponseMode("detailed")}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "detailed"
                     ? "bg-indigo-600 text-white"
                     : "text-foreground/70 hover:text-foreground"
@@ -600,24 +600,26 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         )}
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between gap-2">
-        <ClearChatButton
-          disabled={!userId || loading || messages.length === 0}
-          onConfirm={async () => {
-            if (!userId) return;
-            const { error } = await getBrowserSupabase()
-              .from("messages")
-              .delete()
-              .eq("user_id", userId)
-              .eq("mode", mode);
-            if (!error) {
-              toast({ title: "Conversation cleared" });
-              setMessages([]);
-            } else {
-              toast({ title: "Failed to clear", variant: "destructive" });
-            }
-          }}
-        />
+      <CardFooter className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
+        <div className="flex items-center justify-between sm:justify-start gap-2">
+          <ClearChatButton
+            disabled={!userId || loading || messages.length === 0}
+            onConfirm={async () => {
+              if (!userId) return;
+              const { error } = await getBrowserSupabase()
+                .from("messages")
+                .delete()
+                .eq("user_id", userId)
+                .eq("mode", mode);
+              if (!error) {
+                toast({ title: "Conversation cleared" });
+                setMessages([]);
+              } else {
+                toast({ title: "Failed to clear", variant: "destructive" });
+              }
+            }}
+          />
+        </div>
 
         <div className="flex flex-1 items-start gap-2">
           <Textarea
@@ -700,7 +702,7 @@ export default function Chat({ mode = "interview" as CoachMode }: { mode?: Coach
   const ActiveIcon = getActiveIcon();
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
       <CoachSidebar active={active} onChange={setActive} />
       <section className="min-w-0 flex-1">
         <header className="mb-3 flex items-center gap-2">

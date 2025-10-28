@@ -300,8 +300,8 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           </p>
         </CardContent>
 
-        <CardFooter className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2">
+        <CardFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <Button
               onClick={analyze}
               disabled={loading || jd.trim().length < 20}

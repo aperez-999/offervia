@@ -45,13 +45,13 @@ export default function CoachSidebar({
   onChange: (k: CoachMode) => void;
 }) {
   return (
-    <aside className="w-[280px] shrink-0">
+    <aside className="w-full lg:w-[280px] shrink-0">
       <div className="rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 backdrop-blur-sm dark:ring-black/10">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground/60">
           Modules
         </div>
 
-        <nav className="flex flex-col">
+        <nav className="flex flex-col lg:flex-col">
           {ITEMS.map(({ key, label, desc, icon: Icon }) => {
             const selected = key === active;
             return (
@@ -67,7 +67,7 @@ export default function CoachSidebar({
                 `}
               >
                 <span
-                  className={`grid h-8 w-8 place-items-center rounded-lg border
+                  className={`grid h-8 w-8 place-items-center rounded-lg border flex-shrink-0
                     ${selected
                       ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
                       : "border-border bg-background/80 text-foreground/70"}
@@ -76,17 +76,17 @@ export default function CoachSidebar({
                   <Icon className="h-4 w-4" />
                 </span>
 
-                <span className="flex-1">
+                <span className="flex-1 min-w-0">
                   <span
-                    className={`block text-sm ${selected ? "font-medium text-foreground" : "text-foreground"}`}
+                    className={`block text-sm truncate ${selected ? "font-medium text-foreground" : "text-foreground"}`}
                   >
                     {label}
                   </span>
-                  <span className="block text-xs text-foreground/60">{desc}</span>
+                  <span className="block text-xs text-foreground/60 truncate">{desc}</span>
                 </span>
 
                 <ChevronRight
-                  className={`h-4 w-4 transition-colors
+                  className={`h-4 w-4 transition-colors flex-shrink-0
                     ${selected ? "text-indigo-400" : "text-foreground/30 group-hover:text-foreground/50"}
                   `}
                 />

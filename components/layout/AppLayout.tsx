@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   FileText,
@@ -14,12 +14,15 @@ import {
   GraduationCap,
   Mail,
   Rocket,
+  Menu,
+  X,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import UserMenu from "@/components/layout/UserMenu";
 import GlobalCommandMenu from "@/components/layout/GlobalCommandMenu";
 import Footer from "@/components/public/Footer";
+import { Button } from "@/components/ui/button";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<any> };
 
@@ -40,6 +43,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ✅ Sign-in toast
   useEffect(() => {
@@ -74,6 +78,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Open sidebar</span>
+            </Button>
             <span className="text-lg font-semibold tracking-tight">Offervia</span>
           </div>
 
@@ -87,8 +101,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex-1 w-full">
         <div className="flex gap-6 py-6">
-          {/* Sidebar */}
-          <aside className="w-56 shrink-0">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-56 shrink-0">
             <div className="rounded-xl border border-border bg-background p-3">
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
                 Navigation
@@ -120,13 +134,77 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </aside>
 
+          {/* Mobile Sidebar Overlay */}
+          <AnimatePresence>
+            {sidebarOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+                  onClick={() => setSidebarOpen(false)}
+                />
+                
+                {/* Sidebar */}
+                <motion.aside
+                  initial={{ x: -280 }}
+                  animate={{ x: 0 }}
+                  exit={{ x: -280 }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                  className="fixed left-0 top-0 z-50 h-full w-72 bg-background border-r border-border lg:hidden"
+                >
+                  <div className="flex h-14 items-center justify-between px-4 border-b border-border">
+                    <span className="text-lg font-semibold tracking-tight">Navigation</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <X className="h-5 w-5" />
+                      <span className="sr-only">Close sidebar</span>
+                    </Button>
+                  </div>
+                  
+                  <div className="p-4">
+                    <nav className="space-y-1 text-sm">
+                      {navItems.map((item) => {
+                        const active = pathname === item.href;
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setSidebarOpen(false)}
+                            aria-current={active ? "page" : undefined}
+                            className={[
+                              "flex items-center gap-3 rounded-md px-3 py-2.5 border transition-colors",
+                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
+                              active
+                                ? "border-border bg-foreground/[0.06] font-medium"
+                                : "border-transparent hover:bg-foreground/[0.04]",
+                            ].join(" ")}
+                          >
+                            <Icon className="h-5 w-5 stroke-[1.5]" />
+                            <span className="truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                </motion.aside>
+              </>
+            )}
+          </AnimatePresence>
+
           {/* Page content */}
-          <main className="min-w-0 flex-1">
+          <main className="min-w-0 flex-1 w-full">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="rounded-xl border border-border bg-card p-5 shadow-sm"
+              className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"
             >
               {children}
             </motion.div>

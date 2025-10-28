@@ -206,10 +206,10 @@ export default function DashboardPage() {
   }, [appsThisWeek, recentChats.length]);
 
   return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Greeting */}
         <section>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
             Welcome back,{" "}
             <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
               {friendlyName}
@@ -221,18 +221,18 @@ export default function DashboardPage() {
         </section>
 
         {/* KPIs + Goal/Streak */}
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           <Kpi title="Applications (total)" value={total} />
           <Kpi title="Applications (this week)" value={appsThisWeek} />
           <Kpi title="Interviewing" value={interviewing} />
           <Kpi title="Offers" value={offers} />
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2">
+        <section className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {/* Weekly goal */}
           <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
                   Weekly Goal
                 </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
                   {appsThisWeek}/{weeklyGoalTarget} applications
                 </div>
               </div>
-              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
             </div>
             <Progress
               value={weeklyGoalPct}
@@ -251,18 +251,18 @@ export default function DashboardPage() {
           {/* Streak */}
           <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
                   Streak
                 </div>
-                <div className="mt-1 text-2xl font-semibold text-foreground">
+                <div className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">
                   {streak} day{streak === 1 ? "" : "s"}
                 </div>
                 <p className="mt-1 text-xs text-foreground/60">
                   Keep up the momentum with one small action today.
                 </p>
               </div>
-              <Flame className="h-6 w-6 text-orange-500" />
+              <Flame className="h-6 w-6 text-orange-500 flex-shrink-0" />
             </div>
           </Card>
         </section>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Two-up: Recent Applications + Recent Chats */}
-        <section className="grid gap-4 lg:grid-cols-2">
+        <section className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           {/* Recent Applications */}
           <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
@@ -349,7 +349,7 @@ export default function DashboardPage() {
                           {a.position}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div className="hidden text-xs text-foreground/70 sm:block">
                           {a.applied_on}
                         </div>
@@ -357,6 +357,7 @@ export default function DashboardPage() {
                         <Button
                           asChild
                           variant="outline"
+                          size="sm"
                           className="hidden border-border text-foreground hover:bg-foreground/[0.06] sm:inline-flex"
                         >
                           <Link href="/tracker">Manage</Link>
@@ -443,15 +444,15 @@ export default function DashboardPage() {
                 A tiny push that keeps momentum.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-between gap-3">
-              <div>
+            <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-foreground">
                   {nextAction.title}
                 </div>
                 <div className="text-xs text-foreground/70">{nextAction.desc}</div>
               </div>
               <Link href={nextAction.href}>
-                <Button className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
+                <Button className="w-full sm:w-auto bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
                   {nextAction.cta}
                 </Button>
               </Link>
@@ -466,11 +467,11 @@ export default function DashboardPage() {
 
 function Kpi({ title, value }: { title: string; value: number }) {
   return (
-    <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+    <Card className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60 truncate">
         {title}
       </div>
-      <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
+      <div className="mt-2 text-xl sm:text-2xl font-semibold text-foreground">{value}</div>
     </Card>
   );
 }

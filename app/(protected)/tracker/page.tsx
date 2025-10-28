@@ -636,109 +636,114 @@ export default function TrackerPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead
-                  className="cursor-pointer text-foreground/70"
-                  onClick={() => toggleSort("company")}
-                >
-                  Company <ArrowUpDown className="ml-1 inline h-3 w-3" />
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer text-foreground/70"
-                  onClick={() => toggleSort("position")}
-                >
-                  Position <ArrowUpDown className="ml-1 inline h-3 w-3" />
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer text-foreground/70"
-                  onClick={() => toggleSort("status")}
-                >
-                  Status <ArrowUpDown className="ml-1 inline h-3 w-3" />
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer text-foreground/70"
-                  onClick={() => toggleSort("applied_on")}
-                >
-                  Applied On <ArrowUpDown className="ml-1 inline h-3 w-3" />
-                </TableHead>
-                <TableHead className="text-right text-foreground/70">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+        <div className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10 overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5}>
-                    <div className="animate-pulse space-y-2 p-4">
-                      <div className="h-4 rounded bg-foreground/[0.06]" />
-                      <div className="h-4 rounded bg-foreground/[0.06]" />
-                      <div className="h-4 rounded bg-foreground/[0.06]" />
-                    </div>
-                  </TableCell>
+                  <TableHead
+                    className="cursor-pointer text-foreground/70 whitespace-nowrap"
+                    onClick={() => toggleSort("company")}
+                  >
+                    Company <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer text-foreground/70 whitespace-nowrap"
+                    onClick={() => toggleSort("position")}
+                  >
+                    Position <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer text-foreground/70 whitespace-nowrap"
+                    onClick={() => toggleSort("status")}
+                  >
+                    Status <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer text-foreground/70 whitespace-nowrap hidden sm:table-cell"
+                    onClick={() => toggleSort("applied_on")}
+                  >
+                    Applied On <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  </TableHead>
+                  <TableHead className="text-right text-foreground/70 whitespace-nowrap">Actions</TableHead>
                 </TableRow>
-              ) : paged.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <div className="py-16 text-center">
-                      <p className="mb-3 text-sm text-foreground/70">
-                        No matching applications.
-                      </p>
-                      <Button onClick={openCreate}>+ Add Job</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paged.map((app) => (
-                  <TableRow key={app.id} className="hover:bg-foreground/[0.03]">
-                    <TableCell className="font-medium text-foreground">
-                      {app.company}
-                    </TableCell>
-                    <TableCell className="text-foreground">
-                      {app.position}
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => cycleStatus(app)}
-                        title="Click to cycle status"
-                        className="cursor-pointer"
-                      >
-                        <StatusBadge s={app.status} busy={updatingId === app.id} />
-                      </button>
-                    </TableCell>
-                    <TableCell className="text-foreground/80">{app.applied_on}</TableCell>
-                    <TableCell className="space-x-2 text-right">
-                      <Button
-                        variant="outline"
-                        onClick={() => openEdit(app)}
-                        className="border-border text-foreground hover:bg-foreground/[0.06]"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => confirmDelete(app.id)}
-                        className="border-border text-foreground hover:bg-foreground/[0.06]"
-                      >
-                        Delete
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <div className="animate-pulse space-y-2 p-4">
+                        <div className="h-4 rounded bg-foreground/[0.06]" />
+                        <div className="h-4 rounded bg-foreground/[0.06]" />
+                        <div className="h-4 rounded bg-foreground/[0.06]" />
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : paged.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <div className="py-16 text-center">
+                        <p className="mb-3 text-sm text-foreground/70">
+                          No matching applications.
+                        </p>
+                        <Button onClick={openCreate}>+ Add Job</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paged.map((app) => (
+                    <TableRow key={app.id} className="hover:bg-foreground/[0.03]">
+                      <TableCell className="font-medium text-foreground max-w-[120px] sm:max-w-none">
+                        <div className="truncate">{app.company}</div>
+                      </TableCell>
+                      <TableCell className="text-foreground max-w-[150px] sm:max-w-none">
+                        <div className="truncate">{app.position}</div>
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => cycleStatus(app)}
+                          title="Click to cycle status"
+                          className="cursor-pointer"
+                        >
+                          <StatusBadge s={app.status} busy={updatingId === app.id} />
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-foreground/80 hidden sm:table-cell">{app.applied_on}</TableCell>
+                      <TableCell className="space-x-1 sm:space-x-2 text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEdit(app)}
+                          className="border-border text-foreground hover:bg-foreground/[0.06]"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => confirmDelete(app.id)}
+                          className="border-border text-foreground hover:bg-foreground/[0.06]"
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-foreground/60">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-xs text-foreground/60 text-center sm:text-left">
             Page {page} of {totalPages} • {view.length} result{view.length === 1 ? "" : "s"}
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               className="border-border text-foreground hover:bg-foreground/[0.06]"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
@@ -747,6 +752,7 @@ export default function TrackerPage() {
             </Button>
             <Button
               variant="outline"
+              size="sm"
               className="border-border text-foreground hover:bg-foreground/[0.06]"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
