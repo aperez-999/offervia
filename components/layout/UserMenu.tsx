@@ -112,7 +112,7 @@ export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
 
         <DropdownMenuItem
           onClick={onSignOut}
-          className="text-rose-600 focus:text-rose-700"
+          className="text-rose-600 cursor-pointer focus:text-rose-700"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
