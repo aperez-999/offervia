@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { Lock } from "lucide-react";
@@ -10,7 +10,6 @@ type Status = "checking" | "ready" | "invalid" | "updating";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = useMemo(() => createClientComponentClient(), []);
 
   const [status, setStatus] = useState<Status>("checking");
@@ -21,40 +20,32 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let timeout: any;
     const subRef: { unsub?: () => void } = {};
+    let timeout: ReturnType<typeof setTimeout> | undefined;
 
     async function bootstrap() {
-      // Case 1: PKCE code flow via query param
-      const code = searchParams.get("code");
-      if (code) {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error && data?.session) {
-          setStatus("ready");
-          return;
-        }
-        setStatus("invalid");
-        return;
-      }
-
-      // Case 2: Recovery session flow (no tokens in URL). Try existing session first.
+      // ✅ Check if there's already a session (e.g., redirected from Supabase recovery link)
       const { data } = await supabase.auth.getSession();
       if (data?.session) {
         setStatus("ready");
         return;
       }
 
-      // Listen briefly for auth events that indicate a valid recovery session.
-      const { data: listener } = supabase.auth.onAuthStateChange((event: any) => {
-        if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+      // ✅ Listen for Supabase PASSWORD_RECOVERY event
+      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" && session) {
+          setStatus("ready");
+        } else if (event === "SIGNED_IN" && session) {
           setStatus("ready");
         }
       });
+
       subRef.unsub = () => listener.subscription.unsubscribe();
 
+      // ⏳ Fallback timeout in case no session is detected
       timeout = setTimeout(() => {
         setStatus((prev) => (prev === "checking" ? "invalid" : prev));
-      }, 1200);
+      }, 3000);
     }
 
     bootstrap();
@@ -69,6 +60,7 @@ export default function ResetPasswordPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
     if (pw.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -77,13 +69,16 @@ export default function ResetPasswordPage() {
       setError("Passwords do not match.");
       return;
     }
+
     setStatus("updating");
     const { error } = await supabase.auth.updateUser({ password: pw });
+
     if (error) {
       setError(error.message || "Failed to reset password. Try again.");
       setStatus("ready");
       return;
     }
+
     await supabase.auth.signOut();
     router.replace("/login?reset=1");
   }
@@ -91,30 +86,41 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayout>
       <div className="mb-5 text-center">
-        <h1 className="text-xl font-semibold text-gray-900">Reset your password</h1>
-        <p className="mt-1 text-sm text-gray-600">You will be securely signed out after reset.</p>
+        <h1 className="text-xl font-semibold text-foreground">Reset your password</h1>
+        <p className="mt-1 text-sm text-foreground/70">
+          You will be securely signed out after reset.
+        </p>
       </div>
 
       {status === "checking" && (
-        <div className="py-6 text-center text-sm text-gray-600">Validating link…</div>
+        <div className="py-6 text-center text-sm text-foreground/70">
+          Validating link…
+        </div>
       )}
 
       {status === "invalid" && (
         <div className="space-y-3">
-          <div className="rounded-md border border-rose-200 dark:border-rose-800/30 bg-rose-50 dark:bg-rose-950/20 p-3 text-sm text-rose-700 dark:text-rose-300">Invalid or expired reset link.</div>
-          <a href="/forgot-password" className="block text-center text-sm text-foreground/70 underline hover:text-foreground">Return to Forgot Password</a>
+          <div className="rounded-md border border-rose-200 dark:border-rose-800/30 bg-rose-50 dark:bg-rose-950/20 p-3 text-sm text-rose-700 dark:text-rose-300">
+            Invalid or expired reset link.
+          </div>
+          <a
+            href="/forgot-password"
+            className="block text-center text-sm text-foreground/70 underline hover:text-foreground"
+          >
+            Return to Forgot Password
+          </a>
         </div>
       )}
 
       {status !== "checking" && status !== "invalid" && (
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-1">
-            <label className="text-sm font-medium text-gray-700">New Password</label>
+            <label className="text-sm font-medium text-foreground">New Password</label>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
               <input
                 type={showPw ? "text" : "password"}
-                className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]"
+                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
                 required
@@ -122,19 +128,20 @@ export default function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowPw((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-foreground/70 underline"
               >
                 {showPw ? "Hide" : "Show"}
               </button>
             </div>
           </div>
+
           <div className="grid gap-1">
-            <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+            <label className="text-sm font-medium text-foreground">Confirm Password</label>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
               <input
                 type={showPw2 ? "text" : "password"}
-                className="w-full rounded border p-2 pl-8 pr-16 focus:outline-none focus:ring-2 focus:ring-[#645CFF] focus:border-[#645CFF]"
+                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                 value={pw2}
                 onChange={(e) => setPw2(e.target.value)}
                 required
@@ -142,14 +149,16 @@ export default function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowPw2((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-foreground/70 underline"
               >
                 {showPw2 ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
-          {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
+          {error && (
+            <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+          )}
 
           <button
             type="submit"
@@ -159,7 +168,7 @@ export default function ResetPasswordPage() {
             {status === "updating" && (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             )}
-            <span>Update Password</span>
+            <span className="cursor-pointer">Update Password</span>
           </button>
         </form>
       )}

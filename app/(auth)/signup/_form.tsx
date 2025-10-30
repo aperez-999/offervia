@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const schema = z
   .object({
@@ -24,6 +25,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function SignupForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const {
     register,
@@ -52,7 +54,15 @@ export default function SignupForm() {
 
     await supabase.auth.getSession();
 
-    let dest = "/dashboard?signup=1";
+    // Success: show verification toast immediately
+    toast({
+      title: "Account created successfully — check your email to confirm your account.",
+      description:
+        "A confirmation email has been sent to your inbox. Please verify your email before signing in.",
+    });
+
+    // Default destination is login after email verification
+    let dest = "/login";
     try {
       const lsNext = localStorage.getItem("offervia:postAuthRedirect");
       if (lsNext) {
@@ -61,8 +71,17 @@ export default function SignupForm() {
       }
     } catch {}
 
-    router.replace(dest);
-    router.refresh();
+    if (dest !== "/login") {
+      // If there is an explicit redirect path, go immediately
+      router.replace(dest);
+      router.refresh();
+    } else {
+      // Otherwise, give user a moment to read the toast, then go to login
+      setTimeout(() => {
+        router.replace("/login");
+        router.refresh();
+      }, 3000);
+    }
   };
 
   return (
