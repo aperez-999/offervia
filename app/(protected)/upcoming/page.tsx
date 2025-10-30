@@ -32,7 +32,7 @@ export default function UpcomingPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       <h1 className="text-2xl font-semibold flex items-center gap-2">
         <Rocket className="h-5 w-5 text-indigo-500" /> Coming Soon
       </h1>

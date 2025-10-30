@@ -88,10 +88,10 @@ export default function ContactPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3"
+                className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg flex items-center gap-3"
               >
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                <p className="text-green-800 font-medium">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <p className="text-emerald-800 dark:text-emerald-200 font-medium">
                   Message sent successfully! We&apos;ll get back to you soon.
                 </p>
               </motion.div>
@@ -101,10 +101,10 @@ export default function ContactPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3"
+                className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/30 rounded-lg flex items-center gap-3"
               >
-                <AlertCircle className="h-5 w-5 text-red-600" />
-                <p className="text-red-800 font-medium">
+                <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                <p className="text-rose-800 dark:text-rose-200 font-medium">
                   Failed to send message. Please try again.
                 </p>
               </motion.div>

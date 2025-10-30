@@ -101,8 +101,8 @@ export default function ResetPasswordPage() {
 
       {status === "invalid" && (
         <div className="space-y-3">
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Invalid or expired reset link.</div>
-          <a href="/forgot-password" className="block text-center text-sm text-gray-700 underline">Return to Forgot Password</a>
+          <div className="rounded-md border border-rose-200 dark:border-rose-800/30 bg-rose-50 dark:bg-rose-950/20 p-3 text-sm text-rose-700 dark:text-rose-300">Invalid or expired reset link.</div>
+          <a href="/forgot-password" className="block text-center text-sm text-foreground/70 underline hover:text-foreground">Return to Forgot Password</a>
         </div>
       )}
 
@@ -149,7 +149,7 @@ export default function ResetPasswordPage() {
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
 
           <button
             type="submit"

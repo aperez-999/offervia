@@ -225,7 +225,7 @@ export default function SettingsPage() {
 
   return (
     <AuthGuard>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <section>
           <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
               <Button
                 variant="outline"
                 disabled
-                className="cursor-not-allowed border-red-300/40 text-red-400 hover:bg-red-500/10"
+                className="cursor-not-allowed border-rose-300/40 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                 title="Coming soon"
               >
                 Delete account (coming soon)

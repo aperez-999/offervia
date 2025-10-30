@@ -68,7 +68,7 @@ export default function LoginForm() {
           />
         </div>
         {errors.email && (
-          <p className="text-sm text-red-600">{errors.email.message}</p>
+          <p className="text-sm text-rose-600 dark:text-rose-400">{errors.email.message}</p>
         )}
       </div>
 
@@ -96,11 +96,11 @@ export default function LoginForm() {
           </a>
         </div>
         {errors.password && (
-          <p className="text-sm text-red-600">{errors.password.message}</p>
+          <p className="text-sm text-rose-600 dark:text-rose-400">{errors.password.message}</p>
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
 
       <button
         type="submit"

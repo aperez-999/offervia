@@ -78,7 +78,7 @@ export default function SignupForm() {
             {...register("name")}
           />
         </div>
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="text-sm text-rose-600 dark:text-rose-400">{errors.name.message}</p>}
       </div>
 
       <div className="space-y-1">
@@ -92,7 +92,7 @@ export default function SignupForm() {
             {...register("email")}
           />
         </div>
-        {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+        {errors.email && <p className="text-sm text-rose-600 dark:text-rose-400">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-1">
@@ -113,7 +113,7 @@ export default function SignupForm() {
             {showPw ? "Hide" : "Show"}
           </button>
         </div>
-        {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
+        {errors.password && <p className="text-sm text-rose-600 dark:text-rose-400">{errors.password.message}</p>}
       </div>
 
       <div className="space-y-1">
@@ -134,10 +134,10 @@ export default function SignupForm() {
             {showPw2 ? "Hide" : "Show"}
           </button>
         </div>
-        {errors.confirm && <p className="text-sm text-red-600">{errors.confirm.message}</p>}
+        {errors.confirm && <p className="text-sm text-rose-600 dark:text-rose-400">{errors.confirm.message}</p>}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
 
       <button
         type="submit"
