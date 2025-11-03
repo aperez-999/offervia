@@ -236,13 +236,10 @@ export default function ResumeWizard() {
         if (resumeFile.type.startsWith("text")) {
           const txt = await resumeFile.text();
           // eslint-disable-next-line no-console
-          console.log("Uploaded resume:", (txt || "").slice(0, 200));
         } else {
           // eslint-disable-next-line no-console
-          console.log("Uploaded resume file:", resumeFile.name);
         }
         // eslint-disable-next-line no-console
-        console.log("Template mode:", templateMode);
       } catch {}
 
       const fd = new FormData();
@@ -258,7 +255,6 @@ export default function ResumeWizard() {
         // Also send parsed text when available so the API can prefer it
         fd.append("resumeText", resumeText);
         // eslint-disable-next-line no-console
-        console.log("Resume content sent:", resumeText.slice(0, 200));
       }
 
       const resp = await postForm<{ content?: string; error?: string }>(

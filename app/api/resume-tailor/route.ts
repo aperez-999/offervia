@@ -89,30 +89,18 @@ async function extractFromPdf(buffer: Buffer): Promise<string> {
 /* ---------------- Route ---------------- */
 export async function POST(req: Request) {
   // ---- Rate limit (resume-tailor) ----
-  try {
-    const mod = await import("@/lib/rate-limit");
-    const enforceRateLimit = (mod as any).enforceRateLimit as
-      | ((kind: string, req: Request, limits: any) => Promise<any>)
-      | undefined;
+  const { checkRateLimitForApi } = await import("@/lib/rate-limit");
+  const rl = await checkRateLimitForApi(req, "resume_tailor", {
+    perMinute: 4,
+    perDay: 75,
+  });
 
-    if (enforceRateLimit) {
-      const rl = await enforceRateLimit("resume-tailor", req, {
-        perMinute: 4,
-        perDay: 75,
-      });
-      const limited =
-        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
-      if (limited) {
-        const retry =
-          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
-        return NextResponse.json(
-          { error: "Rate limit reached. Please try again soon." },
-          { status: 429, headers: { "Retry-After": String(retry) } }
-        );
-      }
-    }
-  } catch {
-    // no-op
+  if (!rl.ok) {
+    const retry = rl.retryAfterSeconds || 60;
+    return NextResponse.json(
+      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
+    );
   }
 
   try {
@@ -190,7 +178,6 @@ export async function POST(req: Request) {
     
     // Debug log in development to verify resume content
     if (process.env.NODE_ENV === "development") {
-      console.log("Resume content received (first 200 chars):", resumeText.slice(0, 200));
     }
 
     // Optional company context block

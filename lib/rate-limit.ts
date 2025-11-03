@@ -1,9 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getServiceSupabase } from "./supabase/service";
 
 export type RateWindow = { ms: number; limit: number };
 export type RateResult =
   | { ok: true }
-  | { ok: false; retryAfterSeconds: number; reason: string };
+  | { ok: false; retryAfterSeconds: number; reason: string; allowed?: boolean; limitReached?: boolean };
 
 export function getIpUa(req: Request) {
   const h = new Headers(req.headers);
@@ -14,13 +15,92 @@ export function getIpUa(req: Request) {
 }
 
 /**
+ * Helper function for API routes that need rate limiting.
+ * Gets the current user from request cookies, sets up Supabase, and enforces rate limits.
+ */
+export async function checkRateLimitForApi(
+  req: Request,
+  kind: "coach" | "scanner" | "resume_tailor" | "job-scan",
+  customLimits?: {
+    perMinute?: number;
+    perHour?: number;
+    perDay?: number;
+  }
+): Promise<RateResult & { userId?: string }> {
+  try {
+    // Get authenticated user from request cookies
+    const { createServerClient } = await import("@supabase/ssr");
+    
+    // Read cookies from request headers
+    const cookieHeader = req.headers.get("cookie") || "";
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(";").forEach((cookie) => {
+      const [name, ...rest] = cookie.trim().split("=");
+      if (name) {
+        cookies[name] = rest.join("=");
+      }
+    });
+    
+    const supabaseAuth = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookies[name];
+          },
+          set() {
+            // In API routes, we can't set cookies directly
+            // The client will handle session refresh
+          },
+          remove() {
+            // In API routes, we can't remove cookies directly
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    
+    if (authError || !user || !user.id) {
+      return { ok: false, retryAfterSeconds: 60, reason: "unauthorized", allowed: false };
+    }
+
+    const userId = user.id;
+    const supabase = getServiceSupabase();
+    const { ip, ua } = getIpUa(req);
+
+    // Convert custom limits to windows format
+    const windows: RateWindow[] = customLimits
+      ? [
+          ...(customLimits.perMinute ? [{ ms: 60_000, limit: customLimits.perMinute }] : []),
+          ...(customLimits.perHour ? [{ ms: 3_600_000, limit: customLimits.perHour }] : []),
+          ...(customLimits.perDay ? [{ ms: 86_400_000, limit: customLimits.perDay }] : []),
+        ]
+      : [];
+
+    const result = await enforceRateLimit(supabase, userId, kind, {
+      windows: windows.length > 0 ? windows : undefined,
+      ip,
+      ua,
+    });
+
+    return { ...result, userId };
+  } catch (err) {
+    console.error("Rate limit check failed:", err);
+    // Fail closed for production safety
+    return { ok: false, retryAfterSeconds: 60, reason: "error", allowed: false, limitReached: true };
+  }
+}
+
+/**
  * Checks recent counts in request_events and inserts a new row if allowed.
  * Keep it simple (no transactions) — good enough for beta.
  */
 export async function enforceRateLimit(
   supabase: SupabaseClient,
   userId: string,
-  kind: "coach" | "scanner" | "resume_tailor",
+  kind: "coach" | "scanner" | "resume_tailor" | "job-scan",
   options?: {
     windows?: RateWindow[]; // e.g. [{ ms: 60_000, limit: 10 }, { ms: 86_400_000, limit: 200 }]
     ip?: string | null;

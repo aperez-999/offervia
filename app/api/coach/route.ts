@@ -12,31 +12,19 @@ interface ChatMessage {
 
 export async function POST(req: Request) {
   // ---- Rate limit (coach) ----
-  try {
-    const mod = await import("@/lib/rate-limit");
-    const enforceRateLimit = (mod as any).enforceRateLimit as
-      | ((kind: string, req: Request, limits: any) => Promise<any>)
-      | undefined;
+  const { checkRateLimitForApi } = await import("@/lib/rate-limit");
+  const rl = await checkRateLimitForApi(req, "coach", {
+    perMinute: 8,
+    perHour: 100,
+    perDay: 300,
+  });
 
-    if (enforceRateLimit) {
-      const rl = await enforceRateLimit("coach", req, {
-        perMinute: 8,
-        perHour: 100,
-        perDay: 300,
-      });
-      const limited =
-        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
-      if (limited) {
-        const retry =
-          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
-        return NextResponse.json(
-          { error: "Rate limit reached. Please try again soon." },
-          { status: 429, headers: { "Retry-After": String(retry) } }
-        );
-      }
-    }
-  } catch {
-    // no-op: if rate-limit module can’t be loaded, don’t block the request
+  if (!rl.ok) {
+    const retry = rl.retryAfterSeconds || 60;
+    return NextResponse.json(
+      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
+    );
   }
 
   try {

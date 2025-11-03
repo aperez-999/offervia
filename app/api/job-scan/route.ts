@@ -4,30 +4,18 @@ import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
 
 export async function POST(req: Request) {
   // ---- Rate limit (job-scan) ----
-  try {
-    const mod = await import("@/lib/rate-limit");
-    const enforceRateLimit = (mod as any).enforceRateLimit as
-      | ((kind: string, req: Request, limits: any) => Promise<any>)
-      | undefined;
+  const { checkRateLimitForApi } = await import("@/lib/rate-limit");
+  const rl = await checkRateLimitForApi(req, "job-scan", {
+    perMinute: 6,
+    perDay: 150,
+  });
 
-    if (enforceRateLimit) {
-      const rl = await enforceRateLimit("job-scan", req, {
-        perMinute: 6,
-        perDay: 150,
-      });
-      const limited =
-        rl && (rl.ok === false || rl.allowed === false || rl.limitReached === true);
-      if (limited) {
-        const retry =
-          typeof rl?.retryAfter === "number" ? rl.retryAfter : 60;
-        return NextResponse.json(
-          { error: "Rate limit reached. Please try again soon." },
-          { status: 429, headers: { "Retry-After": String(retry) } }
-        );
-      }
-    }
-  } catch {
-    // no-op
+  if (!rl.ok) {
+    const retry = rl.retryAfterSeconds || 60;
+    return NextResponse.json(
+      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
+    );
   }
 
   try {
