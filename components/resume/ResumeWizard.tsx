@@ -103,6 +103,7 @@ export default function ResumeWizard() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeSize, setResumeSize] = useState<number>(0);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [resumeText, setResumeText] = useState<string>("");
 
   // Step 2: company targeting
   const [companyName, setCompanyName] = useState("");
@@ -118,6 +119,7 @@ export default function ResumeWizard() {
   const [aiText, setAiText] = useState<string>("");
   const [generating, setGenerating] = useState(false);
   const [templateMode, setTemplateMode] = useState(true);
+  const [showExpanded, setShowExpanded] = useState(false);
 
   // PDF zoom
   const [zoom, setZoom] = useState<"fit" | "110" | "125" | "150">("fit");
@@ -202,6 +204,16 @@ export default function ResumeWizard() {
     setResumeFile(file);
     setResumeSize(file.size);
     setAiText(""); // clear AI output if new file
+    // Try to store text for simple text files; PDFs/DOCX will be handled server-side
+    try {
+      if (file.type.startsWith("text")) {
+        file.text().then((txt) => setResumeText(normalizeText(txt))).catch(() => setResumeText(""));
+      } else {
+        setResumeText("");
+      }
+    } catch {
+      setResumeText("");
+    }
   }
 
   function removeFile() {
@@ -218,6 +230,21 @@ export default function ResumeWizard() {
     setGenerating(true);
     setError(null);
     try {
+      // Debug: confirm file and template flag
+      try {
+        // Attempt to preview text if it's a plain text file; otherwise log filename only
+        if (resumeFile.type.startsWith("text")) {
+          const txt = await resumeFile.text();
+          // eslint-disable-next-line no-console
+          console.log("Uploaded resume:", (txt || "").slice(0, 200));
+        } else {
+          // eslint-disable-next-line no-console
+          console.log("Uploaded resume file:", resumeFile.name);
+        }
+        // eslint-disable-next-line no-console
+        console.log("Template mode:", templateMode);
+      } catch {}
+
       const fd = new FormData();
       fd.append("file", resumeFile);
       fd.append("jobDescription", jd);
@@ -227,6 +254,12 @@ export default function ResumeWizard() {
       fd.append("location", location);
       fd.append("companyUrl", companyUrl);
       fd.append("template", templateMode ? "1" : "0");
+      if (resumeText) {
+        // Also send parsed text when available so the API can prefer it
+        fd.append("resumeText", resumeText);
+        // eslint-disable-next-line no-console
+        console.log("Resume content sent:", resumeText.slice(0, 200));
+      }
 
       const resp = await postForm<{ content?: string; error?: string }>(
         "/api/resume-tailor",
@@ -310,6 +343,7 @@ export default function ResumeWizard() {
   /* -------------------------------- Render -------------------------------- */
 
   return (
+    <>
     <div className="space-y-4 sm:space-y-6 w-full max-w-[2000px] mx-auto px-2 md:px-4">
       {/* Header */}
       <section>
@@ -591,29 +625,21 @@ export default function ResumeWizard() {
 
                 {/* Bottom: AI tailored */}
                 <div className="lg:row-span-1 space-y-3 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-foreground">AI Tailored Resume</div>
-                      <p className="text-xs text-foreground/60 truncate">
-                        {targetingSummary
-                          ? `Target: ${targetingSummary}`
-                          : "Editable"}
-                      </p>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-3">
-                      {/* Template toggle */}
-                      <label className="flex items-center gap-2 text-xs text-foreground/70">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-semibold text-foreground">AI Tailored Resume</h2>
+                      <label className="flex items-center gap-2 text-sm">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 accent-indigo-600"
                           checked={templateMode}
                           onChange={(e) => setTemplateMode(e.target.checked)}
+                          className="h-4 w-4 accent-indigo-600"
                           title="When on, the AI returns a clean, sectioned resume template."
                         />
-                        Template output
+                        <span className="text-foreground/70">Template output</span>
                       </label>
-
+                    </div>
+                    <div className="flex items-center flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant="outline"
@@ -621,10 +647,9 @@ export default function ResumeWizard() {
                         className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
                         onClick={() => aiText && download(aiText, "tailored-resume.txt")}
                       >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="mr-1 h-4 w-4" />
                         Download
                       </Button>
-
                       <Button
                         size="sm"
                         variant="outline"
@@ -632,8 +657,19 @@ export default function ResumeWizard() {
                         className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
                         onClick={() => aiText && copy(aiText, "Copied tailored draft")}
                       >
-                        <ClipboardCopy className="mr-2 h-4 w-4" />
+                        <ClipboardCopy className="mr-1 h-4 w-4" />
                         Copy
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={!aiText}
+                        className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => setShowExpanded(true)}
+                        title="Expand output"
+                      >
+                        <Maximize2 className="mr-1 h-4 w-4" />
+                        Expand
                       </Button>
                     </div>
                   </div>
@@ -744,6 +780,21 @@ export default function ResumeWizard() {
         </div>
       </div>
     </div>
+    {showExpanded && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl">
+          <button
+            onClick={() => setShowExpanded(false)}
+            className="absolute right-4 top-4 text-foreground/60 hover:text-foreground"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+          <pre className="whitespace-pre-wrap text-sm text-foreground">{aiText}</pre>
+        </div>
+      </div>
+    )}
+  </>
   );
 }
 
