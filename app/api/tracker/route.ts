@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 /*
 */
 
-function decodeToken(token: string): any | null {
+function decodeToken(token: string): { sub?: string } | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -58,7 +58,7 @@ function badRequest(message: string, details?: unknown, status = 400) {
   return Response.json({ success: false, error: { message, details } }, { status });
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const userId = await getUserIdFromAuthHeader();
   if (!userId) return badRequest("unauthorized", null, 401);
 
@@ -104,12 +104,15 @@ export async function PATCH(req: NextRequest) {
   const url = new URL(req.url);
   const idFromQuery = url.searchParams.get("id");
 
-  let body: any = {};
+  let body: unknown = {};
   try {
     body = await req.json();
-  } catch {}
+  } catch {
+    // Body parsing failed, will use empty object
+  }
 
-  const idValue = idFromQuery ?? body?.id;
+  const bodyId = typeof body === "object" && body !== null && "id" in body ? (body as { id?: unknown }).id : undefined;
+  const idValue = idFromQuery ?? bodyId;
   const parsedId = idSchema.safeParse({ id: idValue });
   if (!parsedId.success) return badRequest("missing or invalid id", parsedId.error.flatten());
 

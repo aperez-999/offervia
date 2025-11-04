@@ -24,7 +24,7 @@ import GlobalCommandMenu from "@/components/layout/GlobalCommandMenu";
 import Footer from "@/components/public/Footer";
 import { Button } from "@/components/ui/button";
 
-type NavItem = { label: string; href: string; icon: React.ComponentType<any> };
+type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

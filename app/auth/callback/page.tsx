@@ -51,9 +51,10 @@ export default function AuthCallbackPage() {
 
         router.replace(next);
         router.refresh();
-      } catch (e: any) {
+      } catch (e: unknown) {
         setStatus("error");
-        setErrorMsg(e?.message || "Unexpected error.");
+        const errorMessage = e instanceof Error ? e.message : "Unexpected error.";
+        setErrorMsg(errorMessage);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

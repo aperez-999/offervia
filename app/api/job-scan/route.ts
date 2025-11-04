@@ -26,21 +26,22 @@ export async function POST(req: Request) {
 
     const groq = getGroqClient();
     const messages = [
-      { role: "system", content: JOB_SCAN_SYSTEM_PROMPT },
-      { role: "user", content: jd.slice(0, 20000) },
-    ] as const;
+      { role: "system" as const, content: JOB_SCAN_SYSTEM_PROMPT },
+      { role: "user" as const, content: jd.slice(0, 20000) },
+    ];
 
     const result = await groq.chat.completions.create({
       model: DEFAULT_GROQ_MODEL,
-      messages: messages as any,
+      messages,
       temperature: 0.2,
       max_tokens: 800,
-    } as any);
+    });
 
-    const content = (result as any)?.choices?.[0]?.message?.content?.trim() || "";
+    const content = (result?.choices?.[0]?.message?.content as string | undefined)?.trim() || "";
     return NextResponse.json({ content });
-  } catch (err: any) {
-    console.error("Job-scan API error:", err?.message || err);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Job-scan API error:", errorMessage);
     return NextResponse.json({ error: "Job scan failed" }, { status: 500 });
   }
 }

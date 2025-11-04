@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     if (now - last < ONE_MIN) {
       return NextResponse.json(
         { error: "You can send one message per minute. Please try again shortly." },
-        { status: 429, headers: { "Retry-After": "60" } as any }
+        { status: 429, headers: { "Retry-After": "60" } }
       );
     }
 
@@ -85,8 +85,9 @@ export async function POST(req: Request) {
     lastByIp.set(ip, now);
 
     return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    console.error("Contact API error:", err?.message || err);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Contact API error:", errorMessage);
     return NextResponse.json(
       { error: "Failed to send your message. Please try again." },
       { status: 500 }

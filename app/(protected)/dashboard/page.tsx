@@ -101,9 +101,9 @@ export default function DashboardPage() {
         .select("id,user_id,company,position,status,applied_on,created_at")
         .eq("user_id", user.id);
 
-      const normalized = (appData || []).map((a: any) => ({
+      const normalized = (appData || []).map((a: Record<string, unknown>) => ({
         ...a,
-        applied_on: a.applied_on
+        applied_on: a.applied_on && typeof a.applied_on === "string"
           ? new Date(a.applied_on).toISOString().slice(0, 10)
           : "",
       })) as Application[];

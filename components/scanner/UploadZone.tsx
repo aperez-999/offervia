@@ -42,9 +42,6 @@ export default function UploadZone({ onFile, fileName, accept = ".pdf,.doc,.docx
       className={`cursor-pointer rounded-lg border p-8 text-center transition-colors ${
         dragOver ? "border-gray-400 bg-gray-50" : "border-gray-200 bg-white"
       }`}
-    {
-      ...({} as any)
-    }
     >
       <input
         ref={inputRef}

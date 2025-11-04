@@ -212,9 +212,9 @@ export default function TrackerPage() {
       setOpen(false);
       resetForm();
       await loadApps();
-    } catch (e: any) {
-      // eslint-disable-next-line no-console
-      console.error(e?.message || e);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      console.error(errorMessage);
       toast({ title: "Failed to save job. Try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
@@ -239,7 +239,6 @@ export default function TrackerPage() {
       .eq("id", pendingDeleteId)
       .eq("user_id", user.id);
     if (error) {
-      // eslint-disable-next-line no-console
       console.error("Delete failed", error.message);
       toast({ title: "Failed to delete job. Try again.", variant: "destructive" });
       return;
@@ -454,7 +453,12 @@ export default function TrackerPage() {
                 className="pl-8 border-border bg-background/80 text-foreground"
               />
             </div>
-            <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v) as any)}>
+            <Select value={String(pageSize)} onValueChange={(v) => {
+              const num = Number(v);
+              if (PAGE_SIZE_OPTIONS.includes(num as typeof PAGE_SIZE_OPTIONS[number])) {
+                setPageSize(num as typeof PAGE_SIZE_OPTIONS[number]);
+              }
+            }}>
               <SelectTrigger className="w-[110px] border-border bg-background/80 text-foreground">
                 <SelectValue placeholder="Rows" />
               </SelectTrigger>
@@ -620,7 +624,11 @@ export default function TrackerPage() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-foreground/70">Filter:</span>
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <Select value={statusFilter} onValueChange={(v) => {
+            if (v === "All" || STATUS_OPTIONS.includes(v as Application["status"])) {
+              setStatusFilter(v as "All" | Application["status"]);
+            }
+          }}>
             <SelectTrigger className="w-40 border-border bg-background/80 text-foreground">
               <SelectValue placeholder="All" />
             </SelectTrigger>

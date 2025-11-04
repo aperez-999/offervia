@@ -32,10 +32,9 @@ import {
   Monitor,
   Mail,
   Rocket,
-  Command as CmdIcon,
 } from "lucide-react";
 
-type Nav = { label: string; href: string; icon: React.ComponentType<any> };
+type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
 const NAV_ITEMS: Nav[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

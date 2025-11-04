@@ -14,7 +14,6 @@ export default function PublicError({
   const { toast } = useToast();
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.error(error);
     toast({
       title: "Something went wrong",

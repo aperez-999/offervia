@@ -39,7 +39,6 @@ export default function BookmarkButton({
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [KEY, id]);
 
   // If parent changes `initial` (e.g. after first render), sync once

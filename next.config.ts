@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse"],
+  eslint: {
+    // Warning: This allows production builds to succeed with ESLint errors
+    // Only use this if you need to deploy immediately
+    ignoreDuringBuilds: false, // Set to true only if absolutely necessary
+  },
+  typescript: {
+    // Warning: This allows production builds to succeed with TypeScript errors
+    // Only use this if you need to deploy immediately
+    ignoreBuildErrors: false, // Set to true only if absolutely necessary
+  },
   async headers() {
     return [
       {

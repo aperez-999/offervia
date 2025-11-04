@@ -111,9 +111,7 @@ export async function POST(req: Request) {
 
     // Company targeting + template flag
     let companyName = "";
-    let roleTitle = "";
-    let location = "";
-    let companyUrl = "";
+    // roleTitle, location, companyUrl removed - not used in current implementation
     let useTemplate = false;
 
     if (contentType.includes("application/json")) {
@@ -122,17 +120,13 @@ export async function POST(req: Request) {
       resumeText = (body?.resumeContent || body?.resumeText || "").toString();
       jobDescription = (body?.jobDescription || "").toString();
       companyName = (body?.companyName || "").toString();
-      roleTitle = (body?.roleTitle || "").toString();
-      location = (body?.location || "").toString();
-      companyUrl = (body?.companyUrl || "").toString();
+      // roleTitle, location, companyUrl removed - not used in current implementation
       useTemplate = !!body?.templateMode || !!body?.template || body?.template === "1";
     } else if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       jobDescription = (form.get("jobDescription") as string) || "";
       companyName = ((form.get("companyName") as string) || "").toString();
-      roleTitle = ((form.get("roleTitle") as string) || "").toString();
-      location = ((form.get("location") as string) || "").toString();
-      companyUrl = ((form.get("companyUrl") as string) || "").toString();
+      // roleTitle, location, companyUrl removed - not used in current implementation
       useTemplate = ((form.get("template") as string) || "") === "1";
 
       // Prefer resumeText if provided; otherwise try the file
@@ -157,9 +151,7 @@ export async function POST(req: Request) {
     jobDescription = normalizeText(jobDescription);
     resumeText = normalizeText(resumeText);
     companyName = normalizeText(companyName);
-    roleTitle = normalizeText(roleTitle);
-    location = normalizeText(location);
-    companyUrl = normalizeText(companyUrl);
+    // roleTitle, location, companyUrl removed - not used in current implementation
 
     // Validation: ensure we have valid resume content
     if (!resumeText || resumeText.trim().length < 100) {
@@ -180,13 +172,7 @@ export async function POST(req: Request) {
     if (process.env.NODE_ENV === "development") {
     }
 
-    // Optional company context block
-    const companyParts: string[] = [];
-    if (companyName) companyParts.push(`Company: ${companyName}`);
-    if (roleTitle) companyParts.push(`Role focus: ${roleTitle}`);
-    if (location) companyParts.push(`Location: ${location}`);
-    if (companyUrl) companyParts.push(`Reference URL: ${companyUrl}`);
-    const companyContext = companyParts.length ? `Company targeting context:\n${companyParts.join("\n")}` : "";
+    // Company context removed - not used in current implementation
 
     // Size budgets (keep payload within free-tier context/TPM limits)
     const JD_MAX_CHARS = 1000;
@@ -257,8 +243,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ content: normalizeText(cleaned) });
-  } catch (err: any) {
-    const msg = err?.message || "Resume tailoring failed";
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
       console.error("Resume-tailor API error: input too large");

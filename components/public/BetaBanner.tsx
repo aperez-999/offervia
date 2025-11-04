@@ -1,27 +1,37 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, Variants } from "framer-motion";
 
 export default function BetaBanner() {
   const prefersReducedMotion = useReducedMotion();
 
-  const container = {
+  // Animation variants for container
+  const container: Variants = {
     hidden: { opacity: 0, y: prefersReducedMotion ? 0 : -6 },
     show: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.45,
-        ease: "easeOut",
+        // Use cubic-bezier array to satisfy Framer's strict types
+        ease: [0.25, 0.1, 0.25, 1],
         when: "beforeChildren",
         staggerChildren: prefersReducedMotion ? 0 : 0.08,
       },
     },
   };
 
-  const line = {
+  // Animation variants for individual lines
+  const line: Variants = {
     hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 4 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.28,
+        ease: [0.25, 0.1, 0.25, 1],
+      },
+    },
   };
 
   return (

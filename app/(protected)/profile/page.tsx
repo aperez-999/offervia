@@ -131,8 +131,9 @@ export default function ProfilePage() {
       await syncProfile({ avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
       toast({ title: "Avatar updated" });
-    } catch (e: any) {
-      console.error(e?.message || e);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      console.error(errorMessage);
       toast({
         title: "Upload failed",
         description: "Check the 'avatars' bucket and Storage policies.",

@@ -3,8 +3,20 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import BetaBanner from "@/components/public/BetaBanner";
+import { useEffect, useRef } from "react";
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const setRate = () => (video.playbackRate = 1.75);
+      video.addEventListener("loadedmetadata", setRate);
+      return () => video.removeEventListener("loadedmetadata", setRate);
+    }
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-background">
       {/* Abstract gradient backdrop: separate light/dark layers, behind content */}
@@ -27,7 +39,7 @@ export default function Hero() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto max-w-3xl text-center"
         >
-          {/* Beta pill — readable in both themes */}
+          {/* Beta pill */}
           <div className="mt-4 sm:mt-4 mx-auto w-fit rounded-full border border-black/5 bg-white/90 px-3 py-1 text-xs font-medium text-indigo-700 shadow-sm dark:border-white/10 dark:bg-neutral-900/80 dark:text-indigo-300">
             Free for Job Seekers • No credit card required
           </div>
@@ -62,17 +74,15 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Video placeholder (drop your file at /public/demo.mp4 and optional poster at /public/hero-poster.png) */}
           <div className="mt-10 rounded-2xl border border-border bg-white/60 p-4 shadow-lg backdrop-blur ring-1 ring-indigo-500/10 dark:bg-neutral-900/40">
             <video
+              ref={videoRef}
               className="aspect-[16/9] w-full rounded-xl border border-dashed border-border object-cover"
               controls
               playsInline
               muted
-              // Replace with your poster or remove the prop
-              poster="#"
             >
-              {/* <source src="/demo.mp4" type="video/mp4" /> */}
+              <source src="/demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>

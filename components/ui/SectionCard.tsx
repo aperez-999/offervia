@@ -24,7 +24,7 @@ type Props = {
 };
 
 export function SectionCard({ children, className, tone = "slate", as = "div", id, title }: Props) {
-  const Comp = as as any;
+  const Comp = as as React.ElementType;
   const base = [
     "rounded-xl border border-white/10 shadow-sm ring-1 ring-white/5",
     "backdrop-blur-sm",

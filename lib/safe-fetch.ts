@@ -1,4 +1,9 @@
-export type SafeFetchErrorCause = "timeout" | "network" | "server" | "client" | "unknown";
+export type SafeFetchErrorCause =
+  | "timeout"
+  | "network"
+  | "server"
+  | "client"
+  | "unknown";
 
 export type SafeFetchResult<T> =
   | { ok: true; data: T; status: number }
@@ -15,12 +20,13 @@ export interface SafeFetchOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: BodyInit | null;
-  timeoutMs?: number;         // default 20000
-  retries?: number;           // default 0 (POSTs usually shouldn't retry)
-  retryDelayMs?: number;      // default 600
+  timeoutMs?: number; // default 20000
+  retries?: number; // default 0
+  retryDelayMs?: number; // default 600
   signal?: AbortSignal | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeFetchJson<T = any>(
   url: string,
   {
@@ -53,12 +59,16 @@ export async function safeFetchJson<T = any>(
           try {
             const json = await res.json();
             msg = json?.error || msg;
-          } catch {}
+          } catch {
+            // ignore JSON parsing failure
+          }
         } else {
           try {
             const text = await res.text();
             if (text) msg = text.slice(0, 2000);
-          } catch {}
+          } catch {
+            // ignore text extraction failure
+          }
         }
 
         const cause: SafeFetchErrorCause = res.status >= 500 ? "server" : "client";
@@ -66,7 +76,7 @@ export async function safeFetchJson<T = any>(
       }
 
       // Parse JSON safely
-      let data: any = null;
+      let data: unknown = null;
       if (isJsonResponse(res)) {
         data = await res.json();
       } else {
@@ -74,17 +84,16 @@ export async function safeFetchJson<T = any>(
         try {
           data = JSON.parse(text);
         } catch {
-          // not JSON, return text
-          data = text as any;
+          data = text;
         }
       }
 
-      return { ok: true, data, status: res.status };
-    } catch (err: any) {
+      // ✅ Fix: cast unknown to T
+      return { ok: true, data: data as T, status: res.status };
+    } catch (err: unknown) {
       clearTimeout(timeout);
 
-      // Abort?
-      if (err?.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         if (attempts <= retries) {
           await sleep(retryDelayMs);
           continue;
@@ -92,7 +101,6 @@ export async function safeFetchJson<T = any>(
         return { ok: false, error: "Request timed out", cause: "timeout" };
       }
 
-      // Network?
       if (attempts <= retries) {
         await sleep(retryDelayMs);
         continue;
@@ -102,8 +110,10 @@ export async function safeFetchJson<T = any>(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function postJson<T = any>(
   url: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   json: any,
   opts?: Omit<SafeFetchOptions, "body" | "method">
 ) {
@@ -115,12 +125,12 @@ export async function postJson<T = any>(
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function postForm<T = any>(
   url: string,
   form: FormData,
   opts?: Omit<SafeFetchOptions, "body" | "method">
 ) {
-  // NOTE: do NOT set Content-Type for FormData; browser will set boundary
   return safeFetchJson<T>(url, {
     method: "POST",
     body: form,
@@ -130,8 +140,6 @@ export async function postForm<T = any>(
 
 function mergeSignals(a: AbortSignal | null | undefined, b: AbortSignal) {
   if (!a) return b;
-  // If dev wants to pass their own signal + our timeout signal, unify them.
-  // Simple approach: if either aborts, we abort via a new controller.
   const controller = new AbortController();
   const onAbort = () => controller.abort();
   a.addEventListener("abort", onAbort, { once: true });

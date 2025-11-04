@@ -28,7 +28,6 @@ export default function SignupPage() {
       try { localStorage.setItem("offervia:postAuthRedirect", "/dashboard?signup=1"); } catch {}
 
       const supabase = getBrowserSupabase();
-      const redirectTo = `${window.location.origin}/auth/callback`;
 
       await supabase.auth.signInWithOAuth({
         provider,

@@ -49,27 +49,30 @@ export async function POST(req: Request) {
       : `${baseSystemPrompt}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
 
     // Update the first message (system prompt) with the modified version
-    const modifiedMessages = [
+    const modifiedMessages: ChatMessage[] = [
       { role: "system", content: systemPrompt },
       ...messages.slice(1)
     ];
 
     const groq = getGroqClient();
+    // Type assertion needed because Groq SDK types are strict but our ChatMessage[] is compatible
     const result = await groq.chat.completions.create({
       model: DEFAULT_GROQ_MODEL,
-      messages: modifiedMessages,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Groq SDK type mismatch, ChatMessage[] is runtime compatible
+      messages: modifiedMessages as any,
       temperature: 0.2,
       max_tokens: isBrief ? 300 : 800, // Shorter responses for brief mode
-    } as any);
+    });
 
-    const rawContent = (result as any)?.choices?.[0]?.message?.content || "";
+    const rawContent = (result?.choices?.[0]?.message?.content as string | undefined) || "";
     
     // Clean up the content by trimming redundant newlines
     const content = rawContent.trimStart().replace(/\n{3,}/g, "\n\n").trim();
 
     return NextResponse.json({ content });
-  } catch (err: any) {
-    console.error("Coach API error:", err?.message || err);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Coach API error:", errorMessage);
     return NextResponse.json(
       { error: "Coach failed to respond" },
       { status: 500 }

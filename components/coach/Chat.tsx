@@ -278,8 +278,8 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           )
         );
       }
-    } catch (e: any) {
-      if (e?.name === "AbortError") {
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name === "AbortError") {
         toast({ title: "Generation stopped" });
       } else {
         toast({
@@ -295,7 +295,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         scrollToBottom(true);
       }, 0);
     }
-  }, [input, messages, mode, sending, supabase, toast, userId, scrollToBottom]);
+  }, [input, messages, mode, responseMode, sending, supabase, toast, userId, scrollToBottom]);
 
   // regenerate last assistant reply (re-send last user message)
   const regenerate = useCallback(() => {

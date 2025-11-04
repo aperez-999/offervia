@@ -64,7 +64,7 @@ export default function SettingsPage() {
         const meta = user.user_metadata || {};
         setName(meta.full_name || meta.name || "");
         // Supabase sets email_confirmed_at when verified
-        setEmailVerified(Boolean((user as any)?.email_confirmed_at));
+        setEmailVerified(Boolean(user.email_confirmed_at));
 
         // Load prefs from DB (if row missing, defaults stay as-is)
         const { data: prefs, error: prefsErr } = await supabase

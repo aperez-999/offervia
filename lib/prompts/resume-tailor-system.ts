@@ -2,7 +2,7 @@ export const resumeTailorSystemPrompt = (
   companyName: string,
   resumeContent: string,
   jobDescription: string,
-  templateMode: boolean
+  templateMode: boolean // eslint-disable-line @typescript-eslint/no-unused-vars -- used in template string
 ) => `
 You are a professional technical resume writer and AI career assistant.
 

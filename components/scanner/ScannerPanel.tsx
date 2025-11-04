@@ -191,7 +191,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       return;
     }
 
-    const formatted = formatForReadability(String((res.data as any)?.content || ""));
+    const formatted = formatForReadability(String((res.data as { content?: string })?.content || ""));
     setResult(formatted);
     addToHistory(text, formatted);
     toast({ title: "Scan complete" });

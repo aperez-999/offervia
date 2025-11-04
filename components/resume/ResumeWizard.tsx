@@ -8,7 +8,6 @@ import {
   Download,
   Trash2,
   Sparkles,
-  Wand2,
   Building2,
   Briefcase,
   MapPin,
@@ -42,11 +41,6 @@ const MAX_SIZE_MB = 8;
 
 const JD_LS_KEY = "offervia:resume:jd_v1";
 
-const EXAMPLE_JD = `Software Engineer (Frontend)
-
-We are seeking a Frontend Engineer to build accessible, performant web experiences.
-Responsibilities include implementing UI components, collaborating with design, writing tests, and improving performance.
-Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/RTL). Bonus: Next.js, accessibility, performance profiling.`;
 
 const TECH_DICT = [
   "react","next.js","typescript","javascript","node","node.js","graphql","rest","api","html","css","tailwind","redux","jest","rtl","cypress","testing","vitest","playwright","aws","gcp","azure","docker","kubernetes","sql","postgres","mysql","mongodb","python","go","java","c++","a11y","accessibility","performance",
@@ -234,12 +228,8 @@ export default function ResumeWizard() {
       try {
         // Attempt to preview text if it's a plain text file; otherwise log filename only
         if (resumeFile.type.startsWith("text")) {
-          const txt = await resumeFile.text();
-          // eslint-disable-next-line no-console
-        } else {
-          // eslint-disable-next-line no-console
+          await resumeFile.text();
         }
-        // eslint-disable-next-line no-console
       } catch {}
 
       const fd = new FormData();
@@ -254,7 +244,6 @@ export default function ResumeWizard() {
       if (resumeText) {
         // Also send parsed text when available so the API can prefer it
         fd.append("resumeText", resumeText);
-        // eslint-disable-next-line no-console
       }
 
       const resp = await postForm<{ content?: string; error?: string }>(
@@ -291,8 +280,8 @@ export default function ResumeWizard() {
 
       setAiText(String(resp.data?.content || ""));
       toast({ title: "Tailored draft generated" });
-    } catch (e: any) {
-      const msg = e?.name === "AbortError"
+    } catch (e: unknown) {
+      const msg = e instanceof Error && e.name === "AbortError"
         ? "The request timed out. Please try again."
         : "AI might be busy, or your input is too large. Please try again.";
       setError(msg);
@@ -323,11 +312,7 @@ export default function ResumeWizard() {
     URL.revokeObjectURL(url);
   }
 
-  const targetingSummary = useMemo(() => {
-    if (!companyName && !roleTitle && !location) return "";
-    const bits = [companyName, roleTitle, location].filter(Boolean);
-    return bits.join(" • ");
-  }, [companyName, roleTitle, location]);
+  // targetingSummary removed - not used in current implementation
 
   const isPdf =
     !!resumeFileName &&

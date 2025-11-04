@@ -8,7 +8,7 @@ function formatContent(content: string, isAssistant: boolean): string {
     return content; // User messages don't need formatting
   }
 
-  let formatted = content
+  const formatted = content
     // Trim excessive newlines (3+ consecutive newlines become 2)
     .replace(/\n{3,}/g, "\n\n")
     // Remove markdown bold/italic syntax (**text**, *text*)
