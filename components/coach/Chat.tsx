@@ -233,7 +233,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         signal: ctrl.signal,
       });
 
-      // NEW: show toast when daily/hourly/minute caps hit
+      // Rate limit: show toast and stop
       if (res.status === 429) {
         const data = await res.json().catch(() => ({}));
         const retry = res.headers.get("Retry-After");
@@ -248,7 +248,40 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         return;
       }
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Plan limit: show server message
+      if (res.status === 403) {
+        const data = await res.json().catch(() => ({}));
+        if (data?.error === "PLAN_LIMIT_REACHED") {
+          toast({
+            title: data?.message ?? "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: data?.message ?? data?.error ?? "Access denied",
+            variant: "destructive",
+          });
+        }
+        setController(null);
+        setSending(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const message = data?.message ?? data?.error ?? `Request failed (${res.status})`;
+        if (res.status >= 500) {
+          toast({
+            title: "AI is temporarily unavailable. Try again soon.",
+            variant: "destructive",
+          });
+        } else {
+          toast({ title: message, variant: "destructive" });
+        }
+        setController(null);
+        setSending(false);
+        return;
+      }
       const data = await res.json();
       const reply: string = data?.content || "";
 

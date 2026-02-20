@@ -166,13 +166,23 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     }
 
     if (!res.ok) {
-      // NEW: clear rate-limit UX
       if (res.status === 429) {
         const msg = res.error || "You've hit today's free limit for scans.";
         setError(msg);
         toast({
           title: "Rate limit reached",
           description: msg,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (res.status === 403 && res.error === "PLAN_LIMIT_REACHED") {
+        const msg =
+          "You've reached your monthly job scan limit. Upgrade to Pro to continue.";
+        setError(msg);
+        toast({
+          title: msg,
           variant: "destructive",
         });
         return;

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
+import { checkFeatureGate } from "@/lib/featureGate";
+import { incrementUsage } from "@/lib/usage";
 
 export async function POST(req: Request) {
   // ---- Rate limit (job-scan) ----
@@ -18,7 +20,20 @@ export async function POST(req: Request) {
     );
   }
 
+  const userId = rl.userId!;
+
   try {
+    const gate = await checkFeatureGate(userId, "job_scan");
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          error: "PLAN_LIMIT_REACHED",
+          message: "You've reached your monthly job scan limit. Upgrade to Pro to continue.",
+        },
+        { status: 403 }
+      );
+    }
+
     const { jd } = (await req.json()) as { jd?: string };
     if (!jd || typeof jd !== "string" || jd.trim().length < 20) {
       return NextResponse.json({ error: "Job description is required" }, { status: 400 });
@@ -38,6 +53,7 @@ export async function POST(req: Request) {
     });
 
     const content = (result?.choices?.[0]?.message?.content as string | undefined)?.trim() || "";
+    await incrementUsage(userId, "job_scan");
     return NextResponse.json({ content });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);

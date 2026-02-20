@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
+import { checkFeatureGate } from "@/lib/featureGate";
+import { incrementUsage } from "@/lib/usage";
 
 type Role = "system" | "user" | "assistant";
 export type CoachMode = "interview" | "resume" | "career";
@@ -27,7 +29,20 @@ export async function POST(req: Request) {
     );
   }
 
+  const userId = rl.userId!;
+
   try {
+    const gate = await checkFeatureGate(userId, "coach");
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          error: "PLAN_LIMIT_REACHED",
+          message: "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+        },
+        { status: 403 }
+      );
+    }
+
     const { mode, responseMode, messages } = (await req.json()) as {
       mode: CoachMode;
       responseMode?: "brief" | "detailed";
@@ -69,6 +84,7 @@ export async function POST(req: Request) {
     // Clean up the content by trimming redundant newlines
     const content = rawContent.trimStart().replace(/\n{3,}/g, "\n\n").trim();
 
+    await incrementUsage(userId, "coach");
     return NextResponse.json({ content });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);

@@ -252,7 +252,7 @@ export default function ResumeWizard() {
         { timeoutMs: 45_000 }
       );
 
-      // --- Rate-limit & other friendly errors ---
+      // --- Rate-limit, plan limit & other friendly errors ---
       if (!resp.ok) {
         if (resp.status === 429) {
           const msg = resp.error || "You've hit today's free limit for tailoring.";
@@ -260,6 +260,16 @@ export default function ResumeWizard() {
           toast({
             title: "Rate limit reached",
             description: msg,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (resp.status === 403 && resp.error === "PLAN_LIMIT_REACHED") {
+          const msg =
+            "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.";
+          setError(msg);
+          toast({
+            title: msg,
             variant: "destructive",
           });
           return;
