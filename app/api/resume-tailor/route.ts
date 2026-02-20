@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
+import { checkFeatureGate } from "@/lib/featureGate";
+import { incrementUsage } from "@/lib/usage";
 import mammoth from "mammoth";
 
 /* ---------------- Helpers ---------------- */
@@ -103,7 +105,20 @@ export async function POST(req: Request) {
     );
   }
 
+  const userId = rl.userId!;
+
   try {
+    const gate = await checkFeatureGate(userId, "resume_tailor");
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          error: "PLAN_LIMIT_REACHED",
+          message: "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.",
+        },
+        { status: 403 }
+      );
+    }
+
     const contentType = req.headers.get("content-type") || "";
 
     let resumeText = "";
@@ -242,6 +257,7 @@ export async function POST(req: Request) {
       );
     }
 
+    await incrementUsage(userId, "resume_tailor");
     return NextResponse.json({ content: normalizeText(cleaned) });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
