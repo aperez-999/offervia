@@ -17,7 +17,15 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Settings, UserRound, LogOut, Palette } from "lucide-react";
 
-export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
+type PlanType = "free" | "pro";
+
+export default function UserMenu({
+  onSignOut,
+  plan = "free",
+}: {
+  onSignOut: () => void;
+  plan?: PlanType;
+}) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -48,19 +56,31 @@ export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
-          aria-label="Open user menu"
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+            plan === "pro"
+              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+              : "bg-muted text-muted-foreground"
+          }`}
+          aria-label={`Plan: ${plan}`}
         >
-          <Avatar className="h-7 w-7">
-            <AvatarImage src={avatarUrl ?? ""} alt={name ?? "Avatar"} />
-            <AvatarFallback className="text-xs font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        </button>
-      </DropdownMenuTrigger>
+          {plan === "pro" ? "Pro" : "Free"}
+        </span>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+            aria-label="Open user menu"
+          >
+            <Avatar className="h-7 w-7">
+              <AvatarImage src={avatarUrl ?? ""} alt={name ?? "Avatar"} />
+              <AvatarFallback className="text-xs font-semibold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        </DropdownMenuTrigger>
+      </div>
 
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>

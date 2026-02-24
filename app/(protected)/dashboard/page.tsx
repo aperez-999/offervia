@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 
 import {
@@ -14,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame, Sparkles, X } from "lucide-react";
 
 type Application = {
   id: string;
@@ -68,11 +69,19 @@ function StatusBadge({ s }: { s: Application["status"] }) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const upgrade = searchParams.get("upgrade");
+
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const [loading, setLoading] = useState(true);
   const [apps, setApps] = useState<Application[]>([]);
   const [recentChats, setRecentChats] = useState<MsgRow[]>([]);
   const [friendlyName, setFriendlyName] = useState<string>("there");
+
+  function dismissUpgradeBanner() {
+    router.replace("/dashboard");
+  }
 
   useEffect(() => {
     (async () => {
@@ -207,6 +216,40 @@ export default function DashboardPage() {
 
   return (
       <div className="space-y-4 sm:space-y-6">
+        {/* Upgrade success / cancel banner */}
+        {upgrade === "success" && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-800 dark:text-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+            <p className="text-sm font-medium">
+              🎉 Welcome to Pro! Your limits have been unlocked.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 shrink-0 rounded-full p-0 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              onClick={dismissUpgradeBanner}
+              aria-label="Dismiss"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        {upgrade === "cancel" && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 text-muted-foreground">
+            <p className="text-sm">
+              Upgrade was canceled. You can try again anytime.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 shrink-0 rounded-full p-0 hover:bg-foreground/[0.06]"
+              onClick={dismissUpgradeBanner}
+              aria-label="Dismiss"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {/* Greeting */}
         <section>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">

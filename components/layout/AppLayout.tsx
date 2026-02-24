@@ -38,7 +38,15 @@ const navItems: NavItem[] = [
   { label: "Coming Soon", href: "/upcoming", icon: Rocket },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+type PlanType = "free" | "pro";
+
+export default function AppLayout({
+  children,
+  plan = "free",
+}: {
+  children: React.ReactNode;
+  plan?: PlanType;
+}) {
   const search = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -93,7 +101,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             <GlobalCommandMenu />
-            <UserMenu onSignOut={onSignOut} />
+            <UserMenu plan={plan} onSignOut={onSignOut} />
           </div>
         </div>
       </header>
