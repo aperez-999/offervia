@@ -19,20 +19,22 @@ export type ToastProps = {
   id?: string
   title?: React.ReactNode
   description?: React.ReactNode
-  variant?: "default" | "destructive"
+  variant?: "default" | "destructive" | "upgrade"
+  action?: React.ReactNode
+  duration?: number
 }
 
 const toastVariants = cva(
-  // ✅ Use theme-aware tokens
-  "pointer-events-auto relative w-full rounded-md border p-4 pr-10 shadow-sm transition-colors " +
-    "bg-background text-foreground border-border",
+  "pointer-events-auto relative w-full rounded-lg border shadow-sm transition-colors",
   {
     variants: {
       variant: {
         default:
-          "bg-background text-foreground border-border shadow-sm",
+          "bg-background text-foreground border-border p-4 pr-10",
         destructive:
-          "border-red-300/60 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700/50"
+          "border-red-300/60 bg-red-50 text-red-700 p-4 pr-10 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700/50",
+        upgrade:
+          "border-amber-500/40 bg-amber-500/10 text-foreground p-5 pr-10 dark:bg-amber-500/10 dark:border-amber-500/30"
       }
     },
     defaultVariants: {
@@ -41,17 +43,18 @@ const toastVariants = cva(
   }
 )
 
-export function Toast({ title, description, variant = "default" }: ToastProps) {
+export function Toast({ title, description, variant = "default", action }: ToastProps) {
   return (
     <div
       className={cn(toastVariants({ variant }))}
       role="status"
       aria-live="polite"
     >
-      {title ? <div className="text-sm font-medium">{title}</div> : null}
+      {title ? <div className="text-sm font-semibold">{title}</div> : null}
       {description ? (
-        <div className="mt-1 text-sm opacity-80">{description}</div>
+        <div className="mt-1.5 break-words text-sm text-foreground/90">{description}</div>
       ) : null}
+      {action ? <div className="mt-4">{action}</div> : null}
       <button
         className="absolute right-2 top-2 rounded p-1 text-foreground/60 hover:bg-foreground/[0.06]"
         aria-label="Close"

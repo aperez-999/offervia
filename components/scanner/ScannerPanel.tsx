@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -67,6 +68,7 @@ function approxTokens(s: string) {
 }
 
 export default function ScannerPanel() {
+  const router = useRouter();
   const { toast } = useToast();
   const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
@@ -182,8 +184,19 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           "You've reached your monthly job scan limit. Upgrade to Pro to continue.";
         setError(msg);
         toast({
-          title: msg,
-          variant: "destructive",
+          title: "Limit reached",
+          description: msg,
+          variant: "upgrade",
+          duration: 8000,
+          action: (
+            <Button
+              size="default"
+              className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              onClick={() => router.push("/upgrade")}
+            >
+              Upgrade to Pro
+            </Button>
+          ),
         });
         return;
       }

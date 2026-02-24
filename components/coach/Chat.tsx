@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +66,7 @@ function dayLabel(date: Date) {
 
 function InnerChat({ mode }: { mode: CoachMode }) {
   const supabase = useMemo(() => getBrowserSupabase(), []);
+  const router = useRouter();
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,13 +250,24 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         return;
       }
 
-      // Plan limit: show server message
+      // Plan limit: show server message + upgrade CTA
       if (res.status === 403) {
         const data = await res.json().catch(() => ({}));
         if (data?.error === "PLAN_LIMIT_REACHED") {
           toast({
-            title: data?.message ?? "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
-            variant: "destructive",
+            title: "Limit reached",
+            description: data?.message ?? "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+            variant: "upgrade",
+            duration: 8000,
+            action: (
+              <Button
+                size="default"
+                className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                onClick={() => router.push("/upgrade")}
+              >
+                Upgrade to Pro
+              </Button>
+            ),
           });
         } else {
           toast({
@@ -328,7 +341,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         scrollToBottom(true);
       }, 0);
     }
-  }, [input, messages, mode, responseMode, sending, supabase, toast, userId, scrollToBottom]);
+  }, [input, messages, mode, responseMode, sending, supabase, toast, userId, scrollToBottom, router]);
 
   // regenerate last assistant reply (re-send last user message)
   const regenerate = useCallback(() => {

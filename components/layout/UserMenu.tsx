@@ -15,7 +15,9 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, UserRound, LogOut, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Settings, UserRound, LogOut, Palette, CreditCard } from "lucide-react";
 
 type PlanType = "free" | "pro";
 
@@ -27,9 +29,35 @@ export default function UserMenu({
   plan?: PlanType;
 }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { toast } = useToast();
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+
+  async function openBillingPortal() {
+    if (billingLoading || plan !== "pro") return;
+    setBillingLoading(true);
+    try {
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+      toast({
+        title: "Billing portal unavailable. Try again.",
+        variant: "destructive",
+      });
+    } catch {
+      toast({
+        title: "Billing portal unavailable. Try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setBillingLoading(false);
+    }
+  }
 
   useEffect(() => {
     const supabase = getBrowserSupabase();
@@ -67,6 +95,16 @@ export default function UserMenu({
         >
           {plan === "pro" ? "Pro" : "Free"}
         </span>
+        {plan === "free" && (
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="h-7 rounded-md border-border px-2 text-[10px] font-medium uppercase tracking-wide text-foreground/80 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-400"
+          >
+            <Link href="/upgrade">Upgrade</Link>
+          </Button>
+        )}
         <DropdownMenuTrigger asChild>
           <button
             className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
@@ -129,6 +167,17 @@ export default function UserMenu({
         </DropdownMenuRadioGroup>
 
         <DropdownMenuSeparator />
+
+        {plan === "pro" && (
+          <DropdownMenuItem
+            onClick={openBillingPortal}
+            disabled={billingLoading}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <CreditCard className="h-4 w-4" />
+            {billingLoading ? "Opening…" : "Manage billing"}
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem
           onClick={onSignOut}
