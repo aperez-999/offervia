@@ -25,6 +25,13 @@ import {
 } from "lucide-react";
 import { postJson } from "@/lib/safe-fetch";
 
+type ScanResultContent = {
+  match_score: number;
+  strengths: string[];
+  missing_skills: string[];
+  summary: string;
+};
+
 type ScanEntry = {
   id: string;
   jd: string;
@@ -72,9 +79,30 @@ export default function ScannerPanel() {
   const { toast } = useToast();
   const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string>("");
+  const [scanResult, setScanResult] = useState<ScanResultContent | null>(null);
+  const [legacyResult, setLegacyResult] = useState<string>("");
   const [history, setHistory] = useState<ScanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const hasResult = !!scanResult || !!legacyResult;
+
+  function scanResultToText(s: ScanResultContent): string {
+    const lines = [
+      `Match Score: ${s.match_score}%`,
+      "",
+      "Strengths:",
+      ...s.strengths.map((x) => `- ${x}`),
+      "",
+      "Missing Skills:",
+      ...s.missing_skills.map((x) => `- ${x}`),
+      "",
+      "Summary:",
+      s.summary,
+    ];
+    return lines.join("\n");
+  }
+
+  const resultText = scanResult ? scanResultToText(scanResult) : legacyResult;
 
   const abortRef = useRef<AbortController | null>(null);
   const canceledRef = useRef(false);
@@ -119,11 +147,11 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     } catch {}
   }
 
-  function addToHistory(jdText: string, resText: string) {
+  function addToHistory(jdText: string, resPayload: string) {
     const entry: ScanEntry = {
       id: `${Date.now()}`,
       jd: jdText,
-      result: resText,
+      result: resPayload,
       created_at: Date.now(),
       title: titleFromJD(jdText),
       techs: detectTechs(jdText),
@@ -144,18 +172,18 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     }
 
     setLoading(true);
-    setResult("");
+    setScanResult(null);
+    setLegacyResult("");
     setError(null);
 
     canceledRef.current = false;
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const res = await postJson<{ content?: string; error?: string }>(
-      "/api/job-scan",
-      { jd: text },
-      { timeoutMs: 20000, retries: 0, signal: controller.signal }
-    );
+    const res = await postJson<{
+      content?: ScanResultContent;
+      error?: string;
+    }>("/api/job-scan", { jd: text }, { timeoutMs: 20000, retries: 0, signal: controller.signal });
 
     abortRef.current = null;
     setLoading(false);
@@ -214,15 +242,21 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       return;
     }
 
-    const formatted = formatForReadability(String((res.data as { content?: string })?.content || ""));
-    setResult(formatted);
-    addToHistory(text, formatted);
+    const content = res.data?.content;
+    if (content && typeof content.match_score === "number" && Array.isArray(content.strengths) && Array.isArray(content.missing_skills) && typeof content.summary === "string") {
+      setScanResult(content);
+      addToHistory(text, JSON.stringify(content));
+    } else {
+      setLegacyResult(formatForReadability(JSON.stringify(content ?? res.data ?? "")));
+      addToHistory(text, JSON.stringify(content ?? res.data ?? ""));
+    }
     toast({ title: "Scan complete" });
   }
 
   function clearAll() {
     setJd("");
-    setResult("");
+    setScanResult(null);
+    setLegacyResult("");
     setError(null);
   }
 
@@ -359,7 +393,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
             <Button
               variant="outline"
               onClick={clearAll}
-              disabled={loading || (!jd && !result)}
+              disabled={loading || (!jd && !hasResult)}
               className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             >
               Clear
@@ -385,8 +419,8 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               size="sm"
               variant="outline"
               className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-              onClick={() => result && copy(result, "Copied analysis")}
-              disabled={!result}
+              onClick={() => resultText && copy(resultText, "Copied analysis")}
+              disabled={!hasResult}
             >
               <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
             </Button>
@@ -395,13 +429,13 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               variant="outline"
               className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
               onClick={() =>
-                result &&
+                resultText &&
                 download(
-                  result,
+                  resultText,
                   `offervia-scan-${new Date().toISOString().slice(0, 10)}.txt`
                 )
               }
-              disabled={!result}
+              disabled={!hasResult}
             >
               <Download className="mr-2 h-4 w-4" /> Download
             </Button>
@@ -415,12 +449,41 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               <div className="h-4 w-3/5 animate-pulse rounded bg-foreground/[0.06]" />
               <div className="mt-2 h-24 animate-pulse rounded bg-foreground/[0.06]" />
             </div>
-          ) : result ? (
+          ) : scanResult ? (
+            <div className="space-y-6" aria-label="Scan results">
+              <div className="mb-6">
+                <p className="text-sm text-muted-foreground">Match Score</p>
+                <p className="text-3xl font-semibold text-foreground">
+                  {scanResult.match_score}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Strengths</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
+                  {scanResult.strengths.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Missing Skills</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
+                  {scanResult.missing_skills.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Summary</p>
+                <p className="mt-2 text-sm text-foreground">{scanResult.summary}</p>
+              </div>
+            </div>
+          ) : legacyResult ? (
             <pre
               aria-label="Scan results"
               className="whitespace-pre-wrap rounded-xl border border-border bg-background/60 p-3 text-sm text-foreground"
             >
-              {result}
+              {legacyResult}
             </pre>
           ) : (
             <p className="text-sm text-foreground/60">
@@ -490,8 +553,27 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                       className="border-border text-foreground hover:bg-foreground/[0.06]"
                       onClick={() => {
                         setJd(h.jd);
-                        setResult(h.result);
                         setError(null);
+                        try {
+                          const parsed = JSON.parse(h.result) as unknown;
+                          if (
+                            parsed &&
+                            typeof parsed === "object" &&
+                            "match_score" in parsed &&
+                            "strengths" in parsed &&
+                            "missing_skills" in parsed &&
+                            "summary" in parsed
+                          ) {
+                            setScanResult(parsed as ScanResultContent);
+                            setLegacyResult("");
+                          } else {
+                            setScanResult(null);
+                            setLegacyResult(h.result);
+                          }
+                        } catch {
+                          setScanResult(null);
+                          setLegacyResult(h.result);
+                        }
                         toast({ title: "Loaded scan" });
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
@@ -502,7 +584,23 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                       size="sm"
                       variant="outline"
                       className="border-border text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => copy(h.result, "Copied analysis")}
+                      onClick={() => {
+                        try {
+                          const parsed = JSON.parse(h.result) as unknown;
+                          if (
+                            parsed &&
+                            typeof parsed === "object" &&
+                            "match_score" in parsed &&
+                            "strengths" in parsed
+                          ) {
+                            copy(scanResultToText(parsed as ScanResultContent), "Copied analysis");
+                          } else {
+                            copy(h.result, "Copied analysis");
+                          }
+                        } catch {
+                          copy(h.result, "Copied analysis");
+                        }
+                      }}
                     >
                       <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
                     </Button>

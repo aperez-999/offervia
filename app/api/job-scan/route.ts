@@ -3,6 +3,7 @@ import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
 import { checkFeatureGate } from "@/lib/featureGate";
 import { incrementUsage } from "@/lib/usage";
+import { getServiceSupabase } from "@/lib/supabase/service";
 
 export async function POST(req: Request) {
   // ---- Rate limit (job-scan) ----
@@ -52,7 +53,47 @@ export async function POST(req: Request) {
       max_tokens: 800,
     });
 
-    const content = (result?.choices?.[0]?.message?.content as string | undefined)?.trim() || "";
+    const raw = (result?.choices?.[0]?.message?.content as string | undefined)?.trim() || "";
+    let parsed: { match_score: number; strengths: string[]; missing_skills: string[]; summary: string };
+    try {
+      const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      parsed = JSON.parse(stripped) as typeof parsed;
+    } catch {
+      console.error("Job-scan API: invalid JSON from model", raw?.slice(0, 200));
+      return NextResponse.json({ error: "Job scan failed: invalid response" }, { status: 500 });
+    }
+
+    if (
+      !Array.isArray(parsed.strengths) ||
+      !Array.isArray(parsed.missing_skills) ||
+      typeof parsed.summary !== "string"
+    ) {
+      console.error("Job-scan API: invalid structure", parsed);
+      return NextResponse.json({ error: "Job scan failed: invalid response" }, { status: 500 });
+    }
+
+    const score = Number(parsed.match_score);
+    const match_score =
+      Number.isFinite(score) ? Math.min(100, Math.max(0, Math.round(score))) : 50;
+    const content = {
+      match_score,
+      strengths: parsed.strengths.map((s) => (typeof s === "string" ? s : String(s))),
+      missing_skills: parsed.missing_skills.map((s) => (typeof s === "string" ? s : String(s))),
+      summary: String(parsed.summary),
+    };
+
+    const supabase = getServiceSupabase();
+    const { error: insertErr } = await supabase.from("job_scans").insert({
+      user_id: userId,
+      match_score: content.match_score,
+      strengths: content.strengths,
+      missing_skills: content.missing_skills,
+      summary: content.summary,
+    });
+    if (insertErr) {
+      console.error("Job-scan API: failed to persist scan", insertErr.message);
+    }
+
     await incrementUsage(userId, "job_scan");
     return NextResponse.json({ content });
   } catch (err: unknown) {
