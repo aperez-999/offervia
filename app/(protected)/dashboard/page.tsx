@@ -38,6 +38,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      plan={plan}
       usage={usage}
       limits={{
         resume_tailor_per_month: limits.resume_tailor_per_month,

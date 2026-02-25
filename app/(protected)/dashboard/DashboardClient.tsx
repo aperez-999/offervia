@@ -76,10 +76,14 @@ function StatusBadge({ s }: { s: Application["status"] }) {
   );
 }
 
+type PlanType = "free" | "pro";
+
 export default function DashboardClient({
+  plan = "free",
   usage,
   limits,
 }: {
+  plan?: PlanType;
   usage: UsageSnapshot;
   limits: PlanLimits;
 }) {
@@ -229,6 +233,17 @@ export default function DashboardClient({
     return "low";
   };
 
+  const nearingLimit = useMemo(() => {
+    const p1 = usagePct(usage.resumeTailor, limits.resume_tailor_per_month);
+    const p2 = usagePct(usage.coachMessages, limits.coach_messages_per_month);
+    const p3 = usagePct(usage.jobScans, limits.job_scans_per_month);
+    return (
+      (p1 >= 80 && p1 < 100) ||
+      (p2 >= 80 && p2 < 100) ||
+      (p3 >= 80 && p3 < 100)
+    );
+  }, [usage, limits]);
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Upgrade success / cancel banner */}
@@ -261,6 +276,28 @@ export default function DashboardClient({
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Soft upgrade nudge when Free user is nearing limit (80–99%) */}
+      {plan === "free" && nearingLimit && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
+          <div>
+            <p className="font-medium text-foreground">
+              You&apos;re close to your monthly limit.
+            </p>
+            <p className="mt-0.5 text-foreground/80">
+              Upgrade to Pro to keep optimizing without interruption.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="shrink-0 cursor-pointer border-amber-500/40 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 dark:text-amber-200 dark:border-amber-500/30 dark:hover:bg-amber-500/20"
+            onClick={() => router.push("/upgrade")}
+          >
+            Upgrade
           </Button>
         </div>
       )}
