@@ -49,12 +49,18 @@ export async function POST(req: Request) {
     }
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)) {
-      return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid email address.", message: "Invalid email address." },
+        { status: 400 }
+      );
     }
 
     if (trimmedMsg.length > 5000) {
       return NextResponse.json(
-        { error: "Message is too long (max 5000 characters)." },
+        {
+          error: "Message is too long (max 5000 characters).",
+          message: "Message is too long (max 5000 characters).",
+        },
         { status: 400 }
       );
     }
@@ -67,8 +73,9 @@ export async function POST(req: Request) {
     const now = Date.now();
     const last = lastByIp.get(ip) || 0;
     if (now - last < ONE_MIN) {
+      const msg = "You can send one message per minute. Please try again shortly.";
       return NextResponse.json(
-        { error: "You can send one message per minute. Please try again shortly." },
+        { error: msg, message: msg },
         { status: 429, headers: { "Retry-After": "60" } }
       );
     }
@@ -85,11 +92,12 @@ export async function POST(req: Request) {
     lastByIp.set(ip, now);
 
     return NextResponse.json({ ok: true });
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("Contact API error:", errorMessage);
+  } catch {
     return NextResponse.json(
-      { error: "Failed to send your message. Please try again." },
+      {
+        error: "Failed to send your message. Please try again.",
+        message: "Failed to send your message. Please try again.",
+      },
       { status: 500 }
     );
   }

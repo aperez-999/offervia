@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
-import { checkFeatureGate } from "@/lib/featureGate";
-import { incrementUsage } from "@/lib/usage";
+import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { incrementUsage } from "@/lib/usage/increment";
 
 type Role = "system" | "user" | "assistant";
 export type CoachMode = "interview" | "resume" | "career";
@@ -50,10 +50,16 @@ export async function POST(req: Request) {
     };
 
     if (!mode || !(mode in SYSTEM_PROMPTS)) {
-      return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid mode", message: "Invalid mode" },
+        { status: 400 }
+      );
     }
     if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({ error: "No messages" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No messages", message: "No messages" },
+        { status: 400 }
+      );
     }
 
     // Modify system prompt based on response mode
@@ -86,11 +92,9 @@ export async function POST(req: Request) {
 
     await incrementUsage(userId, "coach");
     return NextResponse.json({ content });
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("Coach API error:", errorMessage);
+  } catch {
     return NextResponse.json(
-      { error: "Coach failed to respond" },
+      { error: "Coach failed to respond", message: "Coach failed to respond" },
       { status: 500 }
     );
   }

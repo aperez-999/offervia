@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
-import { checkFeatureGate } from "@/lib/featureGate";
-import { incrementUsage } from "@/lib/usage";
+import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { incrementUsage } from "@/lib/usage/increment";
 import mammoth from "mammoth";
 
 /* ---------------- Helpers ---------------- */
@@ -180,7 +180,10 @@ export async function POST(req: Request) {
     resumeText = stripSamplePlaceholders(resumeText);
 
     if (!jobDescription || jobDescription.trim().length < 20) {
-      return NextResponse.json({ error: "Job description is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Job description is required", message: "Job description is required" },
+        { status: 400 }
+      );
     }
     
     // Debug log in development to verify resume content
@@ -251,8 +254,9 @@ export async function POST(req: Request) {
     const cleaned = sanitizeOutput(aiText, companyName);
 
     if (cleaned.length < 100) {
+      const msg = "Model returned incomplete or invalid content. Try again.";
       return NextResponse.json(
-        { error: "Model returned incomplete or invalid content. Try again." },
+        { error: msg, message: msg },
         { status: 500 }
       );
     }
@@ -263,13 +267,16 @@ export async function POST(req: Request) {
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
-      console.error("Resume-tailor API error: input too large");
+      const errMsg =
+        "Your resume and job description are too long for a single pass. Try shortening them and retry.";
       return NextResponse.json(
-        { error: "Your resume and job description are too long for a single pass. Try shortening them and retry." },
+        { error: errMsg, message: errMsg },
         { status: 413 }
       );
     }
-    console.error("Resume-tailor API error:", msg);
-    return NextResponse.json({ error: "Resume tailoring failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Resume tailoring failed", message: "Resume tailoring failed" },
+      { status: 500 }
+    );
   }
 }

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
-import { checkFeatureGate } from "@/lib/featureGate";
-import { incrementUsage } from "@/lib/usage";
+import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { incrementUsage } from "@/lib/usage/increment";
 import { getServiceSupabase } from "@/lib/supabase/service";
 
 export async function POST(req: Request) {
@@ -15,8 +15,12 @@ export async function POST(req: Request) {
 
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds || 60;
+    const msg =
+      rl.reason === "unauthorized"
+        ? "Authentication required"
+        : "Rate limit reached. Please try again soon.";
     return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { error: msg, message: msg },
       { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
     );
   }
@@ -37,7 +41,10 @@ export async function POST(req: Request) {
 
     const { jd } = (await req.json()) as { jd?: string };
     if (!jd || typeof jd !== "string" || jd.trim().length < 20) {
-      return NextResponse.json({ error: "Job description is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Job description is required", message: "Job description is required" },
+        { status: 400 }
+      );
     }
 
     const groq = getGroqClient();
@@ -59,8 +66,10 @@ export async function POST(req: Request) {
       const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       parsed = JSON.parse(stripped) as typeof parsed;
     } catch {
-      console.error("Job-scan API: invalid JSON from model", raw?.slice(0, 200));
-      return NextResponse.json({ error: "Job scan failed: invalid response" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Job scan failed: invalid response", message: "Job scan failed: invalid response" },
+        { status: 500 }
+      );
     }
 
     if (
@@ -68,8 +77,10 @@ export async function POST(req: Request) {
       !Array.isArray(parsed.missing_skills) ||
       typeof parsed.summary !== "string"
     ) {
-      console.error("Job-scan API: invalid structure", parsed);
-      return NextResponse.json({ error: "Job scan failed: invalid response" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Job scan failed: invalid response", message: "Job scan failed: invalid response" },
+        { status: 500 }
+      );
     }
 
     const score = Number(parsed.match_score);
@@ -91,14 +102,15 @@ export async function POST(req: Request) {
       summary: content.summary,
     });
     if (insertErr) {
-      console.error("Job-scan API: failed to persist scan", insertErr.message);
+      // Non-fatal: still return scan result
     }
 
     await incrementUsage(userId, "job_scan");
     return NextResponse.json({ content });
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("Job-scan API error:", errorMessage);
-    return NextResponse.json({ error: "Job scan failed" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Job scan failed", message: "Job scan failed" },
+      { status: 500 }
+    );
   }
 }

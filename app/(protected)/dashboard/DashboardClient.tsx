@@ -26,7 +26,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import type { UsageSnapshot } from "@/lib/usage-read";
+import type { UsageSnapshot } from "@/lib/usage/read";
+import { usagePct, usageState } from "@/lib/utils";
 
 type PlanLimits = {
   resume_tailor_per_month: number;
@@ -85,15 +86,11 @@ function StatusBadge({ s }: { s: Application["status"] }) {
   );
 }
 
+import type { ScanAnalytics } from "@/lib/analytics/scan-analytics";
+
 type PlanType = "free" | "pro";
 
-export type ScanAnalytics = {
-  totalScans: number;
-  averageScore: number;
-  bestScore: number;
-  improvement: number | null;
-  scanHistory: { score: number; created_at: string }[];
-};
+export type { ScanAnalytics };
 
 export default function DashboardClient({
   plan = "free",
@@ -242,15 +239,6 @@ export default function DashboardClient({
       cta: "Scan JD",
     };
   }, [appsThisWeek, recentChats.length]);
-
-  const usagePct = (used: number, limit: number) =>
-    limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
-
-  const usageState = (pct: number): "low" | "warn" | "high" => {
-    if (pct >= 100) return "high";
-    if (pct >= 70) return "warn";
-    return "low";
-  };
 
   const nearingLimit = useMemo(() => {
     const p1 = usagePct(usage.resumeTailor, limits.resume_tailor_per_month);

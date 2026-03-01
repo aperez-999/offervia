@@ -3,9 +3,9 @@ import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import { getUserSubscription } from "@/lib/subscription";
 import { getPlanLimits } from "@/lib/plans";
-import { getUsageSnapshot } from "@/lib/usage-read";
-import { getServiceSupabase } from "@/lib/supabase/service";
-import DashboardClient, { type ScanAnalytics } from "./DashboardClient";
+import { getUsageSnapshot } from "@/lib/usage/read";
+import { buildScanAnalytics } from "@/lib/analytics/scan-analytics";
+import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -37,52 +37,7 @@ export default async function DashboardPage() {
   const limits = getPlanLimits(plan);
   const usage = await getUsageSnapshot(user.id);
 
-  let analytics: ScanAnalytics | null = null;
-  if (plan === "pro") {
-    const serviceSupabase = getServiceSupabase();
-    const { data: scans } = await serviceSupabase
-      .from("job_scans")
-      .select("match_score, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true });
-
-    const list = scans ?? [];
-    const totalScans = list.length;
-    const averageScore =
-      totalScans === 0
-        ? 0
-        : Math.round(
-            list.reduce((sum, s) => sum + (Number(s.match_score) || 0), 0) / totalScans
-          );
-    const bestScore =
-      totalScans === 0
-        ? 0
-        : Math.max(...list.map((s) => Number(s.match_score) || 0));
-
-    let improvement: number | null = null;
-    if (totalScans >= 6) {
-      const firstFive = list.slice(0, 5);
-      const lastFive = list.slice(-5);
-      const firstFiveAvg =
-        firstFive.reduce((sum, s) => sum + (Number(s.match_score) || 0), 0) / firstFive.length;
-      const lastFiveAvg =
-        lastFive.reduce((sum, s) => sum + (Number(s.match_score) || 0), 0) / lastFive.length;
-      improvement = Math.round((lastFiveAvg - firstFiveAvg) * 10) / 10;
-    }
-
-    const scanHistory = list.map((s) => ({
-      score: Number(s.match_score) || 0,
-      created_at: typeof s.created_at === "string" ? s.created_at : new Date(s.created_at).toISOString(),
-    }));
-
-    analytics = {
-      totalScans,
-      averageScore,
-      bestScore,
-      improvement,
-      scanHistory,
-    } satisfies ScanAnalytics;
-  }
+  const analytics = plan === "pro" ? await buildScanAnalytics(user.id) : null;
 
   return (
     <DashboardClient

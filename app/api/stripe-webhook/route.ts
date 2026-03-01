@@ -62,8 +62,10 @@ export async function POST(req: Request) {
         }
 
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const currentPeriodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
+        const periodEnd = (subscription as { current_period_end?: number })
+          .current_period_end;
+        const currentPeriodEnd = periodEnd
+          ? new Date(periodEnd * 1000).toISOString()
           : null;
 
         await supabase.from("subscriptions").upsert(
@@ -97,7 +99,7 @@ export async function POST(req: Request) {
       }
 
       default:
-        console.log("Stripe webhook: unhandled event type", event.type);
+        break;
     }
   } catch (err) {
     console.error("Stripe webhook: handler error", event.type, err);
