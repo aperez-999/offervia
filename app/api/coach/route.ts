@@ -1,19 +1,36 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 
-type Role = "system" | "user" | "assistant";
 export type CoachMode = "interview" | "resume" | "career";
 
-interface ChatMessage {
-  role: Role;
-  content: string;
-}
+const coachBodySchema = z
+  .object({
+    mode: z.enum(["interview", "resume", "cover_letter", "career"]),
+    responseMode: z.enum(["brief", "detailed"]).optional(),
+    messages: z
+      .array(
+        z.object({
+          role: z.enum(["system", "user", "assistant"]),
+          content: z.string().min(1).max(2000),
+        })
+      )
+      .min(1)
+      .max(20),
+  })
+  .strict()
+  .refine(
+    (data) => {
+      const total = data.messages.reduce((sum, m) => sum + (m.content?.length ?? 0), 0);
+      return total <= 20000;
+    },
+    { message: "Total message content too long" }
+  );
 
 export async function POST(req: Request) {
-  // ---- Rate limit (coach) ----
   const { checkRateLimitForApi } = await import("@/lib/rate-limit");
   const rl = await checkRateLimitForApi(req, "coach", {
     perMinute: 8,
@@ -23,8 +40,12 @@ export async function POST(req: Request) {
 
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds || 60;
+    const msg =
+      rl.reason === "unauthorized"
+        ? "Authentication required."
+        : "Too many requests. Try again soon.";
     return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { error: rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", message: msg },
       { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
     );
   }
@@ -43,36 +64,42 @@ export async function POST(req: Request) {
       );
     }
 
-    const { mode, responseMode, messages } = (await req.json()) as {
-      mode: CoachMode;
-      responseMode?: "brief" | "detailed";
-      messages: ChatMessage[]; // should include a system at [0] built client-side
-    };
-
-    if (!mode || !(mode in SYSTEM_PROMPTS)) {
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: "Invalid mode", message: "Invalid mode" },
-        { status: 400 }
-      );
-    }
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json(
-        { error: "No messages", message: "No messages" },
+        { error: "INVALID_INPUT", message: "Invalid request." },
         { status: 400 }
       );
     }
 
-    // Modify system prompt based on response mode
+    const parsed = coachBodySchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "INVALID_INPUT", message: "Invalid request." },
+        { status: 400 }
+      );
+    }
+
+    const { mode, responseMode, messages } = parsed.data;
+
+    if (!(mode in SYSTEM_PROMPTS)) {
+      return NextResponse.json(
+        { error: "INVALID_INPUT", message: "Invalid request." },
+        { status: 400 }
+      );
+    }
+
     const isBrief = responseMode === "brief";
     const baseSystemPrompt = SYSTEM_PROMPTS[mode];
     const systemPrompt = isBrief
       ? `${baseSystemPrompt}\n\nIMPORTANT: Keep responses concise and practical. Limit to 3-5 sentences or key bullet points. Be direct and actionable.`
       : `${baseSystemPrompt}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
 
-    // Update the first message (system prompt) with the modified version
-    const modifiedMessages: ChatMessage[] = [
+    const modifiedMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
       { role: "system", content: systemPrompt },
-      ...messages.slice(1)
+      ...messages.slice(1),
     ];
 
     const groq = getGroqClient();
@@ -94,7 +121,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ content });
   } catch {
     return NextResponse.json(
-      { error: "Coach failed to respond", message: "Coach failed to respond" },
+      { error: "SERVER_ERROR", message: "Coach failed to respond." },
       { status: 500 }
     );
   }

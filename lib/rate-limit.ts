@@ -2,6 +2,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getServiceSupabase } from "./supabase/service";
 
 export type RateWindow = { ms: number; limit: number };
+export type RateLimitKind =
+  | "coach"
+  | "scanner"
+  | "resume_tailor"
+  | "job-scan"
+  | "tracker_get"
+  | "tracker_write"
+  | "billing_checkout"
+  | "billing_portal"
+  | "contact";
 export type RateResult =
   | { ok: true }
   | { ok: false; retryAfterSeconds: number; reason: string; allowed?: boolean; limitReached?: boolean };
@@ -100,7 +110,7 @@ export async function checkRateLimitForApi(
 export async function enforceRateLimit(
   supabase: SupabaseClient,
   userId: string,
-  kind: "coach" | "scanner" | "resume_tailor" | "job-scan",
+  kind: RateLimitKind,
   options?: {
     windows?: RateWindow[]; // e.g. [{ ms: 60_000, limit: 10 }, { ms: 86_400_000, limit: 200 }]
     ip?: string | null;
@@ -150,6 +160,66 @@ export async function enforceRateLimit(
   if (insErr) {
     // Don’t block the request if logging fails; just proceed
     // (You can flip this to fail-closed later if you prefer)
+  }
+
+  return { ok: true };
+}
+
+const IP_ONLY_SENTINEL = "00000000-0000-0000-0000-000000000000";
+
+/** Rate limit when you already have userId (e.g. tracker Bearer, billing cookies). */
+export async function checkRateLimitWithUserId(
+  supabase: SupabaseClient,
+  userId: string,
+  kind: "tracker_get" | "tracker_write" | "billing_checkout" | "billing_portal",
+  customLimits: { perMinute?: number; perDay?: number }
+): Promise<RateResult> {
+  const windows: RateWindow[] = [
+    ...(customLimits.perMinute ? [{ ms: 60_000, limit: customLimits.perMinute }] : []),
+    ...(customLimits.perDay ? [{ ms: 86_400_000, limit: customLimits.perDay }] : []),
+  ];
+  if (windows.length === 0) return { ok: true };
+  return enforceRateLimit(supabase, userId, kind, { windows });
+}
+
+/** IP-only rate limit (e.g. contact form). Counts by kind + ip; inserts with sentinel user_id. */
+export async function enforceRateLimitByIp(
+  supabase: SupabaseClient,
+  kind: "contact",
+  ip: string,
+  windows: RateWindow[]
+): Promise<RateResult> {
+  const now = Date.now();
+
+  for (const w of windows) {
+    const cutoffIso = new Date(now - w.ms).toISOString();
+    const { count, error } = await supabase
+      .from("request_events")
+      .select("*", { head: true, count: "exact" })
+      .eq("kind", kind)
+      .eq("ip", ip)
+      .gt("created_at", cutoffIso);
+
+    if (error) {
+      return { ok: false, retryAfterSeconds: Math.ceil(w.ms / 1000), reason: "db_error" };
+    }
+    if ((count ?? 0) >= w.limit) {
+      return {
+        ok: false,
+        retryAfterSeconds: Math.ceil(w.ms / 1000),
+        reason: "rate_limited",
+      };
+    }
+  }
+
+  const { error: insErr } = await supabase.from("request_events").insert({
+    user_id: IP_ONLY_SENTINEL,
+    kind,
+    ip,
+    ua: null,
+  });
+  if (insErr) {
+    // Non-blocking
   }
 
   return { ok: true };

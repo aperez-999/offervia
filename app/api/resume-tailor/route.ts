@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import mammoth from "mammoth";
+
+const resumeTailorJsonSchema = z
+  .object({
+    resumeText: z.string().max(30000).optional(),
+    resumeContent: z.string().max(30000).optional(),
+    jobDescription: z.string().max(20000),
+    companyName: z.string().max(200).optional(),
+    templateMode: z.boolean().optional(),
+    template: z.union([z.string(), z.literal("1")]).optional(),
+  })
+  .strict()
+  .refine((d) => (d.resumeText?.length ?? 0) > 0 || (d.resumeContent?.length ?? 0) > 0, {
+    message: "resume required",
+  });
 
 /* ---------------- Helpers ---------------- */
 function normalizeText(s: string) {
@@ -99,8 +114,12 @@ export async function POST(req: Request) {
 
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds || 60;
+    const msg =
+      rl.reason === "unauthorized"
+        ? "Authentication required."
+        : "Too many requests. Try again soon.";
     return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "Authentication required" : "Rate limit reached. Please try again soon." },
+      { error: rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", message: msg },
       { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
     );
   }
@@ -130,13 +149,26 @@ export async function POST(req: Request) {
     let useTemplate = false;
 
     if (contentType.includes("application/json")) {
-      const body = await req.json();
-      // Accept both resumeText and resumeContent keys
-      resumeText = (body?.resumeContent || body?.resumeText || "").toString();
-      jobDescription = (body?.jobDescription || "").toString();
-      companyName = (body?.companyName || "").toString();
-      // roleTitle, location, companyUrl removed - not used in current implementation
-      useTemplate = !!body?.templateMode || !!body?.template || body?.template === "1";
+      let body: unknown;
+      try {
+        body = await req.json();
+      } catch {
+        return NextResponse.json(
+          { error: "INVALID_INPUT", message: "Invalid request." },
+          { status: 400 }
+        );
+      }
+      const parsed = resumeTailorJsonSchema.safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: "INVALID_INPUT", message: "Invalid request." },
+          { status: 400 }
+        );
+      }
+      resumeText = (parsed.data.resumeContent || parsed.data.resumeText || "").toString();
+      jobDescription = parsed.data.jobDescription.toString();
+      companyName = (parsed.data.companyName || "").toString();
+      useTemplate = !!parsed.data.templateMode || parsed.data.template === "1" || !!parsed.data.template;
     } else if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       jobDescription = (form.get("jobDescription") as string) || "";
@@ -168,10 +200,9 @@ export async function POST(req: Request) {
     companyName = normalizeText(companyName);
     // roleTitle, location, companyUrl removed - not used in current implementation
 
-    // Validation: ensure we have valid resume content
     if (!resumeText || resumeText.trim().length < 100) {
       return NextResponse.json(
-        { error: "No valid resume text received. Please re-upload your resume." },
+        { error: "INVALID_INPUT", message: "Invalid request." },
         { status: 400 }
       );
     }
@@ -181,7 +212,7 @@ export async function POST(req: Request) {
 
     if (!jobDescription || jobDescription.trim().length < 20) {
       return NextResponse.json(
-        { error: "Job description is required", message: "Job description is required" },
+        { error: "INVALID_INPUT", message: "Invalid request." },
         { status: 400 }
       );
     }
@@ -254,9 +285,8 @@ export async function POST(req: Request) {
     const cleaned = sanitizeOutput(aiText, companyName);
 
     if (cleaned.length < 100) {
-      const msg = "Model returned incomplete or invalid content. Try again.";
       return NextResponse.json(
-        { error: msg, message: msg },
+        { error: "SERVER_ERROR", message: "Something went wrong. Try again." },
         { status: 500 }
       );
     }
@@ -267,15 +297,17 @@ export async function POST(req: Request) {
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
-      const errMsg =
-        "Your resume and job description are too long for a single pass. Try shortening them and retry.";
       return NextResponse.json(
-        { error: errMsg, message: errMsg },
+        {
+          error: "PAYLOAD_TOO_LARGE",
+          message:
+            "Your resume and job description are too long for a single pass. Try shortening them and retry.",
+        },
         { status: 413 }
       );
     }
     return NextResponse.json(
-      { error: "Resume tailoring failed", message: "Resume tailoring failed" },
+      { error: "SERVER_ERROR", message: "Something went wrong." },
       { status: 500 }
     );
   }

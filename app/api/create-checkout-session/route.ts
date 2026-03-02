@@ -34,8 +34,22 @@ export async function POST(req: Request) {
 
     if (authError || !user?.id) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: "UNAUTHORIZED", message: "Authentication required." },
         { status: 401 }
+      );
+    }
+
+    const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
+    const { getServiceSupabase } = await import("@/lib/supabase/service");
+    const serviceSupabase = getServiceSupabase();
+    const rl = await checkRateLimitWithUserId(serviceSupabase, user.id, "billing_checkout", {
+      perMinute: 10,
+      perDay: 50,
+    });
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
+        { status: 429 }
       );
     }
 
@@ -44,7 +58,7 @@ export async function POST(req: Request) {
 
     if (!priceId || !siteUrl) {
       return NextResponse.json(
-        { error: "Checkout is not configured" },
+        { error: "SERVER_ERROR", message: "Unable to start billing session." },
         { status: 500 }
       );
     }
@@ -64,10 +78,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create checkout session";
-    console.error("Create checkout session error:", message);
+    console.error("[billing-session]", err);
     return NextResponse.json(
-      { error: message },
+      { error: "SERVER_ERROR", message: "Unable to start billing session." },
       { status: 500 }
     );
   }
