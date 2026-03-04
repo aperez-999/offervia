@@ -1,3 +1,5 @@
+const tailwindcssAnimate = require("tailwindcss-animate"); // eslint-disable-line @typescript-eslint/no-require-imports
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
@@ -10,6 +12,6 @@ module.exports = {
       extend: {},
     },
     plugins: [
-      require("tailwindcss-animate")
+      tailwindcssAnimate
     ],
   }
