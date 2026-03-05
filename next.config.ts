@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdf-parse"],
   eslint: {
     // Warning: This allows production builds to succeed with ESLint errors
     // Only use this if you need to deploy immediately

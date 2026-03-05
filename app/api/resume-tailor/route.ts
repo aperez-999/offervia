@@ -73,34 +73,23 @@ function sanitizeOutput(s: string, companyName: string) {
   return out;
 }
 
-/* ---------------- File extractors ---------------- */
+/* ---------------- File extractors (serverless-safe: text-only, no canvas/DOMMatrix) ---------------- */
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB for Vercel/serverless
+
 async function extractFromDocx(buffer: Buffer): Promise<string> {
   const { value } = await mammoth.extractRawText({ buffer });
   return value || "";
 }
-async function extractFromPdf(buffer: Buffer): Promise<string> {
-  try {
-    // Dynamic import to avoid ESM bundling issues with Next.js
-    const { PDFParse } = await import("pdf-parse");
-    const pdf = new PDFParse({ data: buffer });
-    try {
-      const textResult = await pdf.getText();
-      // Normalize spacing and remove excessive newlines
-      const text = (textResult.text || "")
-        .replace(/\r\n/g, "\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-      await pdf.destroy();
-      return text;
-    } catch (err) {
-      console.error("PDF extraction failed:", err);
-      await pdf.destroy().catch(() => {});
-      return "";
-    }
-  } catch (err) {
-    console.error("Failed to load pdf-parse module:", err);
-    return "";
-  }
+
+/** Extract text from PDF using pdf-parse (v1). Safe for Vercel serverless — no rendering, no canvas. */
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  const pdfParse = (await import("pdf-parse")).default;
+  const parsed = await pdfParse(buffer);
+  const text = (parsed?.text ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return text;
 }
 
 /* ---------------- Route ---------------- */
@@ -173,21 +162,58 @@ export async function POST(req: Request) {
       const form = await req.formData();
       jobDescription = (form.get("jobDescription") as string) || "";
       companyName = ((form.get("companyName") as string) || "").toString();
-      // roleTitle, location, companyUrl removed - not used in current implementation
       useTemplate = ((form.get("template") as string) || "") === "1";
 
-      // Prefer resumeText if provided; otherwise try the file
       const providedText = ((form.get("resumeText") as string) || "").toString();
       if (providedText && providedText.trim().length > 0) {
         resumeText = providedText;
       } else {
         const file = form.get("file") as File | null;
-        if (file) {
-          const buf = Buffer.from(await file.arrayBuffer());
+        if (file && file.size > 0) {
+          if (file.size > MAX_FILE_BYTES) {
+            return NextResponse.json(
+              {
+                error: "INVALID_INPUT",
+                message: `File too large. Maximum size is ${MAX_FILE_BYTES / (1024 * 1024)}MB.`,
+              },
+              { status: 400 }
+            );
+          }
           const name = (file.name || "").toLowerCase();
-          if (name.endsWith(".docx")) resumeText = await extractFromDocx(buf);
-          else if (name.endsWith(".pdf")) resumeText = await extractFromPdf(buf);
-          else resumeText = buf.toString("utf8");
+          const isPdf = name.endsWith(".pdf") || file.type === "application/pdf";
+          const isDocx = name.endsWith(".docx") || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          if (!isPdf && !isDocx) {
+            return NextResponse.json(
+              { error: "INVALID_INPUT", message: "Resume file must be PDF or DOCX." },
+              { status: 400 }
+            );
+          }
+          const buf = Buffer.from(await file.arrayBuffer());
+          if (isDocx) {
+            resumeText = await extractFromDocx(buf);
+          } else {
+            try {
+              resumeText = await extractPdfText(buf);
+            } catch (err) {
+              console.error("PDF parsing failed", err);
+              return NextResponse.json(
+                {
+                  error: "PDF_PARSE_FAILED",
+                  message: "Failed to extract text from PDF. Try re-saving the file or use a DOCX.",
+                },
+                { status: 500 }
+              );
+            }
+          }
+          if (!resumeText || resumeText.trim().length < 50) {
+            return NextResponse.json(
+              {
+                error: "INVALID_INPUT",
+                message: "Could not extract enough text from the resume. Ensure the file is a valid PDF or DOCX.",
+              },
+              { status: 400 }
+            );
+          }
         } else {
           resumeText = (form.get("resumeText") as string) || "";
         }
