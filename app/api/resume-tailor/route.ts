@@ -81,9 +81,12 @@ async function extractFromDocx(buffer: Buffer): Promise<string> {
   return value || "";
 }
 
-/** Extract text from PDF using pdf-parse (v1). Safe for Vercel serverless — no rendering, no canvas. */
+/**
+ * Extract text from PDF using pdf-parse (v1). Safe for Vercel serverless — no rendering, no canvas.
+ * Load via wrapper so pdf-parse is never the top-level module (avoids its built-in test that reads ./test/data/*.pdf).
+ */
 async function extractPdfText(buffer: Buffer): Promise<string> {
-  const pdfParse = (await import("pdf-parse")).default;
+  const pdfParse = (await import("@/lib/pdf-parse-server.cjs")).default;
   const parsed = await pdfParse(buffer);
   const text = (parsed?.text ?? "")
     .replace(/\r\n/g, "\n")
