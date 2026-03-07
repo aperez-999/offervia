@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import BetaBanner from "@/components/public/BetaBanner";
 import { useEffect, useRef } from "react";
 
 export default function Hero() {
@@ -30,21 +29,14 @@ export default function Hero() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:pt-10">
-        <BetaBanner />
-
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mx-auto max-w-3xl text-center"
+          className="mx-auto max-w-3xl text-center mt-4"
         >
-          {/* Beta pill */}
-          <div className="mt-4 sm:mt-4 mx-auto w-fit rounded-full border border-black/5 bg-white/90 px-3 py-1 text-xs font-medium text-indigo-700 shadow-sm dark:border-white/10 dark:bg-neutral-900/80 dark:text-indigo-300">
-            Free for Job Seekers • No credit card required
-          </div>
-
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl">
             AI resume builder, interview coach, and job search tools — built for job seekers.
           </h1>
 

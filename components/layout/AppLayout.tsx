@@ -13,7 +13,6 @@ import {
   BookOpen,
   GraduationCap,
   Mail,
-  Rocket,
   Menu,
   X,
 } from "lucide-react";
@@ -35,7 +34,6 @@ const navItems: NavItem[] = [
   { label: "Templates", href: "/templates", icon: Mail },
   { label: "Resources", href: "/resources", icon: BookOpen },
   { label: "Student Exclusives", href: "/students", icon: GraduationCap },
-  { label: "Coming Soon", href: "/upcoming", icon: Rocket },
 ];
 
 type PlanType = "free" | "pro";

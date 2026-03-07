@@ -31,7 +31,6 @@ import {
   Sun,
   Monitor,
   Mail,
-  Rocket,
 } from "lucide-react";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
@@ -48,7 +47,6 @@ const NAV_ITEMS: Nav[] = [
   { label: "Contact", href: "/contact", icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Profile", href: "/profile", icon: UserRound },
-  { label: "Coming Soon", href: "/upcoming", icon: Rocket },
 ];
 
 export default function GlobalCommandMenu() {
