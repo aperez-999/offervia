@@ -2,34 +2,46 @@ export const dynamic = "force-dynamic";
 
 import { z } from "zod";
 import { NextRequest } from "next/server";
-import { getServiceSupabase } from "@/lib/supabase/service";
-import { headers } from "next/headers";
-/*
-*/
+import { createServerClient } from "@supabase/ssr";
 
-function decodeToken(token: string): { sub?: string } | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    let payload = parts[1];
-    // base64url -> base64
-    payload = payload.replace(/-/g, "+").replace(/_/g, "/");
-    if (payload.length % 4) payload += "=".repeat(4 - (payload.length % 4));
-    const json = typeof atob === "function" ? atob(payload) : Buffer.from(payload, "base64").toString("utf8");
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
+async function getAuthedUserId(req: NextRequest): Promise<string | null> {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set() {
+          // Route handlers can't reliably set cookies; client/middleware handles refresh.
+        },
+        remove() {
+          // Route handlers can't reliably remove cookies.
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user?.id) return null;
+  return user.id;
 }
 
-async function getUserIdFromAuthHeader(): Promise<string | null> {
-  const hdrs = await headers();
-  const auth = (hdrs.get("authorization") || hdrs.get("Authorization") || "").toString().trim();
-  if (!auth.startsWith("Bearer ")) return null;
-  const token = auth.slice(7).trim();
-  const payload = decodeToken(token);
-  const sub = payload?.sub;
-  return typeof sub === "string" && sub.length > 0 ? sub : null;
+function getAuthedSupabase(req: NextRequest) {
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      get(name: string) {
+        return req.cookies.get(name)?.value;
+      },
+      set() {},
+      remove() {},
+    },
+  });
 }
 
 const createSchema = z
@@ -61,13 +73,14 @@ function errResponse(code: string, message: string, status: number) {
   return Response.json({ error: code, message }, { status });
 }
 
-export async function GET() {
-  const userId = await getUserIdFromAuthHeader();
+export async function GET(req: NextRequest) {
+  const userId = await getAuthedUserId(req);
   if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
-  const supabase = getServiceSupabase();
-  const rl = await checkRateLimitWithUserId(supabase, userId, "tracker_get", RATE_LIMIT_GET);
+  const { getServiceSupabase } = await import("@/lib/supabase/service");
+  const serviceSupabase = getServiceSupabase();
+  const rl = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_get", RATE_LIMIT_GET);
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds ?? 60;
     return Response.json(
@@ -76,6 +89,7 @@ export async function GET() {
     );
   }
 
+  const supabase = getAuthedSupabase(req);
   const { data, error } = await supabase
     .from("applications")
     .select("*")
@@ -90,12 +104,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const userId = await getUserIdFromAuthHeader();
+  const userId = await getAuthedUserId(req);
   if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
-  const supabase = getServiceSupabase();
-  const rlPost = await checkRateLimitWithUserId(supabase, userId, "tracker_write", RATE_LIMIT_WRITE);
+  const { getServiceSupabase } = await import("@/lib/supabase/service");
+  const serviceSupabase = getServiceSupabase();
+  const rlPost = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPost.ok) {
     const retry = rlPost.retryAfterSeconds ?? 60;
     return Response.json(
@@ -117,6 +132,7 @@ export async function POST(req: NextRequest) {
     return errResponse("INVALID_INPUT", "Invalid request.", 400);
   }
 
+  const supabase = getAuthedSupabase(req);
   const { data, error } = await supabase
     .from("applications")
     .insert({ ...parsed.data, user_id: userId })
@@ -130,12 +146,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const userId = await getUserIdFromAuthHeader();
+  const userId = await getAuthedUserId(req);
   if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
-  const supabase = getServiceSupabase();
-  const rlPatch = await checkRateLimitWithUserId(supabase, userId, "tracker_write", RATE_LIMIT_WRITE);
+  const { getServiceSupabase } = await import("@/lib/supabase/service");
+  const serviceSupabase = getServiceSupabase();
+  const rlPatch = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPatch.ok) {
     const retry = rlPatch.retryAfterSeconds ?? 60;
     return Response.json(
@@ -168,6 +185,7 @@ export async function PATCH(req: NextRequest) {
     return errResponse("INVALID_INPUT", "Invalid request.", 400);
   }
 
+  const supabase = getAuthedSupabase(req);
   const { id } = parsedId.data;
   const { data, error } = await supabase
     .from("applications")
@@ -185,12 +203,13 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const userId = await getUserIdFromAuthHeader();
+  const userId = await getAuthedUserId(req);
   if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
-  const supabase = getServiceSupabase();
-  const rlDel = await checkRateLimitWithUserId(supabase, userId, "tracker_write", RATE_LIMIT_WRITE);
+  const { getServiceSupabase } = await import("@/lib/supabase/service");
+  const serviceSupabase = getServiceSupabase();
+  const rlDel = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlDel.ok) {
     const retry = rlDel.retryAfterSeconds ?? 60;
     return Response.json(
@@ -207,6 +226,7 @@ export async function DELETE(req: NextRequest) {
     return errResponse("INVALID_INPUT", "Invalid request.", 400);
   }
 
+  const supabase = getAuthedSupabase(req);
   const { error } = await supabase
     .from("applications")
     .delete()
