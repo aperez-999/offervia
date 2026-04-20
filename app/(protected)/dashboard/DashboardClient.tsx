@@ -54,6 +54,11 @@ type MsgRow = {
   created_at: string;
 };
 
+type OnboardingPrefs = {
+  onboarding_dismissed?: boolean | null;
+  onboarding_completed?: Record<string, boolean> | null;
+};
+
 const MODE_LABELS: Record<MsgRow["mode"], string> = {
   interview: "Interview Coach",
   resume: "Resume Feedback",
@@ -112,6 +117,10 @@ export default function DashboardClient({
   const [apps, setApps] = useState<Application[]>([]);
   const [recentChats, setRecentChats] = useState<MsgRow[]>([]);
   const [friendlyName, setFriendlyName] = useState<string>("there");
+  const [weeklyGoalTarget, setWeeklyGoalTarget] = useState<number>(5);
+  const [emailDigestEnabled, setEmailDigestEnabled] = useState<boolean>(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(false);
+  const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
 
   function dismissUpgradeBanner() {
     router.replace("/dashboard");
@@ -136,6 +145,38 @@ export default function DashboardClient({
       if (!user) {
         setLoading(false);
         return;
+      }
+
+      // preferences
+      const { data: prefs } = await supabase
+        .from("user_prefs")
+        .select("weekly_goal,email_digest")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (prefs) {
+        if (typeof prefs.weekly_goal === "number" && Number.isFinite(prefs.weekly_goal)) {
+          setWeeklyGoalTarget(Math.max(0, Math.min(50, Math.round(prefs.weekly_goal))));
+        }
+        if (typeof prefs.email_digest === "boolean") {
+          setEmailDigestEnabled(prefs.email_digest);
+        }
+      }
+
+      // onboarding (persisted in user_prefs)
+      const { data: ob } = await supabase
+        .from("user_prefs")
+        .select("onboarding_dismissed,onboarding_completed")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (ob) {
+        const typed = ob as unknown as OnboardingPrefs;
+        if (typeof typed.onboarding_dismissed === "boolean") {
+          setOnboardingDismissed(typed.onboarding_dismissed);
+        }
+        const completed = typed.onboarding_completed;
+        if (completed && typeof completed === "object") {
+          setOnboardingCompleted(completed as Record<string, boolean>);
+        }
       }
 
       const { data: appData } = await supabase
@@ -182,7 +223,6 @@ export default function DashboardClient({
     return { appsThisWeek, interviewing, offers, total: apps.length };
   }, [apps]);
 
-  const weeklyGoalTarget = 5;
   const weeklyGoalPct = Math.max(
     0,
     Math.min(100, Math.round((appsThisWeek / weeklyGoalTarget) * 100))
@@ -250,6 +290,57 @@ export default function DashboardClient({
       (p3 >= 80 && p3 < 100)
     );
   }, [usage, limits]);
+
+  const onboardingItems = useMemo(() => {
+    const items = [
+      { key: "add_application", label: "Add your first application", href: "/tracker", done: apps.length > 0 },
+      { key: "scan_jd", label: "Run a job scan", href: "/scanner", done: usage.jobScans > 0 },
+      { key: "tailor_resume", label: "Tailor a resume", href: "/resume", done: usage.resumeTailor > 0 },
+      { key: "coach_chat", label: "Ask the coach something", href: "/coach", done: usage.coachMessages > 0 },
+      { key: "set_weekly_goal", label: "Set a weekly goal", href: "/settings", done: weeklyGoalTarget > 0 },
+      { key: "enable_digest", label: "Enable weekly digest", href: "/settings", done: emailDigestEnabled },
+    ];
+    return items.map((it) => ({
+      ...it,
+      done: it.done || onboardingCompleted[it.key] === true,
+    }));
+  }, [apps.length, emailDigestEnabled, onboardingCompleted, usage, weeklyGoalTarget]);
+
+  const onboardingProgress = useMemo(() => {
+    const total = onboardingItems.length || 1;
+    const done = onboardingItems.filter((i) => i.done).length;
+    return { done, total, pct: Math.round((done / total) * 100) };
+  }, [onboardingItems]);
+
+  async function persistOnboarding(next: { dismissed?: boolean; completed?: Record<string, boolean> }) {
+    const merged = {
+      dismissed: next.dismissed ?? onboardingDismissed,
+      completed: next.completed ?? onboardingCompleted,
+    };
+    setOnboardingDismissed(merged.dismissed);
+    setOnboardingCompleted(merged.completed);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
+      const { error } = await supabase
+        .from("user_prefs")
+        .upsert(
+          ({
+            user_id: user.id,
+            onboarding_dismissed: merged.dismissed,
+            onboarding_completed: merged.completed,
+          } satisfies Record<string, unknown>),
+          { onConflict: "user_id" }
+        );
+      // ignore missing-column errors safely
+      if (error) {
+        // noop
+      }
+    } catch {
+      // noop
+    }
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -422,6 +513,55 @@ export default function DashboardClient({
         </div>
       </section>
 
+      {/* Onboarding */}
+      {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
+        <section className="rounded-xl border border-border bg-card/60 px-4 py-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+                Getting started
+              </div>
+              <div className="mt-1 text-sm text-foreground/80">
+                {onboardingProgress.done}/{onboardingProgress.total} completed
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 shrink-0 rounded-full p-0 hover:bg-foreground/[0.06]"
+              onClick={() => persistOnboarding({ dismissed: true })}
+              aria-label="Dismiss onboarding"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <Progress value={onboardingProgress.pct} className="mt-3 h-2" />
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {onboardingItems.map((it) => (
+              <li key={it.key} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2">
+                <div className="min-w-0">
+                  <div className="text-sm text-foreground truncate">
+                    {it.done ? "✓ " : ""}{it.label}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!it.done && (
+                    <Button asChild size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
+                      <Link href={it.href}>Go</Link>
+                    </Button>
+                  )}
+                  {it.done && (
+                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
+                      Done
+                    </Badge>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {/* Greeting */}
       <section>
         <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
@@ -554,6 +694,19 @@ export default function DashboardClient({
               </div>
               <div className="mt-1 text-sm text-foreground/80">
                 {appsThisWeek}/{weeklyGoalTarget} applications
+              </div>
+              <div className="mt-1 text-xs text-foreground/60">
+                {emailDigestEnabled ? (
+                  <span>Weekly digest is on.</span>
+                ) : (
+                  <span>
+                    Weekly digest is off.{" "}
+                    <Link href="/settings" className="underline text-indigo-600 dark:text-indigo-300">
+                      Enable in settings
+                    </Link>
+                    .
+                  </span>
+                )}
               </div>
             </div>
             <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />

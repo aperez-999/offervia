@@ -1,16 +1,17 @@
 // lib/email.ts
 import nodemailer, { Transporter } from "nodemailer";
+import { serverEnv } from "@/lib/env/server";
 
 let cachedTransporter: Transporter | null = null;
 
 export function getMailer() {
   if (cachedTransporter) return cachedTransporter;
 
-  const host = process.env.SMTP_HOST!;
-  const port = Number(process.env.SMTP_PORT || 465);
+  const host = serverEnv.SMTP_HOST!;
+  const port = Number(serverEnv.SMTP_PORT || 465);
   const secure = String(process.env.SMTP_SECURE || "true") === "true";
-  const user = process.env.SMTP_USER!;
-  const pass = process.env.SMTP_PASS!;
+  const user = serverEnv.SMTP_USER!;
+  const pass = serverEnv.SMTP_PASS!;
 
   if (!host || !user || !pass) {
     throw new Error("SMTP env vars are missing. Check .env.local");
@@ -59,15 +60,51 @@ export async function sendContactEmail(opts: {
   `;
 
   return transporter.sendMail({
-    from: `"${process.env.CONTACT_FROM_NAME || "Offervia"}" <${
-      process.env.CONTACT_FROM_EMAIL
-    }>`,
+    from: `"${serverEnv.CONTACT_FROM_NAME || "Offervia"}" <${serverEnv.CONTACT_FROM_EMAIL}>`,
     to: opts.toEmail,
     subject: `[Offervia] ${opts.subject || "New contact message"}`,
     text,
     html,
     replyTo: opts.replyTo || opts.fromEmail,
   });
+}
+
+export async function sendUserDigestEmail(opts: {
+  toEmail: string;
+  subject: string;
+  preheader?: string;
+  text: string;
+  html: string;
+}) {
+  const transporter = getMailer();
+  return transporter.sendMail({
+    from: `"${serverEnv.CONTACT_FROM_NAME || "Offervia"}" <${serverEnv.CONTACT_FROM_EMAIL}>`,
+    to: opts.toEmail,
+    subject: opts.subject,
+    text: opts.text,
+    html: wrapDigestHtml(opts.html, opts.preheader),
+  });
+}
+
+function wrapDigestHtml(inner: string, preheader?: string) {
+  const pre = preheader ? escapeHtml(preheader) : "";
+  return `
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${pre}</div>
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45">
+      <div style="max-width:680px;margin:0 auto;padding:20px">
+        <div style="margin-bottom:14px">
+          <div style="font-weight:700;font-size:18px">Offervia</div>
+          <div style="color:#6b7280;font-size:13px">Weekly summary</div>
+        </div>
+        <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px">
+          ${inner}
+        </div>
+        <div style="margin-top:14px;color:#6b7280;font-size:12px">
+          Manage email settings in your Offervia settings page.
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function escapeHtml(s: string) {
