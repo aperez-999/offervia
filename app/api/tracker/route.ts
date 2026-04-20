@@ -2,26 +2,15 @@ export const dynamic = "force-dynamic";
 
 import { z } from "zod";
 import { NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import { fail } from "@/lib/api/response";
 
 async function getAuthedUserId(req: NextRequest): Promise<string | null> {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
-        },
-        set() {
-          // Route handlers can't reliably set cookies; client/middleware handles refresh.
-        },
-        remove() {
-          // Route handlers can't reliably remove cookies.
-        },
-      },
-    }
-  );
+  const supabase = createSupabaseServerClient({
+    get(name: string) {
+      return req.cookies.get(name)?.value;
+    },
+  });
 
   const {
     data: { user },
@@ -33,13 +22,9 @@ async function getAuthedUserId(req: NextRequest): Promise<string | null> {
 }
 
 function getAuthedSupabase(req: NextRequest) {
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      get(name: string) {
-        return req.cookies.get(name)?.value;
-      },
-      set() {},
-      remove() {},
+  return createSupabaseServerClient({
+    get(name: string) {
+      return req.cookies.get(name)?.value;
     },
   });
 }
@@ -69,8 +54,8 @@ const idSchema = z.object({ id: z.string().uuid("invalid id") });
 const RATE_LIMIT_GET = { perMinute: 60, perDay: 500 };
 const RATE_LIMIT_WRITE = { perMinute: 20, perDay: 200 };
 
-function errResponse(code: string, message: string, status: number) {
-  return Response.json({ error: code, message }, { status });
+function errResponse(code: Parameters<typeof fail>[0], message: string, status: number) {
+  return fail(code, message, status);
 }
 
 export async function GET(req: NextRequest) {
@@ -83,10 +68,9 @@ export async function GET(req: NextRequest) {
   const rl = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_get", RATE_LIMIT_GET);
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds ?? 60;
-    return Response.json(
-      { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
-      { status: 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const supabase = getAuthedSupabase(req);
@@ -113,10 +97,9 @@ export async function POST(req: NextRequest) {
   const rlPost = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPost.ok) {
     const retry = rlPost.retryAfterSeconds ?? 60;
-    return Response.json(
-      { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
-      { status: 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   let body: unknown;
@@ -155,10 +138,9 @@ export async function PATCH(req: NextRequest) {
   const rlPatch = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPatch.ok) {
     const retry = rlPatch.retryAfterSeconds ?? 60;
-    return Response.json(
-      { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
-      { status: 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const url = new URL(req.url);
@@ -212,10 +194,9 @@ export async function DELETE(req: NextRequest) {
   const rlDel = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlDel.ok) {
     const retry = rlDel.retryAfterSeconds ?? 60;
-    return Response.json(
-      { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
-      { status: 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const url = new URL(req.url);

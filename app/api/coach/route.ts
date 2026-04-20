@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
+import { fail } from "@/lib/api/response";
 
 export type CoachMode = "interview" | "resume" | "career";
 
@@ -44,10 +44,9 @@ export async function POST(req: Request) {
       rl.reason === "unauthorized"
         ? "Authentication required."
         : "Too many requests. Try again soon.";
-    return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", message: msg },
-      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const userId = rl.userId!;
@@ -55,12 +54,10 @@ export async function POST(req: Request) {
   try {
     const gate = await checkFeatureGate(userId, "coach");
     if (!gate.allowed) {
-      return NextResponse.json(
-        {
-          error: "PLAN_LIMIT_REACHED",
-          message: "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
-        },
-        { status: 403 }
+      return fail(
+        "PLAN_LIMIT_REACHED",
+        "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+        403
       );
     }
 
@@ -68,27 +65,18 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const parsed = coachBodySchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const { mode, responseMode, messages } = parsed.data;
 
     if (!(mode in SYSTEM_PROMPTS)) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const isBrief = responseMode === "brief";
@@ -118,11 +106,8 @@ export async function POST(req: Request) {
     const content = rawContent.trimStart().replace(/\n{3,}/g, "\n\n").trim();
 
     await incrementUsage(userId, "coach");
-    return NextResponse.json({ content });
+    return Response.json({ content });
   } catch {
-    return NextResponse.json(
-      { error: "SERVER_ERROR", message: "Coach failed to respond." },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Coach failed to respond.", 500);
   }
 }

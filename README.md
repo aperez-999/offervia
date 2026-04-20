@@ -40,47 +40,53 @@ Built with 💜 by **PerezDev** (Alejandro Perez-Rivero), leveraging **Groq + Su
 ---
 
 ## 🧱 Architecture Overview
-Next.js (app/)
-├─ Public:      /, /login, /signup
-├─ Protected:   /dashboard, /tracker, /coach, /resume
-├─ API routes:  /api/ai/*, /api/tracker
-│
-├─ Supabase:    Auth + Tables (applications, prompts, messages)
-└─ Groq:        Server-side inference only
+Next.js (App Router)
+- **Public**: `/`, `/login`, `/signup`
+- **Protected**: `/dashboard`, `/tracker`, `/coach`, `/resume`, `/scanner`, `/settings`, `/profile`
+- **API routes**:
+  - `/api/resume-tailor`
+  - `/api/job-scan`
+  - `/api/coach`
+  - `/api/tracker`
+  - Billing: `/api/create-checkout-session`, `/api/create-portal-session`, `/api/stripe-webhook`
+
+Supabase provides Auth + Postgres (RLS), and Groq is called server-side only.
 
 ---
 
-## 🗂 Recommended Folder Structure
+## 🗂 Project Structure (this repo)
 offervia/
 ├─ app/
-│  ├─ (public)/            → Landing, Pricing
 │  ├─ (auth)/              → Login, Signup
-│  ├─ (protected)/         → Dashboard, Resume, Scanner, Coach, Tracker
-│  ├─ api/ai/              → Tailor / Scan / Coach endpoints
-│  ├─ api/tracker/         → CRUD job applications
+│  ├─ (protected)/         → Dashboard, Resume, Scanner, Coach, Tracker, Settings
+│  ├─ api/                 → Route handlers (resume-tailor, job-scan, coach, tracker, billing)
 │  └─ layout.tsx
-│
-├─ components/             → UI (shadcn), layout, forms, tables
-├─ lib/                    → Supabase, Groq, Auth utilities
-├─ db/                     → schema.sql + policies.sql
-├─ styles/                 → globals.css
+├─ components/             → UI + feature components
+├─ lib/                    → Supabase, Groq, usage/billing helpers
+├─ db/                     → `schema.sql` + `policies.sql`
+├─ public/
 ├─ .env.example
-├─ package.json
 └─ README.md
 
 ---
 
 ## 🧮 Database Schema (Supabase)
+This repo includes SQL you can paste into the Supabase SQL editor:
+- `db/schema.sql`
+- `db/policies.sql`
 
-**Tables**
-
-- `applications` — job applications per user  
-- `messages` — AI chat history  
-- `prompts` — system prompts per user  
+**Core tables used by the app**
+- `applications` — job applications per user
+- `messages` — AI chat history
+- `subscriptions` — billing state (read-only for end users)
+- `usage_snapshots` — monthly usage counters (read-only for end users)
+- `job_scans` — scan history (read-only for end users)
+- `profiles`, `user_prefs` — profile + settings
+- `request_events` — rate limiting events (service-role only)
 
 **Row Level Security**
-
-Each table enforces `auth.uid()` ownership for full data privacy.
+- Most user tables enforce ownership via `auth.uid()`.
+- Tables written by backend/webhooks use the **service role key** and bypass RLS (as intended).
 
 ---
 
@@ -88,9 +94,9 @@ Each table enforces `auth.uid()` ownership for full data privacy.
 
 | Endpoint | Method | Description |
 |-----------|---------|-------------|
-| `/api/ai/tailor` | `POST` | Returns tailored bullets & summary for a resume |
-| `/api/ai/scan` | `POST` | Extracts required skills and keyword gaps |
-| `/api/ai/coach` | `POST` | Chat-based Q&A with AI coach |
+| `/api/resume-tailor` | `POST` | Tailors a resume to a job description (supports JSON and multipart upload) |
+| `/api/job-scan` | `POST` | Extracts skills + keyword gaps (returns JSON) |
+| `/api/coach` | `POST` | Chat-based Q&A with AI coach |
 | `/api/tracker` | `GET/POST/PATCH/DELETE` | CRUD operations for job applications |
 
 ---
@@ -108,6 +114,9 @@ Each table enforces `auth.uid()` ownership for full data privacy.
 | `NEXT_PUBLIC_SITE_URL` | Base domain |
 | `SMTP_*` | Gmail SMTP config |
 | `CONTACT_*` | Contact email routing |
+| `NEXT_PUBLIC_STRIPE_PRICE_ID` | Stripe Price ID for Pro (safe to expose) |
+| `STRIPE_SECRET_KEY` | Stripe secret key (server-only) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (server-only) |
 
 ---
 
@@ -135,8 +144,8 @@ npm install
 cp .env.example .env.local
 # Fill Supabase + Groq credentials
 
-# 4️⃣ Setup Supabase schema
-# Paste /db/schema.sql into Supabase SQL Editor
+# 4️⃣ Setup Supabase schema + policies
+# Paste `db/schema.sql` then `db/policies.sql` into the Supabase SQL Editor
 
 # 5️⃣ Start dev server
 pnpm dev

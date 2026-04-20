@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import { getServiceSupabase } from "@/lib/supabase/service";
+import { fail } from "@/lib/api/response";
 
 const jobScanBodySchema = z.object({ jd: z.string().min(20).max(20000) }).strict();
 
@@ -21,10 +21,9 @@ export async function POST(req: Request) {
       rl.reason === "unauthorized"
         ? "Authentication required."
         : "Too many requests. Try again soon.";
-    return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", message: msg },
-      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const userId = rl.userId!;
@@ -32,12 +31,10 @@ export async function POST(req: Request) {
   try {
     const gate = await checkFeatureGate(userId, "job_scan");
     if (!gate.allowed) {
-      return NextResponse.json(
-        {
-          error: "PLAN_LIMIT_REACHED",
-          message: "You've reached your monthly job scan limit. Upgrade to Pro to continue.",
-        },
-        { status: 403 }
+      return fail(
+        "PLAN_LIMIT_REACHED",
+        "You've reached your monthly job scan limit. Upgrade to Pro to continue.",
+        403
       );
     }
 
@@ -45,18 +42,12 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const parsed = jobScanBodySchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const { jd } = parsed.data;
@@ -80,10 +71,7 @@ export async function POST(req: Request) {
       const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       aiParsed = JSON.parse(stripped) as typeof aiParsed;
     } catch {
-      return NextResponse.json(
-        { error: "SERVER_ERROR", message: "Job scan failed. Try again." },
-        { status: 500 }
-      );
+      return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
     }
 
     if (
@@ -91,10 +79,7 @@ export async function POST(req: Request) {
       !Array.isArray(aiParsed.missing_skills) ||
       typeof aiParsed.summary !== "string"
     ) {
-      return NextResponse.json(
-        { error: "SERVER_ERROR", message: "Job scan failed. Try again." },
-        { status: 500 }
-      );
+      return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
     }
 
     const score = Number(aiParsed.match_score);
@@ -120,11 +105,8 @@ export async function POST(req: Request) {
     }
 
     await incrementUsage(userId, "job_scan");
-    return NextResponse.json({ content });
+    return Response.json({ content });
   } catch {
-    return NextResponse.json(
-      { error: "SERVER_ERROR", message: "Job scan failed. Try again." },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
   }
 }

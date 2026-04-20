@@ -5,6 +5,7 @@ import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import mammoth from "mammoth";
+import { fail } from "@/lib/api/response";
 
 const resumeTailorJsonSchema = z
   .object({
@@ -110,10 +111,9 @@ export async function POST(req: Request) {
       rl.reason === "unauthorized"
         ? "Authentication required."
         : "Too many requests. Try again soon.";
-    return NextResponse.json(
-      { error: rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", message: msg },
-      { status: rl.reason === "unauthorized" ? 401 : 429, headers: { "Retry-After": String(retry) } }
-    );
+    return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
+      headers: { "Retry-After": String(retry) },
+    });
   }
 
   const userId = rl.userId!;
@@ -121,12 +121,10 @@ export async function POST(req: Request) {
   try {
     const gate = await checkFeatureGate(userId, "resume_tailor");
     if (!gate.allowed) {
-      return NextResponse.json(
-        {
-          error: "PLAN_LIMIT_REACHED",
-          message: "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.",
-        },
-        { status: 403 }
+      return fail(
+        "PLAN_LIMIT_REACHED",
+        "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.",
+        403
       );
     }
 
@@ -145,17 +143,11 @@ export async function POST(req: Request) {
       try {
         body = await req.json();
       } catch {
-        return NextResponse.json(
-          { error: "INVALID_INPUT", message: "Invalid request." },
-          { status: 400 }
-        );
+        return fail("INVALID_INPUT", "Invalid request.", 400);
       }
       const parsed = resumeTailorJsonSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json(
-          { error: "INVALID_INPUT", message: "Invalid request." },
-          { status: 400 }
-        );
+        return fail("INVALID_INPUT", "Invalid request.", 400);
       }
       resumeText = (parsed.data.resumeContent || parsed.data.resumeText || "").toString();
       jobDescription = parsed.data.jobDescription.toString();
@@ -174,22 +166,17 @@ export async function POST(req: Request) {
         const file = form.get("file") as File | null;
         if (file && file.size > 0) {
           if (file.size > MAX_FILE_BYTES) {
-            return NextResponse.json(
-              {
-                error: "INVALID_INPUT",
-                message: `File too large. Maximum size is ${MAX_FILE_BYTES / (1024 * 1024)}MB.`,
-              },
-              { status: 400 }
+            return fail(
+              "INVALID_INPUT",
+              `File too large. Maximum size is ${MAX_FILE_BYTES / (1024 * 1024)}MB.`,
+              400
             );
           }
           const name = (file.name || "").toLowerCase();
           const isPdf = name.endsWith(".pdf") || file.type === "application/pdf";
           const isDocx = name.endsWith(".docx") || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
           if (!isPdf && !isDocx) {
-            return NextResponse.json(
-              { error: "INVALID_INPUT", message: "Resume file must be PDF or DOCX." },
-              { status: 400 }
-            );
+            return fail("INVALID_INPUT", "Resume file must be PDF or DOCX.", 400);
           }
           const buf = Buffer.from(await file.arrayBuffer());
           if (isDocx) {
@@ -199,22 +186,18 @@ export async function POST(req: Request) {
               resumeText = await extractPdfText(buf);
             } catch (err) {
               console.error("PDF parsing failed", err);
-              return NextResponse.json(
-                {
-                  error: "PDF_PARSE_FAILED",
-                  message: "Failed to extract text from PDF. Try re-saving the file or use a DOCX.",
-                },
-                { status: 500 }
+              return fail(
+                "SERVER_ERROR",
+                "Failed to extract text from PDF. Try re-saving the file or use a DOCX.",
+                500
               );
             }
           }
           if (!resumeText || resumeText.trim().length < 50) {
-            return NextResponse.json(
-              {
-                error: "INVALID_INPUT",
-                message: "Could not extract enough text from the resume. Ensure the file is a valid PDF or DOCX.",
-              },
-              { status: 400 }
+            return fail(
+              "INVALID_INPUT",
+              "Could not extract enough text from the resume. Ensure the file is a valid PDF or DOCX.",
+              400
             );
           }
         } else {
@@ -230,20 +213,14 @@ export async function POST(req: Request) {
     // roleTitle, location, companyUrl removed - not used in current implementation
 
     if (!resumeText || resumeText.trim().length < 100) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     // Strip obvious sample placeholders but preserve user content
     resumeText = stripSamplePlaceholders(resumeText);
 
     if (!jobDescription || jobDescription.trim().length < 20) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
     
     // Debug log in development to verify resume content
@@ -314,10 +291,7 @@ export async function POST(req: Request) {
     const cleaned = sanitizeOutput(aiText, companyName);
 
     if (cleaned.length < 100) {
-      return NextResponse.json(
-        { error: "SERVER_ERROR", message: "Something went wrong. Try again." },
-        { status: 500 }
-      );
+      return fail("SERVER_ERROR", "Something went wrong. Try again.", 500);
     }
 
     await incrementUsage(userId, "resume_tailor");
@@ -326,18 +300,12 @@ export async function POST(req: Request) {
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
-      return NextResponse.json(
-        {
-          error: "PAYLOAD_TOO_LARGE",
-          message:
-            "Your resume and job description are too long for a single pass. Try shortening them and retry.",
-        },
-        { status: 413 }
+      return fail(
+        "INVALID_INPUT",
+        "Your resume and job description are too long for a single pass. Try shortening them and retry.",
+        413
       );
     }
-    return NextResponse.json(
-      { error: "SERVER_ERROR", message: "Something went wrong." },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Something went wrong.", 500);
   }
 }

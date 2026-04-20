@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendContactEmail } from "@/lib/email";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { getIpUa } from "@/lib/rate-limit";
 import { enforceRateLimitByIp } from "@/lib/rate-limit";
+import { serverEnv } from "@/lib/env/server";
+import { fail } from "@/lib/api/response";
 
 const contactSchema = z
   .object({
@@ -16,7 +17,7 @@ const contactSchema = z
   .strict();
 
 function isSameOrigin(origin: string | null, referer: string | null): boolean {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "";
+  const siteUrl = serverEnv.NEXT_PUBLIC_SITE_URL || "";
   if (!siteUrl) return false;
   let allowedHost: string;
   try {
@@ -45,46 +46,34 @@ export async function POST(req: Request) {
   try {
     const origin = req.headers.get("origin");
     const referer = req.headers.get("referer");
-    const isDev = process.env.NODE_ENV === "development";
+    const isDev = serverEnv.NODE_ENV === "development";
     const allowed =
       isSameOrigin(origin, referer) || (isDev && (!origin || origin.includes("localhost")));
     if (!allowed) {
-      return NextResponse.json(
-        { error: "FORBIDDEN", message: "Request not allowed." },
-        { status: 403 }
-      );
+      return fail("BAD_REQUEST", "Request not allowed.", 403);
     }
 
-    const toEmail = process.env.CONTACT_TO_EMAIL;
+    const toEmail = serverEnv.CONTACT_TO;
     if (!toEmail) {
-      return NextResponse.json(
-        { error: "SERVER_ERROR", message: "Something went wrong." },
-        { status: 500 }
-      );
+      return fail("SERVER_ERROR", "Something went wrong.", 500);
     }
 
     let body: unknown;
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const parsed = contactSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "INVALID_INPUT", message: "Invalid request." },
-        { status: 400 }
-      );
+      return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
     const { name, email, message, subject, website } = parsed.data;
 
     if (website && website.trim().length > 0) {
-      return NextResponse.json({ ok: true });
+      return Response.json({ ok: true });
     }
 
     const supabase = getServiceSupabase();
@@ -95,10 +84,9 @@ export async function POST(req: Request) {
       { ms: 86_400_000, limit: 20 },
     ]);
     if (!rl.ok) {
-      return NextResponse.json(
-        { error: "RATE_LIMITED", message: "Too many requests. Try again soon." },
-        { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds ?? 60) } }
-      );
+      return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+        headers: { "Retry-After": String(rl.retryAfterSeconds ?? 60) },
+      });
     }
 
     const trimmedSubject =
@@ -113,11 +101,8 @@ export async function POST(req: Request) {
       replyTo: email.trim(),
     });
 
-    return NextResponse.json({ ok: true });
+    return Response.json({ ok: true });
   } catch {
-    return NextResponse.json(
-      { error: "SERVER_ERROR", message: "Failed to send your message. Please try again." },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Failed to send your message. Please try again.", 500);
   }
 }

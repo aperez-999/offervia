@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import stripe from "@/lib/stripe";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import type Stripe from "stripe";
+import { serverEnv } from "@/lib/env/server";
+import { fail } from "@/lib/api/response";
 
 export async function POST(req: Request) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = serverEnv.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
     console.error("Stripe webhook: STRIPE_WEBHOOK_SECRET is not set");
-    return NextResponse.json(
-      { error: "Webhook not configured" },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Webhook not configured", 500);
   }
 
   let rawBody: string;
@@ -18,10 +17,7 @@ export async function POST(req: Request) {
     rawBody = await req.text();
   } catch (e) {
     console.error("Stripe webhook: failed to read body", e);
-    return NextResponse.json(
-      { error: "Invalid body" },
-      { status: 400 }
-    );
+    return fail("INVALID_INPUT", "Invalid body", 400);
   }
 
   const signature = req.headers.get("stripe-signature") ?? "";
@@ -31,10 +27,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(rawBody, signature, secret);
   } catch (err) {
     console.error("Stripe webhook: signature verification failed", err);
-    return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 400 }
-    );
+    return fail("INVALID_INPUT", "Invalid signature", 400);
   }
 
   const supabase = getServiceSupabase();
@@ -103,10 +96,7 @@ export async function POST(req: Request) {
     }
   } catch (err) {
     console.error("Stripe webhook: handler error", event.type, err);
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    return fail("SERVER_ERROR", "Webhook handler failed", 500);
   }
 
   return NextResponse.json({ received: true });

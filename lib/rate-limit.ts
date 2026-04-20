@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getServiceSupabase } from "./supabase/service";
+import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 
 export type RateWindow = { ms: number; limit: number };
 export type RateLimitKind =
@@ -38,9 +39,6 @@ export async function checkRateLimitForApi(
   }
 ): Promise<RateResult & { userId?: string }> {
   try {
-    // Get authenticated user from request cookies
-    const { createServerClient } = await import("@supabase/ssr");
-    
     // Read cookies from request headers
     const cookieHeader = req.headers.get("cookie") || "";
     const cookies: Record<string, string> = {};
@@ -51,24 +49,11 @@ export async function checkRateLimitForApi(
       }
     });
     
-    const supabaseAuth = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookies[name];
-          },
-          set() {
-            // In API routes, we can't set cookies directly
-            // The client will handle session refresh
-          },
-          remove() {
-            // In API routes, we can't remove cookies directly
-          },
-        },
-      }
-    );
+    const supabaseAuth = createSupabaseServerClient({
+      get(name: string) {
+        return cookies[name];
+      },
+    });
 
     const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
     

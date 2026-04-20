@@ -1,16 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { serverEnv } from "@/lib/env/server";
 
 let serviceClient: SupabaseClient | null = null;
 
 export function getServiceSupabase(): SupabaseClient {
   if (serviceClient) return serviceClient;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-  }
-  serviceClient = createClient(url, serviceKey, {
+  serviceClient = createClient(serverEnv.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { "X-Client-Info": "service-role" } },
   });

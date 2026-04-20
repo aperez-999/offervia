@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import AppLayout from "@/components/layout/AppLayout";
 import { getUserSubscription } from "@/lib/subscription";
+import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 
 export default async function ProtectedLayout({
   children,
@@ -10,19 +10,11 @@ export default async function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set() {},
-        remove() {},
-      },
-    }
-  );
+  const supabase = createSupabaseServerClient({
+    get(name: string) {
+      return cookieStore.get(name)?.value;
+    },
+  });
 
   const {
     data: { user },

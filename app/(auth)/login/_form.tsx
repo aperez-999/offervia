@@ -15,6 +15,23 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+function getSafeNextPath(rawNext: string | null): string | null {
+  if (!rawNext) return null;
+  // next is user-controlled input; only allow internal relative paths.
+  // Block protocol-relative URLs ("//evil.com") and any absolute URLs.
+  let decoded = rawNext;
+  try {
+    decoded = decodeURIComponent(rawNext);
+  } catch {
+    // If decode fails, treat as unsafe.
+    return null;
+  }
+  if (!decoded.startsWith("/")) return null;
+  if (decoded.startsWith("//")) return null;
+  if (decoded.includes("\n") || decoded.includes("\r")) return null;
+  return decoded;
+}
+
 export default function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
@@ -48,7 +65,8 @@ export default function LoginForm() {
 
     // 3) Respect ?next=… (added by your middleware), fallback to dashboard
     const rawNext = search.get("next");
-    const dest = rawNext ? decodeURIComponent(rawNext) : "/dashboard?login=1";
+    const safeNext = getSafeNextPath(rawNext);
+    const dest = safeNext || "/dashboard?login=1";
 
     router.replace(dest);
     router.refresh();
