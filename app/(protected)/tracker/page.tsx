@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,6 +60,8 @@ const PREFS_KEY = "offervia:trackerPrefs_v1";
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export default function TrackerPage() {
+  const router = useRouter();
+  const search = useSearchParams();
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const { toast } = useToast();
 
@@ -160,6 +163,29 @@ export default function TrackerPage() {
     loadApps();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Job Packet handoff: prefill create modal from query params, then clear URL
+  useEffect(() => {
+    const c = search.get("company");
+    const p = search.get("position");
+    const s = search.get("status");
+    const d = search.get("applied_on");
+
+    if (!c && !p && !s && !d) return;
+
+    resetForm();
+    if (c) setCompany(c);
+    if (p) setPosition(p);
+    if (s && (STATUS_OPTIONS as readonly string[]).includes(s)) {
+      setStatus(s as Application["status"]);
+    }
+    if (d) setAppliedOn(d);
+    setOpen(true);
+
+    // Clear query so refresh doesn't reopen the modal
+    router.replace("/tracker");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   function resetForm() {
     setCompany("");

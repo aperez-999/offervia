@@ -55,6 +55,11 @@ export async function POST(req: Request) {
       success_url: `${siteUrl}/dashboard?upgrade=success`,
       cancel_url: `${siteUrl}/dashboard?upgrade=cancel`,
       customer_email: user.email ?? undefined,
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+        },
+      },
       metadata: {
         userId: user.id,
       },

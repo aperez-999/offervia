@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +32,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { postJson } from "@/lib/safe-fetch";
+import { getBrowserSupabase } from "@/lib/supabase/client";
 
 type ScanResultContent = {
   match_score: number;
@@ -41,8 +50,21 @@ type ScanEntry = {
   techs: string[];
 };
 
+type CloudScan = {
+  id: string;
+  title: string;
+  jd_excerpt: string;
+  match_score: number;
+  strengths: string[];
+  missing_skills: string[];
+  summary: string;
+  created_at: string;
+};
+
 const LS_HISTORY_KEY = "offervia:scannerHistory_v1";
 const LS_DRAFT_KEY = "offervia:scannerDraft_v1";
+const RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
+const RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
 
 // naïve tech/keyword detection (fast + client-only)
 const TECH_DICT = [
@@ -77,12 +99,17 @@ function approxTokens(s: string) {
 export default function ScannerPanel() {
   const router = useRouter();
   const { toast } = useToast();
+  const supabase = useMemo(() => getBrowserSupabase(), []);
   const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResultContent | null>(null);
   const [legacyResult, setLegacyResult] = useState<string>("");
   const [history, setHistory] = useState<ScanEntry[]>([]);
+  const [cloudHistory, setCloudHistory] = useState<CloudScan[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmKind, setConfirmKind] = useState<"cloud_all" | "cloud_one" | "local_all" | null>(null);
+  const [pendingCloudId, setPendingCloudId] = useState<string | null>(null);
 
   const hasResult = !!scanResult || !!legacyResult;
 
@@ -116,6 +143,41 @@ export default function ScannerPanel() {
       if (raw) setHistory(JSON.parse(raw));
     } catch {}
   }, []);
+
+  // Cloud scan history (Supabase) — optional; keep local history as primary fallback.
+  useEffect(() => {
+    (async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user?.id) return;
+
+        const { data, error: qErr } = await supabase
+          .from("job_scans")
+          .select("id,title,jd_excerpt,match_score,strengths,missing_skills,summary,created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(10);
+        if (qErr || !data) return;
+
+        const normalized = (data as Array<Record<string, unknown>>).map((r) => ({
+          id: String(r.id),
+          title: typeof r.title === "string" ? r.title : "Job scan",
+          jd_excerpt: typeof r.jd_excerpt === "string" ? r.jd_excerpt : "",
+          match_score: typeof r.match_score === "number" ? r.match_score : Number(r.match_score) || 0,
+          strengths: Array.isArray(r.strengths) ? (r.strengths as string[]) : [],
+          missing_skills: Array.isArray(r.missing_skills) ? (r.missing_skills as string[]) : [],
+          summary: typeof r.summary === "string" ? r.summary : String(r.summary ?? ""),
+          created_at: typeof r.created_at === "string" ? r.created_at : String(r.created_at ?? ""),
+        }));
+
+        setCloudHistory(normalized);
+      } catch {
+        // noop
+      }
+    })();
+  }, [supabase]);
   useEffect(() => {
     try {
       localStorage.setItem(LS_DRAFT_KEY, jd);
@@ -145,6 +207,65 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     try {
       localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(next));
     } catch {}
+  }
+
+  function openConfirm(kind: "cloud_all" | "cloud_one" | "local_all", cloudId?: string) {
+    setConfirmKind(kind);
+    setPendingCloudId(cloudId ?? null);
+    setConfirmOpen(true);
+  }
+
+  async function runConfirmDelete() {
+    const kind = confirmKind;
+    setConfirmOpen(false);
+
+    if (!kind) return;
+
+    if (kind === "local_all") {
+      persistHistory([]);
+      toast({ title: "Device history cleared" });
+      return;
+    }
+
+    // Cloud deletes require auth + RLS delete policy
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user?.id) {
+        toast({ title: "Sign in required", variant: "destructive" });
+        return;
+      }
+
+      if (kind === "cloud_one" && pendingCloudId) {
+        const { error: delErr } = await supabase
+          .from("job_scans")
+          .delete()
+          .eq("id", pendingCloudId)
+          .eq("user_id", user.id);
+        if (delErr) throw delErr;
+        setCloudHistory((prev) => prev.filter((x) => x.id !== pendingCloudId));
+        toast({ title: "Deleted cloud scan" });
+        return;
+      }
+
+      if (kind === "cloud_all") {
+        const { error: delErr } = await supabase
+          .from("job_scans")
+          .delete()
+          .eq("user_id", user.id);
+        if (delErr) throw delErr;
+        setCloudHistory([]);
+        toast({ title: "Cloud history cleared" });
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[scanner] cloud delete failed", msg);
+      toast({ title: "Delete failed", description: "Try again in a moment.", variant: "destructive" });
+    } finally {
+      setPendingCloudId(null);
+      setConfirmKind(null);
+    }
   }
 
   function addToHistory(jdText: string, resPayload: string) {
@@ -251,6 +372,23 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       addToHistory(text, JSON.stringify(content ?? res.data ?? ""));
     }
     toast({ title: "Scan complete" });
+  }
+
+  function continueToResumeTailor() {
+    const text = jd.trim();
+    if (text.length < 20) {
+      toast({ title: "Paste a longer job description first.", variant: "destructive" });
+      return;
+    }
+    try {
+      localStorage.setItem(RESUME_JD_LS_KEY, text);
+      // Since we can't carry a File object across routes, land the user on Step 1 (upload),
+      // then let ResumeWizard auto-advance to the JD step once a resume is attached.
+      localStorage.setItem(RESUME_DESIRED_STEP_LS_KEY, "3");
+    } catch {
+      // noop
+    }
+    router.push("/resume?from=scanner");
   }
 
   function clearAll() {
@@ -417,6 +555,15 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           <div className="flex items-center gap-2">
             <Button
               size="sm"
+              className="h-8 bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              onClick={continueToResumeTailor}
+              disabled={loading || jd.trim().length < 20}
+              title="Continue to resume tailor using this job description"
+            >
+              Continue to Resume Tailor
+            </Button>
+            <Button
+              size="sm"
               variant="outline"
               className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
               onClick={() => resultText && copy(resultText, "Copied analysis")}
@@ -494,135 +641,277 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       </Card>
 
       {/* History */}
-      <Card className="max-w-3xl rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-foreground/70" />
-            <CardTitle className="text-foreground">Recent scans</CardTitle>
-          </div>
-          {history.length > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-              onClick={() => persistHistory([])}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Clear history
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {history.length === 0 ? (
-            <p className="text-sm text-foreground/60">No scans yet.</p>
-          ) : (
-            <ul className="space-y-3">
-              {history.map((h) => (
-                <li
-                  key={h.id}
-                  className="flex flex-col gap-2 rounded-lg border border-border bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-foreground">
-                      {h.title}
+      <div className="max-w-3xl space-y-4">
+        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <History className="h-5 w-5 text-foreground/70" />
+              <CardTitle className="text-foreground">Across devices</CardTitle>
+            </div>
+            {cloudHistory.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                onClick={() => openConfirm("cloud_all")}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {cloudHistory.length === 0 ? (
+              <p className="text-sm text-foreground/60">No cloud scans yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {cloudHistory.map((h) => (
+                  <li key={h.id} className="rounded-md border border-border bg-background/60 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-foreground">{h.title}</div>
+                        <div className="text-xs text-foreground/70">Match score: {h.match_score}%</div>
+                      </div>
+                      <div className="text-[11px] text-foreground/60">
+                        {h.created_at ? new Date(h.created_at).toLocaleString() : ""}
+                      </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1">
-                      {h.techs.slice(0, 6).map((t) => (
-                        <Badge
-                          key={t}
-                          variant="outline"
-                          className="border-border text-foreground/80"
-                        >
-                          {t}
-                        </Badge>
-                      ))}
-                      {h.techs.length > 6 && (
-                        <span className="text-[11px] text-foreground/60">
-                          +{h.techs.length - 6} more
-                        </span>
-                      )}
+                    <div className="mt-2 text-sm text-foreground/80">
+                      {h.summary}
                     </div>
-                    <div className="mt-1 text-[11px] text-foreground/60">
-                      {new Date(h.created_at).toLocaleString()}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => {
+                          // Always load results. JD excerpt is optional (older scans won't have it).
+                          if (h.jd_excerpt) setJd(h.jd_excerpt);
+                          setScanResult({
+                            match_score: h.match_score,
+                            strengths: h.strengths,
+                            missing_skills: h.missing_skills,
+                            summary: h.summary,
+                          });
+                          setLegacyResult("");
+                          toast({
+                            title: h.jd_excerpt ? "Loaded cloud scan" : "Loaded results (legacy scan)",
+                            description: h.jd_excerpt
+                              ? undefined
+                              : "This older scan didn’t save the job description text, but the results are still available.",
+                          });
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      >
+                        Load
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-8 bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                        onClick={() => {
+                          if (!h.jd_excerpt || h.jd_excerpt.trim().length < 20) {
+                            toast({
+                              title: "This scan can’t continue yet",
+                              description:
+                                "This older scan didn’t save job description text. Run a new scan to enable continuing from cloud history.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          try {
+                            localStorage.setItem(RESUME_JD_LS_KEY, h.jd_excerpt);
+                            localStorage.setItem(RESUME_DESIRED_STEP_LS_KEY, "3");
+                          } catch {
+                            // noop
+                          }
+                          router.push("/resume?from=scanner");
+                        }}
+                      >
+                        Continue to Resume Tailor
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => openConfirm("cloud_one", h.id)}
+                        title="Delete this scan"
+                        aria-label="Delete this scan"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setJd(h.jd);
-                        setError(null);
-                        try {
-                          const parsed = JSON.parse(h.result) as unknown;
-                          if (
-                            parsed &&
-                            typeof parsed === "object" &&
-                            "match_score" in parsed &&
-                            "strengths" in parsed &&
-                            "missing_skills" in parsed &&
-                            "summary" in parsed
-                          ) {
-                            setScanResult(parsed as ScanResultContent);
-                            setLegacyResult("");
-                          } else {
+                    {h.missing_skills.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {h.missing_skills.slice(0, 8).map((t) => (
+                          <Badge key={t} variant="outline" className="border-border text-foreground/80">
+                            {t}
+                          </Badge>
+                        ))}
+                        {h.missing_skills.length > 8 && (
+                          <span className="text-[11px] text-foreground/60">
+                            +{h.missing_skills.length - 8} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <History className="h-5 w-5 text-foreground/70" />
+              <CardTitle className="text-foreground">On this device</CardTitle>
+            </div>
+            {history.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                onClick={() => openConfirm("local_all")}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {history.length === 0 ? (
+              <p className="text-sm text-foreground/60">No device scans yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {history.map((h) => (
+                  <li
+                    key={h.id}
+                    className="flex flex-col gap-2 rounded-lg border border-border bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-foreground">
+                        {h.title}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        {h.techs.slice(0, 6).map((t) => (
+                          <Badge
+                            key={t}
+                            variant="outline"
+                            className="border-border text-foreground/80"
+                          >
+                            {t}
+                          </Badge>
+                        ))}
+                        {h.techs.length > 6 && (
+                          <span className="text-[11px] text-foreground/60">
+                            +{h.techs.length - 6} more
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-[11px] text-foreground/60">
+                        {new Date(h.created_at).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => {
+                          setJd(h.jd);
+                          setError(null);
+                          try {
+                            const parsed = JSON.parse(h.result) as unknown;
+                            if (
+                              parsed &&
+                              typeof parsed === "object" &&
+                              "match_score" in parsed &&
+                              "strengths" in parsed &&
+                              "missing_skills" in parsed &&
+                              "summary" in parsed
+                            ) {
+                              setScanResult(parsed as ScanResultContent);
+                              setLegacyResult("");
+                            } else {
+                              setScanResult(null);
+                              setLegacyResult(h.result);
+                            }
+                          } catch {
                             setScanResult(null);
                             setLegacyResult(h.result);
                           }
-                        } catch {
-                          setScanResult(null);
-                          setLegacyResult(h.result);
-                        }
-                        toast({ title: "Loaded scan" });
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                    >
-                      Load
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        try {
-                          const parsed = JSON.parse(h.result) as unknown;
-                          if (
-                            parsed &&
-                            typeof parsed === "object" &&
-                            "match_score" in parsed &&
-                            "strengths" in parsed
-                          ) {
-                            copy(scanResultToText(parsed as ScanResultContent), "Copied analysis");
-                          } else {
+                          toast({ title: "Loaded scan" });
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      >
+                        Load
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => {
+                          try {
+                            const parsed = JSON.parse(h.result) as unknown;
+                            if (
+                              parsed &&
+                              typeof parsed === "object" &&
+                              "match_score" in parsed &&
+                              "strengths" in parsed
+                            ) {
+                              copy(scanResultToText(parsed as ScanResultContent), "Copied analysis");
+                            } else {
+                              copy(h.result, "Copied analysis");
+                            }
+                          } catch {
                             copy(h.result, "Copied analysis");
                           }
-                        } catch {
-                          copy(h.result, "Copied analysis");
-                        }
-                      }}
-                    >
-                      <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        const next = history.filter((x) => x.id !== h.id);
-                        persistHistory(next);
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                        }}
+                      >
+                        <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 border-border text-foreground hover:bg-foreground/[0.06]"
+                        onClick={() => {
+                          const next = history.filter((x) => x.id !== h.id);
+                          persistHistory(next);
+                        }}
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete history?</DialogTitle>
+            <DialogDescription>
+              {confirmKind === "cloud_all" && "This will permanently delete your cloud scan history across devices."}
+              {confirmKind === "cloud_one" && "This will permanently delete this cloud scan entry."}
+              {confirmKind === "local_all" && "This will clear scan history stored on this device only."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={runConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -5,6 +5,36 @@ import type Stripe from "stripe";
 import { serverEnv } from "@/lib/env/server";
 import { fail } from "@/lib/api/response";
 
+function isoFromUnixSeconds(seconds: number | null | undefined) {
+  if (!seconds || typeof seconds !== "number") return null;
+  const ms = seconds * 1000;
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+function getCurrentPeriodEndIso(subscriptionLike: unknown) {
+  const seconds =
+    typeof subscriptionLike === "object" &&
+    subscriptionLike !== null &&
+    "current_period_end" in subscriptionLike &&
+    typeof (subscriptionLike as { current_period_end?: unknown }).current_period_end === "number"
+      ? ((subscriptionLike as { current_period_end: number }).current_period_end as number)
+      : undefined;
+  return isoFromUnixSeconds(seconds);
+}
+
+function getInvoiceSubscriptionId(invoiceLike: unknown): string | null {
+  if (!invoiceLike || typeof invoiceLike !== "object") return null;
+  if (!("subscription" in invoiceLike)) return null;
+  const sub = (invoiceLike as { subscription?: unknown }).subscription;
+  if (typeof sub === "string") return sub;
+  if (sub && typeof sub === "object" && "id" in sub && typeof (sub as { id?: unknown }).id === "string") {
+    return (sub as { id: string }).id;
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   const secret = serverEnv.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
@@ -54,12 +84,8 @@ export async function POST(req: Request) {
           break;
         }
 
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd = (subscription as { current_period_end?: number })
-          .current_period_end;
-        const currentPeriodEnd = periodEnd
-          ? new Date(periodEnd * 1000).toISOString()
-          : null;
+        const subscriptionRes = await stripe.subscriptions.retrieve(subscriptionId);
+        const currentPeriodEnd = getCurrentPeriodEndIso(subscriptionRes);
 
         await supabase.from("subscriptions").upsert(
           {
@@ -67,12 +93,90 @@ export async function POST(req: Request) {
             stripe_customer_id: customerId ?? null,
             stripe_subscription_id: subscriptionId,
             plan: "pro",
-            status: "active",
+            status:
+              typeof subscriptionRes === "object" &&
+              subscriptionRes !== null &&
+              "status" in subscriptionRes &&
+              typeof (subscriptionRes as { status?: unknown }).status === "string"
+                ? ((subscriptionRes as { status: string }).status as string)
+                : "active",
             current_period_end: currentPeriodEnd,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "stripe_subscription_id" }
         );
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as unknown;
+        const stripeSubscriptionId =
+          typeof subscription === "object" &&
+          subscription !== null &&
+          "id" in subscription &&
+          typeof (subscription as { id?: unknown }).id === "string"
+            ? ((subscription as { id: string }).id as string)
+            : null;
+        if (!stripeSubscriptionId) break;
+
+        // If we already have a subscription row, update it (idempotent).
+        // If we don't, we can't safely map this subscription to a user without metadata.
+        const currentPeriodEnd = getCurrentPeriodEndIso(subscription);
+
+        // If a subscription is canceled/unpaid, drop to free. Otherwise keep pro.
+        const status =
+          typeof subscription === "object" &&
+          subscription !== null &&
+          "status" in subscription &&
+          typeof (subscription as { status?: unknown }).status === "string"
+            ? ((subscription as { status: string }).status as string)
+            : "inactive";
+        const isActiveLike = ["active", "trialing", "past_due"].includes(status);
+        const nextPlan = isActiveLike ? "pro" : "free";
+
+        await supabase
+          .from("subscriptions")
+          .update({
+            plan: nextPlan,
+            status,
+            current_period_end: currentPeriodEnd,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", stripeSubscriptionId);
+
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object as unknown;
+        const stripeSubscriptionId = getInvoiceSubscriptionId(invoice);
+        if (!stripeSubscriptionId) break;
+
+        await supabase
+          .from("subscriptions")
+          .update({
+            plan: "pro",
+            status: "active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", stripeSubscriptionId);
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as unknown;
+        const stripeSubscriptionId = getInvoiceSubscriptionId(invoice);
+        if (!stripeSubscriptionId) break;
+
+        await supabase
+          .from("subscriptions")
+          .update({
+            // keep pro but mark past_due so the app can decide what to do
+            plan: "pro",
+            status: "past_due",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", stripeSubscriptionId);
         break;
       }
 

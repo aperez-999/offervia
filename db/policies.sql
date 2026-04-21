@@ -150,7 +150,12 @@ on public.job_scans
 for select
 using (user_id = auth.uid());
 
--- Intentionally no insert/update/delete policies for end users.
+-- Delete own scan history (UX: allow users to clear their history)
+drop policy if exists "job_scans_delete_own" on public.job_scans;
+create policy "job_scans_delete_own"
+on public.job_scans
+for delete
+using (user_id = auth.uid());
 
 -- -------------------------------
 -- request_events (no user policies; service role only)

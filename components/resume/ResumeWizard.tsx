@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Upload,
   ClipboardCopy,
@@ -41,6 +41,7 @@ const ACCEPTED_TYPES = [".pdf", ".doc", ".docx"];
 const MAX_SIZE_MB = 8;
 
 const JD_LS_KEY = "offervia:resume:jd_v1";
+const DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
 
 
 const TECH_DICT = [
@@ -90,6 +91,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 export default function ResumeWizard() {
   const router = useRouter();
+  const search = useSearchParams();
   const { toast } = useToast();
 
   const [step, setStep] = useState(1);
@@ -131,6 +133,25 @@ export default function ResumeWizard() {
       if (raw) setJd(raw);
     } catch {}
   }, []);
+
+  // Allow deep-linking into a step (used by Job Packet handoff from Scanner)
+  useEffect(() => {
+    const stepRaw = search.get("step");
+    if (!stepRaw) return;
+    const parsed = Number(stepRaw);
+    if (!Number.isFinite(parsed)) return;
+    const next = Math.max(1, Math.min(steps.length, Math.floor(parsed)));
+    setStep(next);
+    const from = search.get("from") || "";
+    if (from === "scanner" || from.startsWith("scanner")) {
+      toast({
+        title: "Job description ready",
+        description: "Your job description was carried over from the Scanner.",
+      });
+    }
+    // intentionally run only when URL params change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
   useEffect(() => {
     try {
       localStorage.setItem(JD_LS_KEY, jd);
@@ -200,6 +221,22 @@ export default function ResumeWizard() {
     setResumeFile(file);
     setResumeSize(file.size);
     setAiText(""); // clear AI output if new file
+
+    // If the user came from the Scanner Job Packet handoff, auto-advance once a resume exists.
+    try {
+      const desired = localStorage.getItem(DESIRED_STEP_LS_KEY);
+      if (desired) {
+        const parsed = Number(desired);
+        if (Number.isFinite(parsed)) {
+          const nextStep = Math.max(1, Math.min(steps.length, Math.floor(parsed)));
+          setStep(nextStep);
+        }
+        localStorage.removeItem(DESIRED_STEP_LS_KEY);
+      }
+    } catch {
+      // noop
+    }
+
     // Try to store text for simple text files; PDFs/DOCX will be handled server-side
     try {
       if (file.type.startsWith("text")) {
@@ -314,6 +351,25 @@ export default function ResumeWizard() {
     }
   };
 
+  function addToTracker() {
+    const company = (companyName || "").trim();
+    const position = (roleTitle || "").trim();
+    if (!company || !position) {
+      toast({
+        title: "Missing details",
+        description: "Add a company name and role title before sending to the tracker.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("company", company);
+    params.set("position", position);
+    params.set("status", "Applied");
+    params.set("applied_on", new Date().toISOString().slice(0, 10));
+    router.push(`/tracker?${params.toString()}`);
+  }
+
   /* ------------------------------- Helpers -------------------------------- */
 
   function copy(text: string, label = "Copied") {
@@ -368,6 +424,18 @@ export default function ResumeWizard() {
           {step === 1 && (
             <StepContainer title="Upload Resume" description="Upload a PDF or DOCX file.">
               <div className="space-y-3">
+                {(() => {
+                  const from = search.get("from") || "";
+                  const fromScanner = from === "scanner" || from.startsWith("scanner");
+                  return fromScanner && jd.trim().length >= 20 && !resumeFileName;
+                })() && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100 dark:border-emerald-500/20">
+                    <div className="font-medium">Job description loaded</div>
+                    <div className="mt-0.5 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+                      Upload your resume to continue the Job Packet workflow.
+                    </div>
+                  </div>
+                )}
                 <Dropzone onFile={onFileSelected} fileName={resumeFileName} />
                 {resumeFileName && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background/60 p-3">
@@ -727,6 +795,16 @@ export default function ResumeWizard() {
                       }}
                     >
                       Accept & Replace
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      disabled={!aiText}
+                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      onClick={addToTracker}
+                      title="Create a tracker entry prefilled from this job"
+                    >
+                      Add to Tracker
                     </Button>
                   </div>
                 </div>

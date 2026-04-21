@@ -8,6 +8,15 @@ import { fail } from "@/lib/api/response";
 
 const jobScanBodySchema = z.object({ jd: z.string().min(20).max(20000) }).strict();
 
+function titleFromJD(text: string) {
+  const first =
+    (text || "")
+      .split("\n")
+      .map((s) => s.trim())
+      .find(Boolean) || "Job scan";
+  return first.length > 120 ? first.slice(0, 117) + "…" : first;
+}
+
 export async function POST(req: Request) {
   const { checkRateLimitForApi } = await import("@/lib/rate-limit");
   const rl = await checkRateLimitForApi(req, "job-scan", {
@@ -95,6 +104,8 @@ export async function POST(req: Request) {
     const supabase = getServiceSupabase();
     const { error: insertErr } = await supabase.from("job_scans").insert({
       user_id: userId,
+      jd_excerpt: jd.slice(0, 1500),
+      title: titleFromJD(jd),
       match_score: content.match_score,
       strengths: content.strengths,
       missing_skills: content.missing_skills,

@@ -78,6 +78,8 @@ create index if not exists usage_snapshots_user_id_month_idx on public.usage_sna
 create table if not exists public.job_scans (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
+  jd_excerpt text,
+  title text,
   match_score integer not null,
   strengths jsonb not null default '[]'::jsonb,
   missing_skills jsonb not null default '[]'::jsonb,

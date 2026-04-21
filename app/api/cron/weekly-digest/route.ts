@@ -5,7 +5,10 @@ import { fail } from "@/lib/api/response";
 
 function requireCronAuth(req: Request) {
   const secret = serverEnv.CRON_SECRET;
-  if (!secret) return true; // allow if not configured (dev)
+  // Dev-friendly default, but fail closed in production if not configured.
+  if (!secret) {
+    return serverEnv.NODE_ENV !== "production";
+  }
   const got = req.headers.get("x-cron-secret") || new URL(req.url).searchParams.get("secret");
   return got === secret;
 }
