@@ -256,11 +256,11 @@ export default function DashboardClient({
   const nextAction = useMemo(() => {
     if (appsThisWeek === 0) {
       return {
-        title: "Log your first application this week",
+        title: "Start a Job Packet",
         desc:
-          "A small start beats no start. Track one application to keep momentum.",
-        href: "/tracker",
-        cta: "Add Job",
+          "Paste a job description, tailor your resume, and track the application — in one flow.",
+        href: "/job-packet",
+        cta: "Start",
       };
     }
     if (recentChats.length === 0) {
@@ -273,10 +273,10 @@ export default function DashboardClient({
       };
     }
     return {
-      title: "Scan a job description",
-      desc: "Find keywords and gaps to sharpen your next application.",
-      href: "/scanner",
-      cta: "Scan JD",
+      title: "Run a Job Packet",
+      desc: "Scan a job description, tailor, then track your application.",
+      href: "/job-packet",
+      cta: "Start",
     };
   }, [appsThisWeek, recentChats.length]);
 

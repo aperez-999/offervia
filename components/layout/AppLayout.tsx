@@ -6,6 +6,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
+  Sparkles,
   FileText,
   Search,
   MessageSquare,
@@ -27,6 +28,7 @@ type NavItem = { label: string; href: string; icon: React.ComponentType<{ classN
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Job Packet", href: "/job-packet", icon: Sparkles },
   { label: "Resume", href: "/resume", icon: FileText },
   { label: "Scanner", href: "/scanner", icon: Search },
   { label: "Coach", href: "/coach", icon: MessageSquare },

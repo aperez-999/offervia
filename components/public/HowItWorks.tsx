@@ -29,7 +29,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="bg-background">
+    <section id="how-it-works" className="bg-background scroll-mt-20">
       <div className="mx-auto max-w-5xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}

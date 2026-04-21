@@ -5,6 +5,7 @@ import Why from "@/components/public/Why";
 import Testimonials from "@/components/public/Testimonials";
 import Faq from "@/components/public/Faq";
 import HowItWorks from "@/components/public/HowItWorks";
+import Pricing from "@/components/public/Pricing";
 import BottomCta from "@/components/public/BottomCta";
 import Footer from "@/components/public/Footer";
 
@@ -54,6 +55,7 @@ export default function HomePage() {
       <Features />
       <Why />
       <Testimonials />
+      <Pricing />
       <Faq />
       <HowItWorks />
       <BottomCta />

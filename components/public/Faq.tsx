@@ -93,7 +93,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
 
 export default function Faq() {
   return (
-    <section className="bg-background">
+    <section id="faq" className="bg-background scroll-mt-20">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
