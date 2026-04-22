@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { postForm } from "@/lib/safe-fetch"; // uses your safeFetch helper
+import { AnimatePresence, motion } from "framer-motion";
 
 /* ---------------------------------- Data --------------------------------- */
 
@@ -420,9 +421,17 @@ export default function ResumeWizard() {
         <WizardSidebar steps={steps} current={step} />
 
         <div className="space-y-4 sm:space-y-6 min-w-0">
-          {/* Step 1 */}
-          {step === 1 && (
-            <StepContainer title="Upload Resume" description="Upload a PDF or DOCX file.">
+          <AnimatePresence mode="wait" initial={false}>
+            {/* Step 1 */}
+            {step === 1 && (
+              <motion.div
+                key="step-1"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <StepContainer title="Upload Resume" description="Upload a PDF or DOCX file.">
               <div className="space-y-3">
                 {(() => {
                   const from = search.get("from") || "";
@@ -467,12 +476,20 @@ export default function ResumeWizard() {
                   </div>
                 )}
               </div>
-            </StepContainer>
-          )}
+              </StepContainer>
+              </motion.div>
+            )}
 
-          {/* Step 2 */}
-          {step === 2 && (
-            <StepContainer
+            {/* Step 2 */}
+            {step === 2 && (
+              <motion.div
+                key="step-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+              <StepContainer
               title="Company Targeting"
               description="Optional, but highly recommended. This helps the AI tailor language to a specific company, team, and location."
             >
@@ -532,12 +549,20 @@ export default function ResumeWizard() {
                   />
                 </div>
               </div>
-            </StepContainer>
-          )}
+              </StepContainer>
+              </motion.div>
+            )}
 
-          {/* Step 3 */}
-          {step === 3 && (
-            <StepContainer
+            {/* Step 3 */}
+            {step === 3 && (
+              <motion.div
+                key="step-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+              <StepContainer
               title="Paste Job Description"
               description="Paste the full job posting text below."
             >
@@ -588,12 +613,20 @@ export default function ResumeWizard() {
                   </Alert>
                 )}
               </div>
-            </StepContainer>
-          )}
+              </StepContainer>
+              </motion.div>
+            )}
 
-          {/* Step 4 */}
-          {step === 4 && (
-            <StepContainer
+            {/* Step 4 */}
+            {step === 4 && (
+              <motion.div
+                key="step-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+              <StepContainer
               title="Tailor & Review"
               description="Preview your resume on the left and generate an AI-tailored version on the right."
             >
@@ -809,8 +842,10 @@ export default function ResumeWizard() {
                   </div>
                 </div>
               </div>
-            </StepContainer>
-          )}
+              </StepContainer>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Step 1 error banner */}
           {error && step === 1 && attempted && (

@@ -44,8 +44,8 @@ export default function SignupPage() {
   return (
     <AuthLayout>
       <div className="mb-5 text-center">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Create your Offervia account</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-white">Free Beta — No credit card required</p>
+        <h1 className="text-xl font-semibold text-foreground">Create your Offervia account</h1>
+        <p className="mt-1 text-sm text-foreground/70">Start on the free tier — upgrade anytime.</p>
       </div>
 
       <SignupForm />
@@ -57,7 +57,7 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with Google"
           onClick={() => startOAuth("google")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
           title="Sign up with Google"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-4 w-4" aria-hidden="true">
@@ -73,16 +73,16 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with LinkedIn"
           onClick={() => startOAuth("linkedin_oidc")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
           title="Sign up with LinkedIn"
         >
-          <Linkedin className="h-4 w-4 text-gray-900 dark:text-white" aria-hidden="true" />
+          <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="mt-4 text-center text-sm text-gray-600 dark:text-white">
+      <div className="mt-4 text-center text-sm text-foreground/70">
         <span>Already have an account? </span>
-        <Link href="/login" className="underline hover:text-gray-900 dark:hover:text-white/80">
+        <Link href="/login" className="underline hover:text-foreground">
           Sign in
         </Link>
       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +23,27 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Active section highlight (desktop)
+  const [activeId, setActiveId] = useState<string>("features");
+  const sectionIds = useMemo(() => ["features", "how-it-works", "faq"], []);
+  useEffect(() => {
+    const els = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const best = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0];
+        if (best?.target?.id) setActiveId(best.target.id);
+      },
+      { root: null, threshold: [0.2, 0.35, 0.5], rootMargin: "-20% 0px -65% 0px" }
+    );
+    for (const el of els) io.observe(el);
+    return () => io.disconnect();
+  }, [sectionIds]);
+
   // Theme toggle with safe hydration
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -36,14 +57,17 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-background text-foreground scroll-smooth">
-      <header
-        className={`sticky top-0 z-40 backdrop-blur transition-all duration-300 ${
-          scrolled
-            ? "bg-background/85 border-b border-border shadow-[0_1px_0_0_rgba(0,0,0,0.02)]"
-            : "bg-background/65"
-        }`}
-      >
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
+          <div
+            className={[
+              "pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur",
+              "transition-all duration-300",
+              scrolled ? "shadow-md bg-background/80" : "shadow-sm",
+            ].join(" ")}
+          >
+            <div className="flex h-12 items-center justify-between px-3 sm:px-4">
           {/* Brand */}
           <Link
             href="/"
@@ -80,7 +104,11 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                 e.preventDefault();
                 smoothScrollTo("features");
               }}
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className={[
+                "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
+                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
+                activeId === "features" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+              ].join(" ")}
             >
               Features
             </a>
@@ -91,20 +119,13 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                 e.preventDefault();
                 smoothScrollTo("how-it-works");
               }}
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className={[
+                "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
+                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
+                activeId === "how-it-works" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+              ].join(" ")}
             >
               How it works
-            </a>
-
-            <a
-              href="#pricing"
-              onClick={(e) => {
-                e.preventDefault();
-                smoothScrollTo("pricing");
-              }}
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
-            >
-              Pricing
             </a>
 
             <a
@@ -113,28 +134,32 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                 e.preventDefault();
                 smoothScrollTo("faq");
               }}
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className={[
+                "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
+                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
+                activeId === "faq" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+              ].join(" ")}
             >
               FAQ
             </a>
 
             <Link
               href="/contact"
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
             >
               Contact
             </Link>
 
             <Link
               href="/login"
-              className="hidden sm:inline-flex rounded-md px-3 py-1.5 text-sm text-foreground/90 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
             >
               Sign In
             </Link>
 
             <Link
               href="/signup"
-              className="hidden sm:inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
             >
               Sign Up
             </Link>
@@ -144,7 +169,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
               onClick={toggleTheme}
-              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-md border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
             >
               {mounted && (
                 <AnimatePresence mode="wait" initial={false}>
@@ -175,7 +200,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               )}
             </button>
           </nav>
-        </div>
+            </div>
 
         {/* Mobile dropdown */}
         <AnimatePresence initial={false}>
@@ -192,7 +217,6 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                   {[
                     { label: "Features", id: "features" },
                     { label: "How it works", id: "how-it-works" },
-                    { label: "Pricing", id: "pricing" },
                     { label: "FAQ", id: "faq" },
                   ].map((x) => (
                     <button
@@ -235,6 +259,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             </motion.div>
           )}
         </AnimatePresence>
+          </div>
+        </div>
       </header>
 
       <main>{children}</main>

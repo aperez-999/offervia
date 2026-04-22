@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 export default function CoachPage() {
   return (
     <AuthGuard>
-        <CoachHub />
+      <CoachHub />
     </AuthGuard>
   );
 }

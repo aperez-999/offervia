@@ -45,7 +45,8 @@ export default function Testimonials() {
   ];
 
   return (
-    <section id="testimonials" className="bg-background scroll-mt-20">
+    <section id="testimonials" className="relative bg-background scroll-mt-20">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
@@ -56,6 +57,9 @@ export default function Testimonials() {
         >
           Real job seekers. Real results.
         </motion.h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-foreground/70">
+          Built for momentum: clearer applications, faster iteration, and more confidence per submission.
+        </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {items.map((t, i) => {
@@ -67,9 +71,10 @@ export default function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: i * 0.05 }}
+                whileHover={{ y: -4 }}
                 className={[
                   // pill container
-                  "rounded-xl border border-border p-5 shadow-sm backdrop-blur-sm",
+                  "rounded-2xl border border-border p-6 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
                   // base backgrounds
                   "bg-white/70 dark:bg-neutral-900/40",
                   // accented backgrounds (override base subtly)
@@ -87,12 +92,10 @@ export default function Testimonials() {
                   >
                     <User2 className={`h-5 w-5 ${a.icon}`} />
                   </div>
-                  <div className="text-xs font-medium text-gray-900 dark:text-white">
-                    {t.role}
-                  </div>
+                  <div className="text-xs font-medium text-gray-900 dark:text-white">{t.role}</div>
                 </div>
 
-                <p className="mt-3 text-sm text-gray-800 dark:text-white">
+                <p className="mt-4 text-sm leading-relaxed text-gray-800 dark:text-white">
                   “{t.quote}”
                 </p>
               </motion.blockquote>

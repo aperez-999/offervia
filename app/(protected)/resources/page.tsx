@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExternalLink, Tag, CheckCircle2, Bookmark } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Resource = {
   id: string;
@@ -245,16 +246,21 @@ export default function ResourcesPage() {
   }, [q, cat, activeTags]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-      <section>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 sm:space-y-6 p-4 sm:p-6"
+    >
+      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground">Student Resources</h1>
         <p className="mt-1 text-sm text-foreground/70">
-          Curated academic, career, and creative resources to help every student grow—no matter their field.
-          <br></br>
-          <br></br>
-          This page gets updated frequently - More coming soon.
+          Curated academic, career, and creative resources to help you grow—no matter your field.
         </p>
-      </section>
+        <p className="mt-2 text-xs text-foreground/60">
+          Updated regularly. More coming soon.
+        </p>
+      </div>
 
       {/* Controls */}
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -375,6 +381,6 @@ export default function ResourcesPage() {
           </Card>
         ))}
       </section>
-    </div>
+    </motion.div>
   );
 }

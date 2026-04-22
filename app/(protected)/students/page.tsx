@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, ExternalLink, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Deal = {
   id: string;
@@ -203,9 +204,15 @@ export default function StudentsPage() {
   }, [q, cat]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-      <section>
-        <h1 className="text-2xl font-semibold text-foreground">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 sm:space-y-6 p-4 sm:p-6"
+    >
+      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           Student Exclusives
         </h1>
         <p className="mt-1 text-sm text-foreground/70">
@@ -216,7 +223,7 @@ export default function StudentsPage() {
           </span>{" "}
           badge where applicable.
         </p>
-      </section>
+      </div>
 
       {/* Controls */}
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -299,6 +306,6 @@ export default function StudentsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }

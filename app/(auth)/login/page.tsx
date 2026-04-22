@@ -53,8 +53,8 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <div className="mb-5 text-center">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome back</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-white">Let’s help you land your next offer.</p>
+        <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
+        <p className="mt-1 text-sm text-foreground/70">Let’s help you land your next offer.</p>
       </div>
 
       <LoginForm />
@@ -66,7 +66,7 @@ export default function LoginPage() {
           type="button"
           aria-label="Sign in with Google"
           onClick={() => startOAuth("google")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
           title="Sign in with Google"
         >
           {/* Google multicolor icon */}
@@ -83,21 +83,21 @@ export default function LoginPage() {
           type="button"
           aria-label="Sign in with LinkedIn"
           onClick={() => startOAuth("linkedin_oidc")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
           title="Sign in with LinkedIn"
         >
-          <Linkedin className="h-4 w-4 text-gray-900 dark:text-white" aria-hidden="true" />
+          <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="mt-4 text-center text-sm text-gray-600 dark:text-white">
+      <div className="mt-4 text-center text-sm text-foreground/70">
         <span>New to Offervia? </span>
-        <Link href="/signup" className="underline hover:text-gray-900 dark:hover:text-white/80">
+        <Link href="/signup" className="underline hover:text-foreground">
           Create an account
         </Link>
       </div>
 
-      <p className="mt-2 text-center text-xs text-gray-500 dark:text-white">
+      <p className="mt-2 text-center text-xs text-foreground/60">
         Secure • Private • Built for job seekers
       </p>
     </AuthLayout>

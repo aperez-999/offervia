@@ -228,10 +228,12 @@ export default function SettingsPage() {
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <section>
-          <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-          <p className="mt-1 text-sm text-foreground/70">
-            Update your account details and preferences.
-          </p>
+          <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+            <p className="mt-1 text-sm text-foreground/70">
+              Personalize your experience and manage your data.
+            </p>
+          </div>
         </section>
 
         {/* Profile */}
@@ -367,7 +369,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Data & Privacy</CardTitle>
             <CardDescription className="text-foreground/70">
-              Export your data or clear local-only items saved during beta.
+              Export your data or clear local-only items saved on this device.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -395,7 +397,7 @@ export default function SettingsPage() {
               <div className="text-sm font-medium text-foreground">Danger zone</div>
               <p className="text-xs text-foreground/60">
                 Delete account will remove your messages and preferences. This action will be
-                available at GA; during beta, contact support if you need immediate removal.
+                available soon; contact support if you need immediate removal.
               </p>
               <Button
                 variant="outline"

@@ -48,7 +48,8 @@ export default function Why() {
   ];
 
   return (
-    <section className="bg-background">
+    <section className="relative bg-background">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
@@ -59,6 +60,9 @@ export default function Why() {
         >
           Why Offervia?
         </motion.h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-foreground/70">
+          A workflow that keeps you moving: faster iteration, clearer targeting, and fewer dropped follow‑ups.
+        </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {items.map((it, idx) => {
@@ -71,8 +75,9 @@ export default function Why() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
+                whileHover={{ y: -4 }}
                 className={[
-                  "rounded-xl border border-border p-5 text-center shadow-sm backdrop-blur-sm",
+                  "rounded-2xl border border-border p-6 text-center shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
                   // base glass
                   "bg-white/70 dark:bg-neutral-900/40",
                   // subtle tint overlays
@@ -80,8 +85,12 @@ export default function Why() {
                   a.darkBg,
                 ].join(" ")}
               >
-                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2"
-                  style={{ boxShadow: "0 0 0 0" }}
+                <div
+                  className={[
+                    "mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2",
+                    a.ring,
+                    "shadow-sm",
+                  ].join(" ")}
                 >
                   <Icon className={`h-5 w-5 ${a.icon}`} />
                 </div>

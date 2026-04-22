@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
@@ -48,16 +49,25 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="mx-auto max-w-3xl space-y-8"
+    >
       {/* Hero */}
       <section className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Stop guessing. Start optimizing your job hunt.
-        </h1>
-        <p className="mt-3 text-sm text-foreground/80 sm:text-base">
-          Offervia Pro turns your job search into a performance system — more data,
-          more iterations, more control.
-        </p>
+        <div className="mx-auto max-w-2xl">
+          <div className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+            Upgrade to Pro
+          </div>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Stop guessing. Start optimizing your job hunt.
+          </h1>
+          <p className="mt-3 text-sm text-foreground/80 sm:text-base">
+            Higher limits so you can scan and tailor consistently — without interruptions.
+          </p>
+        </div>
       </section>
 
       {/* Why Pro? */}
@@ -86,7 +96,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       </section>
 
       {/* Performance mindset callout */}
-      <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
+      <div className="rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <p className="font-medium text-foreground">
           Free is for exploring. Pro is for optimizing.
         </p>
@@ -164,7 +174,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
             <Button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full max-w-sm cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black sm:w-auto sm:px-8"
+              className="w-full max-w-sm cursor-pointer bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black sm:w-auto sm:px-8"
             >
               {loading ? "Redirecting…" : "Upgrade to Pro — $10/month"}
             </Button>
@@ -174,6 +184,6 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
           </>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }

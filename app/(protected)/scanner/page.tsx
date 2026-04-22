@@ -61,9 +61,9 @@ export const metadata: Metadata = {
 export default function ScannerPage() {
   return (
     <AuthGuard>
-        <div className="p-4 sm:p-6">
-          <ScannerPanel />
-        </div>
+      <div className="p-4 sm:p-6">
+        <ScannerPanel />
+      </div>
     </AuthGuard>
   );
 }

@@ -82,9 +82,18 @@ export default function AppLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {/* Subtle app backdrop */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200/40 via-indigo-100/20 to-transparent blur-3xl dark:hidden" />
+        <div className="hidden dark:block absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-900/25 via-indigo-800/15 to-transparent blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
+          <div className="pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur">
+            <div className="flex h-12 items-center justify-between px-3 sm:px-4">
           <div className="flex items-center gap-2">
             {/* Mobile menu button */}
             <Button
@@ -96,12 +105,20 @@ export default function AppLayout({
               <Menu className="h-5 w-5" />
               <span className="sr-only">Open sidebar</span>
             </Button>
-            <span className="text-lg font-semibold tracking-tight">Offervia</span>
+            <Link
+              href="/dashboard"
+              className="text-lg font-semibold tracking-tight hover:opacity-90 transition-opacity"
+              aria-label="Offervia"
+            >
+              Offervia
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">
             <GlobalCommandMenu />
             <UserMenu plan={plan} onSignOut={onSignOut} />
+          </div>
+            </div>
           </div>
         </div>
       </header>
@@ -111,7 +128,7 @@ export default function AppLayout({
         <div className="flex gap-6 py-6">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-56 shrink-0">
-            <div className="rounded-xl border border-border bg-background p-3">
+            <div className="sticky top-20 rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
                 Navigation
               </div>
@@ -129,7 +146,7 @@ export default function AppLayout({
                         "flex items-center gap-2 rounded-md px-2 py-1.5 border transition-colors",
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
                         active
-                          ? "border-border bg-foreground/[0.06] font-medium"
+                          ? "border-indigo-500/20 bg-indigo-500/10 font-medium"
                           : "border-transparent hover:bg-foreground/[0.04]",
                       ].join(" ")}
                     >
@@ -209,10 +226,11 @@ export default function AppLayout({
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
             >
               {children}
             </motion.div>

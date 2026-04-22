@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Search as SearchIcon } from "lucide-react";
 import TemplatePreview from "@/components/shared/TemplatePreview";
 import BookmarkButton from "@/components/shared/BookmarkButton";
+import { motion } from "framer-motion";
 
 /** --------------------
  * Template data
@@ -263,14 +264,18 @@ export default function TemplatesPage() {
     : "#";
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-      <section>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 sm:space-y-6 p-4 sm:p-6"
+    >
+      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground">Templates</h1>
         <p className="mt-1 text-sm text-foreground/70">
-          Ready-to-use outreach, follow-up, and negotiation messages—fill
-          variables and copy in one click.
+          Ready-to-use outreach, follow-up, and negotiation messages—fill variables and copy in one click.
         </p>
-      </section>
+      </div>
 
       {/* Quick fill */}
       <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
@@ -399,6 +404,6 @@ export default function TemplatesPage() {
           </a>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

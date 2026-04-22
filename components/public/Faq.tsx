@@ -9,11 +9,15 @@ type QA = { q: string; a: string };
 const QA_ITEMS: QA[] = [
   {
     q: "Is Offervia free to use?",
-    a: "Yes — Offervia is currently in free beta. In the future, a Pro tier with advanced resume insights and unlimited tailoring may be added, but core tools will remain accessible.",
+    a: "Yes. Offervia has a generous free tier with monthly limits to keep the platform fast and fair for everyone.",
   },
   {
     q: "How does the AI improve my resume?",
     a: "Our AI tailors your resume to match job descriptions, optimizes keywords, formats for ATS, and highlights impact using real hiring criteria.",
+  },
+  {
+    q: "What do I get with Pro?",
+    a: "Pro is recommended if you’re applying consistently. It unlocks much higher monthly limits so you can scan and tailor without interruptions.",
   },
   {
     q: "Do you store my resume or personal data?",
@@ -93,7 +97,8 @@ function Item({ q, a, idx }: QA & { idx: number }) {
 
 export default function Faq() {
   return (
-    <section id="faq" className="bg-background scroll-mt-20">
+    <section id="faq" className="relative bg-background scroll-mt-20">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}

@@ -42,6 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { ArrowUpDown, Download, Search as SearchIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Application = {
   id: string;
@@ -459,9 +460,14 @@ export default function TrackerPage() {
 
   return (
     <AuthGuard>
-      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="space-y-4 sm:space-y-6 p-4 sm:p-6"
+      >
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
             <p className="mt-1 text-sm text-foreground/70">
@@ -820,7 +826,7 @@ export default function TrackerPage() {
             </ConfirmFooter>
           </ConfirmContent>
         </ConfirmDialog>
-      </div>
+      </motion.div>
     </AuthGuard>
   );
 }

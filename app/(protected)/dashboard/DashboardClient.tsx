@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Sparkles, X } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   LineChart,
   Line,
@@ -343,7 +344,12 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 sm:space-y-6"
+    >
       {/* Upgrade success / cancel banner */}
       {upgrade === "success" && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-800 dark:text-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10">
@@ -564,23 +570,43 @@ export default function DashboardClient({
 
       {/* Greeting */}
       <section>
-        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-          Welcome back,{" "}
-          <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
-            {friendlyName}
-          </span>{" "}
-        </h1>
-        <p className="mt-1 text-sm text-foreground/70">
-          Ready to make progress toward your next offer?
-        </p>
+        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
+                  Welcome back,{" "}
+                  <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
+                    {friendlyName}
+                  </span>
+                </h1>
+                <p className="mt-1 text-sm text-foreground/70">
+                  Keep momentum: scan → tailor → track.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button asChild variant="outline" className="border-border hover:bg-foreground/[0.06]">
+                  <Link href="/scanner">Scan</Link>
+                </Button>
+                <Button asChild variant="outline" className="border-border hover:bg-foreground/[0.06]">
+                  <Link href="/resume">Tailor</Link>
+                </Button>
+                <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
+                  <Link href="/job-packet">Start a Job Packet</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* KPIs + Goal/Streak */}
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Kpi title="Applications (total)" value={total} />
-        <Kpi title="Applications (this week)" value={appsThisWeek} />
-        <Kpi title="Interviewing" value={interviewing} />
-        <Kpi title="Offers" value={offers} />
+        <Kpi title="Applications (total)" value={total} tone="slate" />
+        <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
+        <Kpi title="Interviewing" value={interviewing} tone="blue" />
+        <Kpi title="Offers" value={offers} tone="emerald" />
       </section>
 
       {/* Pro: Performance Insights */}
@@ -922,18 +948,41 @@ export default function DashboardClient({
           </CardContent>
         </Card>
       </section>
-    </div>
+    </motion.div>
   );
 }
 
-function Kpi({ title, value }: { title: string; value: number }) {
+function Kpi({
+  title,
+  value,
+  tone = "slate",
+}: {
+  title: string;
+  value: number;
+  tone?: "slate" | "indigo" | "blue" | "emerald";
+}) {
+  const toneClass =
+    tone === "indigo"
+      ? "bg-indigo-500/10"
+      : tone === "blue"
+      ? "bg-sky-500/10"
+      : tone === "emerald"
+      ? "bg-emerald-500/10"
+      : "bg-foreground/[0.06]";
   return (
-    <Card className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60 truncate">
-        {title}
-      </div>
-      <div className="mt-2 text-xl sm:text-2xl font-semibold text-foreground">{value}</div>
-    </Card>
+    <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 320, damping: 26 }}>
+      <Card className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60 truncate">
+            {title}
+          </div>
+          <div className={`h-2.5 w-2.5 rounded-full ${toneClass}`} aria-hidden />
+        </div>
+        <div className="mt-2 text-xl sm:text-2xl font-semibold text-foreground tabular-nums">
+          {value}
+        </div>
+      </Card>
+    </motion.div>
   );
 }
 

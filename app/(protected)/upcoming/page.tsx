@@ -2,6 +2,7 @@
 
 import { Lock, Rocket, Sparkles } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 export default function UpcomingPage() {
   const features = [
@@ -32,21 +33,25 @@ export default function UpcomingPage() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="space-y-4 sm:space-y-6 p-4 sm:p-6"
+    >
       <h1 className="text-2xl font-semibold flex items-center gap-2">
         <Rocket className="h-5 w-5 text-indigo-500" /> Coming Soon
       </h1>
 
       <p className="text-sm text-foreground/70 max-w-2xl">
-        These features are currently in development and will be available post-beta.
-        Stay tuned for the Pro release — Offervia is just getting started.
+        These features are currently in development. We’ll ship them as polished upgrades — not half-finished experiments.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (
           <Card
             key={f.title}
-            className="relative border-border bg-muted/40 opacity-70 cursor-not-allowed"
+            className="relative rounded-2xl border border-border bg-card/60 opacity-80 cursor-not-allowed shadow-sm ring-1 ring-white/5 dark:ring-black/10"
           >
             <Lock className="absolute right-3 top-3 h-4 w-4 text-foreground/50" />
             <CardHeader>
@@ -61,9 +66,9 @@ export default function UpcomingPage() {
 
       <div className="mt-6 text-center text-xs text-foreground/50">
         <Sparkles className="inline h-3 w-3 mr-1" />
-        Pro features launch Q1 2026 — follow{" "}
+        Pro roadmap is evolving — follow{" "}
         <span className="font-medium text-indigo-500">PerezDev</span> for updates.
       </div>
-    </div>
+    </motion.div>
   );
 }

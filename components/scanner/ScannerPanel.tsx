@@ -31,6 +31,7 @@ import {
   Search as SearchIcon,
   Sparkles,
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { postJson } from "@/lib/safe-fetch";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 
@@ -589,6 +590,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           </div>
         </CardHeader>
         <CardContent>
+          <AnimatePresence mode="wait" initial={false}>
           {loading ? (
             <div className="space-y-2">
               <div className="h-4 w-2/3 animate-pulse rounded bg-foreground/[0.06]" />
@@ -597,7 +599,15 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               <div className="mt-2 h-24 animate-pulse rounded bg-foreground/[0.06]" />
             </div>
           ) : scanResult ? (
-            <div className="space-y-6" aria-label="Scan results">
+            <motion.div
+              key="scanResult"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="space-y-6"
+              aria-label="Scan results"
+            >
               <div className="mb-6">
                 <p className="text-sm text-muted-foreground">Match Score</p>
                 <p className="text-3xl font-semibold text-foreground">
@@ -624,19 +634,32 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                 <p className="text-sm font-medium text-muted-foreground">Summary</p>
                 <p className="mt-2 text-sm text-foreground">{scanResult.summary}</p>
               </div>
-            </div>
+            </motion.div>
           ) : legacyResult ? (
-            <pre
+            <motion.pre
+              key="legacyResult"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               aria-label="Scan results"
               className="whitespace-pre-wrap rounded-xl border border-border bg-background/60 p-3 text-sm text-foreground"
             >
               {legacyResult}
-            </pre>
+            </motion.pre>
           ) : (
-            <p className="text-sm text-foreground/60">
+            <motion.p
+              key="empty"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="text-sm text-foreground/60"
+            >
               No analysis yet. Paste a job description and click Analyze.
-            </p>
+            </motion.p>
           )}
+          </AnimatePresence>
         </CardContent>
       </Card>
 

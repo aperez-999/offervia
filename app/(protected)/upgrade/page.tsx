@@ -24,5 +24,9 @@ export default async function UpgradePage() {
   const subscription = await getUserSubscription(user.id);
   const plan = subscription.plan;
 
-  return <UpgradeClient plan={plan} />;
+  return (
+    <div className="p-4 sm:p-6">
+      <UpgradeClient plan={plan} />
+    </div>
+  );
 }

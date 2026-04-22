@@ -60,7 +60,8 @@ export default function Features() {
   ];
 
   return (
-    <section id="features" className="bg-background scroll-mt-20">
+    <section id="features" className="relative bg-background scroll-mt-20">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
@@ -85,12 +86,14 @@ export default function Features() {
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
                 whileHover={{ y: -4 }}
                 className={[
-                  "rounded-xl border border-border p-5 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
+                  "rounded-2xl border border-border p-5 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
                   // base glass
                   "bg-white/70 dark:bg-neutral-900/40",
                   // subtle tint overlays
                   a.lightBg,
                   a.darkBg,
+                  // equal-height card layout
+                  "flex flex-col",
                 ].join(" ")}
               >
                 <div
@@ -106,14 +109,21 @@ export default function Features() {
                   {it.title}
                 </h3>
 
-                <p className="mt-2 text-center text-sm text-gray-700 dark:text-white">
+                <p className="mt-2 text-center text-sm leading-relaxed text-gray-700 dark:text-white min-h-[5.25rem]">
                   {it.desc}
                 </p>
 
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-gray-700 dark:text-white">
-                  <li>Save time with tailored recommendations</li>
-                  <li>Stay concise and ATS-friendly</li>
-                  <li>Built for job seekers, not HR</li>
+                <ul className="mt-4 space-y-1 text-xs text-gray-700 dark:text-white">
+                  {[
+                    "Save time with tailored recommendations",
+                    "Stay concise and ATS-friendly",
+                    "Built for job seekers, not HR",
+                  ].map((t) => (
+                    <li key={t} className="flex items-start gap-2">
+                      <span className="mt-[0.5rem] h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                      <span className="leading-relaxed">{t}</span>
+                    </li>
+                  ))}
                 </ul>
               </motion.div>
             );
