@@ -104,6 +104,8 @@ create table if not exists public.user_prefs (
   default_mode text,
   weekly_goal integer,
   email_digest boolean not null default false,
+  onboarding_dismissed boolean not null default false,
+  onboarding_completed jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -121,4 +123,3 @@ create table if not exists public.request_events (
 
 create index if not exists request_events_kind_created_at_idx on public.request_events (kind, created_at desc);
 create index if not exists request_events_user_kind_created_at_idx on public.request_events (user_id, kind, created_at desc);
-

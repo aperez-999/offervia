@@ -29,23 +29,33 @@ function getAuthedSupabase(req: NextRequest) {
   });
 }
 
-const createSchema = z
+const trackerPayloadSchema = z
   .object({
-    company: z.string().min(1, "company is required").max(200),
-    role: z.string().min(1, "role is required").max(200),
-    source: z.string().max(200).optional().or(z.literal("")).transform((v) => (v === "" ? undefined : v)),
-    resume_used: z.string().max(200).optional(),
-    status: z.string().min(1).max(100),
-    follow_up_date: z
+    company: z.string().min(1, "company is required").max(200).optional(),
+    role: z.string().min(1, "role is required").max(200).optional(),
+    position: z.string().min(1, "position is required").max(200).optional(),
+    source: z
       .string()
-      .datetime({ offset: true })
-      .or(z.string().date())
-      .optional(),
+      .max(200)
+      .optional()
+      .or(z.literal(""))
+      .transform((v) => (v === "" ? undefined : v)),
+    resume_used: z.string().max(200).optional(),
+    status: z.string().min(1).max(100).optional(),
+    follow_up_date: z.string().datetime({ offset: true }).or(z.string().date()).optional(),
+    applied_on: z.string().datetime({ offset: true }).or(z.string().date()).optional(),
     notes: z.string().max(5000).optional(),
   })
   .strict();
 
-const updateSchema = createSchema.partial().refine((val) => Object.keys(val).length > 0, {
+const createSchema = trackerPayloadSchema.refine(
+  (val) => Boolean(val.company?.trim()) && Boolean(val.role?.trim() || val.position?.trim()) && Boolean(val.status),
+  {
+    message: "company, role, and status are required",
+  }
+);
+
+const updateSchema = trackerPayloadSchema.refine((val) => Object.keys(val).length > 0, {
   message: "At least one field must be provided",
 });
 
@@ -56,6 +66,145 @@ const RATE_LIMIT_WRITE = { perMinute: 20, perDay: 200 };
 
 function errResponse(code: Parameters<typeof fail>[0], message: string, status: number) {
   return fail(code, message, status);
+}
+
+type TrackerPayload = z.infer<typeof trackerPayloadSchema>;
+
+type NormalizedTrackerPayload = {
+  company?: string;
+  role?: string;
+  source?: string;
+  resume_used?: string;
+  status?: string;
+  follow_up_date?: string;
+  notes?: string;
+};
+
+type TrackerRow = {
+  id: string;
+  user_id: string;
+  company: string;
+  role?: string | null;
+  position?: string | null;
+  status: string;
+  follow_up_date?: string | null;
+  applied_on?: string | null;
+  source?: string | null;
+  resume_used?: string | null;
+  notes?: string | null;
+  created_at: string;
+};
+
+function trimOrUndefined(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeTrackerPayload(payload: TrackerPayload): NormalizedTrackerPayload {
+  return {
+    company: trimOrUndefined(payload.company),
+    role: trimOrUndefined(payload.role) ?? trimOrUndefined(payload.position),
+    source: trimOrUndefined(payload.source),
+    resume_used: trimOrUndefined(payload.resume_used),
+    status: trimOrUndefined(payload.status),
+    follow_up_date: trimOrUndefined(payload.follow_up_date) ?? trimOrUndefined(payload.applied_on),
+    notes: trimOrUndefined(payload.notes),
+  };
+}
+
+function withDefinedValues<T extends Record<string, unknown>>(value: T) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined)
+  ) as Partial<T>;
+}
+
+function normalizeTrackerRow(row: TrackerRow) {
+  const role = trimOrUndefined(row.role ?? undefined) ?? trimOrUndefined(row.position ?? undefined) ?? "";
+  const followUpDate =
+    trimOrUndefined(row.follow_up_date ?? undefined) ??
+    trimOrUndefined(row.applied_on ?? undefined) ??
+    "";
+
+  return {
+    ...row,
+    role,
+    position: role,
+    follow_up_date: followUpDate,
+    applied_on: followUpDate,
+  };
+}
+
+function getCanonicalWritePayload(payload: NormalizedTrackerPayload) {
+  return withDefinedValues({
+    company: payload.company,
+    role: payload.role,
+    source: payload.source,
+    resume_used: payload.resume_used,
+    status: payload.status,
+    follow_up_date: payload.follow_up_date,
+    notes: payload.notes,
+  });
+}
+
+function getLegacyWritePayload(payload: NormalizedTrackerPayload) {
+  return withDefinedValues({
+    company: payload.company,
+    position: payload.role,
+    source: payload.source,
+    resume_used: payload.resume_used,
+    status: payload.status,
+    applied_on: payload.follow_up_date,
+    notes: payload.notes,
+  });
+}
+
+async function insertApplication(
+  supabase: ReturnType<typeof getAuthedSupabase>,
+  userId: string,
+  payload: NormalizedTrackerPayload
+) {
+  const canonical = await supabase
+    .from("applications")
+    .insert({ ...getCanonicalWritePayload(payload), user_id: userId })
+    .select("*")
+    .single();
+
+  if (!canonical.error) return canonical;
+
+  const legacy = await supabase
+    .from("applications")
+    .insert({ ...getLegacyWritePayload(payload), user_id: userId })
+    .select("*")
+    .single();
+
+  return legacy.error ? canonical : legacy;
+}
+
+async function updateApplication(
+  supabase: ReturnType<typeof getAuthedSupabase>,
+  userId: string,
+  id: string,
+  payload: NormalizedTrackerPayload
+) {
+  const canonical = await supabase
+    .from("applications")
+    .update(getCanonicalWritePayload(payload))
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .maybeSingle();
+
+  if (!canonical.error) return canonical;
+
+  const legacy = await supabase
+    .from("applications")
+    .update(getLegacyWritePayload(payload))
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .maybeSingle();
+
+  return legacy.error ? canonical : legacy;
 }
 
 export async function GET(req: NextRequest) {
@@ -84,7 +233,10 @@ export async function GET(req: NextRequest) {
     console.error("[tracker] GET fetch applications", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
-  return Response.json({ success: true, data });
+  return Response.json({
+    success: true,
+    data: ((data || []) as TrackerRow[]).map(normalizeTrackerRow),
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -116,16 +268,16 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getAuthedSupabase(req);
-  const { data, error } = await supabase
-    .from("applications")
-    .insert({ ...parsed.data, user_id: userId })
-    .select("*")
-    .single();
+  const normalizedPayload = normalizeTrackerPayload(parsed.data);
+  const { data, error } = await insertApplication(supabase, userId, normalizedPayload);
   if (error) {
     console.error("[tracker] POST insert", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
-  return Response.json({ success: true, data });
+  return Response.json({
+    success: true,
+    data: normalizeTrackerRow(data as TrackerRow),
+  });
 }
 
 export async function PATCH(req: NextRequest) {
@@ -167,21 +319,19 @@ export async function PATCH(req: NextRequest) {
     return errResponse("INVALID_INPUT", "Invalid request.", 400);
   }
 
+  const normalizedPayload = normalizeTrackerPayload(updateParsed.data);
   const supabase = getAuthedSupabase(req);
   const { id } = parsedId.data;
-  const { data, error } = await supabase
-    .from("applications")
-    .update(updateParsed.data)
-    .eq("id", id)
-    .eq("user_id", userId)
-    .select("*")
-    .maybeSingle();
+  const { data, error } = await updateApplication(supabase, userId, id, normalizedPayload);
 
   if (error) {
     console.error("[tracker] PATCH update", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
-  return Response.json({ success: true, data });
+  return Response.json({
+    success: true,
+    data: data ? normalizeTrackerRow(data as TrackerRow) : null,
+  });
 }
 
 export async function DELETE(req: NextRequest) {

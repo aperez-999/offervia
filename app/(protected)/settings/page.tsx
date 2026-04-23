@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import AuthGuard from "@/components/AuthGuard";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
   Card,
@@ -224,8 +223,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <AuthGuard>
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <section>
           <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
@@ -369,7 +367,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Data & Privacy</CardTitle>
             <CardDescription className="text-foreground/70">
-              Export your data or clear local-only items saved on this device.
+              Export server-stored account data plus any browser-only drafts found on this device.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -393,6 +391,19 @@ export default function SettingsPage() {
 
             <hr className="my-2 border-border" />
 
+            <div className="space-y-1 text-xs text-foreground/60">
+              <p>
+                <strong className="text-foreground/80">Export data</strong> includes your profile details,
+                preferences, server-stored coach history, and browser-saved drafts or local history found on
+                this device.
+              </p>
+              <p>
+                <strong className="text-foreground/80">Clear local data</strong> only removes browser-saved
+                drafts and local history from this device. It does not delete your Offervia account or
+                server-stored data.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <div className="text-sm font-medium text-foreground">Danger zone</div>
               <p className="text-xs text-foreground/60">
@@ -410,7 +421,6 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </AuthGuard>
+    </div>
   );
 }

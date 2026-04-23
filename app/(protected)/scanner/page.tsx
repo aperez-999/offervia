@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import AuthGuard from "@/components/AuthGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), {
@@ -60,10 +59,8 @@ export const metadata: Metadata = {
 
 export default function ScannerPage() {
   return (
-    <AuthGuard>
-      <div className="p-4 sm:p-6">
-        <ScannerPanel />
-      </div>
-    </AuthGuard>
+    <div className="p-4 sm:p-6">
+      <ScannerPanel />
+    </div>
   );
 }

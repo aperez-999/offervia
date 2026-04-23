@@ -73,34 +73,37 @@ export default function PrivacyPage() {
           </motion.section>
 
           <SectionCard id="data-we-collect" title="Data We Collect">
-            <p>We collect the minimum necessary to provide and improve Offervia:</p>
+            <p>We collect the data needed to operate Offervia and support your account:</p>
             <ul className="mt-2 list-disc pl-5">
-              <li>Account details (e.g., email) for sign-in and security.</li>
-              <li>Content you provide (e.g., resumes or job descriptions) to deliver features.</li>
-              <li>Basic usage metrics (aggregated/anonymized) to improve performance and reliability.</li>
+              <li>Account, profile, and billing-related information needed for sign-in, subscriptions, and support.</li>
+              <li>User-submitted content used in features such as resume tailoring, job scans, coaching, contact requests, and job tracking.</li>
+              <li>Server-stored history needed to provide the product experience, including tracker entries, coach messages, job scans, usage counts, and subscription state.</li>
+              <li>Browser-local drafts and convenience state saved on the device you are using, such as unsent drafts or local history.</li>
             </ul>
           </SectionCard>
 
           <SectionCard id="how-data-is-used" title="How Data Is Used">
             <p>
-              Your data powers features like resume tailoring, interview coaching, and job description
-              scanning. We may aggregate anonymous metrics to understand which features help most and to
-              guide product improvements.
+              Your data powers features like resume tailoring, interview coaching, job description
+              scanning, and application tracking. User-submitted content is processed by Offervia’s
+              server-side integrations to generate AI outputs, and we may review aggregated product
+              metrics to improve reliability and user experience.
             </p>
           </SectionCard>
 
           <SectionCard id="ai-and-security" title="AI & Security">
             <p>
-              Resumes and job descriptions are processed to generate tailored content and insights. We aim
-              to minimize retention and do not use your uploads to train our own models. We employ reasonable
-              safeguards to protect data in transit and at rest, but no system is perfectly secure.
+              Resumes, job descriptions, and chat prompts are transmitted through Offervia’s backend to
+              configured third-party AI services so we can generate tailored content and guidance. We employ
+              reasonable safeguards to protect data in transit and at rest, but no system is perfectly secure.
             </p>
           </SectionCard>
 
           <SectionCard id="user-rights" title="Your Rights">
             <p>
-              You can request access or deletion of your account data. During beta, some requests may take
-              time, but we’ll do our best to help. For any privacy questions, reach out via our contact page.
+              You can contact us to request access to your account data or help with deletion requests.
+              During beta, some requests may take time and may require manual support. For any privacy
+              questions, reach out via our contact page.
             </p>
           </SectionCard>
 

@@ -18,9 +18,9 @@ export default function Why() {
       icon: CheckCircle2,
     },
     {
-      title: "Private & secure",
+      title: "Clear data handling",
       desc:
-        "Your uploads aren’t shared. Tailor resumes with confidence — your data stays with you.",
+        "Offervia sends your uploads and prompts through secure server-side AI integrations so you can tailor resumes and keep your search history in one place.",
       icon: Shield,
     },
   ];

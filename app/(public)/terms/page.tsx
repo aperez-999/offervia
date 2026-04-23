@@ -88,7 +88,9 @@ export default function TermsPage() {
           <SectionCard id="beta-limitations" title="Beta Limitations">
             <p>
               The service is provided “as is” during beta. Features may change, and occasional downtime or
-              issues may occur. We aim to improve reliability and user experience over time.
+              issues may occur. AI-generated suggestions can be incomplete or inaccurate, so you are
+              responsible for reviewing outputs before relying on them. We aim to improve reliability and
+              user experience over time.
             </p>
           </SectionCard>
 
@@ -96,7 +98,7 @@ export default function TermsPage() {
             <p>
               Offervia and its content are owned by us or our licensors. You retain rights to your own
               materials (e.g., resumes and job descriptions) that you upload. You grant us a limited license
-              to process that content solely to provide the service.
+              to process that content solely to operate, maintain, and provide the service to you.
             </p>
           </SectionCard>
 

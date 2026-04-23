@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import AuthGuard from "@/components/AuthGuard";
 import CoachHub from "@/components/coach/CoachHub";
 
 export const metadata: Metadata = {
@@ -45,9 +44,5 @@ export const metadata: Metadata = {
 };
 
 export default function CoachPage() {
-  return (
-    <AuthGuard>
-      <CoachHub />
-    </AuthGuard>
-  );
+  return <CoachHub />;
 }

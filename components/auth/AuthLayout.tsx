@@ -121,7 +121,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <ul className="mt-2 space-y-2 text-xs text-foreground/70">
                 {[
                   { icon: Zap, t: "Faster iteration per application" },
-                  { icon: ShieldCheck, t: "Privacy-first (no model training)" },
+                  { icon: ShieldCheck, t: "Clear, server-side AI processing" },
                   { icon: Sparkles, t: "Workflow built for momentum" },
                 ].map(({ icon: Icon, t }) => (
                   <li key={t} className="flex items-start gap-2">
@@ -150,7 +150,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {[
                   { icon: Zap, t: "Faster iteration" },
-                  { icon: ShieldCheck, t: "Privacy-first" },
+                  { icon: ShieldCheck, t: "Server-side AI flow" },
                   { icon: Sparkles, t: "Built for momentum" },
                 ].map(({ icon: Icon, t }) => (
                   <div key={t} className="rounded-2xl border border-border bg-background/60 p-3">

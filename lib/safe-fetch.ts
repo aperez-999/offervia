@@ -125,6 +125,16 @@ export async function postJson<T = any>(
   });
 }
 
+export async function getJson<T = unknown>(
+  url: string,
+  opts?: Omit<SafeFetchOptions, "body" | "method">
+) {
+  return safeFetchJson<T>(url, {
+    method: "GET",
+    ...opts,
+  });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function postForm<T = any>(
   url: string,
@@ -134,6 +144,31 @@ export async function postForm<T = any>(
   return safeFetchJson<T>(url, {
     method: "POST",
     body: form,
+    ...opts,
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function patchJson<T = any>(
+  url: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  json: any,
+  opts?: Omit<SafeFetchOptions, "body" | "method">
+) {
+  return safeFetchJson<T>(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+    body: JSON.stringify(json ?? {}),
+    ...opts,
+  });
+}
+
+export async function deleteJson<T = unknown>(
+  url: string,
+  opts?: Omit<SafeFetchOptions, "body" | "method">
+) {
+  return safeFetchJson<T>(url, {
+    method: "DELETE",
     ...opts,
   });
 }

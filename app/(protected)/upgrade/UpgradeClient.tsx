@@ -21,8 +21,6 @@ const PRO_FEATURES = [
   { label: "AI coach messages", value: `${PLAN_LIMITS.pro.coach_messages_per_month} / month` },
   { label: "Job scans", value: `${PLAN_LIMITS.pro.job_scans_per_month} / month` },
   { label: "Interview sessions", value: "Unlimited" },
-  { label: "Priority processing", value: "Coming soon", muted: true },
-  { label: "Advanced performance analytics", value: "Coming soon", muted: true },
 ];
 
 export default function UpgradeClient({ plan }: { plan: PlanType }) {
@@ -141,15 +139,13 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
             {PRO_FEATURES.map((f) => (
               <div
                 key={f.label}
-                className={`flex items-center justify-between gap-2 text-sm ${f.muted ? "text-muted-foreground" : ""}`}
+                className="flex items-center justify-between gap-2 text-sm"
               >
                 <span className="flex items-center gap-2">
                   <Check className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   {f.label}
                 </span>
-                <span className={f.muted ? "text-muted-foreground" : "font-medium text-foreground"}>
-                  {f.value}
-                </span>
+                <span className="font-medium text-foreground">{f.value}</span>
               </div>
             ))}
           </CardContent>

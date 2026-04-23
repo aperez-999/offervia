@@ -21,7 +21,7 @@ const QA_ITEMS: QA[] = [
   },
   {
     q: "Do you store my resume or personal data?",
-    a: "No. Resumes stay local to your session and are never used to train any models. Your data is private.",
+    a: "Offervia stores the account data and feature history needed to run the app, such as tracker entries, coach messages, and saved job scans. Resume text, job descriptions, and chat prompts are processed through Offervia’s server-side AI flow to generate results, and browser-only drafts stay on the device where you created them.",
   },
   {
     q: "Can I upload PDF or DOCX files?",

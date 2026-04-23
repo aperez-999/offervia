@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import AuthGuard from "@/components/AuthGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ResumeWizard = dynamic(() => import("@/components/resume/ResumeWizard"), {
@@ -60,10 +59,8 @@ export const metadata: Metadata = {
 
 export default function ResumePage() {
   return (
-    <AuthGuard>
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        <ResumeWizard />
-      </div>
-    </AuthGuard>
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <ResumeWizard />
+    </div>
   );
 }

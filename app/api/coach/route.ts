@@ -4,12 +4,25 @@ import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import { fail } from "@/lib/api/response";
+import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import { getServiceSupabase } from "@/lib/supabase/service";
 
-export type CoachMode = "interview" | "resume" | "career";
+export type CoachMode = "interview" | "resume" | "cover_letter" | "career";
+
+type PersistedCoachMessage = {
+  id: string;
+  user_id: string;
+  mode: CoachMode;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+};
+
+const coachModeSchema = z.enum(["interview", "resume", "cover_letter", "career"]);
 
 const coachBodySchema = z
   .object({
-    mode: z.enum(["interview", "resume", "cover_letter", "career"]),
+    mode: coachModeSchema,
     responseMode: z.enum(["brief", "detailed"]).optional(),
     messages: z
       .array(
@@ -30,6 +43,60 @@ const coachBodySchema = z
     { message: "Total message content too long" }
   );
 
+function parseCookies(cookieHeader: string): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(";").forEach((cookie) => {
+    const [name, ...rest] = cookie.trim().split("=");
+    if (name) cookies[name] = rest.join("=").trim();
+  });
+  return cookies;
+}
+
+async function getAuthenticatedUserId(req: Request): Promise<string | null> {
+  const cookies = parseCookies(req.headers.get("cookie") || "");
+  const supabase = createSupabaseServerClient({
+    get(name: string) {
+      return cookies[name];
+    },
+  });
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user?.id) return null;
+  return user.id;
+}
+
+function buildSystemPrompt(mode: CoachMode, responseMode?: "brief" | "detailed") {
+  const baseSystemPrompt = SYSTEM_PROMPTS[mode];
+  if (responseMode === "brief") {
+    return `${baseSystemPrompt}\n\nIMPORTANT: Keep responses concise and practical. Limit to 3-5 sentences or key bullet points. Be direct and actionable.`;
+  }
+  return `${baseSystemPrompt}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
+}
+
+async function insertMessage(message: {
+  user_id: string;
+  mode: CoachMode;
+  role: "user" | "assistant";
+  content: string;
+}): Promise<PersistedCoachMessage> {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from("messages")
+    .insert(message)
+    .select("id,user_id,mode,role,content,created_at")
+    .single();
+
+  if (error || !data) {
+    throw new Error("Failed to persist coach message");
+  }
+
+  return data as PersistedCoachMessage;
+}
+
 export async function POST(req: Request) {
   const { checkRateLimitForApi } = await import("@/lib/rate-limit");
   const rl = await checkRateLimitForApi(req, "coach", {
@@ -44,9 +111,14 @@ export async function POST(req: Request) {
       rl.reason === "unauthorized"
         ? "Authentication required."
         : "Too many requests. Try again soon.";
-    return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
-      headers: { "Retry-After": String(retry) },
-    });
+    return fail(
+      rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
+      msg,
+      rl.reason === "unauthorized" ? 401 : 429,
+      {
+        headers: { "Retry-After": String(retry) },
+      }
+    );
   }
 
   const userId = rl.userId!;
@@ -79,35 +151,84 @@ export async function POST(req: Request) {
       return fail("INVALID_INPUT", "Invalid request.", 400);
     }
 
-    const isBrief = responseMode === "brief";
-    const baseSystemPrompt = SYSTEM_PROMPTS[mode];
-    const systemPrompt = isBrief
-      ? `${baseSystemPrompt}\n\nIMPORTANT: Keep responses concise and practical. Limit to 3-5 sentences or key bullet points. Be direct and actionable.`
-      : `${baseSystemPrompt}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
+    const userInput = messages[messages.length - 1];
+    if (!userInput || userInput.role !== "user") {
+      return fail("INVALID_INPUT", "Invalid request.", 400);
+    }
 
-    const modifiedMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-      { role: "system", content: systemPrompt },
-      ...messages.slice(1),
-    ];
-
-    const groq = getGroqClient();
-    // Type assertion needed because Groq SDK types are strict but our ChatMessage[] is compatible
-    const result = await groq.chat.completions.create({
-      model: DEFAULT_GROQ_MODEL,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Groq SDK type mismatch, ChatMessage[] is runtime compatible
-      messages: modifiedMessages as any,
-      temperature: 0.2,
-      max_tokens: isBrief ? 300 : 800, // Shorter responses for brief mode
+    const userMessage = await insertMessage({
+      user_id: userId,
+      mode,
+      role: "user",
+      content: userInput.content,
     });
 
-    const rawContent = (result?.choices?.[0]?.message?.content as string | undefined) || "";
-    
-    // Clean up the content by trimming redundant newlines
-    const content = rawContent.trimStart().replace(/\n{3,}/g, "\n\n").trim();
+    try {
+      const systemPrompt = buildSystemPrompt(mode, responseMode);
+      const modifiedMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
+        { role: "system", content: systemPrompt },
+        ...messages.slice(1),
+      ];
 
-    await incrementUsage(userId, "coach");
-    return Response.json({ content });
+      const groq = getGroqClient();
+      const isBrief = responseMode === "brief";
+      const result = await groq.chat.completions.create({
+        model: DEFAULT_GROQ_MODEL,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Groq SDK type mismatch, ChatMessage[] is runtime compatible
+        messages: modifiedMessages as any,
+        temperature: 0.2,
+        max_tokens: isBrief ? 300 : 800,
+      });
+
+      const rawContent = (result?.choices?.[0]?.message?.content as string | undefined) || "";
+      const content = rawContent.trimStart().replace(/\n{3,}/g, "\n\n").trim();
+
+      const assistantMessage = await insertMessage({
+        user_id: userId,
+        mode,
+        role: "assistant",
+        content,
+      });
+
+      await incrementUsage(userId, "coach");
+      return Response.json({ content, userMessage, assistantMessage });
+    } catch {
+      return Response.json(
+        {
+          error: "SERVER_ERROR",
+          message: "Coach failed to respond.",
+          userMessage,
+        },
+        { status: 500 }
+      );
+    }
   } catch {
     return fail("SERVER_ERROR", "Coach failed to respond.", 500);
   }
+}
+
+export async function DELETE(req: Request) {
+  const userId = await getAuthenticatedUserId(req);
+  if (!userId) {
+    return fail("UNAUTHORIZED", "Authentication required.", 401);
+  }
+
+  const mode = new URL(req.url).searchParams.get("mode");
+  const parsedMode = coachModeSchema.safeParse(mode);
+  if (!parsedMode.success) {
+    return fail("INVALID_INPUT", "Invalid request.", 400);
+  }
+
+  const supabase = getServiceSupabase();
+  const { error } = await supabase
+    .from("messages")
+    .delete()
+    .eq("user_id", userId)
+    .eq("mode", parsedMode.data);
+
+  if (error) {
+    return fail("SERVER_ERROR", "Failed to clear conversation.", 500);
+  }
+
+  return Response.json({ success: true });
 }

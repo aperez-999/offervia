@@ -94,6 +94,32 @@ function InnerChat({ mode }: { mode: CoachMode }) {
     } catch {}
   }, [DRAFT_KEY, input]);
 
+  const loadMessages = useCallback(
+    async (nextUserId: string | null, nextMode: CoachMode) => {
+      if (!nextUserId) {
+        setMessages([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id,user_id,mode,role,content,created_at")
+        .eq("user_id", nextUserId)
+        .eq("mode", nextMode)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        toast({ title: "Failed to load chat", variant: "destructive" });
+      } else {
+        setMessages((data || []) as MsgRow[]);
+      }
+      setLoading(false);
+    },
+    [supabase, toast]
+  );
+
   // initial load
   useEffect(() => {
     let mounted = true;
@@ -101,29 +127,16 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       if (!mounted) return;
       if (!user) {
         setUserId(null);
-        setMessages([]);
-        setLoading(false);
+        await loadMessages(null, mode);
         return;
       }
       setUserId(user.id);
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("messages")
-        .select("id,user_id,mode,role,content,created_at")
-        .eq("user_id", user.id)
-        .eq("mode", mode)
-        .order("created_at", { ascending: true });
-      if (error) {
-        toast({ title: "Failed to load chat", variant: "destructive" });
-      } else {
-        setMessages((data || []) as MsgRow[]);
-      }
-      setLoading(false);
+      await loadMessages(user.id, mode);
     });
     return () => {
       mounted = false;
     };
-  }, [mode, supabase, toast]);
+  }, [loadMessages, mode, supabase]);
 
   // auto-scroll & jump button
   const scrollToBottom = useCallback((smooth = true) => {
@@ -197,27 +210,6 @@ function InnerChat({ mode }: { mode: CoachMode }) {
     setMessages((prev) => [...prev, optimisticUser]);
     setInput("");
 
-    // save to db and swap id
-    const { data: insUser, error: insertUserErr } = await supabase
-      .from("messages")
-      .insert({ user_id: userId, mode, role: "user", content })
-      .select("id,created_at")
-      .single();
-    if (insertUserErr) {
-      toast({ title: "Failed to send message", variant: "destructive" });
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
-      setSending(false);
-      return;
-    } else if (insUser) {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === optimisticUser.id
-            ? { ...m, id: insUser.id, created_at: insUser.created_at }
-            : m
-        )
-      );
-    }
-
     // call AI (abortable) with compacted context
     const ctrl = new AbortController();
     setController(ctrl);
@@ -240,6 +232,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         const data = await res.json().catch(() => ({}));
         const retry = res.headers.get("Retry-After");
         const mins = retry ? Math.ceil(Number(retry) / 60) : null;
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         toast({
           title: data?.error || "Rate limit reached",
           description: mins ? `Try again in ~${mins} min.` : "Please try again later.",
@@ -253,6 +246,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       // Plan limit: show server message + upgrade CTA
       if (res.status === 403) {
         const data = await res.json().catch(() => ({}));
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         if (data?.error === "PLAN_LIMIT_REACHED") {
           toast({
             title: "Limit reached",
@@ -283,6 +277,20 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         const message = data?.message ?? data?.error ?? `Request failed (${res.status})`;
+        if (data?.userMessage?.id) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === optimisticUser.id
+                ? ({
+                    ...data.userMessage,
+                    mode,
+                  } as MsgRow)
+                : m
+            )
+          );
+        } else {
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
+        }
         if (res.status >= 500) {
           toast({
             title: "AI is temporarily unavailable. Try again soon.",
@@ -296,38 +304,21 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         return;
       }
       const data = await res.json();
-      const reply: string = data?.content || "";
+      const persistedUser = data?.userMessage as MsgRow | undefined;
+      const assistantMessage = data?.assistantMessage as MsgRow | undefined;
 
-      const optimisticAssistant: MsgRow = {
-        id: `tmp_assistant_${Date.now()}`,
-        user_id: userId,
-        mode,
-        role: "assistant",
-        content: reply || "(no reply)",
-        created_at: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, optimisticAssistant]);
-
-      const { data: insAsst, error: insertAsstErr } = await supabase
-        .from("messages")
-        .insert({ user_id: userId, mode, role: "assistant", content: reply || "" })
-        .select("id,created_at")
-        .single();
-      if (insertAsstErr) {
-        toast({ title: "Failed to save reply", variant: "destructive" });
-      } else if (insAsst) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === optimisticAssistant.id
-              ? { ...m, id: insAsst.id, created_at: insAsst.created_at }
-              : m
-          )
+      setMessages((prev) => {
+        const withUser = prev.map((m) =>
+          m.id === optimisticUser.id && persistedUser ? { ...persistedUser, mode } : m
         );
-      }
+        return assistantMessage ? [...withUser, { ...assistantMessage, mode }] : withUser;
+      });
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") {
         toast({ title: "Generation stopped" });
+        await loadMessages(userId, mode);
       } else {
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         toast({
           title: "AI is temporarily unavailable. Try again soon.",
           variant: "destructive",
@@ -341,7 +332,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         scrollToBottom(true);
       }, 0);
     }
-  }, [input, messages, mode, responseMode, sending, supabase, toast, userId, scrollToBottom, router]);
+  }, [input, loadMessages, messages, mode, responseMode, sending, toast, userId, scrollToBottom, router]);
 
   // regenerate last assistant reply (re-send last user message)
   const regenerate = useCallback(() => {
@@ -652,12 +643,10 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             disabled={!userId || loading || messages.length === 0}
             onConfirm={async () => {
               if (!userId) return;
-              const { error } = await getBrowserSupabase()
-                .from("messages")
-                .delete()
-                .eq("user_id", userId)
-                .eq("mode", mode);
-              if (!error) {
+              const res = await fetch(`/api/coach?mode=${encodeURIComponent(mode)}`, {
+                method: "DELETE",
+              });
+              if (res.ok) {
                 toast({ title: "Conversation cleared" });
                 setMessages([]);
               } else {

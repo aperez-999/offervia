@@ -13,8 +13,8 @@ const items = [
     bg: "bg-amber-50 dark:bg-amber-500/5",
   },
   {
-    title: "Privacy-first",
-    desc: "Your data isn’t used to train models.",
+    title: "Handled with care",
+    desc: "Your inputs are processed through Offervia's server-side AI flow to generate results.",
     icon: ShieldCheck,
     tone: "text-emerald-600 dark:text-emerald-400",
     ring: "ring-emerald-500/20",
@@ -72,4 +72,3 @@ export default function ProofBar() {
     </section>
   );
 }
-

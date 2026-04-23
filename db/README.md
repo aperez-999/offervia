@@ -13,11 +13,15 @@ These files are intended to be **kept in the repo** (they’re your reproducible
 2. Run `db/schema.sql`
 3. Run `db/policies.sql`
 
+## How to apply (existing Supabase project)
+1. Run `db/onboarding.sql` if your existing `user_prefs` table does not already include onboarding state columns.
+2. Re-run `db/policies.sql` only if you need to refresh the checked-in policy set.
+
 ## Tables used by this repo
 - **`applications`**: job application tracker items (per-user)
 - **`messages`**: AI coach chat history (per-user)
 - **`profiles`**: profile fields mirrored from auth metadata (per-user)
-- **`user_prefs`**: settings (default coach mode, weekly goal, email digest)
+- **`user_prefs`**: settings (default coach mode, weekly goal, email digest, onboarding state)
 - **`job_scans`**: job scan results history (optional analytics)
 - **`usage_snapshots`**: monthly usage counters (for plan limits)
 - **`subscriptions`**: Stripe subscription state (plan/status/period end)
