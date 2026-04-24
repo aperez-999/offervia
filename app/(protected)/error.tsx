@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import ErrorView from "@/components/ErrorView";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +16,7 @@ export default function ProtectedError({
 
   useEffect(() => {
     console.error(error);
+    Sentry.captureException(error);
     toast({
       title: "Something went wrong",
       description: "Please try again.",

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 async function getAuthedUserId(req: NextRequest): Promise<string | null> {
   const supabase = createSupabaseServerClient({
@@ -230,6 +231,7 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (error) {
+    captureServerException(error, { route: "api/tracker", extras: { method: "GET" } });
     console.error("[tracker] GET fetch applications", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
@@ -271,6 +273,7 @@ export async function POST(req: NextRequest) {
   const normalizedPayload = normalizeTrackerPayload(parsed.data);
   const { data, error } = await insertApplication(supabase, userId, normalizedPayload);
   if (error) {
+    captureServerException(error, { route: "api/tracker", extras: { method: "POST" } });
     console.error("[tracker] POST insert", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
@@ -325,6 +328,7 @@ export async function PATCH(req: NextRequest) {
   const { data, error } = await updateApplication(supabase, userId, id, normalizedPayload);
 
   if (error) {
+    captureServerException(error, { route: "api/tracker", extras: { method: "PATCH", id } });
     console.error("[tracker] PATCH update", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }
@@ -364,6 +368,10 @@ export async function DELETE(req: NextRequest) {
     .eq("id", parsedId.data.id)
     .eq("user_id", userId);
   if (error) {
+    captureServerException(error, {
+      route: "api/tracker",
+      extras: { method: "DELETE", id: parsedId.data.id },
+    });
     console.error("[tracker] DELETE", error.message);
     return errResponse("SERVER_ERROR", "Something went wrong.", 500);
   }

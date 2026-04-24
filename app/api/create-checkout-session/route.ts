@@ -2,6 +2,7 @@ import stripe from "@/lib/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { serverEnv } from "@/lib/env/server";
 import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 function parseCookies(cookieHeader: string): Record<string, string> {
   const cookies: Record<string, string> = {};
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
 
     return Response.json({ url: session.url });
   } catch (err) {
+    captureServerException(err, { route: "api/create-checkout-session" });
     console.error("[billing-session]", err);
     return fail("SERVER_ERROR", "Unable to start billing session.", 500);
   }

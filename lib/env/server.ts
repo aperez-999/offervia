@@ -15,6 +15,11 @@ const serverEnvSchema = z.object({
   STRIPE_SECRET_KEY: nonEmpty.optional(),
   STRIPE_WEBHOOK_SECRET: nonEmpty.optional(),
 
+  // Sentry (server-only)
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().optional(),
+
   // Email / contact
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
@@ -42,6 +47,9 @@ export function getServerEnv() {
     GROQ_MODEL: process.env.GROQ_MODEL,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_USER: process.env.SMTP_USER,
@@ -68,4 +76,3 @@ export function getServerEnv() {
 }
 
 export const serverEnv = getServerEnv();
-

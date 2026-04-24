@@ -8,6 +8,7 @@ const publicEnvSchema = z.object({
 
   NEXT_PUBLIC_APP_NAME: z.string().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
 
   // Safe to expose (price id)
   NEXT_PUBLIC_STRIPE_PRICE_ID: z.string().optional(),
@@ -25,6 +26,7 @@ export function getPublicEnv() {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_STRIPE_PRICE_ID: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
     NODE_ENV: process.env.NODE_ENV,
   };
@@ -43,4 +45,3 @@ export function getPublicEnv() {
 }
 
 export const publicEnv = getPublicEnv();
-

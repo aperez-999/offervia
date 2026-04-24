@@ -6,6 +6,7 @@ import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import mammoth from "mammoth";
 import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 const resumeTailorJsonSchema = z
   .object({
@@ -196,6 +197,10 @@ export async function POST(req: Request) {
             try {
               resumeText = await extractPdfText(buf);
             } catch (err) {
+              captureServerException(err, {
+                route: "api/resume-tailor",
+                extras: { stage: "pdf-parse" },
+              });
               console.error("PDF parsing failed", err);
               return fail(
                 "SERVER_ERROR",
@@ -311,6 +316,7 @@ export async function POST(req: Request) {
     await incrementUsage(userId, "resume_tailor");
     return NextResponse.json({ content: normalizeText(cleaned) });
   } catch (err: unknown) {
+    captureServerException(err, { route: "api/resume-tailor" });
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {

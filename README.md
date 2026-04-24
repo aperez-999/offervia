@@ -83,7 +83,39 @@ Quality checks:
 ```bash
 npm run lint
 npm run build
+npm run test
 ```
+
+## Testing
+- `npm run test:unit`: runs Vitest unit/component tests
+- `npm run test:e2e`: runs Playwright smoke tests
+- `npm run test`: runs both
+
+Authenticated Playwright smoke coverage is optional and enabled by setting:
+- `E2E_EMAIL`
+- `E2E_PASSWORD`
+- `E2E_BASE_URL` (optional; defaults to local dev server)
+
+## Release Flow
+For the current solo workflow:
+
+1. Run `npm run lint`
+2. Run `npm run build`
+3. Run `npm run test`
+4. Deploy to Vercel
+5. Confirm the production build succeeds
+6. Run the post-deploy checks in [docs/release-checklist.md](docs/release-checklist.md)
 
 ## Notes on Data Handling
 User-submitted resume text, job descriptions, and chat prompts are sent through Offervia’s server-side routes to configured AI providers so the app can generate outputs. The app also stores feature history such as tracker entries, chat messages, usage counters, and job scans where needed to provide the user experience.
+
+## Sentry Setup
+Sentry is optional in local development and recommended in production.
+
+Environment variables:
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_AUTH_TOKEN` (optional; recommended when uploading source maps)
+
+Set these in `.env.local` for local testing and in Vercel project settings for production and preview deployments.

@@ -5,6 +5,7 @@ import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 const jobScanBodySchema = z.object({ jd: z.string().min(20).max(20000) }).strict();
 
@@ -117,7 +118,8 @@ export async function POST(req: Request) {
 
     await incrementUsage(userId, "job_scan");
     return Response.json({ content });
-  } catch {
+  } catch (error) {
+    captureServerException(error, { route: "api/job-scan" });
     return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
   }
 }

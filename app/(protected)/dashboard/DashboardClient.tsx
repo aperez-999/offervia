@@ -28,12 +28,14 @@ import {
 } from "recharts";
 
 import type { UsageSnapshot } from "@/lib/usage/read";
-import { usagePct, usageState } from "@/lib/utils";
 import {
-  hasMeaningfulJobPacketDraft,
   readJobPacketDraft,
   type JobPacketDraft,
 } from "@/lib/job-packet";
+import {
+  getDashboardNextAction,
+  getDashboardUsageItems,
+} from "@/lib/dashboard/overview";
 
 type PlanLimits = {
   resume_tailor_per_month: number;
@@ -264,71 +266,35 @@ export default function DashboardClient({
     return s;
   }, [apps]);
 
-  const nextAction = useMemo(() => {
-    if (hasMeaningfulJobPacketDraft(jobPacketDraft) && !jobPacketDraft?.completedAt) {
-      if (!jobPacketDraft?.scanResult) {
-        return {
-          title: "Continue your Job Packet",
-          desc:
-            "Your job description is already saved. Run the scan and carry that context through the rest of the flow.",
-          href: "/job-packet",
-          cta: "Continue packet",
-        };
-      }
-      if (!jobPacketDraft?.tailoredResume.trim()) {
-        return {
-          title: "Finish tailoring this Job Packet",
-          desc:
-            "Your scan is ready. Open Resume Tailor with the saved company, role, and JD context.",
-          href: "/job-packet",
-          cta: "Continue packet",
-        };
-      }
-      return {
-        title: "Send this Job Packet to the tracker",
-        desc:
-          "Your tailored draft is ready. Finish the workflow with a prefilled tracker entry.",
-        href: "/job-packet",
-        cta: "Finish packet",
-      };
-    }
+  const nextAction = useMemo(
+    () =>
+      getDashboardNextAction({
+        jobPacketDraft,
+        appsThisWeek,
+        recentChatsCount: recentChats.length,
+      }),
+    [appsThisWeek, jobPacketDraft, recentChats.length]
+  );
 
-    if (appsThisWeek === 0) {
-      return {
-        title: "Start a Job Packet",
-        desc:
-          "Paste a job description once, tailor with the same context, and log the application without extra setup.",
-        href: "/job-packet",
-        cta: "Start packet",
-      };
-    }
-    if (recentChats.length === 0) {
-      return {
-        title: "Ask the coach a quick question",
-        desc:
-          "Practice a mock interview or tighten a resume bullet in minutes.",
-        href: "/coach",
-        cta: "Open Coach",
-      };
-    }
-      return {
-        title: "Run a Job Packet",
-        desc: "Scan a job description, tailor, then track your application.",
-        href: "/job-packet",
-        cta: "Start packet",
-      };
-  }, [appsThisWeek, jobPacketDraft, recentChats.length]);
+  const usageItems = useMemo(
+    () =>
+      getDashboardUsageItems({
+        usage: {
+          resumeTailor: usage.resumeTailor,
+          coachMessages: usage.coachMessages,
+          jobScans: usage.jobScans,
+        },
+        limits,
+      }),
+    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor]
+  );
 
-  const nearingLimit = useMemo(() => {
-    const p1 = usagePct(usage.resumeTailor, limits.resume_tailor_per_month);
-    const p2 = usagePct(usage.coachMessages, limits.coach_messages_per_month);
-    const p3 = usagePct(usage.jobScans, limits.job_scans_per_month);
-    return (
-      (p1 >= 80 && p1 < 100) ||
-      (p2 >= 80 && p2 < 100) ||
-      (p3 >= 80 && p3 < 100)
-    );
-  }, [usage, limits]);
+  const nearingLimit = useMemo(
+    () =>
+      plan === "free" &&
+      usageItems.some((item) => item.state === "warn" || item.state === "high"),
+    [plan, usageItems]
+  );
 
   const onboardingItems = useMemo(() => {
     const items = [
@@ -422,139 +388,173 @@ export default function DashboardClient({
         </div>
       )}
 
-      {/* Soft upgrade nudge when Free user is nearing limit (80–99%) */}
-      {plan === "free" && nearingLimit && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
-          <div>
-            <p className="font-medium text-foreground">
-              You&apos;re close to your monthly limit.
-            </p>
-            <p className="mt-0.5 text-foreground/80">
-              Upgrade to Pro to keep optimizing without interruption.
-            </p>
+      <section>
+        <Card className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-card via-card/95 to-indigo-500/5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl">
+                <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-300">
+                  Continue your search
+                </Badge>
+                <h1 className="mt-3 text-2xl font-semibold text-foreground sm:text-3xl">
+                  Welcome back,{" "}
+                  <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
+                    {friendlyName}
+                  </span>
+                </h1>
+                <p className="mt-2 text-sm text-foreground/75 sm:text-base">
+                  One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now.
+                </p>
+                <div className="mt-4 rounded-2xl border border-border bg-background/70 p-4 shadow-sm">
+                  <div className="text-sm font-medium text-foreground">{nextAction.title}</div>
+                  <div className="mt-1 text-sm text-foreground/70">{nextAction.desc}</div>
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[220px]">
+                <Link href={nextAction.href}>
+                  <Button className="w-full cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
+                    {nextAction.cta}
+                  </Button>
+                </Link>
+                <p className="text-xs text-foreground/60">
+                  Quick actions and recent activity are just below if you need a different path.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* KPIs + Goal/Streak */}
+      <section className="space-y-3">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+            Progress
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="shrink-0 cursor-pointer border-amber-500/40 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 dark:text-amber-200 dark:border-amber-500/30 dark:hover:bg-amber-500/20"
-            onClick={() => router.push("/upgrade")}
-          >
-            Upgrade
-          </Button>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
         </div>
-      )}
-
-      {/* Monthly usage strip */}
-      <section className="rounded-xl border border-border bg-card/60 px-4 py-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground/60">
-          This month
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {(() => {
-            const pct = usagePct(
-              usage.resumeTailor,
-              limits.resume_tailor_per_month
-            );
-            const state = usageState(pct);
-            const textClass =
-              state === "high"
-                ? "text-red-400"
-                : state === "warn"
-                ? "text-amber-300"
-                : "text-foreground/90";
-            const barClass =
-              state === "high"
-                ? "bg-red-500"
-                : state === "warn"
-                ? "bg-amber-500"
-                : "bg-indigo-600 dark:bg-indigo-400";
-            const extraLabel = state === "high" ? " • Limit reached" : "";
-            return (
-              <div>
-                <div className={`text-sm ${textClass}`}>
-                  Resume Tailors: {usage.resumeTailor} / {limits.resume_tailor_per_month}
-                  {extraLabel}
+        <div className="grid gap-3 lg:grid-cols-3">
+          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                  Weekly Goal
                 </div>
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
-                  <div
-                    className={`h-full rounded-full transition-all ${barClass}`}
-                    style={{ width: `${pct}%` }}
-                  />
+                <div className="mt-1 text-sm text-foreground/80">
+                  {appsThisWeek}/{weeklyGoalTarget} applications
+                </div>
+                <div className="mt-1 text-xs text-foreground/60">
+                  {emailDigestEnabled ? (
+                    <span>Weekly digest is on.</span>
+                  ) : (
+                    <span>
+                      Weekly digest is off.{" "}
+                      <Link href="/settings" className="underline text-indigo-600 dark:text-indigo-300">
+                        Enable it in settings
+                      </Link>
+                      .
+                    </span>
+                  )}
                 </div>
               </div>
-            );
-          })()}
+              <Sparkles className="h-5 w-5 flex-shrink-0 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <Progress value={weeklyGoalPct} className="mt-3 h-2" />
+          </Card>
 
-          {(() => {
-            const pct = usagePct(
-              usage.coachMessages,
-              limits.coach_messages_per_month
-            );
-            const state = usageState(pct);
-            const textClass =
-              state === "high"
-                ? "text-red-400"
-                : state === "warn"
-                ? "text-amber-300"
-                : "text-foreground/90";
-            const barClass =
-              state === "high"
-                ? "bg-red-500"
-                : state === "warn"
-                ? "bg-amber-500"
-                : "bg-indigo-600 dark:bg-indigo-400";
-            const extraLabel = state === "high" ? " • Limit reached" : "";
-            return (
-              <div>
-                <div className={`text-sm ${textClass}`}>
-                  AI Coach: {usage.coachMessages} / {limits.coach_messages_per_month}
-                  {extraLabel}
+          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                  Streak
                 </div>
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
-                  <div
-                    className={`h-full rounded-full transition-all ${barClass}`}
-                    style={{ width: `${pct}%` }}
-                  />
+                <div className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
+                  {streak} day{streak === 1 ? "" : "s"}
                 </div>
+                <p className="mt-1 text-xs text-foreground/60">
+                  Keep up the momentum with one small action today.
+                </p>
               </div>
-            );
-          })()}
+              <Flame className="h-6 w-6 flex-shrink-0 text-orange-500" />
+            </div>
+          </Card>
 
-          {(() => {
-            const pct = usagePct(
-              usage.jobScans,
-              limits.job_scans_per_month
-            );
-            const state = usageState(pct);
-            const textClass =
-              state === "high"
-                ? "text-red-400"
-                : state === "warn"
-                ? "text-amber-300"
-                : "text-foreground/90";
-            const barClass =
-              state === "high"
-                ? "bg-red-500"
-                : state === "warn"
-                ? "bg-amber-500"
-                : "bg-indigo-600 dark:bg-indigo-400";
-            const extraLabel = state === "high" ? " • Limit reached" : "";
-            return (
+          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <div className={`text-sm ${textClass}`}>
-                  Job Scans: {usage.jobScans} / {limits.job_scans_per_month}
-                  {extraLabel}
+                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                  Usage This Month
                 </div>
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
-                  <div
-                    className={`h-full rounded-full transition-all ${barClass}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <p className="mt-1 text-sm text-foreground/70">
+                  A quick read on how much room you have left in the current cycle.
+                </p>
               </div>
-            );
-          })()}
+              {nearingLimit && plan === "free" ? (
+                <Badge className="border border-amber-500/20 bg-amber-500/10 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300">
+                  Near limit
+                </Badge>
+              ) : null}
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {usageItems.map((item) => (
+                <div key={item.key}>
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="text-foreground/80">{item.label}</span>
+                    <span
+                      className={
+                        item.state === "high"
+                          ? "font-medium text-red-500"
+                          : item.state === "warn"
+                          ? "font-medium text-amber-500"
+                          : "font-medium text-foreground"
+                      }
+                    >
+                      {item.used} / {item.limit}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
+                    <div
+                      className={
+                        "h-full rounded-full transition-all " +
+                        (item.state === "high"
+                          ? "bg-red-500"
+                          : item.state === "warn"
+                          ? "bg-amber-500"
+                          : "bg-indigo-600 dark:bg-indigo-400")
+                      }
+                      style={{ width: `${item.pct}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {nearingLimit && plan === "free" ? (
+              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-foreground/80">
+                  You&apos;re getting close to a monthly limit. Upgrade if you want to keep the workflow moving without interruption.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 dark:text-amber-200"
+                  onClick={() => router.push("/upgrade")}
+                >
+                  Upgrade
+                </Button>
+              </div>
+            ) : null}
+          </Card>
         </div>
+      </section>
+
+      <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <Kpi title="Applications (total)" value={total} tone="slate" />
+        <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
+        <Kpi title="Interviewing" value={interviewing} tone="blue" />
+        <Kpi title="Offers" value={offers} tone="emerald" />
       </section>
 
       {/* Onboarding */}
@@ -582,19 +582,22 @@ export default function DashboardClient({
           <Progress value={onboardingProgress.pct} className="mt-3 h-2" />
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {onboardingItems.map((it) => (
-              <li key={it.key} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2">
+              <li
+                key={it.key}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2"
+              >
                 <div className="min-w-0">
-                  <div className="text-sm text-foreground truncate">
-                    {it.done ? "✓ " : ""}{it.label}
+                  <div className="truncate text-sm text-foreground">
+                    {it.done ? "✓ " : ""}
+                    {it.label}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {!it.done && (
+                  {!it.done ? (
                     <Button asChild size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
                       <Link href={it.href}>Go</Link>
                     </Button>
-                  )}
-                  {it.done && (
+                  ) : (
                     <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
                       Done
                     </Badge>
@@ -606,234 +609,15 @@ export default function DashboardClient({
         </section>
       )}
 
-      {/* Greeting */}
-      <section>
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-                  Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
-                    {friendlyName}
-                  </span>
-                </h1>
-                <p className="mt-1 text-sm text-foreground/70">
-                  Keep your search moving with one clear workflow: scan, tailor, track, then coach when needed.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Button asChild variant="outline" className="border-border hover:bg-foreground/[0.06]">
-                  <Link href="/scanner">Scan</Link>
-                </Button>
-                <Button asChild variant="outline" className="border-border hover:bg-foreground/[0.06]">
-                  <Link href="/resume">Tailor</Link>
-                </Button>
-                <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
-                  <Link href="/job-packet">Open Job Packet</Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* KPIs + Goal/Streak */}
-      <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Kpi title="Applications (total)" value={total} tone="slate" />
-        <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
-        <Kpi title="Interviewing" value={interviewing} tone="blue" />
-        <Kpi title="Offers" value={offers} tone="emerald" />
-      </section>
-
-      {/* Pro: Performance Insights */}
-      {plan === "pro" && analytics && (
-        <section
-          className="mt-6 rounded-xl border border-border bg-card/60 px-6 py-5"
-          aria-label="Performance Insights"
-        >
-          <h3 className="text-lg font-semibold text-foreground">Performance Insights</h3>
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Average Match Score
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-foreground">
-                {analytics.averageScore}%
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Best Score
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-foreground">
-                {analytics.bestScore}%
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Total Scans
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-foreground">
-                {analytics.totalScans}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Improvement
-              </div>
-              <div className="mt-1 text-2xl font-semibold">
-                {analytics.improvement === null ? (
-                  <span className="text-muted-foreground">Not enough data</span>
-                ) : analytics.improvement > 0 ? (
-                  <span className="text-green-400">+{analytics.improvement}%</span>
-                ) : analytics.improvement < 0 ? (
-                  <span className="text-red-400">{analytics.improvement}%</span>
-                ) : (
-                  <span className="text-muted-foreground">0%</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {analytics.scanHistory?.length >= 2 && (
-            <>
-              <p className="mt-4 mb-2 text-sm text-muted-foreground">Match Score Trend</p>
-              <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart
-                    data={analytics.scanHistory.map((s, index) => ({
-                      index: index + 1,
-                      score: s.score,
-                      date: new Date(s.created_at).toLocaleDateString(),
-                    }))}
-                    margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-foreground/10" />
-                    <XAxis
-                      dataKey="index"
-                      tick={{ fontSize: 12 }}
-                      className="text-foreground/60"
-                    />
-                    <YAxis
-                      domain={[0, 100]}
-                      tick={{ fontSize: 12 }}
-                      className="text-foreground/60"
-                    />
-                    <Tooltip
-                      formatter={(value: number | undefined) =>
-                        value != null ? `${value}%` : ""
-                      }
-                      labelFormatter={(label) => `Scan #${label}`}
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid var(--border)",
-                        backgroundColor: "hsl(var(--card))",
-                      }}
-                      labelStyle={{ color: "hsl(var(--foreground))" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </>
-          )}
-        </section>
-      )}
-
-      <section className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-        <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Weekly Goal
-              </div>
-              <div className="mt-1 text-sm text-foreground/80">
-                {appsThisWeek}/{weeklyGoalTarget} applications
-              </div>
-              <div className="mt-1 text-xs text-foreground/60">
-                {emailDigestEnabled ? (
-                  <span>Weekly digest is on.</span>
-                ) : (
-                  <span>
-                    Weekly digest is off.{" "}
-                    <Link href="/settings" className="underline text-indigo-600 dark:text-indigo-300">
-                      Enable in settings
-                    </Link>
-                    .
-                  </span>
-                )}
-              </div>
-            </div>
-            <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-          </div>
-          <Progress value={weeklyGoalPct} className="mt-3 h-2" />
-        </Card>
-
-        <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                Streak
-              </div>
-              <div className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">
-                {streak} day{streak === 1 ? "" : "s"}
-              </div>
-              <p className="mt-1 text-xs text-foreground/60">
-                Keep up the momentum with one small action today.
-              </p>
-            </div>
-            <Flame className="h-6 w-6 text-orange-500 flex-shrink-0" />
-          </div>
-        </Card>
-      </section>
-
-      {/* Quick actions */}
-      <section>
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-foreground">Quick Actions</CardTitle>
-            <CardDescription className="text-foreground/70">
-              Jump right in.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Link href="/job-packet" className="block">
-                <ActionCard title="Run Job Packet">
-                  Move from JD to tailored draft to tracked application in one guided flow.
-                </ActionCard>
-              </Link>
-              <Link href="/resume" className="block">
-                <ActionCard title="Tailor Resume">
-                  Customize your resume for a specific role.
-                </ActionCard>
-              </Link>
-              <Link href="/scanner" className="block">
-                <ActionCard title="Scan Job Description">
-                  Extract keywords and gaps from a job posting.
-                </ActionCard>
-              </Link>
-              <Link href="/tracker" className="block">
-                <ActionCard title="Track Applications">
-                  Keep tabs on every application you send.
-                </ActionCard>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
       {/* Two-up: Recent Applications + Recent Chats */}
-      <section className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+      <section className="space-y-3">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+            Recent activity
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
+        </div>
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -972,35 +756,154 @@ export default function DashboardClient({
             )}
           </CardContent>
         </Card>
+        </div>
       </section>
 
-      {/* Next best action */}
+      {/* Quick actions */}
       <section>
-        <Card className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-card via-card/90 to-indigo-500/5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
-            <Badge className="w-fit border border-indigo-500/20 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-300">
-              Recommended next step
-            </Badge>
-            <CardTitle className="text-foreground">Next best action</CardTitle>
+            <CardTitle className="text-foreground">Quick Actions</CardTitle>
             <CardDescription className="text-foreground/70">
-              The most direct way to keep your search moving from here.
+              Other ways to move through the product when you need a different route.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium text-foreground">
-                {nextAction.title}
-              </div>
-              <div className="text-xs text-foreground/70">{nextAction.desc}</div>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Link href="/job-packet" className="block">
+                <ActionCard title="Run Job Packet">
+                  Move from JD to tailored draft to tracked application in one guided flow.
+                </ActionCard>
+              </Link>
+              <Link href="/resume" className="block">
+                <ActionCard title="Tailor Resume">
+                  Customize your resume for a specific role.
+                </ActionCard>
+              </Link>
+              <Link href="/scanner" className="block">
+                <ActionCard title="Scan Job Description">
+                  Extract keywords and gaps from a job posting.
+                </ActionCard>
+              </Link>
+              <Link href="/tracker" className="block">
+                <ActionCard title="Track Applications">
+                  Keep tabs on every application you send.
+                </ActionCard>
+              </Link>
             </div>
-            <Link href={nextAction.href}>
-              <Button className="w-full sm:w-auto cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
-                {nextAction.cta}
-              </Button>
-            </Link>
           </CardContent>
         </Card>
       </section>
+
+      {/* Pro: Performance Insights */}
+      {plan === "pro" && analytics && (
+        <section
+          className="rounded-xl border border-border bg-card/60 px-6 py-5"
+          aria-label="Performance Insights"
+        >
+          <div className="mb-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+              Pro insights
+            </div>
+            <h3 className="mt-1 text-lg font-semibold text-foreground">Performance insights</h3>
+            <p className="mt-1 text-sm text-foreground/70">
+              A deeper view of scan quality and progress over time, kept below the main workflow so it stays secondary.
+            </p>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                Average Match Score
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-foreground">
+                {analytics.averageScore}%
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                Best Score
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-foreground">
+                {analytics.bestScore}%
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                Total Scans
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-foreground">
+                {analytics.totalScans}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                Improvement
+              </div>
+              <div className="mt-1 text-2xl font-semibold">
+                {analytics.improvement === null ? (
+                  <span className="text-muted-foreground">Not enough data</span>
+                ) : analytics.improvement > 0 ? (
+                  <span className="text-green-400">+{analytics.improvement}%</span>
+                ) : analytics.improvement < 0 ? (
+                  <span className="text-red-400">{analytics.improvement}%</span>
+                ) : (
+                  <span className="text-muted-foreground">0%</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {analytics.scanHistory?.length >= 2 && (
+            <>
+              <p className="mb-2 mt-4 text-sm text-muted-foreground">Match score trend</p>
+              <div className="h-[220px] w-full">
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart
+                    data={analytics.scanHistory.map((s, index) => ({
+                      index: index + 1,
+                      score: s.score,
+                      date: new Date(s.created_at).toLocaleDateString(),
+                    }))}
+                    margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-foreground/10" />
+                    <XAxis
+                      dataKey="index"
+                      tick={{ fontSize: 12 }}
+                      className="text-foreground/60"
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      tick={{ fontSize: 12 }}
+                      className="text-foreground/60"
+                    />
+                    <Tooltip
+                      formatter={(value: number | undefined) =>
+                        value != null ? `${value}%` : ""
+                      }
+                      labelFormatter={(label) => `Scan #${label}`}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid var(--border)",
+                        backgroundColor: "hsl(var(--card))",
+                      }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#6366f1"
+                      strokeWidth={2}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+        </section>
+      )}
     </motion.div>
   );
 }

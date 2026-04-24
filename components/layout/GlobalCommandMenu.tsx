@@ -36,7 +36,7 @@ import {
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
-const NAV_ITEMS: Nav[] = [
+export const NAV_ITEMS: Nav[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Job Packet", href: "/job-packet", icon: Briefcase },
   { label: "Resume", href: "/resume", icon: FileText },

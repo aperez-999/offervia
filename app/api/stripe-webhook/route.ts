@@ -4,6 +4,7 @@ import { getServiceSupabase } from "@/lib/supabase/service";
 import type Stripe from "stripe";
 import { serverEnv } from "@/lib/env/server";
 import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 function isoFromUnixSeconds(seconds: number | null | undefined) {
   if (!seconds || typeof seconds !== "number") return null;
@@ -199,6 +200,10 @@ export async function POST(req: Request) {
         break;
     }
   } catch (err) {
+    captureServerException(err, {
+      route: "api/stripe-webhook",
+      extras: { eventType: event.type },
+    });
     console.error("Stripe webhook: handler error", event.type, err);
     return fail("SERVER_ERROR", "Webhook handler failed", 500);
   }

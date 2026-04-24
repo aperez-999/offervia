@@ -6,6 +6,7 @@ import { incrementUsage } from "@/lib/usage/increment";
 import { fail } from "@/lib/api/response";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { getServiceSupabase } from "@/lib/supabase/service";
+import { captureServerException } from "@/lib/monitoring/sentry";
 
 export type CoachMode = "interview" | "resume" | "cover_letter" | "career";
 
@@ -192,7 +193,11 @@ export async function POST(req: Request) {
 
       await incrementUsage(userId, "coach");
       return Response.json({ content, userMessage, assistantMessage });
-    } catch {
+    } catch (error) {
+      captureServerException(error, {
+        route: "api/coach",
+        extras: { stage: "assistant-response" },
+      });
       return Response.json(
         {
           error: "SERVER_ERROR",
@@ -202,7 +207,8 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-  } catch {
+  } catch (error) {
+    captureServerException(error, { route: "api/coach" });
     return fail("SERVER_ERROR", "Coach failed to respond.", 500);
   }
 }
@@ -227,6 +233,10 @@ export async function DELETE(req: Request) {
     .eq("mode", parsedMode.data);
 
   if (error) {
+    captureServerException(error, {
+      route: "api/coach",
+      extras: { stage: "delete-history", mode: parsedMode.data },
+    });
     return fail("SERVER_ERROR", "Failed to clear conversation.", 500);
   }
 
