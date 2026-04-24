@@ -47,14 +47,14 @@ export default function BetaBanner() {
           variants={line}
           className="text-xs font-medium text-muted-foreground"
         >
-          Offervia is currently in free Beta — core tools are free while we continue
-          building Pro features.
+          Offervia helps you move from job description to tailored materials,
+          tracking, and coaching in one focused workflow.
         </motion.p>
         <motion.p
           variants={line}
           className="mt-1 text-[11px] text-muted-foreground"
         >
-          Future Pro features coming soon • Feedback welcome
+          Start with Job Packet, then keep the rest of your search organized in one place.
         </motion.p>
       </div>
     </motion.div>

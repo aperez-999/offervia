@@ -39,6 +39,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { deleteJson, getJson, patchJson, postJson } from "@/lib/safe-fetch";
+import { readJobPacketDraft, updateJobPacketDraft } from "@/lib/job-packet";
 import { ArrowUpDown, Download, Search as SearchIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -133,6 +134,7 @@ export default function TrackerPage() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZE_OPTIONS)[number]>(10);
   const [page, setPage] = useState(1);
+  const [openedFromPacket, setOpenedFromPacket] = useState(false);
 
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
@@ -201,8 +203,24 @@ export default function TrackerPage() {
     const positionParam = search.get("position") ?? search.get("role");
     const statusParam = search.get("status");
     const appliedOnParam = search.get("applied_on") ?? search.get("follow_up_date");
+    const fromPacket = search.get("from") === "job-packet";
 
-    if (!companyParam && !positionParam && !statusParam && !appliedOnParam) return;
+    if (!companyParam && !positionParam && !statusParam && !appliedOnParam) {
+      if (!fromPacket) return;
+      const packetDraft = readJobPacketDraft();
+      const packetTracker = packetDraft?.trackerDraft;
+      if (!packetTracker) return;
+
+      resetForm();
+      setCompany(packetTracker.company);
+      setPosition(packetTracker.position);
+      setStatus(packetTracker.status);
+      setAppliedOn(packetTracker.applied_on);
+      setOpenedFromPacket(true);
+      setOpen(true);
+      router.replace("/tracker");
+      return;
+    }
 
     resetForm();
     if (companyParam) setCompany(companyParam);
@@ -211,6 +229,7 @@ export default function TrackerPage() {
       setStatus(statusParam as Application["status"]);
     }
     if (appliedOnParam) setAppliedOn(appliedOnParam);
+    if (fromPacket) setOpenedFromPacket(true);
     setOpen(true);
 
     router.replace("/tracker");
@@ -267,7 +286,28 @@ export default function TrackerPage() {
       }
       return [saved, ...current];
     });
-    toast({ title: "Job saved successfully" });
+    if (saved && openedFromPacket) {
+      updateJobPacketDraft({
+        currentStep: "complete",
+        companyName: saved.company,
+        roleTitle: saved.position,
+        trackerDraft: {
+          company: saved.company,
+          position: saved.position,
+          status: saved.status,
+          applied_on: saved.applied_on,
+        },
+        completedAt: new Date().toISOString(),
+      });
+      setOpenedFromPacket(false);
+    }
+    toast({
+      title: saved && openedFromPacket ? "Application saved from Job Packet" : "Application saved",
+      description:
+        saved && openedFromPacket
+          ? "Your packet is complete and the tracker now has the latest details."
+          : "Your tracker is up to date.",
+    });
     setOpen(false);
     resetForm();
     setSubmitting(false);
@@ -288,7 +328,7 @@ export default function TrackerPage() {
     }
 
     setApps((current) => current.filter((app) => app.id !== pendingDeleteId));
-    toast({ title: "Job deleted" });
+    toast({ title: "Application removed" });
     setConfirmOpen(false);
     setPendingDeleteId(null);
   }
@@ -314,7 +354,10 @@ export default function TrackerPage() {
     if (saved) {
       setApps((current) => [saved, ...current]);
     }
-    toast({ title: "Job added" });
+    toast({
+      title: "Application added",
+      description: "Your tracker has a new entry ready for follow-up.",
+    });
     setQuickCompany("");
     setQuickPosition("");
     setQuickDate(new Date().toISOString().slice(0, 10));
@@ -464,7 +507,7 @@ export default function TrackerPage() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
           <p className="mt-1 text-sm text-foreground/70">
-            Log and track your job applications.
+            Keep every application, status change, and next step in one place.
           </p>
         </div>
 
@@ -513,6 +556,7 @@ export default function TrackerPage() {
               if (!value) {
                 resetForm();
                 setSubmitting(false);
+                setOpenedFromPacket(false);
               }
             }}
           >
@@ -525,10 +569,10 @@ export default function TrackerPage() {
             <DialogContent className="rounded-2xl border border-border bg-card/80 text-foreground shadow-lg">
               <DialogHeader>
                 <DialogTitle className="text-foreground">
-                  {editingId ? "Edit Job Application" : "Add Job Application"}
+                  {editingId ? "Edit application" : "Add application"}
                 </DialogTitle>
                 <DialogDescription className="text-foreground/70">
-                  Fill out the fields below, then save to update your tracker.
+                  Save the essentials now so future follow-ups stay easier to manage.
                 </DialogDescription>
               </DialogHeader>
 
@@ -614,7 +658,10 @@ export default function TrackerPage() {
       </section>
 
       <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-2 text-sm font-medium text-foreground">Quick add</div>
+        <div className="mb-1 text-sm font-medium text-foreground">Quick add</div>
+        <p className="mb-3 text-xs text-foreground/60">
+          Add a role in a few seconds, then come back later for edits and follow-up planning.
+        </p>
         <div className="grid gap-2 sm:grid-cols-5">
           <Input
             placeholder="Company"
@@ -717,8 +764,25 @@ export default function TrackerPage() {
                 <TableRow>
                   <TableCell colSpan={5}>
                     <div className="py-16 text-center">
-                      <p className="mb-3 text-sm text-foreground/70">No matching applications.</p>
-                      <Button onClick={openCreate}>+ Add Job</Button>
+                      <p className="mb-3 text-sm text-foreground/70">No matching applications yet.</p>
+                      <p className="mb-4 text-xs text-foreground/60">
+                        Start with Job Packet for a guided flow, or add an application manually here.
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        <Button
+                          onClick={() => router.push("/job-packet")}
+                          className="bg-indigo-600 text-white hover:bg-indigo-500"
+                        >
+                          Start Job Packet
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={openCreate}
+                          className="border-border text-foreground hover:bg-foreground/[0.06]"
+                        >
+                          Add manually
+                        </Button>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -798,9 +862,9 @@ export default function TrackerPage() {
       <ConfirmDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <ConfirmContent className="rounded-2xl border border-border bg-card/80 text-foreground shadow-lg">
           <ConfirmHeader>
-            <ConfirmTitle className="text-foreground">Delete Job?</ConfirmTitle>
+            <ConfirmTitle className="text-foreground">Remove this application?</ConfirmTitle>
             <ConfirmDescription className="text-foreground/70">
-              Are you sure you want to delete this application? This action cannot be undone.
+              This permanently removes the tracker entry and its current status. This action cannot be undone.
             </ConfirmDescription>
           </ConfirmHeader>
           <ConfirmFooter>

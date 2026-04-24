@@ -255,10 +255,10 @@ export default function ResourcesPage() {
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground">Student Resources</h1>
         <p className="mt-1 text-sm text-foreground/70">
-          Curated academic, career, and creative resources to help you grow—no matter your field.
+          A curated library of learning, practice, and career resources that supports the rest of your Offervia workflow.
         </p>
         <p className="mt-2 text-xs text-foreground/60">
-          Updated regularly. More coming soon.
+          Use these when you want stronger inputs for scanning, tailoring, interviews, and job search planning.
         </p>
       </div>
 
@@ -280,7 +280,7 @@ export default function ResourcesPage() {
           ))}
         </div>
         <Input
-          placeholder="Search resources…"
+          placeholder="Search curated resources..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
           className="w-full sm:w-72 bg-background/80 text-foreground border-border"
@@ -314,7 +314,16 @@ export default function ResourcesPage() {
 
       {/* Grid */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((r) => (
+        {filtered.length === 0 ? (
+          <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 lg:col-span-3">
+            <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
+              <p className="text-sm font-medium text-foreground">No resources match this search yet.</p>
+              <p className="mt-2 max-w-md text-sm text-foreground/70">
+                Try a broader keyword, remove a tag, or switch categories to keep exploring the curated library.
+              </p>
+            </CardContent>
+          </Card>
+        ) : filtered.map((r) => (
           <Card
             key={r.id}
             className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"

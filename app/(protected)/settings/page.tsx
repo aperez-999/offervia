@@ -162,6 +162,7 @@ export default function SettingsPage() {
       const draftKeys = [
         "offervia:scannerDraft_v1",
         "offervia:resume:jd_v1",
+        "offervia:jobPacketDraft_v1",
         "offervia:coachDraft:interview",
         "offervia:coachDraft:resume",
         "offervia:coachDraft:cover_letter",
@@ -209,6 +210,7 @@ export default function SettingsPage() {
       "offervia:scannerHistory_v1",
       "offervia:scannerDraft_v1",
       "offervia:resume:jd_v1",
+      "offervia:jobPacketDraft_v1",
       "offervia:coachDraft:interview",
       "offervia:coachDraft:resume",
       "offervia:coachDraft:cover_letter",

@@ -273,13 +273,16 @@ export default function TemplatesPage() {
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground">Templates</h1>
         <p className="mt-1 text-sm text-foreground/70">
-          Ready-to-use outreach, follow-up, and negotiation messages—fill variables and copy in one click.
+          Curated outreach, follow-up, and negotiation templates you can personalize quickly once the job context is clear.
         </p>
       </div>
 
       {/* Quick fill */}
       <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-3 font-medium text-foreground">Quick fill</div>
+        <div className="mb-1 font-medium text-foreground">Quick fill</div>
+        <p className="mb-3 text-xs text-foreground/60">
+          Add your recurring details once so every template preview is easier to personalize.
+        </p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <Input
             placeholder="Your name"
@@ -338,7 +341,7 @@ export default function TemplatesPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search templates..."
+            placeholder="Search curated templates..."
             className="border-border bg-background/80 pl-8 text-foreground"
           />
         </div>
@@ -346,7 +349,14 @@ export default function TemplatesPage() {
 
       {/* Grid */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {list.map((t) => (
+        {list.length === 0 ? (
+          <article className="rounded-xl border border-dashed border-border bg-background/40 p-6 text-center shadow-sm md:col-span-2 xl:col-span-3">
+            <div className="text-sm font-medium text-foreground">No templates match this search.</div>
+            <div className="mt-2 text-sm text-foreground/70">
+              Try another keyword or switch categories to find a template you can adapt.
+            </div>
+          </article>
+        ) : list.map((t) => (
           <article
             key={t.key}
             className="rounded-xl border border-border bg-background/60 p-4 shadow-sm"

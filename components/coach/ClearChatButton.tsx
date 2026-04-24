@@ -9,18 +9,18 @@ export default function ClearChatButton({ onConfirm, disabled }: { onConfirm: ()
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer" disabled={disabled}>Clear Conversation</Button>
+        <Button variant="outline" className="cursor-pointer" disabled={disabled}>Clear chat</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Clear Conversation?</DialogTitle>
+          <DialogTitle>Clear this chat?</DialogTitle>
           <DialogDescription>
-            This will remove all messages in this conversation. This action cannot be undone.
+            This removes the saved messages for this coach mode on your account. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="destructive" onClick={() => { onConfirm(); setOpen(false); }}>Delete</Button>
+          <Button variant="destructive" onClick={() => { onConfirm(); setOpen(false); }}>Clear chat</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

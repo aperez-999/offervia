@@ -27,6 +27,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { postForm } from "@/lib/safe-fetch"; // uses your safeFetch helper
+import {
+  buildTrackerDraftFromPacket,
+  hasMeaningfulJobPacketDraft,
+  readJobPacketDraft,
+  updateJobPacketDraft,
+} from "@/lib/job-packet";
 import { AnimatePresence, motion } from "framer-motion";
 
 /* ---------------------------------- Data --------------------------------- */
@@ -119,6 +125,7 @@ export default function ResumeWizard() {
   const [generating, setGenerating] = useState(false);
   const [templateMode, setTemplateMode] = useState(true);
   const [showExpanded, setShowExpanded] = useState(false);
+  const [packetContext, setPacketContext] = useState(false);
 
   // PDF zoom
   const [zoom, setZoom] = useState<"fit" | "110" | "125" | "150">("fit");
@@ -134,6 +141,25 @@ export default function ResumeWizard() {
       if (raw) setJd(raw);
     } catch {}
   }, []);
+
+  useEffect(() => {
+    const from = search.get("from") || "";
+    const packetDraft = readJobPacketDraft();
+    const shouldHydrate = from === "job-packet" || hasMeaningfulJobPacketDraft(packetDraft);
+    if (!shouldHydrate || !packetDraft) return;
+
+    setPacketContext(true);
+    setCompanyName((prev) => prev || packetDraft.companyName);
+    setRoleTitle((prev) => prev || packetDraft.roleTitle);
+    setLocation((prev) => prev || packetDraft.location);
+    setCompanyUrl((prev) => prev || packetDraft.companyUrl);
+    setJd((prev) => {
+      if (from === "job-packet" && packetDraft.jobDescription.trim()) {
+        return packetDraft.jobDescription;
+      }
+      return prev || packetDraft.jobDescription;
+    });
+  }, [search]);
 
   // Allow deep-linking into a step (used by Job Packet handoff from Scanner)
   useEffect(() => {
@@ -158,6 +184,28 @@ export default function ResumeWizard() {
       localStorage.setItem(JD_LS_KEY, jd);
     } catch {}
   }, [jd]);
+
+  useEffect(() => {
+    if (!packetContext) return;
+    updateJobPacketDraft({
+      currentStep: "resume",
+      companyName,
+      roleTitle,
+      location,
+      companyUrl,
+      jobDescription: jd,
+      trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
+    });
+  }, [companyName, companyUrl, jd, location, packetContext, roleTitle]);
+
+  useEffect(() => {
+    if (!packetContext || !aiText.trim()) return;
+    updateJobPacketDraft({
+      currentStep: "tracker",
+      tailoredResume: aiText,
+      trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
+    });
+  }, [aiText, companyName, packetContext, roleTitle]);
 
   // preview URL for the uploaded file
   useEffect(() => {
@@ -222,6 +270,12 @@ export default function ResumeWizard() {
     setResumeFile(file);
     setResumeSize(file.size);
     setAiText(""); // clear AI output if new file
+    if (packetContext) {
+      updateJobPacketDraft({
+        currentStep: "resume",
+        resumeFileName: file.name,
+      });
+    }
 
     // If the user came from the Scanner Job Packet handoff, auto-advance once a resume exists.
     try {
@@ -255,6 +309,9 @@ export default function ResumeWizard() {
     setResumeFileName("");
     setResumeSize(0);
     setAiText("");
+    if (packetContext) {
+      updateJobPacketDraft({ resumeFileName: "" });
+    }
   }
 
   /* ------------------------------- Generate ------------------------------- */
@@ -340,6 +397,19 @@ export default function ResumeWizard() {
       }
 
       setAiText(String(resp.data?.content || ""));
+      if (packetContext) {
+        updateJobPacketDraft({
+          currentStep: "tracker",
+          companyName,
+          roleTitle,
+          location,
+          companyUrl,
+          jobDescription: jd,
+          tailoredResume: String(resp.data?.content || ""),
+          resumeFileName,
+          trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
+        });
+      }
       toast({ title: "Tailored draft generated" });
     } catch (e: unknown) {
       const msg = e instanceof Error && e.name === "AbortError"
@@ -368,6 +438,25 @@ export default function ResumeWizard() {
     params.set("position", position);
     params.set("status", "Applied");
     params.set("applied_on", new Date().toISOString().slice(0, 10));
+    params.set("from", "job-packet");
+    if (packetContext) {
+      updateJobPacketDraft({
+        currentStep: "tracker",
+        companyName,
+        roleTitle,
+        location,
+        companyUrl,
+        jobDescription: jd,
+        tailoredResume: aiText,
+        resumeFileName,
+        trackerDraft: {
+          company,
+          position,
+          status: "Applied",
+          applied_on: new Date().toISOString().slice(0, 10),
+        },
+      });
+    }
     router.push(`/tracker?${params.toString()}`);
   }
 
@@ -410,7 +499,7 @@ export default function ResumeWizard() {
       <section>
         <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Follow the steps to tailor your resume to a job posting.
+          Move through the steps to tailor one resume draft to one role with cleaner, more consistent context.
         </p>
       </section>
 
@@ -438,10 +527,10 @@ export default function ResumeWizard() {
                   const fromScanner = from === "scanner" || from.startsWith("scanner");
                   return fromScanner && jd.trim().length >= 20 && !resumeFileName;
                 })() && (
-                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100 dark:border-emerald-500/20">
+                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100 dark:border-emerald-500/20">
                     <div className="font-medium">Job description loaded</div>
                     <div className="mt-0.5 text-xs text-emerald-900/80 dark:text-emerald-100/80">
-                      Upload your resume to continue the Job Packet workflow.
+                      Upload your resume to keep the Job Packet moving.
                     </div>
                   </div>
                 )}
@@ -788,7 +877,7 @@ export default function ResumeWizard() {
                     />
                   ) : (
                     <div className="h-[40vh] rounded-xl border border-border bg-card/60 p-3 text-sm text-foreground shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-                      <p className="text-foreground/60">No AI resume yet. Click Generate to create one.</p>
+                      <p className="text-foreground/60">No tailored draft yet. Generate one when your resume and job description are ready.</p>
                     </div>
                   )}
 
@@ -811,7 +900,7 @@ export default function ResumeWizard() {
                       ) : (
                         <>
                           <Sparkles className="mr-2 h-4 w-4" />
-                          Generate with AI
+                          Generate tailored draft
                         </>
                       )}
                     </Button>
@@ -822,12 +911,12 @@ export default function ResumeWizard() {
                       className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
                       onClick={() => {
                         toast({
-                          title: "Accepted",
-                          description: "You can copy or download the tailored version anytime.",
+                          title: "Draft accepted",
+                          description: "You can keep editing here, copy it out, or send it to the tracker next.",
                         });
                       }}
                     >
-                      Accept & Replace
+                      Mark as ready
                     </Button>
 
                     <Button
@@ -837,7 +926,7 @@ export default function ResumeWizard() {
                       onClick={addToTracker}
                       title="Create a tracker entry prefilled from this job"
                     >
-                      Add to Tracker
+                      Send to Tracker
                     </Button>
                   </div>
                 </div>

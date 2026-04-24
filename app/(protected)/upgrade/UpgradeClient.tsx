@@ -60,10 +60,10 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
             Upgrade to Pro
           </div>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Stop guessing. Start optimizing your job hunt.
+            Keep your job search moving without hitting the brakes.
           </h1>
           <p className="mt-3 text-sm text-foreground/80 sm:text-base">
-            Higher limits so you can scan and tailor consistently — without interruptions.
+            Pro raises your monthly limits so you can keep scanning, tailoring, and coaching when the search gets busy.
           </p>
         </div>
       </section>
@@ -76,7 +76,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         <ul className="space-y-2 text-sm text-foreground/90">
           <li className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            <span><strong className="text-foreground">Faster iteration</strong> — more resume versions per month, less waiting.</span>
+            <span><strong className="text-foreground">Faster iteration</strong> — generate more resume versions without slowing down your workflow.</span>
           </li>
           <li className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -88,7 +88,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
           </li>
           <li className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            <span><strong className="text-foreground">More control</strong> — turn your job search into a measurable system.</span>
+            <span><strong className="text-foreground">More control</strong> — keep the same workflow going across more roles each month.</span>
           </li>
         </ul>
       </section>
@@ -96,10 +96,10 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* Performance mindset callout */}
       <div className="rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <p className="font-medium text-foreground">
-          Free is for exploring. Pro is for optimizing.
+          Built for heavier search weeks.
         </p>
         <p className="mt-1.5 text-foreground/75">
-          When iteration speed increases, your odds improve — because you test more, refine faster, and waste less time.
+          If you are applying broadly, higher limits help you keep tailoring, scanning, and coaching without breaking your rhythm.
         </p>
       </div>
 
@@ -155,7 +155,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* In practice */}
       <section>
         <p className="text-sm text-foreground/80">
-          <span className="font-medium text-foreground">In practice:</span> If you apply to 20 roles per month, Pro lets you tailor and scan nearly every one — instead of guessing with a few.
+          <span className="font-medium text-foreground">In practice:</span> If you are applying to many roles in the same month, Pro lets you keep the workflow consistent instead of rationing your best tools.
         </p>
       </section>
 

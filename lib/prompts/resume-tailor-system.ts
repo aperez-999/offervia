@@ -1,12 +1,15 @@
 export const resumeTailorSystemPrompt = (
   companyName: string,
+  roleTitle: string,
+  location: string,
+  companyUrl: string,
   resumeContent: string,
   jobDescription: string,
   templateMode: boolean // eslint-disable-line @typescript-eslint/no-unused-vars -- used in template string
 ) => `
 You are a professional technical resume writer and AI career assistant.
 
-Your task is to REWRITE and professionally tailor the user's resume to align with the target company ${companyName}.
+Your task is to REWRITE and professionally tailor the user's resume to align with the target company ${companyName || "described below"}.
 
 ## Objective
 
@@ -60,6 +63,13 @@ If templateMode = false:
 
 ---
 
+## TARGET CONTEXT
+
+- Company: ${companyName || "Use the company implied by the job description."}
+- Role title: ${roleTitle || "Infer from the job description."}
+- Location: ${location || "Use the location only if it is relevant in the job description."}
+- Company URL reference: ${companyUrl || "No company URL provided."}
+
 ## USER RESUME (real content)
 
 ${resumeContent}
@@ -72,7 +82,6 @@ ${jobDescription}
 
 OUTPUT:
 
-Produce the **final rewritten resume** text in full, fully tailored to ${companyName}, using all real facts from the user's resume.
+Produce the **final rewritten resume** text in full, fully tailored to ${companyName || "the target company"}, using all real facts from the user's resume.
 `;
-
 

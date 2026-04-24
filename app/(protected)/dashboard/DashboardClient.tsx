@@ -29,6 +29,11 @@ import {
 
 import type { UsageSnapshot } from "@/lib/usage/read";
 import { usagePct, usageState } from "@/lib/utils";
+import {
+  hasMeaningfulJobPacketDraft,
+  readJobPacketDraft,
+  type JobPacketDraft,
+} from "@/lib/job-packet";
 
 type PlanLimits = {
   resume_tailor_per_month: number;
@@ -122,10 +127,15 @@ export default function DashboardClient({
   const [emailDigestEnabled, setEmailDigestEnabled] = useState<boolean>(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
+  const [jobPacketDraft, setJobPacketDraft] = useState<JobPacketDraft | null>(null);
 
   function dismissUpgradeBanner() {
     router.replace("/dashboard");
   }
+
+  useEffect(() => {
+    setJobPacketDraft(readJobPacketDraft());
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -255,13 +265,41 @@ export default function DashboardClient({
   }, [apps]);
 
   const nextAction = useMemo(() => {
+    if (hasMeaningfulJobPacketDraft(jobPacketDraft) && !jobPacketDraft?.completedAt) {
+      if (!jobPacketDraft?.scanResult) {
+        return {
+          title: "Continue your Job Packet",
+          desc:
+            "Your job description is already saved. Run the scan and carry that context through the rest of the flow.",
+          href: "/job-packet",
+          cta: "Continue packet",
+        };
+      }
+      if (!jobPacketDraft?.tailoredResume.trim()) {
+        return {
+          title: "Finish tailoring this Job Packet",
+          desc:
+            "Your scan is ready. Open Resume Tailor with the saved company, role, and JD context.",
+          href: "/job-packet",
+          cta: "Continue packet",
+        };
+      }
+      return {
+        title: "Send this Job Packet to the tracker",
+        desc:
+          "Your tailored draft is ready. Finish the workflow with a prefilled tracker entry.",
+        href: "/job-packet",
+        cta: "Finish packet",
+      };
+    }
+
     if (appsThisWeek === 0) {
       return {
         title: "Start a Job Packet",
         desc:
-          "Paste a job description, tailor your resume, and track the application — in one flow.",
+          "Paste a job description once, tailor with the same context, and log the application without extra setup.",
         href: "/job-packet",
-        cta: "Start",
+        cta: "Start packet",
       };
     }
     if (recentChats.length === 0) {
@@ -273,13 +311,13 @@ export default function DashboardClient({
         cta: "Open Coach",
       };
     }
-    return {
-      title: "Run a Job Packet",
-      desc: "Scan a job description, tailor, then track your application.",
-      href: "/job-packet",
-      cta: "Start",
-    };
-  }, [appsThisWeek, recentChats.length]);
+      return {
+        title: "Run a Job Packet",
+        desc: "Scan a job description, tailor, then track your application.",
+        href: "/job-packet",
+        cta: "Start packet",
+      };
+  }, [appsThisWeek, jobPacketDraft, recentChats.length]);
 
   const nearingLimit = useMemo(() => {
     const p1 = usagePct(usage.resumeTailor, limits.resume_tailor_per_month);
@@ -581,7 +619,7 @@ export default function DashboardClient({
                   </span>
                 </h1>
                 <p className="mt-1 text-sm text-foreground/70">
-                  Keep momentum: scan → tailor → track.
+                  Keep your search moving with one clear workflow: scan, tailor, track, then coach when needed.
                 </p>
               </div>
 
@@ -593,7 +631,7 @@ export default function DashboardClient({
                   <Link href="/resume">Tailor</Link>
                 </Button>
                 <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
-                  <Link href="/job-packet">Start a Job Packet</Link>
+                  <Link href="/job-packet">Open Job Packet</Link>
                 </Button>
               </div>
             </div>
@@ -769,6 +807,11 @@ export default function DashboardClient({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Link href="/job-packet" className="block">
+                <ActionCard title="Run Job Packet">
+                  Move from JD to tailored draft to tracked application in one guided flow.
+                </ActionCard>
+              </Link>
               <Link href="/resume" className="block">
                 <ActionCard title="Tailor Resume">
                   Customize your resume for a specific role.
@@ -819,9 +862,16 @@ export default function DashboardClient({
               <EmptyState
                 text="No applications yet. Start by adding your first job."
                 cta={
-                  <Link href="/tracker">
-                    <Button>+ Add Job</Button>
-                  </Link>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Link href="/job-packet">
+                      <Button className="bg-indigo-600 text-white hover:bg-indigo-500">Start Job Packet</Button>
+                    </Link>
+                    <Link href="/tracker">
+                      <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
+                        Add manually
+                      </Button>
+                    </Link>
+                  </div>
                 }
               />
             ) : (
@@ -889,7 +939,7 @@ export default function DashboardClient({
                 text="No chats yet. Ask the coach for quick practice or resume help."
                 cta={
                   <Link href="/coach">
-                    <Button className="cursor-pointer">Start chatting</Button>
+                    <Button className="cursor-pointer">Open coach</Button>
                   </Link>
                 }
               />
@@ -926,11 +976,14 @@ export default function DashboardClient({
 
       {/* Next best action */}
       <section>
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-card via-card/90 to-indigo-500/5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
+            <Badge className="w-fit border border-indigo-500/20 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-300">
+              Recommended next step
+            </Badge>
             <CardTitle className="text-foreground">Next best action</CardTitle>
             <CardDescription className="text-foreground/70">
-              A tiny push that keeps momentum.
+              The most direct way to keep your search moving from here.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

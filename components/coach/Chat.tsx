@@ -348,13 +348,13 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-foreground text-lg sm:text-xl">{MODE_LABELS[mode]} Mode</CardTitle>
+            <CardTitle className="text-foreground text-lg sm:text-xl">{MODE_LABELS[mode]}</CardTitle>
             <div className="text-sm text-foreground/70">
               {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs text-foreground/60">Response:</span>
+            <span className="text-xs text-foreground/60">Reply style:</span>
             <div className="flex rounded-lg border border-border bg-background/50 p-1">
               <button
                 onClick={() => setResponseMode("brief")}
@@ -400,7 +400,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             <div>
               {mode === "interview" && (
                 <>
-                  <p className="mb-2">Get tailored help for interview prep and practice.</p>
+                  <p className="mb-2">Start with a focused prompt and build a stronger interview story from there.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button
                       size="sm"
@@ -444,7 +444,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
               {mode === "resume" && (
                 <>
-                  <p className="mb-2">Refine your resume bullets, structure, and impact.</p>
+                  <p className="mb-2">Refine bullets, clarify impact, or pressure-test how your experience reads.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button
                       size="sm"
@@ -488,7 +488,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
               {mode === "cover_letter" && (
                 <>
-                  <p className="mb-2">Craft personalized and engaging cover letters.</p>
+                  <p className="mb-2">Draft sharper cover letter language and improve the parts that feel generic.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button
                       size="sm"
@@ -532,7 +532,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
               {mode === "career" && (
                 <>
-                  <p className="mb-2">Career strategy, growth, and decision support.</p>
+                  <p className="mb-2">Use the coach for decision-making, planning, and quick career tradeoff checks.</p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Button
                       size="sm"
@@ -596,9 +596,6 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                       )}
                       <div className="flex-1">
                         <MessageBubble role={m.role} content={m.content} />
-                        {m.role === "assistant" && (
-                          <p className="text-[11px] text-foreground/50 mt-1">💬 Mode: {responseMode}</p>
-                        )}
                         <div
                           className={
                             "mt-1 flex items-center justify-between text-[11px] text-foreground/50 " +
@@ -628,7 +625,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 <div>
                   <div className="mb-1 text-xs text-foreground/60">Coach</div>
                   <div className="inline-block max-w-[85%] animate-pulse rounded-xl border border-border bg-indigo-500/10 px-3 py-2 text-sm text-foreground">
-                    Coach is typing…
+                    Working on your reply...
                   </div>
                 </div>
               </div>
@@ -647,10 +644,10 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 method: "DELETE",
               });
               if (res.ok) {
-                toast({ title: "Conversation cleared" });
+                toast({ title: "Chat cleared" });
                 setMessages([]);
               } else {
-                toast({ title: "Failed to clear", variant: "destructive" });
+                toast({ title: "Failed to clear chat", variant: "destructive" });
               }
             }}
           />
@@ -659,7 +656,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         <div className="flex flex-1 items-start gap-2">
           <Textarea
             aria-label="Chat input"
-            placeholder={userId ? "Type your message..." : "Sign in to chat"}
+            placeholder={userId ? "Ask a question or paste a draft for feedback..." : "Sign in to chat"}
             className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             value={input}
             onChange={(e) => setInput(e.target.value)}

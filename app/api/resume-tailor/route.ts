@@ -13,6 +13,9 @@ const resumeTailorJsonSchema = z
     resumeContent: z.string().max(30000).optional(),
     jobDescription: z.string().max(20000),
     companyName: z.string().max(200).optional(),
+    roleTitle: z.string().max(200).optional(),
+    location: z.string().max(200).optional(),
+    companyUrl: z.string().max(500).optional(),
     templateMode: z.boolean().optional(),
     template: z.union([z.string(), z.literal("1")]).optional(),
   })
@@ -135,7 +138,9 @@ export async function POST(req: Request) {
 
     // Company targeting + template flag
     let companyName = "";
-    // roleTitle, location, companyUrl removed - not used in current implementation
+    let roleTitle = "";
+    let location = "";
+    let companyUrl = "";
     let useTemplate = false;
 
     if (contentType.includes("application/json")) {
@@ -152,11 +157,17 @@ export async function POST(req: Request) {
       resumeText = (parsed.data.resumeContent || parsed.data.resumeText || "").toString();
       jobDescription = parsed.data.jobDescription.toString();
       companyName = (parsed.data.companyName || "").toString();
+      roleTitle = (parsed.data.roleTitle || "").toString();
+      location = (parsed.data.location || "").toString();
+      companyUrl = (parsed.data.companyUrl || "").toString();
       useTemplate = !!parsed.data.templateMode || parsed.data.template === "1" || !!parsed.data.template;
     } else if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       jobDescription = (form.get("jobDescription") as string) || "";
       companyName = ((form.get("companyName") as string) || "").toString();
+      roleTitle = ((form.get("roleTitle") as string) || "").toString();
+      location = ((form.get("location") as string) || "").toString();
+      companyUrl = ((form.get("companyUrl") as string) || "").toString();
       useTemplate = ((form.get("template") as string) || "") === "1";
 
       const providedText = ((form.get("resumeText") as string) || "").toString();
@@ -210,7 +221,9 @@ export async function POST(req: Request) {
     jobDescription = normalizeText(jobDescription);
     resumeText = normalizeText(resumeText);
     companyName = normalizeText(companyName);
-    // roleTitle, location, companyUrl removed - not used in current implementation
+    roleTitle = normalizeText(roleTitle);
+    location = normalizeText(location);
+    companyUrl = normalizeText(companyUrl);
 
     if (!resumeText || resumeText.trim().length < 100) {
       return fail("INVALID_INPUT", "Invalid request.", 400);
@@ -226,8 +239,6 @@ export async function POST(req: Request) {
     // Debug log in development to verify resume content
     if (process.env.NODE_ENV === "development") {
     }
-
-    // Company context removed - not used in current implementation
 
     // Size budgets (keep payload within free-tier context/TPM limits)
     const JD_MAX_CHARS = 1000;
@@ -257,6 +268,9 @@ export async function POST(req: Request) {
 
     const systemMessage = resumeTailorSystemPrompt(
       companyName,
+      roleTitle,
+      location,
+      companyUrl,
       resumeText,
       jobDescription,
       useTemplate

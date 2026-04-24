@@ -216,7 +216,7 @@ export default function StudentsPage() {
           Student Exclusives
         </h1>
         <p className="mt-1 text-sm text-foreground/70">
-          Verified discounts and perks for students. Look for the{" "}
+          Verified discounts, credits, and student-only perks that can lower the cost of building skills and running your search. Look for the{" "}
           <span className="inline-flex items-center gap-1">
             <ShieldCheck className="h-3 w-3 text-emerald-500" />
             <span>“.edu required”</span>
@@ -243,7 +243,7 @@ export default function StudentsPage() {
           ))}
         </div>
         <Input
-          placeholder="Search deals…"
+          placeholder="Search verified student perks..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
           className="w-full sm:w-72 bg-background/80 text-foreground border-border"
@@ -252,7 +252,16 @@ export default function StudentsPage() {
 
       {/* Grid */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((d) => (
+        {filtered.length === 0 ? (
+          <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 lg:col-span-3">
+            <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
+              <p className="text-sm font-medium text-foreground">No student perks match that filter.</p>
+              <p className="mt-2 max-w-md text-sm text-foreground/70">
+                Try a different category or search term to find another verified offer.
+              </p>
+            </CardContent>
+          </Card>
+        ) : filtered.map((d) => (
           <Card
             key={d.id}
             className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"

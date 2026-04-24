@@ -34,6 +34,11 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { postJson } from "@/lib/safe-fetch";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import {
+  hasMeaningfulJobPacketDraft,
+  readJobPacketDraft,
+  updateJobPacketDraft,
+} from "@/lib/job-packet";
 
 type ScanResultContent = {
   match_score: number;
@@ -143,6 +148,12 @@ export default function ScannerPanel() {
       const raw = localStorage.getItem(LS_HISTORY_KEY);
       if (raw) setHistory(JSON.parse(raw));
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const packetDraft = readJobPacketDraft();
+    if (!packetDraft || !hasMeaningfulJobPacketDraft(packetDraft)) return;
+    setJd((prev) => prev || packetDraft.jobDescription);
   }, []);
 
   // Cloud scan history (Supabase) — optional; keep local history as primary fallback.
@@ -368,6 +379,11 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     if (content && typeof content.match_score === "number" && Array.isArray(content.strengths) && Array.isArray(content.missing_skills) && typeof content.summary === "string") {
       setScanResult(content);
       addToHistory(text, JSON.stringify(content));
+      updateJobPacketDraft({
+        currentStep: "resume",
+        jobDescription: text,
+        scanResult: content,
+      });
     } else {
       setLegacyResult(formatForReadability(JSON.stringify(content ?? res.data ?? "")));
       addToHistory(text, JSON.stringify(content ?? res.data ?? ""));
@@ -389,6 +405,10 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
     } catch {
       // noop
     }
+    updateJobPacketDraft({
+      currentStep: "resume",
+      jobDescription: text,
+    });
     router.push("/resume?from=scanner");
   }
 
@@ -426,7 +446,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           Job Description Scanner
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Paste a job description and analyze key skills, gaps, and keywords.
+          Paste a job description to surface the skills, gaps, and themes you should carry into the rest of your workflow.
         </p>
       </section>
 
@@ -656,7 +676,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="text-sm text-foreground/60"
             >
-              No analysis yet. Paste a job description and click Analyze.
+              No scan yet. Paste a job description, run the analysis, then continue into Resume Tailor when you are ready.
             </motion.p>
           )}
           </AnimatePresence>
@@ -747,6 +767,16 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                           } catch {
                             // noop
                           }
+                          updateJobPacketDraft({
+                            currentStep: "resume",
+                            jobDescription: h.jd_excerpt,
+                            scanResult: {
+                              match_score: h.match_score,
+                              strengths: h.strengths,
+                              missing_skills: h.missing_skills,
+                              summary: h.summary,
+                            },
+                          });
                           router.push("/resume?from=scanner");
                         }}
                       >

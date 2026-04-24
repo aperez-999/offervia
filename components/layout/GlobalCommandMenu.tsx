@@ -31,12 +31,14 @@ import {
   Sun,
   Monitor,
   Mail,
+  Briefcase,
 } from "lucide-react";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
 const NAV_ITEMS: Nav[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Job Packet", href: "/job-packet", icon: Briefcase },
   { label: "Resume", href: "/resume", icon: FileText },
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
   { label: "Coach", href: "/coach", icon: MessageSquare },
@@ -112,6 +114,11 @@ export default function GlobalCommandMenu() {
 
           {/* Quick Actions */}
           <CommandGroup heading="Quick actions">
+            <CommandItem onSelect={() => go("/job-packet")}>
+              <Briefcase className="mr-2 h-4 w-4" />
+              Start Job Packet
+              <CommandShortcut>J</CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={() => go("/resume")}>
               <FileText className="mr-2 h-4 w-4" />
               Tailor Resume

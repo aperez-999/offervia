@@ -1,33 +1,53 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageSquare, FileText, ClipboardList, Stamp } from "lucide-react";
+import { MessageSquare, FileText, ClipboardList, Briefcase } from "lucide-react";
 
 export default function Features() {
   const items = [
     {
       title: "AI Interview Coach",
       desc:
-        "Prepare faster with realistic practice questions and concise coaching — get interview-ready in less time.",
+        "Practice answers, tighten stories, and prepare for real conversations without losing momentum.",
       icon: MessageSquare,
+      bullets: [
+        "Use quick prompts for behavioral, resume, and career questions",
+        "Switch between brief and detailed coaching when needed",
+        "Keep the conversation history for your next practice session",
+      ],
     },
     {
       title: "Job Description Scanner",
       desc:
-        "Scan any posting to extract required skills, keywords, and gaps so you can target your resume effectively.",
+        "Scan any posting to surface requirements, missing skills, and the strongest resume angles before you apply.",
       icon: FileText,
+      bullets: [
+        "Highlight strengths and keyword gaps in seconds",
+        "Carry the same JD into Resume Tailor without re-pasting",
+        "Save scan history so you can compare applications over time",
+      ],
     },
     {
       title: "Resume Tailor",
       desc:
-        "Use the AI resume builder to tailor content to the role and stay ATS-friendly for better visibility.",
+        "Generate a cleaner, more targeted draft while keeping the role, company, and JD context aligned.",
       icon: ClipboardList,
+      bullets: [
+        "Upload once and iterate on tailored drafts quickly",
+        "Keep outputs concise and ATS-aware",
+        "Send finished work straight into your tracker flow",
+      ],
     },
     {
-      title: "Cover Letter Builder (Coming Soon)",
+      title: "Application Tracker",
       desc:
-        "Quickly draft focused cover letters that highlight motivation and fit — no fluff.",
-      icon: Stamp,
+        "Track every application, keep follow-ups visible, and turn scattered searching into a system.",
+      icon: Briefcase,
+      bullets: [
+        "Quick-add applications or create them from Job Packet",
+        "Sort by company, role, status, and date",
+        "Export your progress when you want a full snapshot",
+      ],
     },
   ];
 
@@ -114,11 +134,7 @@ export default function Features() {
                 </p>
 
                 <ul className="mt-4 space-y-1 text-xs text-gray-700 dark:text-white">
-                  {[
-                    "Save time with tailored recommendations",
-                    "Stay concise and ATS-friendly",
-                    "Built for job seekers, not HR",
-                  ].map((t) => (
+                  {it.bullets.map((t) => (
                     <li key={t} className="flex items-start gap-2">
                       <span className="mt-[0.5rem] h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
                       <span className="leading-relaxed">{t}</span>
