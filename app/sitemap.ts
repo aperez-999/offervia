@@ -2,21 +2,14 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Replace localhost with your production domain automatically
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  // Static pages — both public and SEO-relevant protected ones
   const routes = [
     "",
-    "login",
-    "signup",
-    "templates",
-    "resources",
     "contact",
-    "resume",
-    "scanner",
-    "coach",
+    "privacy",
+    "terms",
   ];
 
   const now = new Date().toISOString();

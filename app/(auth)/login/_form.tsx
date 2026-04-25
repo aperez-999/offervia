@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { postJson } from "@/lib/safe-fetch";
+import { sanitizeRedirectPath } from "@/lib/auth/redirect";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -14,23 +15,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
-function getSafeNextPath(rawNext: string | null): string | null {
-  if (!rawNext) return null;
-  // next is user-controlled input; only allow internal relative paths.
-  // Block protocol-relative URLs ("//evil.com") and any absolute URLs.
-  let decoded = rawNext;
-  try {
-    decoded = decodeURIComponent(rawNext);
-  } catch {
-    // If decode fails, treat as unsafe.
-    return null;
-  }
-  if (!decoded.startsWith("/")) return null;
-  if (decoded.startsWith("//")) return null;
-  if (decoded.includes("\n") || decoded.includes("\r")) return null;
-  return decoded;
-}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -48,25 +32,18 @@ export default function LoginForm() {
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
-    const supabase = getBrowserSupabase();
-
-    // 1) Sign in with password
-    const { error } = await supabase.auth.signInWithPassword({
+    const safeNext = sanitizeRedirectPath(search.get("next"), "/dashboard?login=1");
+    const result = await postJson<{ success: true; data: { next: string } }>("/api/auth/login", {
       email: values.email,
       password: values.password,
+      next: safeNext,
     });
-    if (error) {
-      setError(error.message);
+
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
-
-    // 2) Ensure the session is ready (cookie written) before navigating
-    await supabase.auth.getSession();
-
-    // 3) Respect ?next=… (added by your middleware), fallback to dashboard
-    const rawNext = search.get("next");
-    const safeNext = getSafeNextPath(rawNext);
-    const dest = safeNext || "/dashboard?login=1";
+    const dest = result.data.data.next || safeNext;
 
     router.replace(dest);
     router.refresh();

@@ -3,35 +3,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
-  // Absolute passthrough for the OAuth callback (keeps ?code & ?state intact)
-  if (req.nextUrl.pathname.startsWith("/auth/")) {
-    return NextResponse.next();
-  }
-
-  // Only protect the routes matched below (same idea as your config)
-  const res = NextResponse.next();
+  const res = NextResponse.next({
+    request: req,
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
+        getAll() {
+          return req.cookies.getAll();
         },
-        set(name: string, value: string, options?: Record<string, unknown>) {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options?: Record<string, unknown>) {
-          res.cookies.set({ name, value: "", ...options, maxAge: 0 });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            res.cookies.set(name, value, options);
+          });
         },
       },
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     const login = new URL("/login", req.url);
     login.searchParams.set("next", req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(login);
@@ -50,7 +47,11 @@ export const config = {
     "/tracker/:path*",
     "/resources/:path*",
     "/students/:path*",
+    "/templates/:path*",
     "/settings/:path*",
     "/profile/:path*",
+    "/upcoming/:path*",
+    "/job-packet/:path*",
+    "/upgrade/:path*",
   ],
 };

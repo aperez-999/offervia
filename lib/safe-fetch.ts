@@ -58,7 +58,7 @@ export async function safeFetchJson<T = any>(
         if (isJsonResponse(res)) {
           try {
             const json = await res.json();
-            msg = json?.error || msg;
+            msg = json?.message || json?.error || msg;
           } catch {
             // ignore JSON parsing failure
           }

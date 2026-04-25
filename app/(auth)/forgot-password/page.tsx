@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { Mail } from "lucide-react";
+import { postJson } from "@/lib/safe-fetch";
 
 export default function ForgotPasswordPage() {
-  const supabase = createClientComponentClient();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle"|"sending"|"sent"|"error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -16,17 +15,12 @@ export default function ForgotPasswordPage() {
     setStatus("sending");
     setError(null);
 
-    const redirectTo =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/reset-password`
-        : `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`;
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo,
+    const result = await postJson<{ success: true; data: { message: string } }>("/api/auth/forgot-password", {
+      email,
     });
 
-    if (error) {
-      setError(error.message);
+    if (!result.ok) {
+      setError(result.error);
       setStatus("error");
     } else {
       setStatus("sent");

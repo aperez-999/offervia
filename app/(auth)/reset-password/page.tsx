@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { Lock } from "lucide-react";
+import { getBrowserSupabase } from "@/lib/supabase/client";
+import { getAuthErrorMessage } from "@/lib/auth/errors";
 
 type Status = "checking" | "ready" | "invalid" | "updating";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getBrowserSupabase(), []);
 
   const [status, setStatus] = useState<Status>("checking");
   const [pw, setPw] = useState("");
@@ -74,7 +75,7 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password: pw });
 
     if (error) {
-      setError(error.message || "Failed to reset password. Try again.");
+      setError(getAuthErrorMessage(error, "reset-password"));
       setStatus("ready");
       return;
     }

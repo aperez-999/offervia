@@ -31,12 +31,19 @@ For a new Supabase project:
 # Run these in the Supabase SQL editor
 db/schema.sql
 db/policies.sql
+db/storage_policies.sql
 ```
 
 For an existing project that predates persisted onboarding fields:
 
 ```bash
 db/onboarding.sql
+```
+
+Before release, also review:
+
+```bash
+db/audit/rls-verification.sql
 ```
 
 ## API Routes
@@ -105,6 +112,7 @@ For the current solo workflow:
 4. Deploy to Vercel
 5. Confirm the production build succeeds
 6. Run the post-deploy checks in [docs/release-checklist.md](docs/release-checklist.md)
+7. Run the security checks in [docs/security-checklist.md](docs/security-checklist.md)
 
 ## Notes on Data Handling
 User-submitted resume text, job descriptions, and chat prompts are sent through Offervia’s server-side routes to configured AI providers so the app can generate outputs. The app also stores feature history such as tracker entries, chat messages, usage counters, and job scans where needed to provide the user experience.

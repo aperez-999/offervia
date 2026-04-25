@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster, ToastProvider } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/next";
+import { publicEnv } from "@/lib/env/public";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Offervia - AI Career Suite",
+  metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: {
+    default: "Offervia - AI Career Suite",
+    template: "%s | Offervia",
+  },
+  description:
+    "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
+  openGraph: {
+    title: "Offervia - AI Career Suite",
+    description:
+      "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
+    siteName: "Offervia",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Offervia" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Offervia - AI Career Suite",
+    description:
+      "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

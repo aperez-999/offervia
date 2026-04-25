@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { postJson } from "@/lib/safe-fetch";
 import AuthLayout from "@/components/auth/AuthLayout";
 import SignupForm from "./_form";
 import Link from "next/link";
@@ -12,30 +10,21 @@ import { useToast } from "@/hooks/use-toast";
 type OAuthProvider = "google" | "linkedin_oidc";
 
 export default function SignupPage() {
-  const router = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    (async () => {
-      const supabase = getBrowserSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) router.replace("/dashboard");
-    })();
-  }, [router]);
 
   async function startOAuth(provider: OAuthProvider) {
     try {
-      try { localStorage.setItem("offervia:postAuthRedirect", "/dashboard?signup=1"); } catch {}
-
-      const supabase = getBrowserSupabase();
-
-      await supabase.auth.signInWithOAuth({
+      const result = await postJson<{ success: true; data: { url: string } }>("/api/auth/oauth/start", {
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined,
-        },
+        next: "/dashboard?signup=1",
       });
+      if (!result.ok) {
+        throw new Error(result.error || "OAuth start failed");
+      }
+      if (!result.data?.data?.url) {
+        throw new Error("OAuth start failed");
+      }
+      window.location.assign(result.data.data.url);
     } catch {
       toast({ title: "Could not start sign up", description: "Please try again.", variant: "destructive" });
     }

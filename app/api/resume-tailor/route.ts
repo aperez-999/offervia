@@ -240,10 +240,6 @@ export async function POST(req: Request) {
     if (!jobDescription || jobDescription.trim().length < 20) {
       return fail("INVALID_INPUT", "Invalid request.", 400);
     }
-    
-    // Debug log in development to verify resume content
-    if (process.env.NODE_ENV === "development") {
-    }
 
     // Size budgets (keep payload within free-tier context/TPM limits)
     const JD_MAX_CHARS = 1000;

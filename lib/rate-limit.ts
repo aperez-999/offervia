@@ -12,15 +12,24 @@ export type RateLimitKind =
   | "tracker_write"
   | "billing_checkout"
   | "billing_portal"
-  | "contact";
+  | "contact"
+  | "auth_login"
+  | "auth_signup"
+  | "auth_forgot_password"
+  | "auth_oauth_start";
 export type RateResult =
   | { ok: true }
   | { ok: false; retryAfterSeconds: number; reason: string; allowed?: boolean; limitReached?: boolean };
 
 export function getIpUa(req: Request) {
   const h = new Headers(req.headers);
-  const fwd = h.get("x-forwarded-for") || "";
-  const ip = fwd.split(",")[0]?.trim() || h.get("x-real-ip") || null;
+  const forwarded =
+    h.get("x-vercel-forwarded-for") ||
+    h.get("cf-connecting-ip") ||
+    h.get("x-real-ip") ||
+    h.get("x-forwarded-for") ||
+    "";
+  const ip = forwarded.split(",")[0]?.trim() || null;
   const ua = h.get("user-agent") || null;
   return { ip, ua };
 }
@@ -170,7 +179,7 @@ export async function checkRateLimitWithUserId(
 /** IP-only rate limit (e.g. contact form). Counts by kind + ip; inserts with sentinel user_id. */
 export async function enforceRateLimitByIp(
   supabase: SupabaseClient,
-  kind: "contact",
+  kind: "contact" | "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
   ip: string,
   windows: RateWindow[]
 ): Promise<RateResult> {
@@ -208,4 +217,14 @@ export async function enforceRateLimitByIp(
   }
 
   return { ok: true };
+}
+
+export async function checkRateLimitByIp(
+  req: Request,
+  kind: "contact" | "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
+  windows: RateWindow[]
+): Promise<RateResult> {
+  const supabase = getServiceSupabase();
+  const { ip } = getIpUa(req);
+  return enforceRateLimitByIp(supabase, kind, ip || "unknown", windows);
 }

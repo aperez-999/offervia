@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { postJson } from "@/lib/safe-fetch";
+import { sanitizeRedirectPath } from "@/lib/auth/redirect";
 import AuthLayout from "@/components/auth/AuthLayout";
 import LoginForm from "./_form";
 import Link from "next/link";
@@ -21,30 +22,33 @@ export default function LoginPage() {
       toast({ title: "Password reset successful — please sign in." });
       router.replace("/login");
     }
+    if (searchParams.get("auth_error") === "oauth_callback_failed") {
+      toast({
+        title: "Could not complete sign-in",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+      router.replace("/login");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function startOAuth(provider: OAuthProvider) {
     try {
-      const rawNext = searchParams.get("next");
-      const dest = rawNext ? decodeURIComponent(rawNext) : "/dashboard?login=1";
-      try { localStorage.setItem("offervia:postAuthRedirect", dest); } catch {}
-
-      const supabase = getBrowserSupabase();
-
-      const { error } = await supabase.auth.signInWithOAuth({
+      const dest = sanitizeRedirectPath(searchParams.get("next"), "/dashboard?login=1");
+      const result = await postJson<{ success: true; data: { url: string } }>("/api/auth/oauth/start", {
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: provider === "google" 
-            ? { access_type: "offline", prompt: "consent" } 
-            : undefined,
-        },
+        next: dest,
       });
-      
-      if (error) {
-        throw error;
+
+      if (!result.ok) {
+        throw new Error(result.error || "OAuth start failed");
       }
+      if (!result.data?.data?.url) {
+        throw new Error("OAuth start failed");
+      }
+
+      window.location.assign(result.data.data.url);
     } catch {
       toast({ title: "Could not start sign-in", description: "Please try again.", variant: "destructive" });
     }

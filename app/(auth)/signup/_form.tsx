@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { postJson } from "@/lib/safe-fetch";
 import { useToast } from "@/hooks/use-toast";
 
 const schema = z
@@ -40,48 +40,26 @@ export default function SignupForm() {
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
-    const supabase = getBrowserSupabase();
-
-    const { error } = await supabase.auth.signUp({
+    const result = await postJson<{ success: true; data: { message: string } }>("/api/auth/signup", {
+      name: values.name,
       email: values.email,
       password: values.password,
-      options: { data: { full_name: values.name } },
+      next: "/dashboard?signup=1",
     });
-    if (error) {
-      setError(error.message);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
-
-    await supabase.auth.getSession();
 
     // Success: show verification toast immediately
     toast({
       title: "Account created successfully — check your email to confirm your account.",
-      description:
-        "A confirmation email has been sent to your inbox. Please verify your email before signing in.",
+      description: result.data.data.message,
     });
-
-    // Default destination is login after email verification
-    let dest = "/login";
-    try {
-      const lsNext = localStorage.getItem("offervia:postAuthRedirect");
-      if (lsNext) {
-        dest = lsNext;
-        localStorage.removeItem("offervia:postAuthRedirect");
-      }
-    } catch {}
-
-    if (dest !== "/login") {
-      // If there is an explicit redirect path, go immediately
-      router.replace(dest);
+    setTimeout(() => {
+      router.replace("/login");
       router.refresh();
-    } else {
-      // Otherwise, give user a moment to read the toast, then go to login
-      setTimeout(() => {
-        router.replace("/login");
-        router.refresh();
-      }, 3000);
-    }
+    }, 2000);
   };
 
   return (
