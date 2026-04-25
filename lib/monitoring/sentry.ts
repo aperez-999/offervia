@@ -7,7 +7,7 @@ export function captureServerException(
     extras?: Record<string, unknown>;
   }
 ) {
-  Sentry.withScope((scope) => {
+  return Sentry.withScope((scope) => {
     scope.setTag("route", context.route);
     if (context.extras) {
       Object.entries(context.extras).forEach(([key, value]) => {
