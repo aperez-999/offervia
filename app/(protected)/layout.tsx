@@ -6,6 +6,10 @@ import { getUserSubscription } from "@/lib/subscription";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 
 export const metadata: Metadata = {
+  title: {
+    default: "Workspace",
+    template: "%s | Offervia",
+  },
   robots: {
     index: false,
     follow: false,

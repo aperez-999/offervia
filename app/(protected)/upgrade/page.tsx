@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUserSubscription } from "@/lib/subscription";
 import UpgradeClient from "@/app/(protected)/upgrade/UpgradeClient";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import { createPageMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Upgrade",
+  description: "Unlock higher monthly limits and uninterrupted iteration when you need more room to run your search.",
+  path: "/upgrade",
+  index: false,
+});
 
 export default async function UpgradePage() {
   const cookieStore = await cookies();

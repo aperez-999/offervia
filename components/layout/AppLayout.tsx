@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BrandIcon from "@/components/brand/BrandIcon";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
@@ -107,10 +108,11 @@ export default function AppLayout({
             </Button>
             <Link
               href="/dashboard"
-              className="text-lg font-semibold tracking-tight hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-90"
               aria-label="Offervia"
             >
-              Offervia
+              <BrandIcon size={30} priority className="rounded-xl" />
+              <span>Offervia</span>
             </Link>
           </div>
 

@@ -5,6 +5,7 @@ Offervia uses Supabase for **Auth + Postgres + Row Level Security (RLS)**.
 ## Source of truth
 - **Schema**: `db/schema.sql`
 - **RLS policies**: `db/policies.sql`
+- **Legacy policy cleanup**: `db/policy_cleanup.sql`
 - **Storage policies**: `db/storage_policies.sql`
 - **RLS audit pack**: `db/audit/rls-verification.sql`
 
@@ -18,9 +19,10 @@ These files are intended to be **kept in the repo** (they’re your reproducible
 
 ## How to apply (existing Supabase project)
 1. Run `db/onboarding.sql` if your existing `user_prefs` table does not already include onboarding state columns.
-2. Re-run `db/policies.sql` only if you need to refresh the checked-in policy set.
-3. Apply `db/storage_policies.sql` if avatar bucket policies are not already present.
-4. Use `db/audit/rls-verification.sql` as the live verification checklist before release.
+2. Run `db/policy_cleanup.sql` if your existing project shows legacy duplicate policies in `pg_policies`.
+3. Re-run `db/policies.sql` to refresh the checked-in policy set and clean up any legacy duplicate policies from older iterations.
+4. Apply `db/storage_policies.sql` if avatar bucket policies are not already present.
+5. Use `db/audit/rls-verification.sql` as the live verification checklist before release.
 
 ## Tables used by this repo
 - **`applications`**: job application tracker items (per-user)

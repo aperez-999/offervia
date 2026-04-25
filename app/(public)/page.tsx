@@ -8,45 +8,14 @@ import Faq from "@/components/public/Faq";
 import HowItWorks from "@/components/public/HowItWorks";
 import BottomCta from "@/components/public/BottomCta";
 import Footer from "@/components/public/Footer";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Offervia – AI Resume Builder & Job Tailoring Tool",
+export const metadata: Metadata = createPageMetadata({
+  title: "AI Job Search Copilot",
   description:
-    "Offervia helps you stand out with AI-powered resume tailoring, job description scanning, and interview prep. Build your career smarter.",
-  keywords: [
-    "AI resume builder",
-    "job description scanner",
-    "resume tailoring",
-    "career coach",
-    "interview preparation",
-    "Offervia"
-  ],
-  openGraph: {
-    title: "Offervia – Smarter Career Tools",
-    description:
-      "AI-powered resume tailoring, job scan insights, and interview coaching to help you land your dream job.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-    siteName: "Offervia",
-    images: [
-      {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: "Offervia – AI Resume Builder"
-      }
-    ],
-    locale: "en_US",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Offervia – AI Resume Builder & Job Tailoring",
-    description:
-      "Build your dream career with AI-powered resume tailoring and job scanning tools.",
-    images: [`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/og-image.png`],
-    creator: "@offervia"
-  }
-};
+    "Turn job descriptions into stronger applications with Job Packet, Resume Tailor, AI Coach, and Application Tracker in one focused workflow.",
+  path: "/",
+});
 
 export default function HomePage() {
   return (

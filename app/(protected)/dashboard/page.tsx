@@ -6,6 +6,15 @@ import { getUsageSnapshot } from "@/lib/usage/read";
 import { buildScanAnalytics } from "@/lib/analytics/scan-analytics";
 import DashboardClient from "./DashboardClient";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Dashboard",
+  description: "Pick up where you left off, review progress, and keep your job search organized in one calm workspace.",
+  path: "/dashboard",
+  index: false,
+});
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();

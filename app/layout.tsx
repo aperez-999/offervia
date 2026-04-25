@@ -4,7 +4,13 @@ import "./globals.css";
 import { Toaster, ToastProvider } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
-import { publicEnv } from "@/lib/env/public";
+import {
+  SITE_DEFAULT_TITLE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_SHARE_IMAGE_ALT,
+  getSiteUrl,
+} from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,27 +23,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
+  applicationName: SITE_NAME,
   title: {
-    default: "Offervia - AI Career Suite",
+    default: SITE_DEFAULT_TITLE,
     template: "%s | Offervia",
   },
-  description:
-    "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: getSiteUrl(),
+  },
   openGraph: {
-    title: "Offervia - AI Career Suite",
-    description:
-      "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
-    siteName: "Offervia",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Offervia" }],
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_DESCRIPTION,
+    url: getSiteUrl(),
+    siteName: SITE_NAME,
+    images: [{ url: "/og-image.png", width: 1774, height: 887, alt: SITE_SHARE_IMAGE_ALT }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Offervia - AI Career Suite",
-    description:
-      "Offervia helps job seekers scan roles, tailor resumes, prepare for interviews, and track applications in one workflow.",
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_DESCRIPTION,
     images: ["/og-image.png"],
+  },
+  icons: {
+    shortcut: ["/favicon.ico"],
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-256.png", type: "image/png", sizes: "256x256" },
+      { url: "/offervia-icon-square.png", type: "image/png", sizes: "1024x1024" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" }],
   },
 };
 

@@ -10,6 +10,11 @@
 -- -------------------------------
 alter table public.applications enable row level security;
 
+drop policy if exists "apps delete own" on public.applications;
+drop policy if exists "apps insert own" on public.applications;
+drop policy if exists "apps select own" on public.applications;
+drop policy if exists "apps update own" on public.applications;
+drop policy if exists "apps_owner" on public.applications;
 drop policy if exists "applications_select_own" on public.applications;
 create policy "applications_select_own"
 on public.applications
@@ -40,6 +45,16 @@ using (user_id = auth.uid());
 -- -------------------------------
 alter table public.messages enable row level security;
 
+drop policy if exists "delete own messages" on public.messages;
+drop policy if exists "insert own messages" on public.messages;
+drop policy if exists "messages_insert_self" on public.messages;
+drop policy if exists "msgs delete own" on public.messages;
+drop policy if exists "msgs insert own" on public.messages;
+drop policy if exists "msgs select own" on public.messages;
+drop policy if exists "msgs update own" on public.messages;
+drop policy if exists "msgs_owner" on public.messages;
+drop policy if exists "read own messages" on public.messages;
+drop policy if exists "update own messages" on public.messages;
 drop policy if exists "messages_select_own" on public.messages;
 create policy "messages_select_own"
 on public.messages
@@ -70,6 +85,7 @@ using (user_id = auth.uid());
 -- -------------------------------
 alter table public.profiles enable row level security;
 
+drop policy if exists "profiles_insert_own" on public.profiles;
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own"
 on public.profiles
@@ -94,6 +110,12 @@ with check (id = auth.uid());
 -- -------------------------------
 alter table public.user_prefs enable row level security;
 
+drop policy if exists "delete own prefs" on public.user_prefs;
+drop policy if exists "insert own prefs" on public.user_prefs;
+drop policy if exists "read own prefs" on public.user_prefs;
+drop policy if exists "update own prefs" on public.user_prefs;
+drop policy if exists "user_prefs_insert_self" on public.user_prefs;
+drop policy if exists "user_prefs_rw" on public.user_prefs;
 drop policy if exists "user_prefs_select_own" on public.user_prefs;
 create policy "user_prefs_select_own"
 on public.user_prefs
@@ -144,6 +166,8 @@ using (user_id = auth.uid());
 -- -------------------------------
 alter table public.job_scans enable row level security;
 
+drop policy if exists "Users can insert their own scans" on public.job_scans;
+drop policy if exists "Users can view their own scans" on public.job_scans;
 drop policy if exists "job_scans_select_own" on public.job_scans;
 create policy "job_scans_select_own"
 on public.job_scans
@@ -162,6 +186,11 @@ using (user_id = auth.uid());
 -- -------------------------------
 alter table public.request_events enable row level security;
 
+drop policy if exists "Allow inserts from service role only" on public.request_events;
+drop policy if exists "Allow select for service role" on public.request_events;
+drop policy if exists "insert own event" on public.request_events;
+drop policy if exists "select own events" on public.request_events;
+
 -- No policies on purpose.
 
 -- -------------------------------
@@ -176,6 +205,7 @@ begin
     where table_schema = 'public' and table_name = 'prompts'
   ) then
     execute 'alter table public.prompts enable row level security';
+    execute 'drop policy if exists "prompts_owner" on public.prompts';
     execute 'drop policy if exists "prompts_select_own" on public.prompts';
     execute 'create policy "prompts_select_own" on public.prompts for select using (user_id = auth.uid())';
     execute 'drop policy if exists "prompts_insert_own" on public.prompts';
@@ -197,6 +227,9 @@ begin
     where table_schema = 'public' and table_name = 'template_saves'
   ) then
     execute 'alter table public.template_saves enable row level security';
+    execute 'drop policy if exists "Users can delete their saves" on public.template_saves';
+    execute 'drop policy if exists "Users can insert their saves" on public.template_saves';
+    execute 'drop policy if exists "Users can read their saves" on public.template_saves';
     execute 'drop policy if exists "template_saves_select_own" on public.template_saves';
     execute 'create policy "template_saves_select_own" on public.template_saves for select using (user_id = auth.uid())';
     execute 'drop policy if exists "template_saves_insert_own" on public.template_saves';
@@ -207,4 +240,3 @@ begin
     execute 'create policy "template_saves_delete_own" on public.template_saves for delete using (user_id = auth.uid())';
   end if;
 end $$;
-
