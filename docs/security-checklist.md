@@ -7,6 +7,7 @@
 - Client auth screens never display raw provider or backend error text.
 
 ## Supabase and data access
+- `db/policy_cleanup.sql` applied if the project previously accumulated duplicate legacy policies.
 - `db/policies.sql` applied in production.
 - `db/storage_policies.sql` applied for the `avatars` bucket.
 - `db/audit/rls-verification.sql` reviewed against live production/preview data.

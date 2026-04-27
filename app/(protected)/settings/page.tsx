@@ -1,6 +1,7 @@
 // app/(protected)/settings/page.tsx
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
@@ -155,7 +156,7 @@ export default function SettingsPage() {
           .maybeSingle(),
       ]);
 
-      // Pull local-only data used in beta
+      // Pull browser-only drafts and local history from the current device
       const scannerHistory =
         JSON.parse(localStorage.getItem("offervia:scannerHistory_v1") || "[]");
 
@@ -409,16 +410,15 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <div className="text-sm font-medium text-foreground">Danger zone</div>
               <p className="text-xs text-foreground/60">
-                Delete account will remove your messages and preferences. This action will be
-                available soon; contact support if you need immediate removal.
+                Need your account removed? Contact support and we&apos;ll help with deletion requests
+                and data removal steps.
               </p>
               <Button
                 variant="outline"
-                disabled
-                className="cursor-not-allowed border-rose-300/40 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
-                title="Coming soon"
+                asChild
+                className="border-rose-300/40 text-rose-600 hover:bg-rose-500/10 dark:border-rose-800/40 dark:text-rose-400"
               >
-                Delete account (coming soon)
+                <Link href="/contact">Contact support about account deletion</Link>
               </Button>
             </div>
           </CardContent>

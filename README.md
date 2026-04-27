@@ -46,6 +46,14 @@ Before release, also review:
 db/audit/rls-verification.sql
 ```
 
+If your project has older duplicate policies from previous iterations, run this upgrade sequence before release:
+
+```bash
+db/policy_cleanup.sql
+db/policies.sql
+db/audit/rls-verification.sql
+```
+
 ## API Routes
 - `POST /api/resume-tailor`
 - `POST /api/job-scan`
@@ -103,17 +111,16 @@ Playwright loads `.env.local` automatically through the Next env loader.
 Authenticated Playwright coverage is enabled by setting:
 - `E2E_EMAIL`
 - `E2E_PASSWORD`
-- `E2E_BASE_URL` (optional; use it when you want Playwright to target an already running app)
+- `E2E_BASE_URL` (optional; keep `http://localhost:3000` for local runs)
 
 Recommended local flow:
 
 ```bash
 npx playwright install
-npm run dev
 npm run test:e2e
 ```
 
-If `E2E_BASE_URL` is set, Playwright uses that app instead of starting its own web server. If `E2E_BASE_URL` is omitted, it will start a local Next dev server on `127.0.0.1:3000`.
+If `E2E_BASE_URL` points to `localhost` or `127.0.0.1`, Playwright will start or reuse your local Next dev server automatically. If `E2E_BASE_URL` points to a non-local environment, Playwright will target that URL without starting a local server.
 
 ## Release Flow
 For the current solo workflow:

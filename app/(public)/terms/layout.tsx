@@ -3,7 +3,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Terms of Service",
-  description: "Review the terms that govern Offervia, including acceptable use, beta limitations, and service rights.",
+  description: "Review the terms that govern Offervia, including acceptable use, service availability, and content rights.",
   path: "/terms",
 });
 

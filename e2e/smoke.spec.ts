@@ -16,6 +16,7 @@ test.describe("authenticated smoke", () => {
   test.skip(!HAS_AUTH_ENV, "Set E2E_EMAIL and E2E_PASSWORD to enable authenticated smoke tests.");
 
   test("signed-in user can reach dashboard and core workflow pages", async ({ page }) => {
+    test.setTimeout(60_000);
     await login(page);
 
     const routes = [

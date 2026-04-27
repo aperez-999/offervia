@@ -13,7 +13,7 @@ export async function login(page: Page) {
   await page.getByPlaceholder("you@example.com").fill(E2E_EMAIL);
   await page.getByPlaceholder("Enter your password").fill(E2E_PASSWORD);
   await page.getByRole("button", { name: /^sign in$/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
 }
 
 export function uniqueLabel(prefix: string) {

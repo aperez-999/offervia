@@ -39,22 +39,14 @@ import {
   readJobPacketDraft,
   updateJobPacketDraft,
 } from "@/lib/job-packet";
-
-type ScanResultContent = {
-  match_score: number;
-  strengths: string[];
-  missing_skills: string[];
-  summary: string;
-};
-
-type ScanEntry = {
-  id: string;
-  jd: string;
-  result: string;
-  created_at: number;
-  title: string;
-  techs: string[];
-};
+import {
+  approxTokens,
+  detectTechs,
+  scanResultToText,
+  titleFromJD,
+  type ScanEntry,
+  type ScanResultContent,
+} from "@/lib/scanner/utils";
 
 type CloudScan = {
   id: string;
@@ -72,36 +64,6 @@ const LS_DRAFT_KEY = "offervia:scannerDraft_v1";
 const RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
 const RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
 
-// naïve tech/keyword detection (fast + client-only)
-const TECH_DICT = [
-  "react","next.js","typescript","javascript","node","node.js","graphql","rest","api","html","css","tailwind","redux","jest","rtl","cypress","testing","vitest","playwright","webpack","vite","rollup","aws","gcp","azure","docker","kubernetes","sql","postgres","mysql","mongodb","python","go","java","c++","a11y","accessibility","performance",
-];
-
-function detectTechs(text: string): string[] {
-  const hay = text.toLowerCase();
-  const set = new Set<string>();
-  for (const t of TECH_DICT) {
-    const rx =
-      t === "c++"
-        ? /\bc\+\+\b/i
-        : new RegExp(`(^|[^a-z0-9])${t.replace(".", "\\.")}([^a-z0-9]|$)`, "i");
-    if (rx.test(hay)) set.add(t);
-  }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
-}
-
-function titleFromJD(text: string): string {
-  const first =
-    (text || "").split("\n").map((s) => s.trim()).find(Boolean) ||
-    "Untitled scan";
-  return first.length > 90 ? first.slice(0, 87) + "…" : first;
-}
-
-function approxTokens(s: string) {
-  // rough heuristic (4 chars ≈ 1 token)
-  return Math.max(1, Math.round((s || "").length / 4));
-}
-
 export default function ScannerPanel() {
   const router = useRouter();
   const { toast } = useToast();
@@ -118,22 +80,6 @@ export default function ScannerPanel() {
   const [pendingCloudId, setPendingCloudId] = useState<string | null>(null);
 
   const hasResult = !!scanResult || !!legacyResult;
-
-  function scanResultToText(s: ScanResultContent): string {
-    const lines = [
-      `Match Score: ${s.match_score}%`,
-      "",
-      "Strengths:",
-      ...s.strengths.map((x) => `- ${x}`),
-      "",
-      "Missing Skills:",
-      ...s.missing_skills.map((x) => `- ${x}`),
-      "",
-      "Summary:",
-      s.summary,
-    ];
-    return lines.join("\n");
-  }
 
   const resultText = scanResult ? scanResultToText(scanResult) : legacyResult;
 

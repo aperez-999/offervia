@@ -151,7 +151,7 @@ export default function SignupForm() {
         Secure • Private • No spam
       </p>
       <p className="mt-1 text-xs text-gray-600 text-center">
-        Free Beta — no credit card required
+        Get started free — no credit card required
       </p>
     </form>
   );

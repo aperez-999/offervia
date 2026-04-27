@@ -1,11 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { SectionCard } from "@/components/ui/SectionCard";
 
 export default function PrivacyPage() {
-  const lastUpdated = new Date().toLocaleDateString();
+  const lastUpdated = "April 27, 2026";
 
   const sections = [
     { id: "introduction", title: "Introduction" },
@@ -21,12 +18,7 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-16 text-foreground">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="mb-10 text-center"
-      >
+      <header className="mb-10 text-center">
         <div className="mx-auto w-fit rounded-full border border-border bg-background/70 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
           Last updated: {lastUpdated}
         </div>
@@ -36,7 +28,7 @@ export default function PrivacyPage() {
         <p className="mt-2 text-sm text-muted-foreground dark:text-white">
           Offervia is built for job seekers. We handle your information with care and transparency.
         </p>
-      </motion.header>
+      </header>
 
       <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
         {/* Sticky TOC (desktop) */}
@@ -57,20 +49,16 @@ export default function PrivacyPage() {
         {/* Content */}
         <article className="space-y-6">
           {/* Intro callout */}
-          <motion.section
+          <section
             id="introduction"
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.35 }}
             className="rounded-xl border border-white/10 bg-[rgba(99,102,241,0.05)] p-5 shadow-sm ring-1 ring-indigo-500/10 dark:border-white/10 dark:bg-[rgba(99,102,241,0.06)]"
           >
             <h2 className="text-base font-semibold text-foreground dark:text-white">Introduction</h2>
             <p className="mt-2 text-sm leading-relaxed text-foreground/90 dark:text-white">
-              Offervia is an AI career suite built for job seekers. During our free beta, this policy
-              explains what we collect, how we use it, and your choices. We don’t sell your data.
+              Offervia is an AI career suite built for job seekers. This policy explains what we
+              collect, how we use it, and the choices available to you. We do not sell your data.
             </p>
-          </motion.section>
+          </section>
 
           <SectionCard id="data-we-collect" title="Data We Collect">
             <p>We collect the data needed to operate Offervia and support your account:</p>
@@ -102,8 +90,8 @@ export default function PrivacyPage() {
           <SectionCard id="user-rights" title="Your Rights">
             <p>
               You can contact us to request access to your account data or help with deletion requests.
-              During beta, some requests may take time and may require manual support. For any privacy
-              questions, reach out via our contact page.
+              We review privacy and deletion requests as promptly as we can. For any privacy questions,
+              reach out through our contact page.
             </p>
           </SectionCard>
 

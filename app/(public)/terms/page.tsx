@@ -1,17 +1,14 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { SectionCard } from "@/components/ui/SectionCard";
 
 export default function TermsPage() {
-  const lastUpdated = new Date().toLocaleDateString();
+  const lastUpdated = "April 27, 2026";
 
   const sections = [
     { id: "agreement", title: "Agreement" },
     { id: "use-of-service", title: "Use of Service" },
     { id: "acceptable-use", title: "Acceptable Use" },
-    { id: "beta-limitations", title: "Beta Limitations" },
+    { id: "service-limitations", title: "Service Limitations" },
     { id: "intellectual-property", title: "Intellectual Property" },
     { id: "limitation-of-liability", title: "Limitation of Liability" },
     { id: "termination", title: "Termination" },
@@ -22,12 +19,7 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-16 text-foreground">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="mb-10 text-center"
-      >
+      <header className="mb-10 text-center">
         <div className="mx-auto w-fit rounded-full border border-border bg-background/70 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
           Last updated: {lastUpdated}
         </div>
@@ -35,9 +27,9 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="mt-2 text-sm text-muted-foreground dark:text-white">
-          Please read these terms carefully. Offervia is currently in free beta.
+          Please read these terms carefully before using Offervia.
         </p>
-      </motion.header>
+      </header>
 
       <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
         {/* Sticky TOC (desktop) */}
@@ -85,12 +77,11 @@ export default function TermsPage() {
             </ul>
           </SectionCard>
 
-          <SectionCard id="beta-limitations" title="Beta Limitations">
+          <SectionCard id="service-limitations" title="Service Limitations">
             <p>
-              The service is provided “as is” during beta. Features may change, and occasional downtime or
-              issues may occur. AI-generated suggestions can be incomplete or inaccurate, so you are
-              responsible for reviewing outputs before relying on them. We aim to improve reliability and
-              user experience over time.
+              The service is provided on an “as is” and “as available” basis. Features may evolve,
+              and occasional downtime or defects may occur. AI-generated suggestions can be incomplete
+              or inaccurate, so you are responsible for reviewing outputs before relying on them.
             </p>
           </SectionCard>
 

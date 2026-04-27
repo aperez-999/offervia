@@ -1,7 +1,19 @@
 "use client";
 
-import Chat from "./Chat";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
+
+const Chat = dynamic(() => import("./Chat"), {
+  loading: () => (
+    <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="h-6 w-40 rounded bg-foreground/10" />
+      <div className="mt-3 space-y-2">
+        <div className="h-20 rounded bg-foreground/5" />
+        <div className="h-20 rounded bg-foreground/5" />
+      </div>
+    </div>
+  ),
+});
 
 export default function CoachHub() {
   return (

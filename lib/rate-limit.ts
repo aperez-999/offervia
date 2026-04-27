@@ -99,7 +99,7 @@ export async function checkRateLimitForApi(
 
 /**
  * Checks recent counts in request_events and inserts a new row if allowed.
- * Keep it simple (no transactions) — good enough for beta.
+ * Keep it simple (no transactions) for the current launch-stage request volume.
  */
 export async function enforceRateLimit(
   supabase: SupabaseClient,

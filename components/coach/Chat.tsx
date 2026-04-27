@@ -12,6 +12,12 @@ import { SYSTEM_PROMPTS, MODE_LABELS } from "./system-prompts";
 import MessageBubble from "./MessageBubble";
 import ClearChatButton from "./ClearChatButton";
 import {
+  formatTime,
+  groupMessagesByDay,
+  MAX_CONTEXT_TURNS,
+  type DayGroup,
+} from "./chat-utils";
+import {
   Bot,
   User,
   Mail,
@@ -31,35 +37,6 @@ interface MsgRow {
   role: "user" | "assistant";
   content: string;
   created_at: string;
-}
-
-type DayGroup = { label: string; items: MsgRow[] };
-
-const MAX_CONTEXT_TURNS = 24; // send only the most recent turns to the model
-
-function formatTime(iso: string) {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "";
-  }
-}
-
-function dayLabel(date: Date) {
-  const today = new Date();
-  const yday = new Date(Date.now() - 86400000);
-  const sameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
-  if (sameDay(date, today)) return "Today";
-  if (sameDay(date, yday)) return "Yesterday";
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 /* ------------------------------ Inner chat UI ----------------------------- */
@@ -159,22 +136,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
     return () => node.removeEventListener("scroll", onScroll);
   }, []);
 
-  const grouped: DayGroup[] = useMemo(() => {
-    const byDay = new Map<string, MsgRow[]>();
-    for (const m of messages) {
-      const d = new Date(m.created_at);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (!byDay.has(key)) byDay.set(key, []);
-      byDay.get(key)!.push(m);
-    }
-    return Array.from(byDay.entries())
-      .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
-      .map(([k, items]) => {
-        const [y, mo, da] = k.split("-").map((n) => Number(n));
-        const label = dayLabel(new Date(y, mo, da));
-        return { label, items };
-      });
-  }, [messages]);
+  const grouped: DayGroup<MsgRow>[] = useMemo(() => groupMessagesByDay(messages), [messages]);
 
   // find the last user message (for regenerate)
   const lastUserMessage = useMemo(() => {

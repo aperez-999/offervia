@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import BrandLogo from "@/components/brand/BrandLogo";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
@@ -21,9 +22,18 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import UserMenu from "@/components/layout/UserMenu";
-import GlobalCommandMenu from "@/components/layout/GlobalCommandMenu";
 import Footer from "@/components/public/Footer";
 import { Button } from "@/components/ui/button";
+
+const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalCommandMenu"), {
+  ssr: false,
+  loading: () => (
+    <div
+      aria-hidden="true"
+      className="h-8 w-[3.75rem] rounded-md border border-border bg-background/70"
+    />
+  ),
+});
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
