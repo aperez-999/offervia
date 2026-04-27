@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AppLayout from "@/components/layout/AppLayout";
-import { getUserSubscription } from "@/lib/subscription";
-import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import { getCurrentUser, getCurrentUserSubscription } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: {
@@ -21,23 +19,13 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const supabase = createSupabaseServerClient({
-    get(name: string) {
-      return cookieStore.get(name)?.value;
-    },
-  });
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { user, error: authError } = await getCurrentUser();
 
   if (authError || !user?.id) {
     redirect("/login");
   }
 
-  const subscription = await getUserSubscription(user.id);
+  const subscription = await getCurrentUserSubscription(user.id);
   const plan = subscription.plan;
 
   return <AppLayout plan={plan}>{children}</AppLayout>;

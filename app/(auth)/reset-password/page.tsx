@@ -114,7 +114,7 @@ export default function ResetPasswordPage() {
       )}
 
       {status !== "checking" && status !== "invalid" && (
-        <form onSubmit={onSubmit} className="grid gap-4">
+        <form method="post" onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-1">
             <label className="text-sm font-medium text-foreground">New Password</label>
             <div className="relative">

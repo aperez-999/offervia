@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { fail } from "@/lib/api/response";
 import { buildAuthCallbackUrl, OAUTH_NEXT_COOKIE, sanitizeRedirectPath } from "@/lib/auth/redirect";
-import { publicEnv } from "@/lib/env/public";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { checkRateLimitByIp } from "@/lib/rate-limit";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabase/route";
@@ -40,8 +39,8 @@ export async function POST(req: NextRequest) {
     return fail("INVALID_INPUT", "Invalid request.", 400);
   }
 
-  const safeNext = sanitizeRedirectPath(parsed.data.next, "/dashboard?login=1");
-  const origin = publicEnv.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || new URL(req.url).origin;
+  const safeNext = sanitizeRedirectPath(parsed.data.next, "/dashboard");
+  const origin = req.nextUrl.origin;
   const redirectTo = buildAuthCallbackUrl(origin, safeNext);
   const { supabase, applyCookies } = createSupabaseRouteHandlerClient(req);
 

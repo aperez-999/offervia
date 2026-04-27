@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   async function startOAuth(provider: OAuthProvider) {
     try {
-      const dest = sanitizeRedirectPath(searchParams.get("next"), "/dashboard?login=1");
+      const dest = sanitizeRedirectPath(searchParams.get("next"), "/dashboard");
       const result = await postJson<{ success: true; data: { url: string } }>("/api/auth/oauth/start", {
         provider,
         next: dest,
@@ -48,7 +48,10 @@ export default function LoginPage() {
         throw new Error("OAuth start failed");
       }
 
-      window.location.assign(result.data.data.url);
+      try {
+        sessionStorage.setItem("offervia:flash", "login");
+      } catch {}
+      window.location.replace(result.data.data.url);
     } catch {
       toast({ title: "Could not start sign-in", description: "Please try again.", variant: "destructive" });
     }

@@ -4,12 +4,12 @@ import { sanitizeRedirectPath } from "@/lib/auth/redirect";
 
 describe("sanitizeRedirectPath", () => {
   it("allows safe internal paths", () => {
-    expect(sanitizeRedirectPath("/dashboard?login=1")).toBe("/dashboard?login=1");
+    expect(sanitizeRedirectPath("/dashboard")).toBe("/dashboard");
   });
 
   it("blocks absolute and protocol-relative paths", () => {
-    expect(sanitizeRedirectPath("https://evil.test")).toBe("/dashboard?login=1");
-    expect(sanitizeRedirectPath("//evil.test")).toBe("/dashboard?login=1");
+    expect(sanitizeRedirectPath("https://evil.test")).toBe("/dashboard");
+    expect(sanitizeRedirectPath("//evil.test")).toBe("/dashboard");
   });
 
   it("falls back on malformed encoded values", () => {

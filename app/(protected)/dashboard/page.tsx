@@ -1,13 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getUserSubscription } from "@/lib/subscription";
 import { getPlanLimits } from "@/lib/plans";
 import { getUsageSnapshot } from "@/lib/usage/read";
 import { buildScanAnalytics } from "@/lib/analytics/scan-analytics";
 import DashboardClient from "./DashboardClient";
-import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
+import { getCurrentUser, getCurrentUserSubscription } from "@/lib/auth/session";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Dashboard",
@@ -17,27 +15,18 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const supabase = createSupabaseServerClient({
-    get(name: string) {
-      return cookieStore.get(name)?.value;
-    },
-  });
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { user, error: authError } = await getCurrentUser();
 
   if (authError || !user?.id) {
     redirect("/login");
   }
 
-  const subscription = await getUserSubscription(user.id);
+  const [subscription, usage] = await Promise.all([
+    getCurrentUserSubscription(user.id),
+    getUsageSnapshot(user.id),
+  ]);
   const plan = subscription.plan;
   const limits = getPlanLimits(plan);
-  const usage = await getUsageSnapshot(user.id);
-
   const analytics = plan === "pro" ? await buildScanAnalytics(user.id) : null;
 
   return (

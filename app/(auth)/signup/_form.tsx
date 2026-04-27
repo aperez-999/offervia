@@ -44,7 +44,7 @@ export default function SignupForm() {
       name: values.name,
       email: values.email,
       password: values.password,
-      next: "/dashboard?signup=1",
+      next: "/dashboard",
     });
     if (!result.ok) {
       setError(result.error);
@@ -58,12 +58,11 @@ export default function SignupForm() {
     });
     setTimeout(() => {
       router.replace("/login");
-      router.refresh();
     }, 2000);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label className="block text-sm font-medium text-foreground">Name</label>
         <div className="relative">

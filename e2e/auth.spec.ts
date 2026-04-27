@@ -12,6 +12,9 @@ test.describe("auth flows", () => {
 
   test("signup surfaces an existing-account error for known users", async ({ page }) => {
     await page.goto("/signup");
+    await expect(
+      page.getByRole("heading", { name: /create your offervia account/i })
+    ).toBeVisible({ timeout: 15_000 });
     await page.getByPlaceholder("Your name").fill("Playwright Existing User");
     await page.getByPlaceholder("you@example.com").fill(E2E_EMAIL!);
     await page.getByPlaceholder("Enter at least 6 characters").fill(E2E_PASSWORD!);

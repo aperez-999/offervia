@@ -8,7 +8,8 @@ const configuredBaseURL = process.env.E2E_BASE_URL?.trim();
 const baseURL = configuredBaseURL || `http://127.0.0.1:${DEFAULT_PORT}`;
 const parsedBaseURL = new URL(baseURL);
 const isLocalBaseURL = ["127.0.0.1", "localhost"].includes(parsedBaseURL.hostname);
-const localHost = parsedBaseURL.hostname;
+const shouldStartLocalServer = isLocalBaseURL && !configuredBaseURL;
+const localHost = parsedBaseURL.hostname === "localhost" ? "127.0.0.1" : parsedBaseURL.hostname;
 const localPort = parsedBaseURL.port || String(DEFAULT_PORT);
 
 export default defineConfig({
@@ -19,7 +20,7 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  webServer: isLocalBaseURL
+  webServer: shouldStartLocalServer
     ? {
         command: `npm run dev -- --hostname ${localHost} --port ${localPort}`,
         url: baseURL,

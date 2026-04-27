@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,10 +29,17 @@ export default function LoginForm() {
     defaultValues: { email: "", password: "" },
   });
   const [showPw, setShowPw] = useState(false);
+  const safeNext = useMemo(
+    () => sanitizeRedirectPath(search.get("next"), "/dashboard"),
+    [search]
+  );
+
+  useEffect(() => {
+    router.prefetch(safeNext);
+  }, [router, safeNext]);
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
-    const safeNext = sanitizeRedirectPath(search.get("next"), "/dashboard?login=1");
     const result = await postJson<{ success: true; data: { next: string } }>("/api/auth/login", {
       email: values.email,
       password: values.password,
@@ -45,12 +52,14 @@ export default function LoginForm() {
     }
     const dest = result.data.data.next || safeNext;
 
+    try {
+      sessionStorage.setItem("offervia:flash", "login");
+    } catch {}
     router.replace(dest);
-    router.refresh();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label className="block text-sm font-medium text-foreground">Email</label>
         <div className="relative">

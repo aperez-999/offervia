@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   const { supabase, applyCookies } = createSupabaseRouteHandlerClient(req);
   const { email, password, next } = parsed.data;
-  const safeNext = sanitizeRedirectPath(next, "/dashboard?login=1");
+  const safeNext = sanitizeRedirectPath(next, "/dashboard");
 
   try {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

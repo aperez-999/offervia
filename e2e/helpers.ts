@@ -10,6 +10,9 @@ export async function login(page: Page) {
   }
 
   await page.goto("/login");
+  await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible({
+    timeout: 15_000,
+  });
   await page.getByPlaceholder("you@example.com").fill(E2E_EMAIL);
   await page.getByPlaceholder("Enter your password").fill(E2E_PASSWORD);
   await page.getByRole("button", { name: /^sign in$/i }).click();

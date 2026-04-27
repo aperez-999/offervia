@@ -1,7 +1,7 @@
 const INTERNAL_PATH_PATTERN = /^\/(?!\/).*/;
 export const OAUTH_NEXT_COOKIE = "offervia_oauth_next";
 
-export function sanitizeRedirectPath(rawPath: string | null | undefined, fallback = "/dashboard?login=1") {
+export function sanitizeRedirectPath(rawPath: string | null | undefined, fallback = "/dashboard") {
   if (!rawPath) return fallback;
 
   let decoded = rawPath;

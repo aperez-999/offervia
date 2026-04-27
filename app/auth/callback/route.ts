@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const error = searchParams.get("error");
   const code = searchParams.get("code");
-  const safeNext = sanitizeRedirectPath(searchParams.get("next") ?? req.cookies.get(OAUTH_NEXT_COOKIE)?.value, "/dashboard?login=1");
+  const safeNext = sanitizeRedirectPath(searchParams.get("next") ?? req.cookies.get(OAUTH_NEXT_COOKIE)?.value, "/dashboard");
   const { supabase, applyCookies } = createSupabaseRouteHandlerClient(req);
 
   if (error || !code) {

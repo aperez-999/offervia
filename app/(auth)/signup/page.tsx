@@ -16,7 +16,7 @@ export default function SignupPage() {
     try {
       const result = await postJson<{ success: true; data: { url: string } }>("/api/auth/oauth/start", {
         provider,
-        next: "/dashboard?signup=1",
+        next: "/dashboard",
       });
       if (!result.ok) {
         throw new Error(result.error || "OAuth start failed");
@@ -24,7 +24,7 @@ export default function SignupPage() {
       if (!result.data?.data?.url) {
         throw new Error("OAuth start failed");
       }
-      window.location.assign(result.data.data.url);
+      window.location.replace(result.data.data.url);
     } catch {
       toast({ title: "Could not start sign up", description: "Please try again.", variant: "destructive" });
     }

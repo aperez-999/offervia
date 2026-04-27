@@ -3,7 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import BrandLogo from "@/components/brand/BrandLogo";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -58,25 +58,38 @@ export default function AppLayout({
   children: React.ReactNode;
   plan?: PlanType;
 }) {
-  const search = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ✅ Sign-in toast
   useEffect(() => {
-    if (search.get("login") === "1") {
-      toast({
-        title: "Signed in — welcome back!",
-        description: "You're now signed in to Offervia.",
-        variant: "default",
-      });
-      router.replace("/dashboard");
+    try {
+      if (sessionStorage.getItem("offervia:flash") === "login") {
+        sessionStorage.removeItem("offervia:flash");
+        toast({
+          title: "Signed in — welcome back!",
+          description: "You're now signed in to Offervia.",
+          variant: "default",
+        });
+      }
+    } catch {
+      // noop
     }
-  }, [search, router, toast]);
+  }, [toast]);
 
-  // ✅ Sign-out function + toast
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+
+    document.body.style.overflow = "";
+    return undefined;
+  }, [sidebarOpen]);
+
   async function onSignOut() {
     const supabase = getBrowserSupabase();
     await supabase.auth.signOut();
@@ -236,15 +249,9 @@ export default function AppLayout({
 
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
-            >
+            <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               {children}
-            </motion.div>
+            </div>
           </main>
         </div>
       </div>

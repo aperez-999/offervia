@@ -2,7 +2,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/resume",
+  "/scanner",
+  "/coach",
+  "/tracker",
+  "/resources",
+  "/students",
+  "/templates",
+  "/settings",
+  "/profile",
+  "/upcoming",
+  "/job-packet",
+  "/upgrade",
+];
+
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname === "/") {
+    const searchParams = req.nextUrl.searchParams;
+    if (searchParams.has("code") || searchParams.has("error")) {
+      const callbackUrl = new URL("/auth/callback", req.url);
+      searchParams.forEach((value, key) => {
+        callbackUrl.searchParams.append(key, value);
+      });
+      return NextResponse.redirect(callbackUrl);
+    }
+  }
+
+  const isProtected = PROTECTED_PREFIXES.some(
+    (prefix) => req.nextUrl.pathname === prefix || req.nextUrl.pathname.startsWith(`${prefix}/`)
+  );
+  if (!isProtected) {
+    return NextResponse.next({
+      request: req,
+    });
+  }
+
   const res = NextResponse.next({
     request: req,
   });
@@ -37,9 +73,9 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-// Same protected routes you had
 export const config = {
   matcher: [
+    "/",
     "/dashboard/:path*",
     "/resume/:path*",
     "/scanner/:path*",
