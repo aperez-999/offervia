@@ -52,6 +52,7 @@ export const metadata: Metadata = {
     icon: [
       { url: "/favicon.ico" },
       { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-64.png", type: "image/png", sizes: "64x64" },
       { url: "/icon-256.png", type: "image/png", sizes: "256x256" },
       { url: "/offervia-icon-square.png", type: "image/png", sizes: "1024x1024" },
     ],

@@ -22,10 +22,14 @@ export function createPageMetadata({
   index = true,
 }: CreatePageMetadataOptions = {}): Metadata {
   const pageUrl = absoluteUrl(path);
-  const socialTitle = title ? `${title} | ${SITE_NAME}` : SITE_DEFAULT_TITLE;
+  const normalizedTitle = title?.trim();
+  const socialTitle =
+    !normalizedTitle || normalizedTitle === SITE_NAME
+      ? SITE_DEFAULT_TITLE
+      : `${normalizedTitle} | ${SITE_NAME}`;
 
   return {
-    title,
+    title: normalizedTitle,
     description,
     alternates: {
       canonical: pageUrl,

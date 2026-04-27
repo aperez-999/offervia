@@ -1,7 +1,12 @@
+import { loadEnvConfig } from "@next/env";
 import { defineConfig } from "@playwright/test";
 
-const PORT = 3000;
-const baseURL = process.env.E2E_BASE_URL || `http://127.0.0.1:${PORT}`;
+loadEnvConfig(process.cwd());
+
+const DEFAULT_PORT = 3000;
+const configuredBaseURL = process.env.E2E_BASE_URL?.trim();
+const baseURL = configuredBaseURL || `http://127.0.0.1:${DEFAULT_PORT}`;
+const localPort = String(DEFAULT_PORT);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -10,10 +15,10 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  webServer: process.env.E2E_BASE_URL
+  webServer: configuredBaseURL
     ? undefined
     : {
-        command: `npm run dev -- --hostname 127.0.0.1 --port ${PORT}`,
+        command: `npm run dev -- --hostname 127.0.0.1 --port ${localPort}`,
         url: baseURL,
         reuseExistingServer: true,
         timeout: 120_000,

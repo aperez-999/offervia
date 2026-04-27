@@ -98,10 +98,22 @@ npm run test
 - `npm run test:e2e`: runs Playwright smoke tests
 - `npm run test`: runs both
 
-Authenticated Playwright smoke coverage is optional and enabled by setting:
+Playwright loads `.env.local` automatically through the Next env loader.
+
+Authenticated Playwright coverage is enabled by setting:
 - `E2E_EMAIL`
 - `E2E_PASSWORD`
-- `E2E_BASE_URL` (optional; defaults to local dev server)
+- `E2E_BASE_URL` (optional; use it when you want Playwright to target an already running app)
+
+Recommended local flow:
+
+```bash
+npx playwright install
+npm run dev
+npm run test:e2e
+```
+
+If `E2E_BASE_URL` is set, Playwright uses that app instead of starting its own web server. If `E2E_BASE_URL` is omitted, it will start a local Next dev server on `127.0.0.1:3000`.
 
 ## Release Flow
 For the current solo workflow:

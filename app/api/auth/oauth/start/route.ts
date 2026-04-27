@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { fail, ok } from "@/lib/api/response";
-import { buildAuthCallbackUrl, sanitizeRedirectPath } from "@/lib/auth/redirect";
+import { fail } from "@/lib/api/response";
+import { buildAuthCallbackUrl, OAUTH_NEXT_COOKIE, sanitizeRedirectPath } from "@/lib/auth/redirect";
 import { publicEnv } from "@/lib/env/public";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { checkRateLimitByIp } from "@/lib/rate-limit";
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
   const safeNext = sanitizeRedirectPath(parsed.data.next, "/dashboard?login=1");
   const origin = publicEnv.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || new URL(req.url).origin;
   const redirectTo = buildAuthCallbackUrl(origin, safeNext);
-  const { supabase } = createSupabaseRouteHandlerClient(req);
+  const { supabase, applyCookies } = createSupabaseRouteHandlerClient(req);
 
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -60,7 +61,22 @@ export async function POST(req: NextRequest) {
       return fail("BAD_REQUEST", "We couldn't continue the sign-in flow. Please try again.", 400);
     }
 
-    return ok({ url: data.url });
+    const response = applyCookies(
+      NextResponse.json({
+        success: true,
+        data: { url: data.url },
+      })
+    );
+
+    response.cookies.set(OAUTH_NEXT_COOKIE, safeNext, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 10,
+    });
+
+    return response;
   } catch (error) {
     captureServerException(error, { route: "api/auth/oauth/start" });
     return fail("SERVER_ERROR", "We couldn't continue the sign-in flow. Please try again.", 500);

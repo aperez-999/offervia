@@ -1,5 +1,12 @@
 type AuthErrorContext = "login" | "signup" | "forgot-password" | "reset-password" | "oauth";
 
+type SignUpResponseLike = {
+  user?: {
+    identities?: unknown[] | null;
+  } | null;
+  session?: unknown | null;
+};
+
 function normalizeMessage(error: unknown) {
   if (error instanceof Error) return error.message.toLowerCase();
   if (typeof error === "string") return error.toLowerCase();
@@ -40,4 +47,8 @@ export function getAuthErrorMessage(error: unknown, context: AuthErrorContext) {
   }
 
   return "We couldn't continue the sign-in flow. Please try again.";
+}
+
+export function isObfuscatedExistingSignupResponse(data: SignUpResponseLike | null | undefined) {
+  return !data?.session && Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
 }

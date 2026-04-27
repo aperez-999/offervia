@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAuthErrorMessage } from "@/lib/auth/errors";
+import { getAuthErrorMessage, isObfuscatedExistingSignupResponse } from "@/lib/auth/errors";
 
 describe("getAuthErrorMessage", () => {
   it("sanitizes common login provider errors", () => {
@@ -13,5 +13,14 @@ describe("getAuthErrorMessage", () => {
     expect(getAuthErrorMessage(new Error("User already registered"), "signup")).toBe(
       "An account with that email already exists."
     );
+  });
+
+  it("detects Supabase's obfuscated existing-user signup response", () => {
+    expect(
+      isObfuscatedExistingSignupResponse({
+        session: null,
+        user: { identities: [] },
+      })
+    ).toBe(true);
   });
 });

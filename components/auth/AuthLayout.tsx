@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
-import BrandIcon from "@/components/brand/BrandIcon";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -40,11 +40,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="flex h-12 items-center justify-between px-3 sm:px-4">
               <Link
                 href="/"
-                className="group flex items-center gap-2"
+                className="group flex items-center"
                 aria-label="Offervia — Home"
               >
-                <BrandIcon size={30} priority className="rounded-xl transition-transform group-hover:scale-[1.02]" />
-                <span className="text-base font-semibold tracking-tight">Offervia</span>
+                <BrandLogo
+                  width={190}
+                  height={48}
+                  priority
+                  className="h-10 transition-transform group-hover:scale-[1.02] sm:h-11"
+                />
               </Link>
               <nav className="hidden items-center gap-2 sm:gap-3 sm:flex">
                 <Link

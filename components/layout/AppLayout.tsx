@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import BrandIcon from "@/components/brand/BrandIcon";
+import BrandLogo from "@/components/brand/BrandLogo";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
@@ -108,11 +108,10 @@ export default function AppLayout({
             </Button>
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-90"
+              className="flex items-center transition-opacity hover:opacity-90"
               aria-label="Offervia"
             >
-              <BrandIcon size={30} priority className="rounded-xl" />
-              <span>Offervia</span>
+              <BrandLogo width={190} height={48} priority className="h-10 sm:h-11" />
             </Link>
           </div>
 

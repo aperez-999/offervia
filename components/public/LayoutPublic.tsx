@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import BrandIcon from "@/components/brand/BrandIcon";
+import BrandLogo from "@/components/brand/BrandLogo";
 
 export default function LayoutPublic({ children }: { children: React.ReactNode }) {
   // Smooth in-page scroll
@@ -71,11 +71,15 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
           {/* Brand */}
           <Link
             href="/"
-            className="group flex items-center gap-2"
+            className="group flex items-center"
             aria-label="Offervia — Home"
           >
-            <BrandIcon size={30} priority className="rounded-xl transition-transform group-hover:scale-[1.02]" />
-            <span className="text-base font-semibold tracking-tight">Offervia</span>
+            <BrandLogo
+              width={190}
+              height={48}
+              priority
+              className="h-10 transition-transform group-hover:scale-[1.02] sm:h-11"
+            />
           </Link>
 
           {/* Nav */}

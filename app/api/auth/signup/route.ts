@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { fail } from "@/lib/api/response";
-import { getAuthErrorMessage } from "@/lib/auth/errors";
+import { getAuthErrorMessage, isObfuscatedExistingSignupResponse } from "@/lib/auth/errors";
 import { buildAuthCallbackUrl, sanitizeRedirectPath } from "@/lib/auth/redirect";
 import { publicEnv } from "@/lib/env/public";
 import { captureServerException } from "@/lib/monitoring/sentry";
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   const { supabase, applyCookies } = createSupabaseRouteHandlerClient(req);
 
   try {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       return fail("BAD_REQUEST", getAuthErrorMessage(error, "signup"), 400);
+    }
+
+    if (isObfuscatedExistingSignupResponse(data)) {
+      return fail("BAD_REQUEST", "An account with that email already exists.", 400);
     }
 
     return applyCookies(

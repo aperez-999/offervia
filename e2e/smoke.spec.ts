@@ -1,14 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-const email = process.env.E2E_EMAIL;
-const password = process.env.E2E_PASSWORD;
-
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByPlaceholder("you@example.com").fill(email!);
-  await page.getByPlaceholder("Enter your password").fill(password!);
-  await page.getByRole("button", { name: /sign in/i }).click();
-}
+import { HAS_AUTH_ENV, login } from "@/e2e/helpers";
 
 test("homepage loads", async ({ page }) => {
   await page.goto("/");
@@ -21,22 +13,28 @@ test("dashboard redirects signed-out users to login", async ({ page }) => {
 });
 
 test.describe("authenticated smoke", () => {
-  test.skip(!email || !password, "Set E2E_EMAIL and E2E_PASSWORD to enable authenticated smoke tests.");
+  test.skip(!HAS_AUTH_ENV, "Set E2E_EMAIL and E2E_PASSWORD to enable authenticated smoke tests.");
 
   test("signed-in user can reach dashboard and core workflow pages", async ({ page }) => {
     await login(page);
-    await expect(page).toHaveURL(/\/dashboard/);
 
-    await page.goto("/job-packet");
-    await expect(page.getByRole("heading", { name: /job packet/i })).toBeVisible();
+    const routes = [
+      { path: "/dashboard", heading: /dashboard|welcome/i },
+      { path: "/job-packet", heading: /job packet/i },
+      { path: "/resume", heading: /resume tailor/i },
+      { path: "/tracker", heading: /job tracker/i },
+      { path: "/coach", heading: /interview coach|resume feedback|cover letter help|career advice/i },
+      { path: "/settings", heading: /settings/i },
+      { path: "/profile", heading: /profile/i },
+      { path: "/resources", heading: /student resources/i },
+      { path: "/templates", heading: /templates/i },
+      { path: "/students", heading: /student exclusives/i },
+    ];
 
-    await page.goto("/resume");
-    await expect(page.getByRole("heading", { name: /resume tailor/i })).toBeVisible();
-
-    await page.goto("/tracker");
-    await expect(page.getByRole("heading", { name: /job tracker/i })).toBeVisible();
-
-    await page.goto("/coach");
-    await expect(page.getByRole("heading", { name: /interview coach|resume feedback|cover letter help|career advice/i })).toBeVisible();
+    for (const route of routes) {
+      await page.goto(route.path);
+      await expect(page).toHaveURL(new RegExp(route.path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      await expect(page.getByRole("heading", { name: route.heading })).toBeVisible();
+    }
   });
 });
