@@ -1,67 +1,39 @@
 "use client";
 
-import React, { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 
 type DropzoneProps = {
   onFile: (file: File) => void;
   fileName?: string;
   accept?: string;
+  maxSizeMb?: number;
 };
 
-export default function Dropzone({ onFile, fileName, accept = ".pdf,.doc,.docx" }: DropzoneProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-
-  function onClick() {
-    inputRef.current?.click();
-  }
-
-  function handleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    const exts = accept.split(",").map((s) => s.trim().toLowerCase());
-    const nameOk = exts.some((ext) => file.name.toLowerCase().endsWith(ext));
-    if (nameOk) onFile(file);
-  }
-
+export default function Dropzone({
+  onFile,
+  fileName,
+  accept = ".pdf,.doc,.docx",
+  maxSizeMb = 8,
+}: DropzoneProps) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragOver(false);
-        handleFiles(e.dataTransfer.files);
-      }}
-      className={`cursor-pointer rounded-lg border p-6 text-center transition-colors ${
-        dragOver ? "border-gray-400 bg-gray-50" : "border-gray-200 bg-white"
-      }`}
-    >
+    <label className="block cursor-pointer rounded-xl border border-dashed border-border bg-background/60 p-8 text-center shadow-sm transition-colors hover:bg-foreground/[0.04]">
       <input
-        ref={inputRef}
         type="file"
-        className="hidden"
         accept={accept}
-        onChange={(e) => handleFiles(e.target.files)}
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) onFile(file);
+        }}
       />
-      <div className="flex flex-col items-center justify-center gap-2">
-        <Upload className="h-6 w-6 text-gray-500" />
-        <div className="text-sm text-gray-700">Drag and drop your resume here</div>
-        <div className="text-xs text-gray-500">PDF, DOC, or DOCX</div>
-        {fileName ? (
-          <div className="mt-2 text-sm text-gray-600">Selected: {fileName}</div>
-        ) : (
-          <div className="mt-2 text-sm text-gray-600">or click to choose a file</div>
-        )}
+      <div className="mx-auto flex max-w-md flex-col items-center">
+        <Upload className="mb-2 h-6 w-6 text-foreground/60" />
+        <p className="text-sm text-foreground">
+          {fileName ? `Selected: ${fileName}` : "Drag and drop your resume here"}
+        </p>
+        <p className="mt-1 text-xs text-foreground/60">PDF, DOC, or DOCX (max {maxSizeMb}MB)</p>
+        <p className="mt-2 text-xs text-foreground/60">or click to choose a file</p>
       </div>
-    </div>
+    </label>
   );
 }

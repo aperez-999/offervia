@@ -4,9 +4,9 @@ import { HAS_AUTH_ENV, login } from "@/e2e/helpers";
 
 test("homepage loads", async ({ page }) => {
   await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: /the fastest way to go from job post/i })
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("heading", { name: /turn job descriptions into interviews/i })).toBeVisible({
+    timeout: 15_000,
+  });
 });
 
 test("dashboard redirects signed-out users to login", async ({ page }) => {

@@ -40,34 +40,18 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { deleteJson, getJson, patchJson, postJson } from "@/lib/safe-fetch";
 import { readJobPacketDraft, updateJobPacketDraft } from "@/lib/job-packet";
+import {
+  type Application,
+  nextApplicationStatus,
+  normalizeApplication,
+  TRACKER_PAGE_SIZE_OPTIONS,
+  TRACKER_PREFS_KEY,
+  TRACKER_STATUS_OPTIONS,
+  type SortDir,
+  type SortKey,
+  type TrackerApiRow,
+} from "@/lib/tracker/utils";
 import { ArrowUpDown, Download, Search as SearchIcon } from "lucide-react";
-import { motion } from "framer-motion";
-
-type ApplicationStatus = "Applied" | "Interviewing" | "Offer" | "Rejected";
-
-type Application = {
-  id: string;
-  user_id: string;
-  company: string;
-  position: string;
-  role: string;
-  status: ApplicationStatus;
-  applied_on: string;
-  follow_up_date: string;
-  created_at: string;
-};
-
-type TrackerApiRow = {
-  id: string;
-  user_id: string;
-  company: string;
-  role?: string | null;
-  position?: string | null;
-  status: ApplicationStatus;
-  applied_on?: string | null;
-  follow_up_date?: string | null;
-  created_at: string;
-};
 
 type TrackerListResponse = {
   success: true;
@@ -79,39 +63,6 @@ type TrackerItemResponse = {
   data: TrackerApiRow | null;
 };
 
-const STATUS_OPTIONS = ["Applied", "Interviewing", "Offer", "Rejected"] as const;
-type SortKey = "company" | "position" | "status" | "applied_on";
-type SortDir = "asc" | "desc";
-const PREFS_KEY = "offervia:trackerPrefs_v1";
-const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "";
-  try {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return date.toISOString().slice(0, 10);
-  } catch {
-    return String(value);
-  }
-}
-
-function normalizeApplication(row: TrackerApiRow): Application {
-  const position = row.position?.trim() || row.role?.trim() || "";
-  const appliedOn = formatDate(row.applied_on || row.follow_up_date);
-
-  return {
-    id: row.id,
-    user_id: row.user_id,
-    company: row.company,
-    position,
-    role: position,
-    status: row.status,
-    applied_on: appliedOn,
-    follow_up_date: appliedOn,
-    created_at: row.created_at,
-  };
-}
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -132,7 +83,7 @@ export default function TrackerPage() {
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("applied_on");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [pageSize, setPageSize] = useState<(typeof PAGE_SIZE_OPTIONS)[number]>(10);
+  const [pageSize, setPageSize] = useState<(typeof TRACKER_PAGE_SIZE_OPTIONS)[number]>(10);
   const [page, setPage] = useState(1);
   const [openedFromPacket, setOpenedFromPacket] = useState(false);
 
@@ -151,7 +102,7 @@ export default function TrackerPage() {
   const isValid =
     Boolean((company || "").trim()) &&
     Boolean((position || "").trim()) &&
-    STATUS_OPTIONS.includes(status) &&
+    TRACKER_STATUS_OPTIONS.includes(status) &&
     Boolean(appliedOn);
 
   const loadApps = useCallback(async () => {
@@ -173,7 +124,7 @@ export default function TrackerPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(PREFS_KEY);
+      const raw = localStorage.getItem(TRACKER_PREFS_KEY);
       if (!raw) return;
 
       const prefs = JSON.parse(raw);
@@ -181,7 +132,7 @@ export default function TrackerPage() {
       if (typeof prefs.q === "string") setQ(prefs.q);
       if (prefs.sortKey) setSortKey(prefs.sortKey);
       if (prefs.sortDir) setSortDir(prefs.sortDir);
-      if (prefs.pageSize && PAGE_SIZE_OPTIONS.includes(prefs.pageSize)) {
+      if (prefs.pageSize && TRACKER_PAGE_SIZE_OPTIONS.includes(prefs.pageSize)) {
         setPageSize(prefs.pageSize);
       }
     } catch {}
@@ -189,7 +140,7 @@ export default function TrackerPage() {
 
   useEffect(() => {
     localStorage.setItem(
-      PREFS_KEY,
+      TRACKER_PREFS_KEY,
       JSON.stringify({ statusFilter, q, sortKey, sortDir, pageSize })
     );
   }, [statusFilter, q, sortKey, sortDir, pageSize]);
@@ -225,7 +176,7 @@ export default function TrackerPage() {
     resetForm();
     if (companyParam) setCompany(companyParam);
     if (positionParam) setPosition(positionParam);
-    if (statusParam && (STATUS_OPTIONS as readonly string[]).includes(statusParam)) {
+    if (statusParam && (TRACKER_STATUS_OPTIONS as readonly string[]).includes(statusParam)) {
       setStatus(statusParam as Application["status"]);
     }
     if (appliedOnParam) setAppliedOn(appliedOnParam);
@@ -364,14 +315,8 @@ export default function TrackerPage() {
     setQuickSaving(false);
   }
 
-  function nextStatus(value: Application["status"]): Application["status"] {
-    const order: Application["status"][] = ["Applied", "Interviewing", "Offer", "Rejected"];
-    const index = order.indexOf(value);
-    return order[(index + 1) % order.length];
-  }
-
   async function cycleStatus(app: Application) {
-    const next = nextStatus(app.status);
+    const next = nextApplicationStatus(app.status);
     setUpdatingId(app.id);
     setApps((current) =>
       current.map((entry) => (entry.id === app.id ? { ...entry, status: next } : entry))
@@ -497,12 +442,7 @@ export default function TrackerPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 p-4 sm:space-y-6 sm:p-6"
-    >
+    <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
@@ -525,8 +465,12 @@ export default function TrackerPage() {
             value={String(pageSize)}
             onValueChange={(value) => {
               const nextPageSize = Number(value);
-              if (PAGE_SIZE_OPTIONS.includes(nextPageSize as (typeof PAGE_SIZE_OPTIONS)[number])) {
-                setPageSize(nextPageSize as (typeof PAGE_SIZE_OPTIONS)[number]);
+              if (
+                TRACKER_PAGE_SIZE_OPTIONS.includes(
+                  nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]
+                )
+              ) {
+                setPageSize(nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]);
               }
             }}
           >
@@ -534,7 +478,7 @@ export default function TrackerPage() {
               <SelectValue placeholder="Rows" />
             </SelectTrigger>
             <SelectContent className="border-border bg-card/80 text-foreground">
-              {PAGE_SIZE_OPTIONS.map((value) => (
+              {TRACKER_PAGE_SIZE_OPTIONS.map((value) => (
                 <SelectItem key={value} value={String(value)}>
                   {value} / page
                 </SelectItem>
@@ -604,7 +548,7 @@ export default function TrackerPage() {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent className="border-border bg-card/80 text-foreground">
-                      {STATUS_OPTIONS.map((value) => (
+                      {TRACKER_STATUS_OPTIONS.map((value) => (
                         <SelectItem key={value} value={value}>
                           {value}
                         </SelectItem>
@@ -698,7 +642,7 @@ export default function TrackerPage() {
         <Select
           value={statusFilter}
           onValueChange={(value) => {
-            if (value === "All" || STATUS_OPTIONS.includes(value as Application["status"])) {
+            if (value === "All" || TRACKER_STATUS_OPTIONS.includes(value as Application["status"])) {
               setStatusFilter(value as "All" | Application["status"]);
             }
           }}
@@ -708,7 +652,7 @@ export default function TrackerPage() {
           </SelectTrigger>
           <SelectContent className="border-border bg-card/80 text-foreground">
             <SelectItem value="All">All</SelectItem>
-            {STATUS_OPTIONS.map((value) => (
+            {TRACKER_STATUS_OPTIONS.map((value) => (
               <SelectItem key={value} value={value}>
                 {value}
               </SelectItem>
@@ -881,7 +825,7 @@ export default function TrackerPage() {
           </ConfirmFooter>
         </ConfirmContent>
       </ConfirmDialog>
-    </motion.div>
+    </div>
   );
 }
 

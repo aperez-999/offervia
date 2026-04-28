@@ -1,10 +1,9 @@
 // components/resume/ResumeWizard.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Upload,
   ClipboardCopy,
   Download,
   Trash2,
@@ -19,6 +18,7 @@ import {
   ZoomOut,
   Maximize2,
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -33,66 +33,20 @@ import {
   readJobPacketDraft,
   updateJobPacketDraft,
 } from "@/lib/job-packet";
-import { AnimatePresence, motion } from "framer-motion";
-
-/* ---------------------------------- Data --------------------------------- */
-
-const steps = [
-  { id: 1, title: "Upload Resume" },
-  { id: 2, title: "Company Targeting" },
-  { id: 3, title: "Job Description" },
-  { id: 4, title: "Tailor & Review" },
-];
-
-const ACCEPTED_TYPES = [".pdf", ".doc", ".docx"];
-const MAX_SIZE_MB = 8;
-
-const JD_LS_KEY = "offervia:resume:jd_v1";
-const DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
-
-
-const TECH_DICT = [
-  "react","next.js","typescript","javascript","node","node.js","graphql","rest","api","html","css","tailwind","redux","jest","rtl","cypress","testing","vitest","playwright","aws","gcp","azure","docker","kubernetes","sql","postgres","mysql","mongodb","python","go","java","c++","a11y","accessibility","performance",
-];
-
-/* --------------------------------- Utils --------------------------------- */
-
-function detectTechs(text: string): string[] {
-  const hay = text.toLowerCase();
-  const set = new Set<string>();
-  for (const t of TECH_DICT) {
-    const rx =
-      t === "c++"
-        ? /\bc\+\+\b/i
-        : new RegExp(`(^|[^a-z0-9])${t.replace(".", "\\.")}([^a-z0-9]|$)`, "i");
-    if (rx.test(hay)) set.add(t);
-  }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
-}
-
-function approxTokens(s: string) {
-  return Math.max(1, Math.round((s || "").length / 4)); // ~4 chars/token
-}
-
-function bytesToStr(b: number) {
-  if (b < 1024) return `${b} B`;
-  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
-  return `${(b / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function normalizeText(s: string) {
-  return s
-    .replace(/\r\n/g, "\n")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/\t/g, "  ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
+import Dropzone from "@/components/resume/Dropzone";
+import StepContainer from "@/components/resume/StepContainer";
+import WizardSidebar from "@/components/resume/WizardSidebar";
+import {
+  approxTokens,
+  bytesToStr,
+  detectTechs,
+  normalizeText,
+  RESUME_ACCEPTED_TYPES,
+  RESUME_DESIRED_STEP_LS_KEY,
+  RESUME_JD_LS_KEY,
+  RESUME_MAX_SIZE_MB,
+  resumeWizardSteps,
+} from "@/components/resume/wizard-utils";
 
 /* ------------------------------- Component ------------------------------- */
 
@@ -137,7 +91,7 @@ export default function ResumeWizard() {
   // restore JD draft from localStorage
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(JD_LS_KEY);
+      const raw = localStorage.getItem(RESUME_JD_LS_KEY);
       if (raw) setJd(raw);
     } catch {}
   }, []);
@@ -167,7 +121,7 @@ export default function ResumeWizard() {
     if (!stepRaw) return;
     const parsed = Number(stepRaw);
     if (!Number.isFinite(parsed)) return;
-    const next = Math.max(1, Math.min(steps.length, Math.floor(parsed)));
+    const next = Math.max(1, Math.min(resumeWizardSteps.length, Math.floor(parsed)));
     setStep(next);
     const from = search.get("from") || "";
     if (from === "scanner" || from.startsWith("scanner")) {
@@ -181,7 +135,7 @@ export default function ResumeWizard() {
   }, [search]);
   useEffect(() => {
     try {
-      localStorage.setItem(JD_LS_KEY, jd);
+      localStorage.setItem(RESUME_JD_LS_KEY, jd);
     } catch {}
   }, [jd]);
 
@@ -220,7 +174,7 @@ export default function ResumeWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeFile?.name]);
 
-  const progress = useMemo(() => (step / steps.length) * 100, [step]);
+  const progress = useMemo(() => (step / resumeWizardSteps.length) * 100, [step]);
   const step1Valid = !!resumeFileName;
   const step3Valid = jd.trim().length >= 20;
 
@@ -237,7 +191,7 @@ export default function ResumeWizard() {
       setError("Job description must be at least 20 characters.");
       return;
     }
-    setStep((s) => Math.min(s + 1, steps.length));
+    setStep((s) => Math.min(s + 1, resumeWizardSteps.length));
   }
 
   function onBack() {
@@ -249,7 +203,7 @@ export default function ResumeWizard() {
 
   function onFileSelected(file: File) {
     const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
-    if (!ACCEPTED_TYPES.includes(ext)) {
+    if (!(RESUME_ACCEPTED_TYPES as readonly string[]).includes(ext)) {
       toast({
         title: "Unsupported file type",
         description: "Please upload a PDF, DOC, or DOCX.",
@@ -257,10 +211,10 @@ export default function ResumeWizard() {
       });
       return;
     }
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    if (file.size > RESUME_MAX_SIZE_MB * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: `Max size is ${MAX_SIZE_MB}MB.`,
+        description: `Max size is ${RESUME_MAX_SIZE_MB}MB.`,
         variant: "destructive",
       });
       return;
@@ -279,14 +233,14 @@ export default function ResumeWizard() {
 
     // If the user came from the Scanner Job Packet handoff, auto-advance once a resume exists.
     try {
-      const desired = localStorage.getItem(DESIRED_STEP_LS_KEY);
+      const desired = localStorage.getItem(RESUME_DESIRED_STEP_LS_KEY);
       if (desired) {
         const parsed = Number(desired);
         if (Number.isFinite(parsed)) {
-          const nextStep = Math.max(1, Math.min(steps.length, Math.floor(parsed)));
+          const nextStep = Math.max(1, Math.min(resumeWizardSteps.length, Math.floor(parsed)));
           setStep(nextStep);
         }
-        localStorage.removeItem(DESIRED_STEP_LS_KEY);
+        localStorage.removeItem(RESUME_DESIRED_STEP_LS_KEY);
       }
     } catch {
       // noop
@@ -507,7 +461,7 @@ export default function ResumeWizard() {
 
       {/* Responsive two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 lg:gap-8">
-        <WizardSidebar steps={steps} current={step} />
+      <WizardSidebar steps={[...resumeWizardSteps]} current={step} />
 
         <div className="space-y-4 sm:space-y-6 min-w-0">
           <AnimatePresence mode="wait" initial={false}>
@@ -534,7 +488,12 @@ export default function ResumeWizard() {
                     </div>
                   </div>
                 )}
-                <Dropzone onFile={onFileSelected} fileName={resumeFileName} />
+                <Dropzone
+                  onFile={onFileSelected}
+                  fileName={resumeFileName}
+                  accept={RESUME_ACCEPTED_TYPES.join(",")}
+                  maxSizeMb={RESUME_MAX_SIZE_MB}
+                />
                 {resumeFileName && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background/60 p-3">
                     <div className="text-sm text-foreground">
@@ -965,7 +924,7 @@ export default function ResumeWizard() {
             </Button>
 
             <div className="flex items-center gap-2">
-              {step < steps.length ? (
+              {step < resumeWizardSteps.length ? (
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 3 && !step3Valid)}
@@ -1001,103 +960,5 @@ export default function ResumeWizard() {
       </div>
     )}
   </>
-  );
-}
-
-/* ------------------------------ Subcomponents ----------------------------- */
-
-function WizardSidebar({
-  steps,
-  current,
-}: {
-  steps: { id: number; title: string }[];
-  current: number;
-}) {
-  return (
-    <aside className="w-full lg:w-72 shrink-0">
-      <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
-          Wizard
-        </div>
-        <nav className="space-y-2">
-          {steps.map((s, idx) => {
-            const active = current === s.id;
-            return (
-              <div
-                key={s.id}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors",
-                  active
-                    ? "border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20"
-                    : "border-border hover:bg-foreground/[0.05]"
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-xs flex-shrink-0",
-                    active ? "bg-indigo-600 text-white" : "bg-foreground/10 text-foreground/80"
-                  )}
-                >
-                  {idx + 1}
-                </span>
-                <span className="truncate text-sm text-foreground">{s.title}</span>
-              </div>
-            );
-          })}
-        </nav>
-      </div>
-    </aside>
-  );
-}
-
-function StepContainer({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <header>
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        ) : null}
-      </header>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-
-function Dropzone({
-  onFile,
-  fileName,
-}: {
-  onFile: (f: File) => void;
-  fileName?: string;
-}) {
-  return (
-    <label className="block cursor-pointer rounded-xl border border-dashed border-border bg-background/60 p-8 text-center shadow-sm transition-colors hover:bg-foreground/[0.04]">
-      <input
-        type="file"
-        accept={ACCEPTED_TYPES.join(",")}
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
-        }}
-      />
-      <div className="mx-auto flex max-w-md flex-col items-center">
-        <Upload className="mb-2 h-6 w-6 text-foreground/60" />
-        <p className="text-sm text-foreground">
-          {fileName ? `Selected: ${fileName}` : "Drag and drop your resume here"}
-        </p>
-        <p className="mt-1 text-xs text-foreground/60">PDF, DOC, or DOCX (max {MAX_SIZE_MB}MB)</p>
-        <p className="mt-2 text-xs text-foreground/60">or click to choose a file</p>
-      </div>
-    </label>
   );
 }

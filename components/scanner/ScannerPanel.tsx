@@ -41,28 +41,19 @@ import {
 } from "@/lib/job-packet";
 import {
   approxTokens,
+  CloudScan,
   detectTechs,
+  EXAMPLE_JOB_DESCRIPTION,
+  formatScanResultForReadability,
+  SCANNER_DRAFT_LS_KEY,
+  SCANNER_HISTORY_LS_KEY,
+  SCANNER_RESUME_DESIRED_STEP_LS_KEY,
+  SCANNER_RESUME_JD_LS_KEY,
   scanResultToText,
   titleFromJD,
   type ScanEntry,
   type ScanResultContent,
 } from "@/lib/scanner/utils";
-
-type CloudScan = {
-  id: string;
-  title: string;
-  jd_excerpt: string;
-  match_score: number;
-  strengths: string[];
-  missing_skills: string[];
-  summary: string;
-  created_at: string;
-};
-
-const LS_HISTORY_KEY = "offervia:scannerHistory_v1";
-const LS_DRAFT_KEY = "offervia:scannerDraft_v1";
-const RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
-const RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
 
 export default function ScannerPanel() {
   const router = useRouter();
@@ -89,9 +80,9 @@ export default function ScannerPanel() {
   // draft + history bootstrap
   useEffect(() => {
     try {
-      const d = localStorage.getItem(LS_DRAFT_KEY);
+      const d = localStorage.getItem(SCANNER_DRAFT_LS_KEY);
       if (d) setJd(d);
-      const raw = localStorage.getItem(LS_HISTORY_KEY);
+      const raw = localStorage.getItem(SCANNER_HISTORY_LS_KEY);
       if (raw) setHistory(JSON.parse(raw));
     } catch {}
   }, []);
@@ -138,32 +129,16 @@ export default function ScannerPanel() {
   }, [supabase]);
   useEffect(() => {
     try {
-      localStorage.setItem(LS_DRAFT_KEY, jd);
+      localStorage.setItem(SCANNER_DRAFT_LS_KEY, jd);
     } catch {}
   }, [jd]);
 
   const techs = useMemo(() => detectTechs(jd), [jd]);
 
-  const exampleJD = `Software Engineer (Frontend)
-
-We are seeking a Frontend Engineer to build accessible, performant web experiences.
-Responsibilities include implementing UI components, collaborating with design, writing tests, and improving performance.
-Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/RTL). Bonus: Next.js, accessibility, performance profiling.`;
-
-  function formatForReadability(raw: string): string {
-    if (!raw) return "";
-    let out = raw.replace(/\n(?=\s*[1-9]\)\s)/g, "\n\n");
-    out = out.replace(
-      /\n(?=\s*(Summary|Top required hard skills|Top required soft skills|Missing skills|Keywords|Follow-up))/gi,
-      "\n\n"
-    );
-    return out.trim();
-  }
-
   function persistHistory(next: ScanEntry[]) {
     setHistory(next);
     try {
-      localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(next));
+      localStorage.setItem(SCANNER_HISTORY_LS_KEY, JSON.stringify(next));
     } catch {}
   }
 
@@ -331,7 +306,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
         scanResult: content,
       });
     } else {
-      setLegacyResult(formatForReadability(JSON.stringify(content ?? res.data ?? "")));
+      setLegacyResult(formatScanResultForReadability(JSON.stringify(content ?? res.data ?? "")));
       addToHistory(text, JSON.stringify(content ?? res.data ?? ""));
     }
     toast({ title: "Scan complete" });
@@ -344,10 +319,10 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
       return;
     }
     try {
-      localStorage.setItem(RESUME_JD_LS_KEY, text);
+      localStorage.setItem(SCANNER_RESUME_JD_LS_KEY, text);
       // Since we can't carry a File object across routes, land the user on Step 1 (upload),
       // then let ResumeWizard auto-advance to the JD step once a resume is attached.
-      localStorage.setItem(RESUME_DESIRED_STEP_LS_KEY, "3");
+      localStorage.setItem(SCANNER_RESUME_DESIRED_STEP_LS_KEY, "3");
     } catch {
       // noop
     }
@@ -508,7 +483,7 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
           <button
             type="button"
             className="text-xs text-foreground/70 cursor-pointer underline underline-offset-4 hover:text-foreground"
-            onClick={() => setJd(exampleJD)}
+            onClick={() => setJd(EXAMPLE_JOB_DESCRIPTION)}
           >
             Paste example job description
           </button>
@@ -708,8 +683,8 @@ Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/
                             return;
                           }
                           try {
-                            localStorage.setItem(RESUME_JD_LS_KEY, h.jd_excerpt);
-                            localStorage.setItem(RESUME_DESIRED_STEP_LS_KEY, "3");
+                            localStorage.setItem(SCANNER_RESUME_JD_LS_KEY, h.jd_excerpt);
+                            localStorage.setItem(SCANNER_RESUME_DESIRED_STEP_LS_KEY, "3");
                           } catch {
                             // noop
                           }

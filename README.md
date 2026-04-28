@@ -81,10 +81,13 @@ db/audit/rls-verification.sql
 - `SMTP_USER`
 - `SMTP_PASS`
 - `CONTACT_TO`
-- `CONTACT_FROM`
 - `CONTACT_FROM_NAME`
 - `CONTACT_FROM_EMAIL`
 - `CRON_SECRET`
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_AUTH_TOKEN` (optional when uploading source maps)
 
 ## Local Development
 ```bash
@@ -113,14 +116,15 @@ Authenticated Playwright coverage is enabled by setting:
 - `E2E_PASSWORD`
 - `E2E_BASE_URL` (optional; keep `http://localhost:3000` for local runs)
 
-Recommended local flow:
+Recommended local flow when `E2E_BASE_URL` is set:
 
 ```bash
 npx playwright install
+npm run dev
 npm run test:e2e
 ```
 
-If `E2E_BASE_URL` points to `localhost` or `127.0.0.1`, Playwright will start or reuse your local Next dev server automatically. If `E2E_BASE_URL` points to a non-local environment, Playwright will target that URL without starting a local server.
+If `E2E_BASE_URL` is omitted, Playwright will start a local dev server automatically. If `E2E_BASE_URL` is present, Playwright will target that URL and expect the app to already be running there.
 
 ## Release Flow
 For the current solo workflow:
@@ -146,3 +150,30 @@ Environment variables:
 - `SENTRY_AUTH_TOKEN` (optional; recommended when uploading source maps)
 
 Set these in `.env.local` for local testing and in Vercel project settings for production and preview deployments.
+
+## Vercel Production Setup
+Public env vars:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_APP_NAME`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_STRIPE_PRICE_ID`
+- `NEXT_PUBLIC_SENTRY_DSN`
+
+Server-only env vars:
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GROQ_API_KEY`
+- `GROQ_MODEL`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `CONTACT_TO`
+- `CONTACT_FROM_NAME`
+- `CONTACT_FROM_EMAIL`
+- `CRON_SECRET`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_AUTH_TOKEN` when source maps are enabled

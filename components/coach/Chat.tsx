@@ -11,6 +11,8 @@ import type { CoachMode } from "./system-prompts";
 import { SYSTEM_PROMPTS, MODE_LABELS } from "./system-prompts";
 import MessageBubble from "./MessageBubble";
 import ClearChatButton from "./ClearChatButton";
+import ChatStarterPrompts from "./ChatStarterPrompts";
+import { COACH_MODE_META } from "./chat-config";
 import {
   formatTime,
   groupMessagesByDay,
@@ -20,10 +22,6 @@ import {
 import {
   Bot,
   User,
-  Mail,
-  Compass,
-  MessageSquare,
-  FileText,
   CornerDownRight,
   RotateCcw,
   ChevronsDown,
@@ -359,183 +357,13 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           <div className="grid h-full place-items-center text-sm text-foreground/70">Loading…</div>
         ) : messages.length === 0 ? (
           <div className="grid h-full place-items-center text-center text-sm text-foreground/70">
-            <div>
-              {mode === "interview" && (
-                <>
-                  <p className="mb-2">Start with a focused prompt and build a stronger interview story from there.</p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Help me prepare for a behavioral interview.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <MessageSquare className="mr-1 h-4 w-4" />
-                      Help me prepare for a behavioral interview.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Ask me a mock interview question.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <MessageSquare className="mr-1 h-4 w-4" />
-                      Ask me a mock interview question.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("How do I explain a resume gap?");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <FileText className="mr-1 h-4 w-4" />
-                      How do I explain a resume gap?
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {mode === "resume" && (
-                <>
-                  <p className="mb-2">Refine bullets, clarify impact, or pressure-test how your experience reads.</p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Rewrite this bullet in STAR format.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <FileText className="mr-1 h-4 w-4" />
-                      Rewrite this bullet in STAR format.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("How do I list freelance experience?");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <FileText className="mr-1 h-4 w-4" />
-                      How do I list freelance experience?
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Fix grammar in this bullet.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <FileText className="mr-1 h-4 w-4" />
-                      Fix grammar in this bullet.
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {mode === "cover_letter" && (
-                <>
-                  <p className="mb-2">Draft sharper cover letter language and improve the parts that feel generic.</p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Write a cover letter intro.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Mail className="mr-1 h-4 w-4" />
-                      Write a cover letter intro.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Explain why I want to join this company.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Mail className="mr-1 h-4 w-4" />
-                      Explain why I want to join this company.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Improve this paragraph.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Mail className="mr-1 h-4 w-4" />
-                      Improve this paragraph.
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {mode === "career" && (
-                <>
-                  <p className="mb-2">Use the coach for decision-making, planning, and quick career tradeoff checks.</p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("How do I choose between two job offers?");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Compass className="mr-1 h-4 w-4" />
-                      How do I choose between two job offers?
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("Help me plan a promotion roadmap.");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Compass className="mr-1 h-4 w-4" />
-                      Help me plan a promotion roadmap.
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.06]"
-                      onClick={() => {
-                        setInput("How do I negotiate salary?");
-                        setTimeout(() => void send(), 0);
-                      }}
-                    >
-                      <Compass className="mr-1 h-4 w-4" />
-                      How do I negotiate salary?
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
+            <ChatStarterPrompts
+              mode={mode}
+              onPrompt={(prompt) => {
+                setInput(prompt);
+                setTimeout(() => void send(), 0);
+              }}
+            />
           </div>
         ) : (
           <div className="space-y-4">
@@ -663,37 +491,8 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
 export default function Chat({ mode = "interview" as CoachMode }: { mode?: CoachMode }) {
   const [active, setActive] = useState<CoachMode>(mode);
-
-  const getActiveIcon = () => {
-    switch (active) {
-      case "interview":
-        return MessageSquare;
-      case "resume":
-        return FileText;
-      case "cover_letter":
-        return Mail;
-      case "career":
-        return Compass;
-      default:
-        return MessageSquare;
-    }
-  };
-  const getActiveLabel = () => {
-    switch (active) {
-      case "interview":
-        return "Interview Coach";
-      case "resume":
-        return "Resume Feedback";
-      case "cover_letter":
-        return "Cover Letter Help";
-      case "career":
-        return "Career Advice";
-      default:
-        return "Interview Coach";
-    }
-  };
-
-  const ActiveIcon = getActiveIcon();
+  const activeMeta = COACH_MODE_META[active];
+  const ActiveIcon = activeMeta.icon;
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -701,7 +500,7 @@ export default function Chat({ mode = "interview" as CoachMode }: { mode?: Coach
       <section className="min-w-0 flex-1">
         <header className="mb-3 flex items-center gap-2">
           <ActiveIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-lg font-semibold text-foreground">{getActiveLabel()}</h1>
+          <h1 className="text-lg font-semibold text-foreground">{activeMeta.label}</h1>
         </header>
         <InnerChat mode={active} />
       </section>

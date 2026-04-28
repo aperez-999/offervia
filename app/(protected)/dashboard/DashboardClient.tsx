@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Sparkles, X } from "lucide-react";
-import { motion } from "framer-motion";
 
 import type { UsageSnapshot } from "@/lib/usage/read";
 import type { ScanAnalytics } from "@/lib/analytics/scan-analytics";
@@ -29,6 +28,14 @@ import {
   getDashboardNextAction,
   getDashboardUsageItems,
 } from "@/lib/dashboard/overview";
+import {
+  ActionCard,
+  capitalizeFirst,
+  EmptyState,
+  Kpi,
+  SkeletonList,
+  StatusBadge,
+} from "@/components/dashboard/dashboard-cards";
 
 type PlanLimits = {
   resume_tailor_per_month: number;
@@ -56,6 +63,8 @@ type MsgRow = {
 };
 
 type OnboardingPrefs = {
+  weekly_goal?: number | null;
+  email_digest?: boolean | null;
   onboarding_dismissed?: boolean | null;
   onboarding_completed?: Record<string, boolean> | null;
 };
@@ -66,31 +75,6 @@ const MODE_LABELS: Record<MsgRow["mode"], string> = {
   cover_letter: "Cover Letter Help",
   career: "Career Advice",
 };
-
-function StatusBadge({ s }: { s: Application["status"] }) {
-  if (s === "Interviewing") {
-    return (
-      <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-300">
-        {s}
-      </Badge>
-    );
-  }
-  if (s === "Offer") {
-    return (
-      <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
-        {s}
-      </Badge>
-    );
-  }
-  if (s === "Rejected") {
-    return <Badge variant="destructive">{s}</Badge>;
-  }
-  return (
-    <Badge className="border border-foreground/10 bg-foreground/[0.06] text-foreground/80 hover:bg-foreground/[0.08]">
-      {s}
-    </Badge>
-  );
-}
 
 type PlanType = "free" | "pro";
 
@@ -156,62 +140,52 @@ export default function DashboardClient({
         return;
       }
 
-      // preferences
-      const { data: prefs } = await supabase
-        .from("user_prefs")
-        .select("weekly_goal,email_digest")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (prefs) {
-        if (typeof prefs.weekly_goal === "number" && Number.isFinite(prefs.weekly_goal)) {
-          setWeeklyGoalTarget(Math.max(0, Math.min(50, Math.round(prefs.weekly_goal))));
-        }
-        if (typeof prefs.email_digest === "boolean") {
-          setEmailDigestEnabled(prefs.email_digest);
-        }
-      }
+      const [{ data: prefs }, { data: appData }, { data: msgData }] = await Promise.all([
+        supabase
+          .from("user_prefs")
+          .select("weekly_goal,email_digest,onboarding_dismissed,onboarding_completed")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("applications")
+          .select("id,user_id,company,position,status,applied_on,created_at")
+          .eq("user_id", user.id),
+        supabase
+          .from("messages")
+          .select("id,user_id,mode,role,content,created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(8),
+      ]);
 
-      // onboarding (persisted in user_prefs)
-      const { data: ob } = await supabase
-        .from("user_prefs")
-        .select("onboarding_dismissed,onboarding_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (ob) {
-        const typed = ob as unknown as OnboardingPrefs;
+      if (prefs) {
+        const typed = prefs as unknown as OnboardingPrefs;
+        if (typeof typed.weekly_goal === "number" && Number.isFinite(typed.weekly_goal)) {
+          setWeeklyGoalTarget(Math.max(0, Math.min(50, Math.round(typed.weekly_goal))));
+        }
+        if (typeof typed.email_digest === "boolean") {
+          setEmailDigestEnabled(typed.email_digest);
+        }
         if (typeof typed.onboarding_dismissed === "boolean") {
           setOnboardingDismissed(typed.onboarding_dismissed);
         }
-        const completed = typed.onboarding_completed;
-        if (completed && typeof completed === "object") {
-          setOnboardingCompleted(completed as Record<string, boolean>);
+        if (typed.onboarding_completed && typeof typed.onboarding_completed === "object") {
+          setOnboardingCompleted(typed.onboarding_completed as Record<string, boolean>);
         }
       }
 
-      const { data: appData } = await supabase
-        .from("applications")
-        .select("id,user_id,company,position,status,applied_on,created_at")
-        .eq("user_id", user.id);
-
-      const normalized = (appData || []).map((a: Record<string, unknown>) => ({
-        ...a,
-        applied_on: a.applied_on && typeof a.applied_on === "string"
-          ? new Date(a.applied_on).toISOString().slice(0, 10)
-          : "",
+      const normalized = ((appData || []) as Array<Record<string, unknown>>).map((entry) => ({
+        ...entry,
+        applied_on:
+          entry.applied_on && typeof entry.applied_on === "string"
+            ? new Date(entry.applied_on).toISOString().slice(0, 10)
+            : "",
       })) as Application[];
 
       normalized.sort((a, b) =>
         b.applied_on > a.applied_on ? 1 : b.applied_on < a.applied_on ? -1 : 0
       );
       setApps(normalized);
-
-      const { data: msgData } = await supabase
-        .from("messages")
-        .select("id,user_id,mode,role,content,created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(8);
-
       setRecentChats((msgData || []) as MsgRow[]);
       setLoading(false);
     })();
@@ -344,12 +318,7 @@ export default function DashboardClient({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 sm:space-y-6"
-    >
+    <div className="space-y-4 sm:space-y-6">
       {/* Upgrade success / cancel banner */}
       {upgrade === "success" && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-800 dark:text-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10">
@@ -673,7 +642,7 @@ export default function DashboardClient({
                       <div className="hidden text-xs text-foreground/70 sm:block">
                         {a.applied_on}
                       </div>
-                      <StatusBadge s={a.status} />
+                      <StatusBadge status={a.status} />
                       <Button
                         asChild
                         variant="outline"
@@ -793,79 +762,6 @@ export default function DashboardClient({
 
       {/* Pro: Performance Insights */}
       {plan === "pro" && analytics ? <PerformanceInsights analytics={analytics} /> : null}
-    </motion.div>
-  );
-}
-
-function Kpi({
-  title,
-  value,
-  tone = "slate",
-}: {
-  title: string;
-  value: number;
-  tone?: "slate" | "indigo" | "blue" | "emerald";
-}) {
-  const toneClass =
-    tone === "indigo"
-      ? "bg-indigo-500/10"
-      : tone === "blue"
-      ? "bg-sky-500/10"
-      : tone === "emerald"
-      ? "bg-emerald-500/10"
-      : "bg-foreground/[0.06]";
-  return (
-    <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 320, damping: 26 }}>
-      <Card className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60 truncate">
-            {title}
-          </div>
-          <div className={`h-2.5 w-2.5 rounded-full ${toneClass}`} aria-hidden />
-        </div>
-        <div className="mt-2 text-xl sm:text-2xl font-semibold text-foreground tabular-nums">
-          {value}
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
-function ActionCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Card className="h-full rounded-xl border border-border bg-background/60 p-4 shadow-sm transition-all hover:shadow-md">
-      <div className="text-sm font-medium text-foreground">{title}</div>
-      <div className="mt-1 text-xs text-foreground/70">{children}</div>
-    </Card>
-  );
-}
-
-function SkeletonList({ rows = 5 }: { rows?: number }) {
-  return (
-    <ul className="animate-pulse space-y-3">
-      {Array.from({ length: rows }).map((_, i) => (
-        <li key={i} className="h-10 rounded-md bg-foreground/[0.06]" />
-      ))}
-    </ul>
-  );
-}
-
-function EmptyState({ text, cta }: { text: string; cta?: React.ReactNode }) {
-  return (
-    <div className="py-10 text-center">
-      <p className="mb-3 text-sm text-foreground/70">{text}</p>
-      {cta}
     </div>
   );
-}
-
-function capitalizeFirst(s: string) {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

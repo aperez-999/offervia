@@ -14,6 +14,27 @@ export type ScanEntry = {
   techs: string[];
 };
 
+export type CloudScan = {
+  id: string;
+  title: string;
+  jd_excerpt: string;
+  match_score: number;
+  strengths: string[];
+  missing_skills: string[];
+  summary: string;
+  created_at: string;
+};
+
+export const SCANNER_HISTORY_LS_KEY = "offervia:scannerHistory_v1";
+export const SCANNER_DRAFT_LS_KEY = "offervia:scannerDraft_v1";
+export const SCANNER_RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
+export const SCANNER_RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
+export const EXAMPLE_JOB_DESCRIPTION = `Software Engineer (Frontend)
+
+We are seeking a Frontend Engineer to build accessible, performant web experiences.
+Responsibilities include implementing UI components, collaborating with design, writing tests, and improving performance.
+Requirements: JavaScript/TypeScript, React, HTML, CSS, REST APIs, testing (Jest/RTL). Bonus: Next.js, accessibility, performance profiling.`;
+
 const TECH_DICT = [
   "react",
   "next.js",
@@ -79,6 +100,16 @@ export function titleFromJD(text: string): string {
 
 export function approxTokens(input: string): number {
   return Math.max(1, Math.round(input.length / 4));
+}
+
+export function formatScanResultForReadability(raw: string): string {
+  if (!raw) return "";
+  let output = raw.replace(/\n(?=\s*[1-9]\)\s)/g, "\n\n");
+  output = output.replace(
+    /\n(?=\s*(Summary|Top required hard skills|Top required soft skills|Missing skills|Keywords|Follow-up))/gi,
+    "\n\n"
+  );
+  return output.trim();
 }
 
 export function scanResultToText(result: ScanResultContent): string {
