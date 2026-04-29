@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       line_items: [
         { price: priceId, quantity: 1 },
       ],
-      success_url: `${siteUrl}/dashboard?upgrade=success`,
+      success_url: `${siteUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/dashboard?upgrade=cancel`,
       customer_email: user.email ?? undefined,
       subscription_data: {
