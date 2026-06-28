@@ -43,7 +43,11 @@ export function switchTheme(apply: () => void, origin?: Origin | null): void {
 
   transition.ready
     .then(() => {
-      document.documentElement.animate(
+      const root = document.documentElement;
+      const duration = 520;
+      const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+      // New theme wipes in from the toggle point...
+      root.animate(
         {
           clipPath: [
             `circle(0px at ${x}px ${y}px)`,
@@ -51,9 +55,19 @@ export function switchTheme(apply: () => void, origin?: Origin | null): void {
           ],
         },
         {
-          duration: 480,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          duration,
+          easing,
           pseudoElement: "::view-transition-new(root)",
+        }
+      );
+      // ...while the old theme dissolves out, so the moving edge softens
+      // instead of showing a hard static black/white split.
+      root.animate(
+        { opacity: [1, 0] },
+        {
+          duration,
+          easing: "ease-out",
+          pseudoElement: "::view-transition-old(root)",
         }
       );
     })
