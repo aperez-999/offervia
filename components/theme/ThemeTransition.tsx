@@ -13,13 +13,22 @@ export default function ThemeTransition() {
     const root = document.documentElement;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+    // Signature of the current theme, ignoring our own transient helper class.
+    const themeSignature = () =>
+      Array.from(root.classList)
+        .filter((c) => c !== "theme-anim")
+        .sort()
+        .join(" ") + `|${root.style.colorScheme}`;
+
+    let lastSignature = themeSignature();
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    const observer = new MutationObserver((mutations) => {
-      const themeChanged = mutations.some(
-        (m) => m.attributeName === "class" || m.attributeName === "style"
-      );
-      if (!themeChanged || reduceMotion.matches) return;
+    const observer = new MutationObserver(() => {
+      const next = themeSignature();
+      // Ignore mutations that don't change the theme (e.g. our own toggle).
+      if (next === lastSignature) return;
+      lastSignature = next;
+      if (reduceMotion.matches) return;
 
       root.classList.add("theme-anim");
       if (timer) clearTimeout(timer);
