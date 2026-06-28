@@ -8,25 +8,19 @@ const items = [
     title: "Fast iteration",
     desc: "Scan → tailor → apply in minutes.",
     icon: Zap,
-    tone: "text-warning",
-    ring: "ring-ring",
-    bg: "bg-warning/10",
+    chip: "bg-warning/10 text-warning",
   },
   {
     title: "Handled with care",
     desc: "Your inputs are processed through Offervia's server-side AI flow to generate results.",
     icon: ShieldCheck,
-    tone: "text-success",
-    ring: "ring-ring",
-    bg: "bg-success/10",
+    chip: "bg-success/10 text-success",
   },
   {
     title: "Built for momentum",
     desc: "A workflow, not a one-off tool.",
     icon: Sparkles,
-    tone: "text-primary",
-    ring: "ring-ring",
-    bg: "bg-primary/10",
+    chip: "bg-primary/10 text-primary",
   },
 ];
 
@@ -44,20 +38,11 @@ export default function ProofBar() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.4, delay: idx * 0.04 }}
-                className={[
-                  "rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10",
-                  "backdrop-blur",
-                ].join(" ")}
+                className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10"
               >
                 <div className="flex items-start gap-3">
-                  <div
-                    className={[
-                      "flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2",
-                      it.ring,
-                      it.bg,
-                    ].join(" ")}
-                  >
-                    <Icon className={`h-5 w-5 ${it.tone}`} />
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${it.chip}`}>
+                    <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-foreground">{it.title}</div>

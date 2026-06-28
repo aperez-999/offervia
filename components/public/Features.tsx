@@ -10,10 +10,11 @@ export default function Features() {
       desc:
         "Practice answers, tighten stories, and prepare for real conversations without losing momentum.",
       icon: MessageSquare,
+      chip: "bg-primary/10 text-primary",
       bullets: [
-        "Use quick prompts for behavioral, resume, and career questions",
+        "Quick prompts for behavioral, resume, and career questions",
         "Switch between brief and detailed coaching when needed",
-        "Keep the conversation history for your next practice session",
+        "Keep the conversation history for your next session",
       ],
     },
     {
@@ -21,10 +22,11 @@ export default function Features() {
       desc:
         "Scan any posting to surface requirements, missing skills, and the strongest resume angles before you apply.",
       icon: FileText,
+      chip: "bg-info/10 text-info",
       bullets: [
         "Highlight strengths and keyword gaps in seconds",
         "Carry the same JD into Resume Tailor without re-pasting",
-        "Save scan history so you can compare applications over time",
+        "Save scan history to compare applications over time",
       ],
     },
     {
@@ -32,6 +34,7 @@ export default function Features() {
       desc:
         "Generate a cleaner, more targeted draft while keeping the role, company, and JD context aligned.",
       icon: ClipboardList,
+      chip: "bg-brand/10 text-brand",
       bullets: [
         "Upload once and iterate on tailored drafts quickly",
         "Keep outputs concise and ATS-aware",
@@ -43,6 +46,7 @@ export default function Features() {
       desc:
         "Track every application, keep follow-ups visible, and turn scattered searching into a system.",
       icon: Briefcase,
+      chip: "bg-success/10 text-success",
       bullets: [
         "Quick-add applications or create them from Job Packet",
         "Sort by company, role, status, and date",
@@ -51,52 +55,29 @@ export default function Features() {
     },
   ];
 
-  // Per-card accent tints to match the pill look (light & dark)
-  const accents = [
-    {
-      icon: "text-primary",
-      lightBg: "bg-primary/10",
-      darkBg: "",
-      ring: "ring-ring",
-    },
-    {
-      icon: "text-sky-600 dark:text-sky-400",
-      lightBg: "bg-sky-50",
-      darkBg: "dark:bg-sky-500/5",
-      ring: "ring-sky-500/20",
-    },
-    {
-      icon: "text-brand",
-      lightBg: "bg-brand/10",
-      darkBg: "",
-      ring: "ring-ring",
-    },
-    {
-      icon: "text-fuchsia-600 dark:text-fuchsia-400",
-      lightBg: "bg-fuchsia-50",
-      darkBg: "dark:bg-fuchsia-500/5",
-      ring: "ring-fuchsia-500/20",
-    },
-  ];
-
   return (
     <section id="features" className="relative bg-background scroll-mt-20">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
-        <motion.h2
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-2xl font-semibold text-foreground dark:text-white"
+          className="mx-auto max-w-2xl text-center"
         >
-          Everything you need to land the offer
-        </motion.h2>
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Features</p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
+            Everything you need to land the offer
+          </h2>
+          <p className="mt-3 text-sm text-foreground/70">
+            One focused workflow — from job description to interview-ready, all in the same place.
+          </p>
+        </motion.div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((it, idx) => {
             const Icon = it.icon;
-            const a = accents[idx % accents.length];
             return (
               <motion.div
                 key={it.title}
@@ -105,38 +86,20 @@ export default function Features() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
                 whileHover={{ y: -4 }}
-                className={[
-                  "rounded-2xl border border-border p-5 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
-                  // base glass
-                  "bg-white/70 dark:bg-neutral-900/40",
-                  // subtle tint overlays
-                  a.lightBg,
-                  a.darkBg,
-                  // equal-height card layout
-                  "flex flex-col",
-                ].join(" ")}
+                className="flex flex-col rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 backdrop-blur transition-shadow hover:shadow-md dark:ring-black/10"
               >
-                <div
-                  className={[
-                    "mb-2 mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2",
-                    a.ring,
-                  ].join(" ")}
-                >
-                  <Icon className={`h-5 w-5 ${a.icon}`} />
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${it.chip}`}>
+                  <Icon className="h-5 w-5" />
                 </div>
 
-                <h3 className="text-center text-base font-medium text-gray-900 dark:text-white">
-                  {it.title}
-                </h3>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{it.title}</h3>
 
-                <p className="mt-2 text-center text-sm leading-relaxed text-gray-700 dark:text-white min-h-[5.25rem]">
-                  {it.desc}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-foreground/70">{it.desc}</p>
 
-                <ul className="mt-4 space-y-1 text-xs text-gray-700 dark:text-white">
+                <ul className="mt-4 space-y-2 text-xs text-foreground/70">
                   {it.bullets.map((t) => (
                     <li key={t} className="flex items-start gap-2">
-                      <span className="mt-[0.5rem] h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
                       <span className="leading-relaxed">{t}</span>
                     </li>
                   ))}
