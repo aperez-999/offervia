@@ -448,10 +448,11 @@ export default function ResumeWizard() {
 
   return (
     <>
-    <div className="space-y-4 sm:space-y-6 w-full max-w-[2000px] mx-auto px-2 md:px-4">
+    <div className="space-y-6">
       {/* Header */}
       <section>
-        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
+        <p className="text-xs font-medium uppercase tracking-wide text-primary">Step 2 · Tailor</p>
+        <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Move through the steps to tailor one resume draft to one role with cleaner, more consistent context.
         </p>
@@ -678,8 +679,8 @@ export default function ResumeWizard() {
               title="Tailor & Review"
               description="Preview your resume on the left and generate an AI-tailored version on the right."
             >
-              {/* Horizontal layout: switches at lg (≥1024px) */}
-              <div className="grid lg:grid-rows-2 gap-8">
+              {/* Preview and AI output side-by-side on wide screens */}
+              <div className="grid items-start gap-8 xl:grid-cols-2">
                 {/* Top: File preview */}
                 <div className="lg:row-span-1">
                   <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

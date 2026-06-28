@@ -223,12 +223,18 @@ export default function ResourcesPage() {
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [savedOnly, setSavedOnly] = useState(false);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
     CATALOG.forEach((r) => r.tags.forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, []);
+
+  const savedCount = useMemo(
+    () => Object.values(saved).filter(Boolean).length,
+    [saved],
+  );
 
   const filtered = useMemo(() => {
     const text = q.trim().toLowerCase();
@@ -241,150 +247,212 @@ export default function ResourcesPage() {
         r.tags.some((t) => t.toLowerCase().includes(text));
       const okTags =
         activeTags.length === 0 || activeTags.every((t) => r.tags.includes(t));
-      return okCat && okText && okTags;
+      const okSaved = !savedOnly || !!saved[r.id];
+      return okCat && okText && okTags && okSaved;
     });
-  }, [q, cat, activeTags]);
+  }, [q, cat, activeTags, savedOnly, saved]);
+
+  const hasFilters = cat !== "All" || activeTags.length > 0 || q.trim() !== "" || savedOnly;
+  const clearFilters = () => {
+    setCat("All");
+    setActiveTags([]);
+    setQ("");
+    setSavedOnly(false);
+  };
 
   return (
     <PageContainer>
-      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <h1 className="text-2xl font-semibold text-foreground">Student Resources</h1>
-        <p className="mt-1 text-sm text-foreground/70">
-          A curated library of learning, practice, and career resources that supports the rest of your Offervia workflow.
-        </p>
-        <p className="mt-2 text-xs text-foreground/60">
-          Use these when you want stronger inputs for scanning, tailoring, interviews, and job search planning.
-        </p>
+      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs font-medium uppercase tracking-wide text-primary">Curated library</p>
+        <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Student Resources</h1>
+            <p className="mt-1 max-w-2xl text-sm text-foreground/70">
+              Learning, practice, and career resources that strengthen your inputs for scanning, tailoring, and interviews.
+            </p>
+          </div>
+          <div className="flex gap-2 text-center">
+            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
+              <div className="text-lg font-semibold text-foreground">{CATALOG.length}</div>
+              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Resources</div>
+            </div>
+            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
+              <div className="text-lg font-semibold text-success">{CATALOG.filter((r) => r.free).length}</div>
+              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Free</div>
+            </div>
+            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
+              <div className="text-lg font-semibold text-foreground">{savedCount}</div>
+              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Saved</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Controls */}
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`rounded-full px-3 py-1 text-sm border transition ${
-                cat === c
-                  ? "border-primary/30 bg-primary/10 text-primary "
-                  : "border-border hover:bg-foreground/[0.06] text-foreground/80"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-        <Input
-          placeholder="Search curated resources..."
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="w-full sm:w-72 bg-background/80 text-foreground border-border"
-        />
-      </section>
-
-      {/* Tag filter */}
-      <section className="flex flex-wrap gap-2">
-        {allTags.map((t) => {
-          const active = activeTags.includes(t);
-          return (
-            <button
-              key={t}
-              onClick={() =>
-                setActiveTags((prev) =>
-                  active ? prev.filter((x) => x !== t) : [...prev, t]
-                )
-              }
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${
-                active
-                  ? "border-primary/30 bg-primary/10 text-primary "
-                  : "border-border text-foreground/80 hover:bg-foreground/[0.06]"
-              }`}
-            >
-              <Tag className="h-3 w-3" />
-              {t}
-            </button>
-          );
-        })}
-      </section>
-
-      {/* Grid */}
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.length === 0 ? (
-          <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 lg:col-span-3">
-            <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
-              <p className="text-sm font-medium text-foreground">No resources match this search yet.</p>
-              <p className="mt-2 max-w-md text-sm text-foreground/70">
-                Try a broader keyword, remove a tag, or switch categories to keep exploring the curated library.
-              </p>
-            </CardContent>
-          </Card>
-        ) : filtered.map((r) => (
-          <Card
-            key={r.id}
-            className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
-          >
-            <CardHeader className="pb-2">
-              <CardTitle className="text-foreground">{r.title}</CardTitle>
-              <CardDescription className="text-foreground/70">
-                {r.category}
-                {r.verified && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-success">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Verified
-                  </span>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col h-full">
-              <div className="flex-1 space-y-3">
-                <p className="text-sm text-foreground/80">{r.desc}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {r.tags.map((t) => (
-                    <Badge
-                      key={t}
-                      className="border border-foreground/10 bg-foreground/[0.06] text-foreground/70"
-                    >
-                      {t}
-                    </Badge>
-                  ))}
-                  {r.free && (
-                    <Badge className="border border-success/30 bg-success/10 text-success">
-                      Free
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between mt-4 pt-2">
-                <Button
-                  asChild
-                  className="bg-primary text-white hover:bg-primary/90"
+      <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
+        {/* Filter rail */}
+        <aside className="space-y-6 xl:sticky xl:top-24">
+          <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="font-medium text-foreground">Filters</div>
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-primary hover:underline"
                 >
-                  <a href={r.url} target="_blank" rel="noopener noreferrer">
-                    Open <ExternalLink className="ml-1 h-4 w-4" />
-                  </a>
-                </Button>
-                <Button
-                  variant="outline"
-                  className={`border-border text-foreground hover:bg-foreground/[0.06] ${
-                    saved[r.id] ? "border-primary/30" : ""
+                  Clear
+                </button>
+              )}
+            </div>
+
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground/50">Category</div>
+            <div className="mb-4 flex flex-col gap-1">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCat(c)}
+                  className={`rounded-lg px-3 py-1.5 text-left text-sm transition ${
+                    cat === c
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/80 hover:bg-foreground/[0.06]"
                   }`}
-                  onClick={() =>
-                    setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))
-                  }
                 >
-                  <Bookmark
-                    className={`h-4 w-4 ${
-                      saved[r.id]
-                        ? "fill-primary text-primary  "
-                        : ""
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/[0.06]">
+              <input
+                type="checkbox"
+                checked={savedOnly}
+                onChange={(e) => setSavedOnly(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              Saved only
+            </label>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="mb-3 text-xs font-medium uppercase tracking-wide text-foreground/50">Tags</div>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map((t) => {
+                const active = activeTags.includes(t);
+                return (
+                  <button
+                    key={t}
+                    onClick={() =>
+                      setActiveTags((prev) =>
+                        active ? prev.filter((x) => x !== t) : [...prev, t]
+                      )
+                    }
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition ${
+                      active
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-border text-foreground/80 hover:bg-foreground/[0.06]"
                     }`}
-                  />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
+                  >
+                    <Tag className="h-3 w-3" />
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </aside>
+
+        {/* Main */}
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Input
+              placeholder="Search curated resources..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="w-full sm:max-w-sm bg-background/80 text-foreground border-border"
+            />
+            <div className="text-xs text-foreground/60">
+              Showing {filtered.length} of {CATALOG.length}
+            </div>
+          </div>
+
+          <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+            {filtered.length === 0 ? (
+              <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 2xl:col-span-3">
+                <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
+                  <p className="text-sm font-medium text-foreground">No resources match this search yet.</p>
+                  <p className="mt-2 max-w-md text-sm text-foreground/70">
+                    Try a broader keyword, remove a tag, or switch categories to keep exploring the curated library.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : filtered.map((r) => (
+              <Card
+                key={r.id}
+                className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 transition-colors hover:border-primary/40 dark:ring-black/10"
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-foreground">{r.title}</CardTitle>
+                  <CardDescription className="text-foreground/70">
+                    {r.category}
+                    {r.verified && (
+                      <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-success">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Verified
+                      </span>
+                    )}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col h-full">
+                  <div className="flex-1 space-y-3">
+                    <p className="text-sm text-foreground/80">{r.desc}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {r.tags.map((t) => (
+                        <Badge
+                          key={t}
+                          className="border border-foreground/10 bg-foreground/[0.06] text-foreground/70"
+                        >
+                          {t}
+                        </Badge>
+                      ))}
+                      {r.free && (
+                        <Badge className="border border-success/30 bg-success/10 text-success">
+                          Free
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-4 pt-2">
+                    <Button
+                      asChild
+                      className="bg-primary text-white hover:bg-primary/90"
+                    >
+                      <a href={r.url} target="_blank" rel="noopener noreferrer">
+                        Open <ExternalLink className="ml-1 h-4 w-4" />
+                      </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className={`border-border text-foreground hover:bg-foreground/[0.06] ${
+                        saved[r.id] ? "border-primary/30" : ""
+                      }`}
+                      onClick={() =>
+                        setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))
+                      }
+                    >
+                      <Bookmark
+                        className={`h-4 w-4 ${
+                          saved[r.id]
+                            ? "fill-primary text-primary  "
+                            : ""
+                        }`}
+                      />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        </div>
+      </div>
     </PageContainer>
   );
 }

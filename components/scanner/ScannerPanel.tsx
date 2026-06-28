@@ -363,16 +363,19 @@ export default function ScannerPanel() {
     <div className="space-y-6">
       {/* Heading */}
       <section>
-        <h1 className="text-2xl font-semibold text-foreground">
+        <p className="text-xs font-medium uppercase tracking-wide text-primary">Step 1 · Analyze</p>
+        <h1 className="mt-1 text-2xl font-semibold text-foreground">
           Job Description Scanner
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           Paste a job description to surface the skills, gaps, and themes you should carry into the rest of your workflow.
         </p>
       </section>
 
+      {/* Input + Results side-by-side on large screens */}
+      <div className="grid items-start gap-6 xl:grid-cols-2">
       {/* Input Card */}
-      <Card className="max-w-3xl rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <CardHeader className="pb-2">
           <CardTitle className="text-foreground">Paste Job Description</CardTitle>
 
@@ -491,7 +494,7 @@ export default function ScannerPanel() {
       </Card>
 
       {/* Results Card */}
-      <Card className="max-w-3xl rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-foreground">Results</CardTitle>
           <div className="flex items-center gap-2">
@@ -603,9 +606,10 @@ export default function ScannerPanel() {
           </AnimatePresence>
         </CardContent>
       </Card>
+      </div>
 
       {/* History */}
-      <div className="max-w-3xl space-y-4">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div className="flex items-center gap-2">
