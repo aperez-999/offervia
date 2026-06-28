@@ -107,6 +107,8 @@ export default function TrackerPage() {
   const [pageSize, setPageSize] = useState<(typeof TRACKER_PAGE_SIZE_OPTIONS)[number]>(10);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<TrackerViewMode>("table");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<Application["status"] | null>(null);
   const [openedFromPacket, setOpenedFromPacket] = useState(false);
 
   const [company, setCompany] = useState("");
@@ -353,6 +355,30 @@ export default function TrackerPage() {
         current.map((entry) => (entry.id === app.id ? { ...entry, status: app.status } : entry))
       );
       toast({ title: "Failed to update status", variant: "destructive" });
+    }
+
+    setUpdatingId(null);
+  }
+
+  async function moveToStatus(app: Application, next: Application["status"]) {
+    if (app.status === next) return;
+    const previous = app.status;
+    setUpdatingId(app.id);
+    setApps((current) =>
+      current.map((entry) => (entry.id === app.id ? { ...entry, status: next } : entry))
+    );
+
+    const res = await patchJson<TrackerItemResponse>(`/api/tracker?id=${encodeURIComponent(app.id)}`, {
+      status: next,
+    });
+
+    if (!res.ok) {
+      setApps((current) =>
+        current.map((entry) => (entry.id === app.id ? { ...entry, status: previous } : entry))
+      );
+      toast({ title: "Failed to update status", variant: "destructive" });
+    } else {
+      toast({ title: `Moved to ${next}` });
     }
 
     setUpdatingId(null);
@@ -732,7 +758,28 @@ export default function TrackerPage() {
             return (
               <div
                 key={column.status}
-                className="flex flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dragOverStatus !== column.status) setDragOverStatus(column.status);
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    setDragOverStatus((current) => (current === column.status ? null : current));
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = e.dataTransfer.getData("text/plain") || draggingId;
+                  const dragged = apps.find((a) => a.id === id);
+                  setDragOverStatus(null);
+                  setDraggingId(null);
+                  if (dragged) void moveToStatus(dragged, column.status);
+                }}
+                className={`flex flex-col rounded-2xl border bg-card/60 shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10 ${
+                  dragOverStatus === column.status
+                    ? "border-primary/60 bg-primary/[0.04]"
+                    : "border-border"
+                }`}
               >
                 <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -762,7 +809,19 @@ export default function TrackerPage() {
                     items.map((app) => (
                       <div
                         key={app.id}
-                        className="group rounded-lg border border-border bg-background/60 p-3 transition-colors hover:border-primary/30 hover:bg-foreground/[0.02]"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", app.id);
+                          e.dataTransfer.effectAllowed = "move";
+                          setDraggingId(app.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null);
+                          setDragOverStatus(null);
+                        }}
+                        className={`group cursor-grab rounded-lg border border-border bg-background/60 p-3 transition-colors hover:border-primary/30 hover:bg-foreground/[0.02] active:cursor-grabbing ${
+                          draggingId === app.id ? "opacity-50" : ""
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
@@ -773,7 +832,7 @@ export default function TrackerPage() {
                           </div>
                           <button
                             onClick={() => void cycleStatus(app)}
-                            title="Click to advance status"
+                            title="Click to advance status, or drag the card to any stage"
                             className="shrink-0 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             <StatusBadge value={app.status} busy={updatingId === app.id} />

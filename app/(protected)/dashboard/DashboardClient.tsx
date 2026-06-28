@@ -85,6 +85,11 @@ const PerformanceInsights = dynamic(
   { ssr: false }
 );
 
+const ApplicationPipeline = dynamic(
+  () => import("@/components/dashboard/ApplicationPipeline"),
+  { ssr: false }
+);
+
 export default function DashboardClient({
   plan = "free",
   usage,
@@ -521,6 +526,8 @@ export default function DashboardClient({
         <Kpi title="Interviewing" value={interviewing} tone="blue" />
         <Kpi title="Offers" value={offers} tone="emerald" />
       </section>
+
+      {!loading && total > 0 && <ApplicationPipeline apps={apps} />}
 
       {/* Onboarding */}
       {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
