@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { switchTheme } from "@/lib/theme-transition";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
   DropdownMenu,
@@ -159,7 +160,9 @@ export default function UserMenu({
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={currentThemeValue}
-          onValueChange={(val) => setTheme(val as "light" | "dark" | "system")}
+          onValueChange={(val) =>
+            switchTheme(() => setTheme(val as "light" | "dark" | "system"))
+          }
         >
           <DropdownMenuRadioItem value="light" className="cursor-pointer">Light</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark" className="cursor-pointer">Dark</DropdownMenuRadioItem>

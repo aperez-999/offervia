@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/brand/BrandLogo";
+import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -68,7 +69,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 </Link>
                 <button
                   aria-label="Toggle theme"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  onClick={(e) =>
+                    switchTheme(
+                      () => setTheme((resolvedTheme ?? theme) === "dark" ? "light" : "dark"),
+                      originFromEvent(e)
+                    )
+                  }
                   className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
                 >
                   {!mounted ? null : resolvedTheme === "dark" ? (

@@ -27,7 +27,10 @@ export default function BrandLogo({
   }, []);
 
   // Default to the dark wordmark until the theme resolves to avoid a flash.
+  // The swap is instant; smoothness during theme switches comes from the
+  // View Transitions reveal (see lib/theme-transition.ts).
   const isLight = mounted && resolvedTheme === "light";
+  const src = isLight ? "/offervia-logo-light.png" : "/offervia-logo-dark.png";
 
   return (
     <span
@@ -37,28 +40,13 @@ export default function BrandLogo({
       role="img"
     >
       <Image
-        src="/offervia-logo-dark.png"
+        src={src}
         alt=""
         width={width}
         height={height}
         priority={priority}
         aria-hidden
-        className={cn(
-          "absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ease-in-out motion-reduce:transition-none",
-          isLight ? "opacity-0" : "opacity-100",
-        )}
-      />
-      <Image
-        src="/offervia-logo-light.png"
-        alt=""
-        width={width}
-        height={height}
-        priority={priority}
-        aria-hidden
-        className={cn(
-          "absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ease-in-out motion-reduce:transition-none",
-          isLight ? "opacity-100" : "opacity-0",
-        )}
+        className="h-full w-full object-contain"
       />
     </span>
   );

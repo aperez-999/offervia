@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster, ToastProvider } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
-import ThemeTransition from "@/components/theme/ThemeTransition";
 import { Analytics } from "@vercel/analytics/next";
 import {
   SITE_DEFAULT_TITLE,
@@ -70,7 +69,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ThemeTransition />
           <ToastProvider>
             {children}
             <Toaster />

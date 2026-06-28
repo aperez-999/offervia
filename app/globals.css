@@ -238,17 +238,19 @@
   }
 }
 
-/* Smooth global color cross-fade applied only while the theme is switching.
-   Toggled on <html> by <ThemeTransition> so light <-> dark glides instead of
-   snapping, without slowing down normal hover/interaction transitions. */
-.theme-anim,
-.theme-anim *,
-.theme-anim *::before,
-.theme-anim *::after {
-  transition-property: background-color, border-color, color, fill, stroke,
-    box-shadow, outline-color, text-decoration-color, opacity !important;
-  transition-duration: 500ms !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* View Transitions: clean circular reveal on theme switch.
+   The expanding clip is animated in lib/theme-transition.ts. Disabling the
+   default crossfade keeps the wipe sharp (no ghosting of the wordmark). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2147483646;
 }
 
 /* Respect users who request reduced motion (a11y) */

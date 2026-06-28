@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { switchTheme } from "@/lib/theme-transition";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
   CommandDialog,
@@ -141,17 +142,17 @@ export default function GlobalCommandMenu() {
 
           {/* Theme Switching */}
           <CommandGroup heading="Theme">
-            <CommandItem onSelect={() => setTheme("light")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("light"))}>
               <Sun className="mr-2 h-4 w-4" />
               Light
               {resolvedTheme === "light" && <CommandShortcut>✓</CommandShortcut>}
             </CommandItem>
-            <CommandItem onSelect={() => setTheme("dark")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("dark"))}>
               <Moon className="mr-2 h-4 w-4" />
               Dark
               {resolvedTheme === "dark" && <CommandShortcut>✓</CommandShortcut>}
             </CommandItem>
-            <CommandItem onSelect={() => setTheme("system")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("system"))}>
               <Monitor className="mr-2 h-4 w-4" />
               System
               {resolvedTheme === "system" && <CommandShortcut>✓</CommandShortcut>}

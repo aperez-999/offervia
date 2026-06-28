@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrandLogo from "@/components/brand/BrandLogo";
+import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
 export default function LayoutPublic({ children }: { children: React.ReactNode }) {
   // Smooth in-page scroll
@@ -50,9 +51,10 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
   useEffect(() => setMounted(true), []);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const toggleTheme = () => {
+  const toggleTheme = (e?: React.MouseEvent) => {
     if (!mounted) return;
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    switchTheme(() => setTheme(next), originFromEvent(e));
   };
 
   return (
@@ -75,10 +77,10 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             aria-label="Offervia — Home"
           >
             <BrandLogo
-              width={190}
-              height={48}
+              width={132}
+              height={32}
               priority
-              className="h-10 transition-transform group-hover:scale-[1.02] sm:h-11"
+              className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8"
             />
           </Link>
 
@@ -165,7 +167,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             <button
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
-              onClick={toggleTheme}
+              onClick={(e) => toggleTheme(e)}
               className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               {mounted && (

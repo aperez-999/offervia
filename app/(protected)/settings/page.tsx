@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 import {
   UserRound,
   Palette,
@@ -411,7 +412,7 @@ export default function SettingsPage() {
                     <button
                       key={value}
                       type="button"
-                      onClick={() => setTheme(value)}
+                      onClick={(e) => switchTheme(() => setTheme(value), originFromEvent(e))}
                       className={`flex items-center gap-2 rounded-xl border p-3 text-sm transition-colors ${
                         active
                           ? "border-primary/40 bg-primary/10 text-foreground"
