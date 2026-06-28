@@ -88,11 +88,12 @@ export default function GlobalCommandMenu() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 text-sm hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+        className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
         aria-label="Open command palette"
       >
         <Search className="h-4 w-4" />
-        <span className="hidden sm:inline text-xs opacity-80">⌘K</span>
+        <span className="hidden sm:inline text-xs">Search</span>
+        <kbd className="hidden sm:inline rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
