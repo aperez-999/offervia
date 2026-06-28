@@ -238,6 +238,19 @@
   }
 }
 
+/* Smooth global color cross-fade applied only while the theme is switching.
+   Toggled on <html> by <ThemeTransition> so light <-> dark glides instead of
+   snapping, without slowing down normal hover/interaction transitions. */
+.theme-anim,
+.theme-anim *,
+.theme-anim *::before,
+.theme-anim *::after {
+  transition-property: background-color, border-color, color, fill, stroke,
+    box-shadow, outline-color, text-decoration-color !important;
+  transition-duration: 480ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 /* Respect users who request reduced motion (a11y) */
 @media (prefers-reduced-motion: reduce) {
   *,
