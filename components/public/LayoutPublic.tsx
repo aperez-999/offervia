@@ -156,7 +156,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
 
             <Link
               href="/signup"
-              className="hidden sm:inline-flex rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="bg-brand-gradient hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
               Sign Up
             </Link>
@@ -245,7 +245,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                     </Link>
                     <Link
                       href="/signup"
-                      className="rounded-md bg-indigo-600 px-3 py-2 text-center font-medium text-white hover:bg-indigo-500"
+                      className="bg-brand-gradient rounded-md px-3 py-2 text-center font-medium text-white hover:brightness-110"
                       onClick={() => setMobileOpen(false)}
                     >
                       Sign Up

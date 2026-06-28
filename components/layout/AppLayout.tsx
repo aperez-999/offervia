@@ -108,8 +108,7 @@ export default function AppLayout({
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Subtle app backdrop */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200/40 via-indigo-100/20 to-transparent blur-3xl dark:hidden" />
-        <div className="hidden dark:block absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-900/25 via-indigo-800/15 to-transparent blur-3xl" />
+        <div className="brand-glow absolute inset-x-0 -top-24 h-72" />
       </div>
 
       {/* Header */}
@@ -168,10 +167,10 @@ export default function AppLayout({
                       aria-current={active ? "page" : undefined}
                       className={[
                         "flex items-center gap-2 rounded-md px-2 py-1.5 border transition-colors",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                         active
-                          ? "border-indigo-500/20 bg-indigo-500/10 font-medium"
-                          : "border-transparent hover:bg-foreground/[0.04]",
+                          ? "border-primary/20 bg-primary/10 text-primary font-medium"
+                          : "border-transparent hover:bg-accent hover:text-accent-foreground",
                       ].join(" ")}
                     >
                       <Icon className="h-5 w-5 stroke-[1.5]" />

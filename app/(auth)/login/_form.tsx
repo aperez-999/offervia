@@ -66,7 +66,7 @@ export default function LoginForm() {
           <Mail className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <input
             type="email"
-            className="w-full rounded-md border border-border bg-background/80 p-2 pl-8 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+            className="w-full rounded-md border border-border bg-background/80 p-2 pl-8 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             placeholder="you@example.com"
             {...register("email")}
           />
@@ -82,7 +82,7 @@ export default function LoginForm() {
           <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <input
             type={showPw ? "text" : "password"}
-            className="w-full rounded-md border border-border bg-background/80 p-2 pl-8 pr-16 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+            className="w-full rounded-md border border-border bg-background/80 p-2 pl-8 pr-16 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             placeholder="Enter your password"
             {...register("password")}
           />
@@ -109,7 +109,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 p-2 text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-gradient p-2 text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

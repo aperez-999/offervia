@@ -13,14 +13,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => setMounted(true), []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* full-screen subtle animated gradient backdrop */}
+      {/* full-screen subtle animated gradient backdrop (token-driven) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200/50 via-indigo-100/20 to-transparent blur-3xl dark:hidden" />
-        <div className="absolute bottom-0 right-0 h-56 w-56 translate-y-1/3 rounded-full bg-indigo-100/40 blur-2xl dark:hidden" />
-        <div className="absolute top-28 right-1/3 h-40 w-40 rounded-full bg-amber-100/30 blur-2xl dark:hidden" />
-        <div className="hidden dark:block absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-900/25 via-indigo-800/10 to-transparent blur-3xl" />
-        <div className="hidden dark:block absolute bottom-0 right-0 h-56 w-56 translate-y-1/3 rounded-full bg-indigo-950/20 blur-2xl" />
-        <div className="hidden dark:block absolute top-24 right-1/3 h-40 w-40 rounded-full bg-amber-500/10 blur-2xl" />
+        <div className="brand-glow absolute inset-x-0 -top-24 h-96" />
+        <div className="absolute bottom-0 right-0 h-56 w-56 translate-y-1/3 rounded-full bg-primary/10 blur-2xl" />
+        <div className="absolute top-28 right-1/3 h-40 w-40 rounded-full bg-[var(--chart-2)]/10 blur-2xl" />
         {/* faint noise / texture */}
         <div
           className="absolute inset-0 opacity-[0.035] dark:opacity-[0.03]"
