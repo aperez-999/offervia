@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
+// Intrinsic aspect ratio of the trimmed, transparent wordmark assets.
+const ASPECT = 1609 / 391;
+
 export default function BrandLogo({
-  width = 190,
-  height = 48,
+  width = 176,
+  height = 44,
   priority = false,
   className,
 }: {
@@ -23,16 +26,40 @@ export default function BrandLogo({
     setMounted(true);
   }, []);
 
-  const src = mounted && resolvedTheme === "light" ? "/offervia-logo-light.png" : "/offervia-logo-dark.png";
+  // Default to the dark wordmark until the theme resolves to avoid a flash.
+  const isLight = mounted && resolvedTheme === "light";
 
   return (
-    <Image
-      src={src}
-      alt="Offervia"
-      width={width}
-      height={height}
-      priority={priority}
-      className={cn("w-auto", className)}
-    />
+    <span
+      className={cn("relative inline-block w-auto", className)}
+      style={{ aspectRatio: ASPECT }}
+      aria-label="Offervia"
+      role="img"
+    >
+      <Image
+        src="/offervia-logo-dark.png"
+        alt=""
+        width={width}
+        height={height}
+        priority={priority}
+        aria-hidden
+        className={cn(
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          isLight ? "opacity-0" : "opacity-100",
+        )}
+      />
+      <Image
+        src="/offervia-logo-light.png"
+        alt=""
+        width={width}
+        height={height}
+        priority={priority}
+        aria-hidden
+        className={cn(
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          isLight ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </span>
   );
 }
