@@ -8,13 +8,14 @@ type ViewTransitionDocument = Document & {
 };
 
 /**
- * Apply a theme change with a smooth circular reveal using the View
- * Transitions API. The new theme wipes in from the toggle's position, so
- * light <-> dark switches glide cleanly instead of crossfading (which ghosts
- * differently-colored content like the wordmark). Falls back to an instant
- * apply when the API is unavailable or the user prefers reduced motion.
+ * Apply a theme change with a smooth full-screen dissolve using the View
+ * Transitions API. The next theme fades in over a frozen snapshot of the
+ * previous one, so there is no moving clip edge to flicker or tear — just a
+ * clean crossfade. Falls back to an instant apply when the API is unavailable
+ * or the user prefers reduced motion.
  */
 export function switchTheme(apply: () => void, origin?: Origin | null): void {
+  void origin; // accepted for API compatibility; dissolve needs no origin
   if (typeof document === "undefined") {
     apply();
     return;
@@ -34,40 +35,18 @@ export function switchTheme(apply: () => void, origin?: Origin | null): void {
     apply();
   });
 
-  const x = origin?.x ?? window.innerWidth - 48;
-  const y = origin?.y ?? 32;
-  const endRadius = Math.hypot(
-    Math.max(x, window.innerWidth - x),
-    Math.max(y, window.innerHeight - y)
-  );
-
   transition.ready
     .then(() => {
       const root = document.documentElement;
-      const duration = 520;
-      const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
-      // New theme wipes in from the toggle point...
+      // The new theme sits on top and fades in; the old snapshot stays fully
+      // opaque underneath, so the result is a seamless dissolve with no hard
+      // black/white seam and no clip-path glitch.
       root.animate(
+        { opacity: [0, 1] },
         {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration,
-          easing,
+          duration: 480,
+          easing: "ease-in-out",
           pseudoElement: "::view-transition-new(root)",
-        }
-      );
-      // ...while the old theme dissolves out, so the moving edge softens
-      // instead of showing a hard static black/white split.
-      root.animate(
-        { opacity: [1, 0] },
-        {
-          duration,
-          easing: "ease-out",
-          pseudoElement: "::view-transition-old(root)",
         }
       );
     })

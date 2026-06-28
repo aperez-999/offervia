@@ -238,9 +238,10 @@
   }
 }
 
-/* View Transitions: clean circular reveal on theme switch.
-   The expanding clip is animated in lib/theme-transition.ts. Disabling the
-   default crossfade keeps the wipe sharp (no ghosting of the wordmark). */
+/* View Transitions: smooth dissolve on theme switch.
+   The new theme fades in over a frozen snapshot of the old one (driven in
+   lib/theme-transition.ts). Default crossfade is disabled so we control the
+   fade ourselves; stacking new above old gives a seamless dissolve. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

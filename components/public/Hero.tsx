@@ -73,23 +73,45 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-5xl rounded-3xl border border-border glass p-4 shadow-2xl shadow-primary/10 ring-1 ring-white/5 dark:ring-black/10 sm:p-5 dark:shadow-black/40">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="text-sm font-medium text-foreground">Product demo</div>
+          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-5xl">
+            <div className="group relative overflow-hidden rounded-3xl border border-border glass shadow-2xl shadow-primary/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40">
+              {/* Soft brand glow framing the window */}
+              <div className="pointer-events-none absolute -inset-px -z-10 bg-gradient-to-br from-primary/15 via-transparent to-[var(--chart-2)]/15" />
+
+              {/* Browser-style chrome */}
+              <div className="flex items-center gap-2 border-b border-border/70 px-4 py-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-full bg-destructive/70" />
+                  <span className="h-3 w-3 rounded-full bg-warning/70" />
+                  <span className="h-3 w-3 rounded-full bg-success/70" />
+                </div>
+                <div className="mx-auto flex items-center gap-1.5 rounded-md bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  offervia.app/job-packet
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                  </span>
+                  Live demo
+                </span>
+              </div>
+
+              <video
+                ref={videoRef}
+                className="aspect-[16/9] w-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                aria-label="Offervia product demo: scan a job description, tailor a resume, and add it to your tracker"
+              >
+                <source src="/demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
-            <video
-              ref={videoRef}
-              className="aspect-[16/9] w-full rounded-2xl border border-dashed border-border object-cover"
-              controls
-              playsInline
-              muted
-            >
-              <source src="/demo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            <p className="mt-3 text-xs text-foreground/60">
-              Watch the Job Packet workflow: scan a JD, tailor a resume, then add to your tracker.
-            </p>
           </div>
         </motion.div>
       </div>
