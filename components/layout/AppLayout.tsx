@@ -114,7 +114,7 @@ export default function AppLayout({
       {/* Header */}
       <header className="sticky top-0 z-40">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
+        <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 pt-3">
           <div className="pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur">
             <div className="flex h-12 items-center justify-between px-3 sm:px-4">
           <div className="flex items-center gap-2">
@@ -147,10 +147,10 @@ export default function AppLayout({
       </header>
 
       {/* Main content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex-1 w-full">
-        <div className="flex gap-6 py-6">
+      <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 flex-1 w-full">
+        <div className="flex gap-8 py-6 sm:py-8">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-56 shrink-0">
+          <aside className="hidden lg:block w-60 shrink-0">
             <div className="sticky top-20 rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
                 Navigation

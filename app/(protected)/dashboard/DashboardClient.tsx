@@ -323,7 +323,7 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Upgrade success / cancel banner */}
       {upgrade === "success" && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-success">
@@ -404,7 +404,7 @@ export default function DashboardClient({
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
         </div>
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
@@ -520,7 +520,7 @@ export default function DashboardClient({
         </div>
       </section>
 
-      <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Kpi title="Applications (total)" value={total} tone="slate" />
         <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
         <Kpi title="Interviewing" value={interviewing} tone="blue" />
@@ -581,15 +581,18 @@ export default function DashboardClient({
         </section>
       )}
 
-      {/* Two-up: Recent Applications + Recent Chats */}
-      <section className="space-y-3">
+      {/* Activity (main) + secondary rail */}
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
+          {/* Two-up: Recent Applications + Recent Chats */}
+          <section className="space-y-3">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
             Recent activity
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
         </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 2xl:grid-cols-2">
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -730,7 +733,9 @@ export default function DashboardClient({
         </Card>
         </div>
       </section>
+        </div>
 
+        <div className="space-y-6">
       {/* Quick actions */}
       <section>
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
@@ -741,7 +746,7 @@ export default function DashboardClient({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <Link href="/job-packet" className="block">
                 <ActionCard title="Run Job Packet">
                   Move from JD to tailored draft to tracked application in one guided flow.
@@ -766,6 +771,8 @@ export default function DashboardClient({
           </CardContent>
         </Card>
       </section>
+        </div>
+      </div>
 
       {/* Pro: Performance Insights */}
       {plan === "pro" && analytics ? <PerformanceInsights analytics={analytics} /> : null}
