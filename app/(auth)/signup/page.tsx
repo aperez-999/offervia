@@ -32,7 +32,7 @@ export default function SignupPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-5 text-center">
+      <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
         <h1 className="text-xl font-semibold text-foreground">Create your Offervia account</h1>
         <p className="mt-1 text-sm text-foreground/70">Start on the free tier — upgrade anytime.</p>
       </div>
@@ -46,7 +46,7 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with Google"
           onClick={() => startOAuth("google")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign up with Google"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-4 w-4" aria-hidden="true">
@@ -62,7 +62,7 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with LinkedIn"
           onClick={() => startOAuth("linkedin_oidc")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign up with LinkedIn"
         >
           <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />

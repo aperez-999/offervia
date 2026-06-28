@@ -42,10 +42,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 aria-label="Offervia — Home"
               >
                 <BrandLogo
-                  width={190}
-                  height={48}
+                  width={132}
+                  height={33}
                   priority
-                  className="h-10 transition-transform group-hover:scale-[1.02] sm:h-11"
+                  className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8"
                 />
               </Link>
               <nav className="hidden items-center gap-2 sm:gap-3 sm:flex">

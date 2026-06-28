@@ -59,7 +59,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-5 text-center">
+      <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
         <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
         <p className="mt-1 text-sm text-foreground/70">Let’s help you land your next offer.</p>
       </div>
@@ -73,7 +73,7 @@ export default function LoginPage() {
           type="button"
           aria-label="Sign in with Google"
           onClick={() => startOAuth("google")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign in with Google"
         >
           {/* Google multicolor icon */}
@@ -90,7 +90,7 @@ export default function LoginPage() {
           type="button"
           aria-label="Sign in with LinkedIn"
           onClick={() => startOAuth("linkedin_oidc")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign in with LinkedIn"
         >
           <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />
