@@ -17,6 +17,7 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  CheckCircle2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
@@ -460,9 +461,9 @@ export default function ResumeWizard() {
 
       <Progress value={progress} className="h-2" />
 
-      {/* Responsive two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 lg:gap-8">
-      <WizardSidebar steps={[...resumeWizardSteps]} current={step} />
+      {/* Responsive layout: wizard rail for input steps, full-width workspace on review */}
+      <div className={`grid grid-cols-1 gap-4 lg:gap-8 ${step === 4 ? "" : "lg:grid-cols-[16rem_minmax(0,1fr)]"}`}>
+      {step !== 4 && <WizardSidebar steps={[...resumeWizardSteps]} current={step} />}
 
         <div className="space-y-4 sm:space-y-6 min-w-0">
           <AnimatePresence mode="wait" initial={false}>
@@ -742,7 +743,7 @@ export default function ResumeWizard() {
                     </div>
                   </div>
 
-                  <div className="h-[40vh] overflow-hidden rounded-xl border border-border bg-background/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+                  <div className="h-[68vh] overflow-hidden rounded-xl border border-border bg-background/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
                     {resumeFile ? (
                       isPdf && previewUrl ? (
                         <div className="h-full w-full overflow-auto">
@@ -831,13 +832,27 @@ export default function ResumeWizard() {
                   {aiText ? (
                     <Textarea
                       spellCheck
-                      className="h-[40vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="h-[68vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       value={aiText}
                       onChange={(e) => setAiText(e.target.value)}
                     />
                   ) : (
-                    <div className="h-[40vh] rounded-xl border border-border bg-card/60 p-3 text-sm text-foreground shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-                      <p className="text-foreground/60">No tailored draft yet. Generate one when your resume and job description are ready.</p>
+                    <div className="flex h-[68vh] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/40 p-6 text-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <Sparkles className="h-6 w-6 text-primary" />
+                      </div>
+                      <p className="mt-4 text-sm font-medium text-foreground">No tailored draft yet</p>
+                      <p className="mt-1 max-w-xs text-sm text-foreground/60">
+                        Generate an AI-tailored version once your resume and job description are ready.
+                      </p>
+                      <div className="mt-4 flex flex-col gap-1.5 text-xs">
+                        <span className={`inline-flex items-center gap-1.5 ${resumeFile ? "text-success" : "text-foreground/50"}`}>
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Resume uploaded
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 ${jd.trim().length >= 20 ? "text-success" : "text-foreground/50"}`}>
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Job description added
+                        </span>
+                      </div>
                     </div>
                   )}
 
