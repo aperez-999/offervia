@@ -16,7 +16,7 @@ const Chat = dynamic(() => import("./Chat"), {
 
 export default function CoachHub() {
   return (
-    <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+    <div className="space-y-8 py-6 sm:py-8">
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Coach</h1>
         <p className="mt-1 text-sm text-foreground/70">

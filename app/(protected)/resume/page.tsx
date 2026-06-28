@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPageMetadata } from "@/lib/metadata";
+import { PageContainer } from "@/components/layout/Page";
 
 const ResumeWizard = dynamic(() => import("@/components/resume/ResumeWizard"), {
   loading: () => (
@@ -26,8 +27,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function ResumePage() {
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <PageContainer>
       <ResumeWizard />
-    </div>
+    </PageContainer>
   );
 }

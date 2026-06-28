@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPageMetadata } from "@/lib/metadata";
+import { PageContainer } from "@/components/layout/Page";
 
 const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), {
   loading: () => (
@@ -25,8 +26,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function ScannerPage() {
   return (
-    <div className="p-4 sm:p-6">
+    <PageContainer>
       <ScannerPanel />
-    </div>
+    </PageContainer>
   );
 }

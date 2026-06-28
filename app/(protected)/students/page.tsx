@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, ExternalLink, ShieldCheck } from "lucide-react";
-import { motion } from "framer-motion";
+import { PageContainer } from "@/components/layout/Page";
 
 type Deal = {
   id: string;
@@ -204,12 +204,7 @@ export default function StudentsPage() {
   }, [q, cat]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 sm:space-y-6 p-4 sm:p-6"
-    >
+    <PageContainer>
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
           <GraduationCap className="h-5 w-5 text-primary " />
@@ -251,7 +246,7 @@ export default function StudentsPage() {
       </section>
 
       {/* Grid */}
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtered.length === 0 ? (
           <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 lg:col-span-3">
             <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
@@ -315,6 +310,6 @@ export default function StudentsPage() {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </PageContainer>
   );
 }

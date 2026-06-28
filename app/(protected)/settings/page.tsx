@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { PageContainer } from "@/components/layout/Page";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
 type UserPrefsRow = {
@@ -226,7 +227,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <PageContainer>
         {/* Header */}
         <section>
           <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
@@ -423,6 +424,6 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-    </div>
+    </PageContainer>
   );
 }

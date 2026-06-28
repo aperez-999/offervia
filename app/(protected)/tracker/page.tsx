@@ -499,7 +499,7 @@ export default function TrackerPage() {
   }
 
   return (
-    <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
+    <div className="space-y-8 py-6 sm:py-8">
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>

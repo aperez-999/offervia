@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { PageContainer } from "@/components/layout/Page";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const MAX_SIZE_MB = 4;
@@ -162,7 +163,7 @@ export default function ProfilePage() {
   }
 
   return (
-      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <PageContainer>
         <section>
           <h1 className="text-2xl font-semibold text-foreground">Profile</h1>
           <p className="mt-1 text-sm text-foreground/70">Manage your avatar and public details.</p>
@@ -243,6 +244,6 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </PageContainer>
   );
 }
