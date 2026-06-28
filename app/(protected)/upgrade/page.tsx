@@ -34,7 +34,7 @@ export default async function UpgradePage() {
   const plan = subscription.plan;
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="py-6 sm:py-8">
       <UpgradeClient plan={plan} />
     </div>
   );

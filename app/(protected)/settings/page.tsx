@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
   Card,
@@ -20,8 +21,21 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import {
+  UserRound,
+  Palette,
+  SlidersHorizontal,
+  CreditCard,
+  Database,
+  Sun,
+  Moon,
+  Monitor,
+  Crown,
+  Check,
+} from "lucide-react";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
 type UserPrefsRow = {
@@ -31,9 +45,18 @@ type UserPrefsRow = {
   email_digest: boolean | null;
 };
 
+const SECTIONS = [
+  { id: "profile", label: "Profile", icon: UserRound },
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
+  { id: "plan", label: "Plan & billing", icon: CreditCard },
+  { id: "data", label: "Data & privacy", icon: Database },
+] as const;
+
 export default function SettingsPage() {
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // profile
   const [email, setEmail] = useState("");
@@ -44,6 +67,11 @@ export default function SettingsPage() {
   const [weeklyGoal, setWeeklyGoal] = useState<number>(5);
   const [defaultMode, setDefaultMode] = useState<CoachMode>("interview");
   const [emailDigest, setEmailDigest] = useState<boolean>(false);
+
+  // plan
+  const [plan, setPlan] = useState<"free" | "pro">("free");
+  const [periodEnd, setPeriodEnd] = useState<string | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   // ui state
   const [loading, setLoading] = useState(true);
@@ -83,6 +111,17 @@ export default function SettingsPage() {
           if (prefs.default_mode) setDefaultMode(prefs.default_mode as CoachMode);
           if (typeof prefs.weekly_goal === "number") setWeeklyGoal(prefs.weekly_goal);
           if (typeof prefs.email_digest === "boolean") setEmailDigest(prefs.email_digest);
+        }
+
+        // Load subscription/plan (own row via RLS)
+        const { data: sub } = await supabase
+          .from("subscriptions")
+          .select("plan, current_period_end")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (sub) {
+          setPlan((sub.plan as "free" | "pro") ?? "free");
+          setPeriodEnd((sub.current_period_end as string | null) ?? null);
         }
       } catch {
         toast({ title: "Failed to load settings", variant: "destructive" });
@@ -134,6 +173,24 @@ export default function SettingsPage() {
       toast({ title: "Sign out failed", variant: "destructive" });
     } finally {
       setWorking(false);
+    }
+  }
+
+  async function openBillingPortal() {
+    if (billingLoading) return;
+    setBillingLoading(true);
+    try {
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+      toast({ title: "Billing portal unavailable. Try again.", variant: "destructive" });
+    } catch {
+      toast({ title: "Billing portal unavailable. Try again.", variant: "destructive" });
+    } finally {
+      setBillingLoading(false);
     }
   }
 
@@ -228,202 +285,328 @@ export default function SettingsPage() {
 
   return (
     <PageContainer>
-        {/* Header */}
-        <section>
-          <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs font-medium uppercase tracking-wide text-primary">Account</p>
+        <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
             <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
             <p className="mt-1 text-sm text-foreground/70">
-              Personalize your experience and manage your data.
+              Personalize your experience, manage your plan, and control your data.
             </p>
           </div>
-        </section>
+          <Badge
+            className={
+              plan === "pro"
+                ? "border border-primary/30 bg-primary/10 text-primary"
+                : "border border-border bg-background/60 text-foreground/70"
+            }
+          >
+            {plan === "pro" ? (
+              <span className="inline-flex items-center gap-1"><Crown className="h-3 w-3" /> Pro plan</span>
+            ) : (
+              "Free plan"
+            )}
+          </Badge>
+        </div>
+      </div>
 
-        {/* Profile */}
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-foreground">Profile</CardTitle>
-            <CardDescription className="text-foreground/70">
-              Basic account information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid gap-1">
-              <label className="text-sm text-foreground/80">Display name</label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-background/80 text-foreground border-border"
-                placeholder="Your name"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="grid gap-1">
-              <label className="text-sm text-foreground/80">Email</label>
-              <Input
-                value={email}
-                disabled
-                className="bg-background/60 text-foreground/70 border-border"
-              />
-              {emailVerified === false && (
-                <p className="text-xs text-foreground/60">
-                  Your email isn’t verified yet. Check your inbox for a confirmation link.
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Button
-                variant="outline"
-                className="border-border text-foreground hover:bg-foreground/[0.06]"
-                asChild
+      <div className="grid items-start gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
+        {/* Section nav */}
+        <aside className="xl:sticky xl:top-24">
+          <nav className="rounded-2xl border border-border bg-card/60 p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            {SECTIONS.map(({ id, label, icon: Icon }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
               >
-                <a href="/profile">Edit avatar</a>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={signOut}
-                disabled={working}
-                className="border-border text-foreground hover:bg-foreground/[0.06]"
-              >
-                Sign out
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <Icon className="h-4 w-4 text-foreground/60" />
+                {label}
+              </a>
+            ))}
+          </nav>
+        </aside>
 
-        {/* Preferences */}
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-foreground">Preferences</CardTitle>
-            <CardDescription className="text-foreground/70">
-              Customize your Offervia experience
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-1">
-              <label className="text-sm text-foreground/80">Default coach mode</label>
-              <Select
-                value={defaultMode}
-                onValueChange={(v) => setDefaultMode(v as CoachMode)}
-                disabled={loading}
-              >
-                <SelectTrigger className="border-border">
-                  <SelectValue placeholder="Select a mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="interview">Interview Coach</SelectItem>
-                  <SelectItem value="resume">Resume Feedback</SelectItem>
-                  <SelectItem value="cover_letter">Cover Letter Help</SelectItem>
-                  <SelectItem value="career">Career Advice</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-1">
-              <label className="text-sm text-foreground/80">Weekly applications goal</label>
-              <Input
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={50}
-                value={Number.isFinite(weeklyGoal) ? weeklyGoal : 0}
-                onChange={(e) => setWeeklyGoal(Number(e.target.value || 0))}
-                className="border-border bg-background/80 text-foreground"
-                disabled={loading}
-              />
-              <div className="text-xs text-foreground/60">
-                Used on the dashboard for progress nudges.
+        {/* Sections */}
+        <div className="space-y-6">
+          {/* Profile */}
+          <Card id="profile" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Profile</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Basic account information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1">
+                  <label className="text-sm text-foreground/80">Display name</label>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-background/80 text-foreground border-border"
+                    placeholder="Your name"
+                    disabled={loading}
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-foreground/80">Email</label>
+                  <Input
+                    value={email}
+                    disabled
+                    className="bg-background/60 text-foreground/70 border-border"
+                  />
+                  {emailVerified === false && (
+                    <p className="text-xs text-foreground/60">
+                      Your email isn’t verified yet. Check your inbox for a confirmation link.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="grid gap-2 sm:col-span-2">
-              <label className="text-sm text-foreground/80">Weekly email digest</label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="digest"
-                  type="checkbox"
-                  checked={emailDigest}
-                  onChange={(e) => setEmailDigest(e.target.checked)}
-                  className="h-4 w-4 rounded border-border bg-background accent-primary"
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Button
+                  onClick={onSave}
+                  disabled={saving || loading}
+                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                >
+                  {saving ? "Saving…" : "Save profile"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-border text-foreground hover:bg-foreground/[0.06]"
+                  asChild
+                >
+                  <a href="/profile">Edit avatar</a>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={signOut}
+                  disabled={working}
+                  className="border-border text-foreground hover:bg-foreground/[0.06]"
+                >
+                  Sign out
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Appearance */}
+          <Card id="appearance" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Appearance</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Choose how Offervia looks on this device.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {([
+                  { value: "light", label: "Light", icon: Sun },
+                  { value: "dark", label: "Dark", icon: Moon },
+                  { value: "system", label: "System", icon: Monitor },
+                ] as const).map(({ value, label, icon: Icon }) => {
+                  const active = theme === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setTheme(value)}
+                      className={`flex items-center gap-2 rounded-xl border p-3 text-sm transition-colors ${
+                        active
+                          ? "border-primary/40 bg-primary/10 text-foreground"
+                          : "border-border bg-background/60 text-foreground/80 hover:bg-foreground/[0.06]"
+                      }`}
+                    >
+                      <Icon className={`h-4 w-4 ${active ? "text-primary" : "text-foreground/60"}`} />
+                      {label}
+                      {active && <Check className="ml-auto h-4 w-4 text-primary" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Preferences */}
+          <Card id="preferences" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Preferences</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Customize your Offervia experience
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-1">
+                <label className="text-sm text-foreground/80">Default coach mode</label>
+                <Select
+                  value={defaultMode}
+                  onValueChange={(v) => setDefaultMode(v as CoachMode)}
+                  disabled={loading}
+                >
+                  <SelectTrigger className="border-border">
+                    <SelectValue placeholder="Select a mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="interview">Interview Coach</SelectItem>
+                    <SelectItem value="resume">Resume Feedback</SelectItem>
+                    <SelectItem value="cover_letter">Cover Letter Help</SelectItem>
+                    <SelectItem value="career">Career Advice</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-1">
+                <label className="text-sm text-foreground/80">Weekly applications goal</label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={50}
+                  value={Number.isFinite(weeklyGoal) ? weeklyGoal : 0}
+                  onChange={(e) => setWeeklyGoal(Number(e.target.value || 0))}
+                  className="border-border bg-background/80 text-foreground"
                   disabled={loading}
                 />
-                <label htmlFor="digest" className="text-sm text-foreground/80">
-                  Send a weekly summary (applications & reminders)
-                </label>
+                <div className="text-xs text-foreground/60">
+                  Used on the dashboard for progress nudges.
+                </div>
               </div>
-            </div>
 
-            <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
-              <Button
-                onClick={onSave}
-                disabled={saving || loading}
-                className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-              >
-                {saving ? "Saving…" : "Save settings"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid gap-2 sm:col-span-2">
+                <label className="text-sm text-foreground/80">Weekly email digest</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="digest"
+                    type="checkbox"
+                    checked={emailDigest}
+                    onChange={(e) => setEmailDigest(e.target.checked)}
+                    className="h-4 w-4 rounded border-border bg-background accent-primary"
+                    disabled={loading}
+                  />
+                  <label htmlFor="digest" className="text-sm text-foreground/80">
+                    Send a weekly summary (applications & reminders)
+                  </label>
+                </div>
+              </div>
 
-        {/* Data & Privacy */}
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-foreground">Data & Privacy</CardTitle>
-            <CardDescription className="text-foreground/70">
-              Export server-stored account data plus any browser-only drafts found on this device.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={exportData}
-                disabled={working}
-                className="border-border text-foreground hover:bg-foreground/[0.06]"
-              >
-                Export data (JSON)
-              </Button>
-              <Button
-                variant="outline"
-                onClick={clearLocalData}
-                className="border-border text-foreground hover:bg-foreground/[0.06]"
-              >
-                Clear local data
-              </Button>
-            </div>
+              <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
+                <Button
+                  onClick={onSave}
+                  disabled={saving || loading}
+                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                >
+                  {saving ? "Saving…" : "Save settings"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-            <hr className="my-2 border-border" />
+          {/* Plan & billing */}
+          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Plan &amp; billing</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Manage your subscription and billing details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-3 rounded-xl border border-border bg-background/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${plan === "pro" ? "bg-primary/10 text-primary" : "bg-foreground/5 text-foreground/60"}`}>
+                    <Crown className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-foreground">
+                      {plan === "pro" ? "Offervia Pro" : "Free plan"}
+                    </div>
+                    <div className="text-xs text-foreground/60">
+                      {plan === "pro"
+                        ? periodEnd
+                          ? `Renews ${new Date(periodEnd).toLocaleDateString()}`
+                          : "Active subscription"
+                        : "Upgrade to unlock unlimited tailoring and Pro tools."}
+                    </div>
+                  </div>
+                </div>
+                {plan === "pro" ? (
+                  <Button
+                    variant="outline"
+                    onClick={openBillingPortal}
+                    disabled={billingLoading}
+                    className="border-border text-foreground hover:bg-foreground/[0.06]"
+                  >
+                    {billingLoading ? "Opening…" : "Manage billing"}
+                  </Button>
+                ) : (
+                  <Button asChild className="bg-primary text-white hover:bg-primary/90">
+                    <Link href="/upgrade">Upgrade to Pro</Link>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-1 text-xs text-foreground/60">
-              <p>
-                <strong className="text-foreground/80">Export data</strong> includes your profile details,
-                preferences, server-stored coach history, and browser-saved drafts or local history found on
-                this device.
-              </p>
-              <p>
-                <strong className="text-foreground/80">Clear local data</strong> only removes browser-saved
-                drafts and local history from this device. It does not delete your Offervia account or
-                server-stored data.
-              </p>
-            </div>
+          {/* Data & Privacy */}
+          <Card id="data" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Data &amp; privacy</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Export server-stored account data plus any browser-only drafts found on this device.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={exportData}
+                  disabled={working}
+                  className="border-border text-foreground hover:bg-foreground/[0.06]"
+                >
+                  Export data (JSON)
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={clearLocalData}
+                  className="border-border text-foreground hover:bg-foreground/[0.06]"
+                >
+                  Clear local data
+                </Button>
+              </div>
 
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-foreground">Danger zone</div>
-              <p className="text-xs text-foreground/60">
-                Need your account removed? Contact support and we&apos;ll help with deletion requests
-                and data removal steps.
-              </p>
-              <Button
-                variant="outline"
-                asChild
-                className="border-destructive/30 text-destructive hover:bg-destructive/10  "
-              >
-                <Link href="/contact">Contact support about account deletion</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <hr className="my-2 border-border" />
+
+              <div className="space-y-1 text-xs text-foreground/60">
+                <p>
+                  <strong className="text-foreground/80">Export data</strong> includes your profile details,
+                  preferences, server-stored coach history, and browser-saved drafts or local history found on
+                  this device.
+                </p>
+                <p>
+                  <strong className="text-foreground/80">Clear local data</strong> only removes browser-saved
+                  drafts and local history from this device. It does not delete your Offervia account or
+                  server-stored data.
+                </p>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                <div className="text-sm font-medium text-foreground">Danger zone</div>
+                <p className="text-xs text-foreground/60">
+                  Need your account removed? Contact support and we&apos;ll help with deletion requests
+                  and data removal steps.
+                </p>
+                <Button
+                  variant="outline"
+                  asChild
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                >
+                  <Link href="/contact">Contact support about account deletion</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </PageContainer>
   );
 }
