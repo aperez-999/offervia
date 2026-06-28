@@ -70,7 +70,7 @@ export default function MessageBubble({
         {shouldTruncate && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="ml-2 text-xs text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
+            className="ml-2 text-xs text-primary hover:text-primary/90 underline"
           >
             {isExpanded ? "Show Less" : "Show More"}
           </button>

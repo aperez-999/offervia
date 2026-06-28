@@ -23,9 +23,9 @@ export default function HowItWorks() {
 
   // Subtle per-card accent tints (light & dark), matching Testimonials/Why
   const ACCENTS = [
-    { lightBg: "bg-indigo-50",  darkBg: "dark:bg-indigo-500/5",  ring: "ring-indigo-500/20" },
+    { lightBg: "bg-primary/10",  darkBg: "",  ring: "ring-ring" },
     { lightBg: "bg-sky-50",     darkBg: "dark:bg-sky-500/5",     ring: "ring-sky-500/20" },
-    { lightBg: "bg-violet-50",  darkBg: "dark:bg-violet-500/5",  ring: "ring-violet-500/20" },
+    { lightBg: "bg-brand/10",  darkBg: "",  ring: "ring-ring" },
   ];
 
   return (

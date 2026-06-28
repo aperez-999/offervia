@@ -62,14 +62,14 @@ export default function CoachSidebar({
                 onClick={() => onChange(key)}
                 className={`group mb-1 cursor-pointer flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors
                   ${selected
-                    ? "border-indigo-500/30 bg-indigo-500/10"
+                    ? "border-primary/30 bg-primary/10"
                     : "border-transparent hover:bg-foreground/[0.06]"}
                 `}
               >
                 <span
                   className={`grid h-8 w-8 place-items-center rounded-lg border flex-shrink-0
                     ${selected
-                      ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
+                      ? "border-primary/30 bg-primary/10 text-primary"
                       : "border-border bg-background/80 text-foreground/70"}
                   `}
                 >
@@ -87,7 +87,7 @@ export default function CoachSidebar({
 
                 <ChevronRight
                   className={`h-4 w-4 transition-colors flex-shrink-0
-                    ${selected ? "text-indigo-400" : "text-foreground/30 group-hover:text-foreground/50"}
+                    ${selected ? "text-primary" : "text-foreground/30 group-hover:text-foreground/50"}
                   `}
                 />
               </button>

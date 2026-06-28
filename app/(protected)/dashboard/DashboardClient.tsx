@@ -321,14 +321,14 @@ export default function DashboardClient({
     <div className="space-y-4 sm:space-y-6">
       {/* Upgrade success / cancel banner */}
       {upgrade === "success" && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-800 dark:text-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-success">
           <p className="text-sm font-medium">
             🎉 Welcome to Pro! Your limits have been unlocked.
           </p>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 shrink-0 rounded-full p-0 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+            className="h-8 w-8 shrink-0 rounded-full p-0 text-success hover:bg-success/20"
             onClick={dismissUpgradeBanner}
             aria-label="Dismiss"
           >
@@ -354,16 +354,16 @@ export default function DashboardClient({
       )}
 
       <section>
-        <Card className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-card via-card/95 to-indigo-500/5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-primary/30 bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
-                <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-300">
+                <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
                   Continue your search
                 </Badge>
                 <h1 className="mt-3 text-2xl font-semibold text-foreground sm:text-3xl">
                   Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
+                  <span className="text-brand-gradient">
                     {friendlyName}
                   </span>
                 </h1>
@@ -378,7 +378,7 @@ export default function DashboardClient({
 
               <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[220px]">
                 <Link href={nextAction.href}>
-                  <Button className="w-full cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
+                  <Button className="w-full cursor-pointer bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                     {nextAction.cta}
                   </Button>
                 </Link>
@@ -415,7 +415,7 @@ export default function DashboardClient({
                   ) : (
                     <span>
                       Weekly digest is off.{" "}
-                      <Link href="/settings" className="underline text-indigo-600 dark:text-indigo-300">
+                      <Link href="/settings" className="underline text-primary">
                         Enable it in settings
                       </Link>
                       .
@@ -423,7 +423,7 @@ export default function DashboardClient({
                   )}
                 </div>
               </div>
-              <Sparkles className="h-5 w-5 flex-shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <Sparkles className="h-5 w-5 flex-shrink-0 text-primary" />
             </div>
             <Progress value={weeklyGoalPct} className="mt-3 h-2" />
           </Card>
@@ -456,7 +456,7 @@ export default function DashboardClient({
                 </p>
               </div>
               {nearingLimit && plan === "free" ? (
-                <Badge className="border border-amber-500/20 bg-amber-500/10 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300">
+                <Badge className="border border-warning/30 bg-warning/10 text-warning hover:bg-warning/10">
                   Near limit
                 </Badge>
               ) : null}
@@ -470,9 +470,9 @@ export default function DashboardClient({
                     <span
                       className={
                         item.state === "high"
-                          ? "font-medium text-red-500"
+                          ? "font-medium text-destructive"
                           : item.state === "warn"
-                          ? "font-medium text-amber-500"
+                          ? "font-medium text-warning"
                           : "font-medium text-foreground"
                       }
                     >
@@ -484,10 +484,10 @@ export default function DashboardClient({
                       className={
                         "h-full rounded-full transition-all " +
                         (item.state === "high"
-                          ? "bg-red-500"
+                          ? "bg-destructive"
                           : item.state === "warn"
-                          ? "bg-amber-500"
-                          : "bg-indigo-600 dark:bg-indigo-400")
+                          ? "bg-warning"
+                          : "bg-primary")
                       }
                       style={{ width: `${item.pct}%` }}
                     />
@@ -497,14 +497,14 @@ export default function DashboardClient({
             </div>
 
             {nearingLimit && plan === "free" ? (
-              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-foreground/80">
                   You&apos;re getting close to a monthly limit. Upgrade if you want to keep the workflow moving without interruption.
                 </p>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 dark:text-amber-200"
+                  className="border-warning/30 bg-warning/10 text-warning hover:bg-warning/20"
                   onClick={() => router.push("/upgrade")}
                 >
                   Upgrade
@@ -563,7 +563,7 @@ export default function DashboardClient({
                       <Link href={it.href}>Go</Link>
                     </Button>
                   ) : (
-                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
+                    <Badge className="border border-success/30 bg-success/10 text-success hover:bg-success/10">
                       Done
                     </Badge>
                   )}
@@ -613,7 +613,7 @@ export default function DashboardClient({
                 cta={
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href="/job-packet">
-                      <Button className="bg-indigo-600 text-white hover:bg-indigo-500">Start Job Packet</Button>
+                      <Button className="bg-primary text-white hover:bg-primary/90">Start Job Packet</Button>
                     </Link>
                     <Link href="/tracker">
                       <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
@@ -710,7 +710,7 @@ export default function DashboardClient({
                     <Link href="/coach">
                       <Button
                         variant="ghost"
-                        className="text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-300"
+                        className="text-primary hover:bg-primary/10"
                       >
                         Open
                       </Button>

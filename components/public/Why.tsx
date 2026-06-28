@@ -28,22 +28,22 @@ export default function Why() {
   // Subtle per-card tints (light & dark) for consistent “pill” look
   const accents = [
     {
-      icon: "text-indigo-600 dark:text-indigo-400",
-      lightBg: "bg-indigo-50",
-      darkBg: "dark:bg-indigo-500/5",
-      ring: "ring-indigo-500/20",
+      icon: "text-primary",
+      lightBg: "bg-primary/10",
+      darkBg: "",
+      ring: "ring-ring",
     },
     {
-      icon: "text-emerald-600 dark:text-emerald-400",
-      lightBg: "bg-emerald-50",
-      darkBg: "dark:bg-emerald-500/5",
-      ring: "ring-emerald-500/20",
+      icon: "text-success",
+      lightBg: "bg-success/10",
+      darkBg: "",
+      ring: "ring-ring",
     },
     {
-      icon: "text-amber-600 dark:text-amber-300",
-      lightBg: "bg-amber-50",
-      darkBg: "dark:bg-amber-500/5",
-      ring: "ring-amber-500/20",
+      icon: "text-warning",
+      lightBg: "bg-warning/10",
+      darkBg: "",
+      ring: "ring-ring",
     },
   ];
 

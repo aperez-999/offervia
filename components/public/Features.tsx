@@ -54,10 +54,10 @@ export default function Features() {
   // Per-card accent tints to match the pill look (light & dark)
   const accents = [
     {
-      icon: "text-indigo-600 dark:text-indigo-400",
-      lightBg: "bg-indigo-50",
-      darkBg: "dark:bg-indigo-500/5",
-      ring: "ring-indigo-500/20",
+      icon: "text-primary",
+      lightBg: "bg-primary/10",
+      darkBg: "",
+      ring: "ring-ring",
     },
     {
       icon: "text-sky-600 dark:text-sky-400",
@@ -66,10 +66,10 @@ export default function Features() {
       ring: "ring-sky-500/20",
     },
     {
-      icon: "text-violet-600 dark:text-violet-400",
-      lightBg: "bg-violet-50",
-      darkBg: "dark:bg-violet-500/5",
-      ring: "ring-violet-500/20",
+      icon: "text-brand",
+      lightBg: "bg-brand/10",
+      darkBg: "",
+      ring: "ring-ring",
     },
     {
       icon: "text-fuchsia-600 dark:text-fuchsia-400",

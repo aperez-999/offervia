@@ -64,9 +64,9 @@ export default function PerformanceInsights({
             {analytics.improvement === null ? (
               <span className="text-muted-foreground">Not enough data</span>
             ) : analytics.improvement > 0 ? (
-              <span className="text-green-400">+{analytics.improvement}%</span>
+              <span className="text-success">+{analytics.improvement}%</span>
             ) : analytics.improvement < 0 ? (
-              <span className="text-red-400">{analytics.improvement}%</span>
+              <span className="text-destructive">{analytics.improvement}%</span>
             ) : (
               <span className="text-muted-foreground">0%</span>
             )}
@@ -104,14 +104,16 @@ export default function PerformanceInsights({
                   contentStyle={{
                     borderRadius: "8px",
                     border: "1px solid var(--border)",
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
+                    color: "var(--foreground)",
                   }}
-                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                  labelStyle={{ color: "var(--foreground)" }}
+                  itemStyle={{ color: "var(--foreground)" }}
                 />
                 <Line
                   type="monotone"
                   dataKey="score"
-                  stroke="#6366f1"
+                  stroke="var(--brand)"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   activeDot={{ r: 5 }}

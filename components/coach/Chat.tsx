@@ -216,7 +216,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             action: (
               <Button
                 size="default"
-                className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => router.push("/upgrade")}
               >
                 Upgrade to Pro
@@ -320,7 +320,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 onClick={() => setResponseMode("brief")}
                 className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "brief"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-primary text-white"
                     : "text-foreground/70 hover:text-foreground"
                 }`}
               >
@@ -330,7 +330,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 onClick={() => setResponseMode("detailed")}
                 className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "detailed"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-primary text-white"
                     : "text-foreground/70 hover:text-foreground"
                 }`}
               >
@@ -347,7 +347,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           <Button
             size="sm"
             onClick={() => scrollToBottom(true)}
-            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-indigo-600 text-white hover:bg-indigo-500"
+            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-primary text-white hover:bg-primary/90"
           >
             <ChevronsDown className="mr-1 h-4 w-4" /> Jump to latest
           </Button>
@@ -380,7 +380,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                   return (
                     <div key={m.id} className="flex items-start gap-2">
                       {m.role === "assistant" ? (
-                        <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        <Bot className="mt-0.5 h-5 w-5 text-primary" />
                       ) : (
                         <User className="order-2 ml-auto mt-0.5 h-5 w-5 text-foreground/70" />
                       )}
@@ -396,7 +396,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                           {isLastAssistant && lastUserMessage && (
                             <button
                               onClick={regenerate}
-                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-400"
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-primary hover:bg-primary/10"
                               title="Regenerate reply"
                             >
                               <RotateCcw className="h-3 w-3" /> Regenerate
@@ -411,10 +411,10 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             ))}
             {sending && (
               <div className="flex items-start gap-2">
-                <Bot className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <Bot className="mt-0.5 h-5 w-5 text-primary" />
                 <div>
                   <div className="mb-1 text-xs text-foreground/60">Coach</div>
-                  <div className="inline-block max-w-[85%] animate-pulse rounded-xl border border-border bg-indigo-500/10 px-3 py-2 text-sm text-foreground">
+                  <div className="inline-block max-w-[85%] animate-pulse rounded-xl border border-border bg-primary/10 px-3 py-2 text-sm text-foreground">
                     Working on your reply...
                   </div>
                 </div>
@@ -447,7 +447,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           <Textarea
             aria-label="Chat input"
             placeholder={userId ? "Ask a question or paste a draft for feedback..." : "Sign in to chat"}
-            className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+            className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={!userId || loading || sending}
@@ -467,7 +467,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             <Button
               onClick={() => void send()}
               disabled={!userId || loading || !input.trim()}
-              className="bg-indigo-600 text-white cursor-pointer hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="bg-primary text-white cursor-pointer hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <CornerDownRight className="mr-1 h-4 w-4" />
               Send
@@ -499,7 +499,7 @@ export default function Chat({ mode = "interview" as CoachMode }: { mode?: Coach
       <CoachSidebar active={active} onChange={setActive} />
       <section className="min-w-0 flex-1">
         <header className="mb-3 flex items-center gap-2">
-          <ActiveIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <ActiveIcon className="h-5 w-5 text-primary" />
           <h1 className="text-lg font-semibold text-foreground">{activeMeta.label}</h1>
         </header>
         <InnerChat mode={active} />

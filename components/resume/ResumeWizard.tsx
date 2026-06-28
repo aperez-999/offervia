@@ -327,7 +327,7 @@ export default function ResumeWizard() {
             action: (
               <Button
                 size="default"
-                className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => router.push("/upgrade")}
               >
                 Upgrade to Pro
@@ -481,9 +481,9 @@ export default function ResumeWizard() {
                   const fromScanner = from === "scanner" || from.startsWith("scanner");
                   return fromScanner && jd.trim().length >= 20 && !resumeFileName;
                 })() && (
-                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100 dark:border-emerald-500/20">
+                    <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
                     <div className="font-medium">Job description loaded</div>
-                    <div className="mt-0.5 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+                    <div className="mt-0.5 text-xs text-success/80">
                       Upload your resume to keep the Job Packet moving.
                     </div>
                   </div>
@@ -628,7 +628,7 @@ export default function ResumeWizard() {
                   value={jd}
                   onChange={(e) => setJd(e.target.value)}
                   placeholder="Paste the full job description here..."
-                  className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 />
 
                 {techs.length > 0 && (
@@ -786,7 +786,7 @@ export default function ResumeWizard() {
                           type="checkbox"
                           checked={templateMode}
                           onChange={(e) => setTemplateMode(e.target.checked)}
-                          className="h-4 w-4 accent-indigo-600"
+                          className="h-4 w-4 accent-primary"
                           title="When on, the AI returns a clean, sectioned resume template."
                         />
                         <span className="text-foreground/70">Template output</span>
@@ -830,7 +830,7 @@ export default function ResumeWizard() {
                   {aiText ? (
                     <Textarea
                       spellCheck
-                      className="h-[40vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="h-[40vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       value={aiText}
                       onChange={(e) => setAiText(e.target.value)}
                     />
@@ -849,7 +849,7 @@ export default function ResumeWizard() {
                     <Button
                       disabled={generating || !resumeFile || jd.trim().length < 20}
                       onClick={handleGenerate}
-                      className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="bg-primary cursor-pointer text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       {generating ? (
                         <>
@@ -867,7 +867,7 @@ export default function ResumeWizard() {
                     <Button
                       variant="outline"
                       disabled={!aiText}
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       onClick={() => {
                         toast({
                           title: "Draft accepted",
@@ -881,7 +881,7 @@ export default function ResumeWizard() {
                     <Button
                       variant="outline"
                       disabled={!aiText}
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       onClick={addToTracker}
                       title="Create a tracker entry prefilled from this job"
                     >
@@ -918,7 +918,7 @@ export default function ResumeWizard() {
               variant="outline"
               onClick={onBack}
               disabled={step === 1}
-              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Back
             </Button>
@@ -928,14 +928,14 @@ export default function ResumeWizard() {
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 3 && !step3Valid)}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-primary text-white hover:bg-primary/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Continue
                 </Button>
               ) : (
                 <Button
                   onClick={() => setStep(1)}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Start Over
                 </Button>

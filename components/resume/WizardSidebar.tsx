@@ -29,14 +29,14 @@ export default function WizardSidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors",
                   active
-                    ? "border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20"
+                    ? "border-primary/30 bg-primary/10 ring-1 ring-ring"
                     : "border-border hover:bg-foreground/[0.05]"
                 )}
               >
                 <span
                   className={cn(
                     "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs",
-                    active ? "bg-indigo-600 text-white" : "bg-foreground/10 text-foreground/80"
+                    active ? "bg-primary text-white" : "bg-foreground/10 text-foreground/80"
                   )}
                 >
                   {index + 1}
