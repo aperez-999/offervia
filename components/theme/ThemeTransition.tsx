@@ -34,7 +34,7 @@ export default function ThemeTransition() {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         root.classList.remove("theme-anim");
-      }, 520);
+      }, 560);
     });
 
     observer.observe(root, {

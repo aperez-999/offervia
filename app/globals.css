@@ -246,8 +246,8 @@
 .theme-anim *::before,
 .theme-anim *::after {
   transition-property: background-color, border-color, color, fill, stroke,
-    box-shadow, outline-color, text-decoration-color !important;
-  transition-duration: 480ms !important;
+    box-shadow, outline-color, text-decoration-color, opacity !important;
+  transition-duration: 500ms !important;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
