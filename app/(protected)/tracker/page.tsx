@@ -51,7 +51,7 @@ import {
   type SortKey,
   type TrackerApiRow,
 } from "@/lib/tracker/utils";
-import { ArrowUpDown, Download, Search as SearchIcon } from "lucide-react";
+import { ArrowUpDown, Download, LayoutGrid, Rows3, Search as SearchIcon } from "lucide-react";
 
 type TrackerListResponse = {
   success: true;
@@ -62,6 +62,27 @@ type TrackerItemResponse = {
   success: true;
   data: TrackerApiRow | null;
 };
+
+type TrackerViewMode = "table" | "board";
+
+const TRACKER_VIEW_KEY = "offervia.tracker.view";
+
+const STATUS_BADGE_VARIANT: Record<
+  Application["status"],
+  "applied" | "interviewing" | "offer" | "rejected"
+> = {
+  Applied: "applied",
+  Interviewing: "interviewing",
+  Offer: "offer",
+  Rejected: "rejected",
+};
+
+const BOARD_COLUMNS: { status: Application["status"]; accent: string }[] = [
+  { status: "Applied", accent: "var(--status-applied)" },
+  { status: "Interviewing", accent: "var(--status-interviewing)" },
+  { status: "Offer", accent: "var(--status-offer)" },
+  { status: "Rejected", accent: "var(--status-rejected)" },
+];
 
 
 export default function TrackerPage() {
@@ -85,6 +106,7 @@ export default function TrackerPage() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [pageSize, setPageSize] = useState<(typeof TRACKER_PAGE_SIZE_OPTIONS)[number]>(10);
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<TrackerViewMode>("table");
   const [openedFromPacket, setOpenedFromPacket] = useState(false);
 
   const [company, setCompany] = useState("");
@@ -390,6 +412,35 @@ export default function TrackerPage() {
   const totalPages = Math.max(1, Math.ceil(view.length / pageSize));
   useEffect(() => setPage(1), [q, statusFilter, sortKey, sortDir, pageSize]);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(TRACKER_VIEW_KEY);
+      if (saved === "table" || saved === "board") setViewMode(saved);
+    } catch {
+      // ignore storage access errors
+    }
+  }, []);
+
+  function changeViewMode(next: TrackerViewMode) {
+    setViewMode(next);
+    try {
+      window.localStorage.setItem(TRACKER_VIEW_KEY, next);
+    } catch {
+      // ignore storage access errors
+    }
+  }
+
+  const groupedByStatus = useMemo(() => {
+    const groups: Record<Application["status"], Application[]> = {
+      Applied: [],
+      Interviewing: [],
+      Offer: [],
+      Rejected: [],
+    };
+    for (const app of view) groups[app.status].push(app);
+    return groups;
+  }, [view]);
+
   const paged = useMemo(() => {
     const start = (page - 1) * pageSize;
     return view.slice(start, start + pageSize);
@@ -397,28 +448,8 @@ export default function TrackerPage() {
 
   function StatusBadge({ value, busy }: { value: Application["status"]; busy?: boolean }) {
     const content = busy ? "…" : value;
-    if (value === "Interviewing") {
-      return (
-        <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-300">
-          {content}
-        </Badge>
-      );
-    }
-    if (value === "Offer") {
-      return (
-        <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
-          {content}
-        </Badge>
-      );
-    }
-    if (value === "Rejected") {
-      return <Badge variant="destructive">{content}</Badge>;
-    }
-    return (
-      <Badge className="border border-foreground/10 bg-foreground/[0.06] text-foreground/80 hover:bg-foreground/[0.08]">
-        {content}
-      </Badge>
-    );
+    const variant = STATUS_BADGE_VARIANT[value];
+    return <Badge variant={variant}>{content}</Badge>;
   }
 
   function exportCsv() {
@@ -505,7 +536,7 @@ export default function TrackerPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button onClick={openCreate} className="bg-indigo-600 text-white hover:bg-indigo-500">
+              <Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Add Job
               </Button>
             </DialogTrigger>
@@ -584,7 +615,7 @@ export default function TrackerPage() {
                 <Button
                   onClick={onSave}
                   disabled={!isValid || submitting}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {submitting ? "Saving..." : editingId ? "Save Changes" : "Save"}
                 </Button>
@@ -629,7 +660,7 @@ export default function TrackerPage() {
             <Button
               onClick={quickAdd}
               disabled={quickSaving || !quickCompany.trim() || !quickPosition.trim()}
-              className="whitespace-nowrap bg-indigo-600 text-white hover:bg-indigo-500"
+              className="whitespace-nowrap bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {quickSaving ? "Saving…" : "Add"}
             </Button>
@@ -659,8 +690,127 @@ export default function TrackerPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <div
+          role="group"
+          aria-label="View mode"
+          className="ml-auto inline-flex items-center rounded-lg border border-border bg-background/80 p-0.5"
+        >
+          <button
+            type="button"
+            aria-pressed={viewMode === "table"}
+            onClick={() => changeViewMode("table")}
+            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              viewMode === "table"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/60 hover:text-foreground"
+            }`}
+          >
+            <Rows3 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Table</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={viewMode === "board"}
+            onClick={() => changeViewMode("board")}
+            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              viewMode === "board"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/60 hover:text-foreground"
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Board</span>
+          </button>
+        </div>
       </div>
 
+      {viewMode === "board" ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {BOARD_COLUMNS.map((column) => {
+            const items = groupedByStatus[column.status];
+            return (
+              <div
+                key={column.status}
+                className="flex flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: column.accent }}
+                    />
+                    <span className="text-sm font-semibold text-foreground">{column.status}</span>
+                  </div>
+                  <span className="rounded-full bg-foreground/[0.06] px-2 py-0.5 text-xs font-medium text-foreground/70">
+                    {items.length}
+                  </span>
+                </div>
+
+                <div className="flex flex-1 flex-col gap-2 p-3">
+                  {loading ? (
+                    <div className="space-y-2 animate-pulse">
+                      <div className="h-16 rounded-lg bg-foreground/[0.06]" />
+                      <div className="h-16 rounded-lg bg-foreground/[0.06]" />
+                    </div>
+                  ) : items.length === 0 ? (
+                    <p className="px-1 py-6 text-center text-xs text-foreground/50">
+                      No applications
+                    </p>
+                  ) : (
+                    items.map((app) => (
+                      <div
+                        key={app.id}
+                        className="group rounded-lg border border-border bg-background/60 p-3 transition-colors hover:border-primary/30 hover:bg-foreground/[0.02]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-medium text-foreground">
+                              {app.company}
+                            </div>
+                            <div className="truncate text-xs text-foreground/70">{app.position}</div>
+                          </div>
+                          <button
+                            onClick={() => void cycleStatus(app)}
+                            title="Click to advance status"
+                            className="shrink-0 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <StatusBadge value={app.status} busy={updatingId === app.id} />
+                          </button>
+                        </div>
+                        {app.applied_on && (
+                          <div className="mt-2 text-[11px] text-foreground/50">
+                            Applied {app.applied_on}
+                          </div>
+                        )}
+                        <div className="mt-2 flex items-center gap-1.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEdit(app)}
+                            className="h-7 border-border px-2 text-xs text-foreground hover:bg-foreground/[0.06]"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => confirmDelete(app.id)}
+                            className="h-7 border-border px-2 text-xs text-foreground hover:bg-foreground/[0.06]"
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
       <div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <div className="overflow-x-auto">
           <Table>
@@ -715,7 +865,7 @@ export default function TrackerPage() {
                       <div className="flex flex-wrap items-center justify-center gap-2">
                         <Button
                           onClick={() => router.push("/job-packet")}
-                          className="bg-indigo-600 text-white hover:bg-indigo-500"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90"
                         >
                           Start Job Packet
                         </Button>
@@ -776,7 +926,9 @@ export default function TrackerPage() {
           </Table>
         </div>
       </div>
+      )}
 
+      {viewMode === "table" && (
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="text-center text-xs text-foreground/60 sm:text-left">
           Page {page} of {totalPages} • {view.length} result{view.length === 1 ? "" : "s"}
@@ -802,6 +954,7 @@ export default function TrackerPage() {
           </Button>
         </div>
       </div>
+      )}
 
       <ConfirmDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <ConfirmContent className="rounded-2xl border border-border bg-card/80 text-foreground shadow-lg">
