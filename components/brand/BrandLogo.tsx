@@ -44,7 +44,7 @@ export default function BrandLogo({
         priority={priority}
         aria-hidden
         className={cn(
-          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ease-in-out motion-reduce:transition-none",
           isLight ? "opacity-0" : "opacity-100",
         )}
       />
@@ -56,7 +56,7 @@ export default function BrandLogo({
         priority={priority}
         aria-hidden
         className={cn(
-          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ease-in-out motion-reduce:transition-none",
           isLight ? "opacity-100" : "opacity-0",
         )}
       />

@@ -133,7 +133,7 @@ export default function AppLayout({
               className="flex items-center transition-opacity hover:opacity-90"
               aria-label="Offervia"
             >
-              <BrandLogo width={190} height={48} priority className="h-10 sm:h-11" />
+              <BrandLogo width={150} height={36} priority className="h-8 sm:h-9" />
             </Link>
           </div>
 
