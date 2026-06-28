@@ -35,9 +35,9 @@ const QA_ITEMS: QA[] = [
 
 // Subtle per-item accent tints (light & dark), matching your other sections
 const ACCENTS = [
-  { lightBg: "bg-indigo-50", darkBg: "dark:bg-indigo-500/5", ring: "ring-indigo-500/20" },
+  { lightBg: "bg-primary/10", darkBg: "", ring: "ring-primary/20" },
   { lightBg: "bg-sky-50",    darkBg: "dark:bg-sky-500/5",    ring: "ring-sky-500/20" },
-  { lightBg: "bg-violet-50", darkBg: "dark:bg-violet-500/5", ring: "ring-violet-500/20" },
+  { lightBg: "bg-brand/10", darkBg: "", ring: "ring-brand/20" },
   { lightBg: "bg-fuchsia-50",darkBg: "dark:bg-fuchsia-500/5",ring: "ring-fuchsia-500/20" },
   { lightBg: "bg-teal-50",   darkBg: "dark:bg-teal-500/5",   ring: "ring-teal-500/20" },
 ];
@@ -66,7 +66,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
         type="button"
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between px-4 py-3 text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+        className="flex w-full items-center justify-between px-4 py-3 text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="text-sm font-medium text-gray-900 dark:text-white">
           {q}

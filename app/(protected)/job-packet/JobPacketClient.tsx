@@ -238,7 +238,7 @@ export default function JobPacketClient() {
       <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-foreground">
+            <div className="inline-flex items-center rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-medium text-foreground">
               Flagship workflow
             </div>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
@@ -259,7 +259,7 @@ export default function JobPacketClient() {
             >
               Clear packet
             </Button>
-            <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
+            <Button asChild className="bg-primary text-white hover:bg-primary/90">
               <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
@@ -274,7 +274,7 @@ export default function JobPacketClient() {
         </div>
 
         {draft.completedAt && (
-          <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-foreground">
+          <div className="mt-4 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm text-foreground">
             This packet already made it into your tracker. Reopen Resume Tailor if you want another pass,
             or start a fresh packet for the next role.
           </div>
@@ -302,7 +302,7 @@ export default function JobPacketClient() {
                   <Badge variant="outline" className="border-border text-foreground/80">
                     Step {step.number}
                   </Badge>
-                  {done && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                  {done && <CheckCircle2 className="h-4 w-4 text-success" />}
                 </div>
                 <CardTitle className="text-base text-foreground">{step.title}</CardTitle>
                 <CardDescription className="text-foreground/70">{step.desc}</CardDescription>
@@ -386,7 +386,7 @@ export default function JobPacketClient() {
                   })
                 }
                 placeholder="Paste the full job description here..."
-                className="min-h-[260px] border-border bg-background/80 text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="min-h-[260px] border-border bg-background/80 text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               />
               <div className="text-xs text-foreground/60">
                 {draft.jobDescription.length} characters
@@ -397,7 +397,7 @@ export default function JobPacketClient() {
               <Button
                 onClick={() => void runScan()}
                 disabled={!canRunScan || loadingScan}
-                className="bg-indigo-600 text-white hover:bg-indigo-500"
+                className="bg-primary text-white hover:bg-primary/90"
               >
                 {loadingScan ? (
                   <>
@@ -478,7 +478,7 @@ export default function JobPacketClient() {
                     </div>
                     <p className="mt-2 text-sm text-foreground/80">{draft.scanResult.summary}</p>
                   </div>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-foreground">
+                  <div className="rounded-xl border border-success/30 bg-success/10 p-3 text-sm text-foreground">
                     Next step: open Resume Tailor to apply these themes to your current resume draft.
                   </div>
                 </>
@@ -510,7 +510,7 @@ export default function JobPacketClient() {
               </div>
 
               {draft.tailoredResume ? (
-                <div className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+                <div className="space-y-3 rounded-xl border border-success/30 bg-success/10 p-3">
                   <div className="text-sm font-medium text-foreground">
                     Tailored resume ready
                   </div>
@@ -530,7 +530,7 @@ export default function JobPacketClient() {
                     <Button
                       size="sm"
                       onClick={continueToTracker}
-                      className="bg-emerald-600 text-white hover:bg-emerald-500"
+                      className="bg-success text-white hover:bg-success/100"
                     >
                       Send to tracker
                     </Button>
@@ -546,7 +546,7 @@ export default function JobPacketClient() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={continueToResumeTailor}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500"
+                  className="bg-primary text-white hover:bg-primary/90"
                 >
                   {draft.tailoredResume ? "Refine in Resume Tailor" : "Open Resume Tailor"}
                 </Button>

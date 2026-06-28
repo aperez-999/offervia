@@ -37,7 +37,7 @@ export default function ErrorView({
       <CardHeader className="pb-2">
         <div className="flex items-start gap-3">
           <div className="rounded-md bg-foreground/5 p-2">
-            <TriangleAlert className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
+            <TriangleAlert className="h-5 w-5 text-primary " />
           </div>
           <div>
             <CardTitle className="text-foreground">{title}</CardTitle>
@@ -63,7 +63,7 @@ export default function ErrorView({
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               Try again
@@ -80,7 +80,7 @@ export default function ErrorView({
           </Button>
           <a
             href={supportHref}
-            className="text-sm text-indigo-600 underline decoration-indigo-500/50 underline-offset-4 hover:decoration-indigo-500 dark:text-indigo-300"
+            className="text-sm text-primary underline decoration-primary/50 underline-offset-4 hover:decoration-primary "
           >
             Contact support
           </a>

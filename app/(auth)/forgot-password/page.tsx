@@ -48,13 +48,13 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-md border border-border pl-9 pr-3 py-2 text-sm bg-background/80 text-foreground placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="w-full rounded-md border border-border pl-9 pr-3 py-2 text-sm bg-background/80 text-foreground placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               />
             </div>
           </div>
 
           {error && (
-            <div className="text-sm text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-800/30 rounded-md px-3 py-2">
+            <div className="text-sm text-destructive bg-destructive/10  border border-destructive/30  rounded-md px-3 py-2">
               {error}
             </div>
           )}
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={status === "sending" || status === "sent"}
-            className="w-full h-10 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 disabled:opacity-60"
+            className="w-full h-10 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-60"
           >
             {status === "sending" ? "Sending…" : status === "sent" ? "Email sent" : "Send reset link"}
           </button>

@@ -271,7 +271,7 @@ export default function ResourcesPage() {
               onClick={() => setCat(c)}
               className={`rounded-full px-3 py-1 text-sm border transition ${
                 cat === c
-                  ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
+                  ? "border-primary/30 bg-primary/10 text-primary "
                   : "border-border hover:bg-foreground/[0.06] text-foreground/80"
               }`}
             >
@@ -301,7 +301,7 @@ export default function ResourcesPage() {
               }
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${
                 active
-                  ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
+                  ? "border-primary/30 bg-primary/10 text-primary "
                   : "border-border text-foreground/80 hover:bg-foreground/[0.06]"
               }`}
             >
@@ -333,7 +333,7 @@ export default function ResourcesPage() {
               <CardDescription className="text-foreground/70">
                 {r.category}
                 {r.verified && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-emerald-500">
+                  <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-success">
                     <CheckCircle2 className="h-3 w-3" />
                     Verified
                   </span>
@@ -353,7 +353,7 @@ export default function ResourcesPage() {
                     </Badge>
                   ))}
                   {r.free && (
-                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                    <Badge className="border border-success/30 bg-success/10 text-success">
                       Free
                     </Badge>
                   )}
@@ -362,7 +362,7 @@ export default function ResourcesPage() {
               <div className="flex items-center justify-between mt-4 pt-2">
                 <Button
                   asChild
-                  className="bg-indigo-600 text-white hover:bg-indigo-500"
+                  className="bg-primary text-white hover:bg-primary/90"
                 >
                   <a href={r.url} target="_blank" rel="noopener noreferrer">
                     Open <ExternalLink className="ml-1 h-4 w-4" />
@@ -371,7 +371,7 @@ export default function ResourcesPage() {
                 <Button
                   variant="outline"
                   className={`border-border text-foreground hover:bg-foreground/[0.06] ${
-                    saved[r.id] ? "border-indigo-500/40" : ""
+                    saved[r.id] ? "border-primary/30" : ""
                   }`}
                   onClick={() =>
                     setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))
@@ -380,7 +380,7 @@ export default function ResourcesPage() {
                   <Bookmark
                     className={`h-4 w-4 ${
                       saved[r.id]
-                        ? "fill-indigo-600 text-indigo-600 dark:fill-indigo-400 dark:text-indigo-400"
+                        ? "fill-primary text-primary  "
                         : ""
                     }`}
                   />

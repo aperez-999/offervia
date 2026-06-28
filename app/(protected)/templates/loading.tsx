@@ -47,7 +47,7 @@ export default function Loading() {
                 <div className="h-6 w-12 rounded-md border border-border bg-foreground/[0.04] animate-pulse" />
                 <div className="h-6 w-20 rounded-md border border-border bg-foreground/[0.04] animate-pulse" />
               </div>
-              <div className="h-8 w-24 rounded-md bg-indigo-600/60 animate-pulse" />
+              <div className="h-8 w-24 rounded-md bg-primary/60 animate-pulse" />
             </article>
           ))}
         </div>

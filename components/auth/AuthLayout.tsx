@@ -50,26 +50,26 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <nav className="hidden items-center gap-2 sm:gap-3 sm:flex">
                 <Link
                   href="/privacy"
-                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
                 >
                   Privacy
                 </Link>
                 <Link
                   href="/terms"
-                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
                 >
                   Terms
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
                 >
                   Contact
                 </Link>
                 <button
                   aria-label="Toggle theme"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+                  className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
                 >
                   {!mounted ? null : resolvedTheme === "dark" ? (
                     <Sun className="h-4 w-4" />
@@ -93,7 +93,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="rounded-3xl border border-border bg-card/60 p-8 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 backdrop-blur dark:shadow-black/40"
           >
-            <div className="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-foreground">
+            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
               Offervia • AI career suite
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
@@ -126,7 +126,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                   { icon: Sparkles, t: "Workflow built for momentum" },
                 ].map(({ icon: Icon, t }) => (
                   <li key={t} className="flex items-start gap-2">
-                    <Icon className="mt-0.5 h-4 w-4 text-indigo-500/80" />
+                    <Icon className="mt-0.5 h-4 w-4 text-primary/80" />
                     <span>{t}</span>
                   </li>
                 ))}
@@ -145,7 +145,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="rounded-3xl border border-border bg-card/60 p-6 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 backdrop-blur dark:shadow-black/40">
             {/* Mobile-only mini value prop to make auth feel premium */}
             <div className="mb-5 lg:hidden">
-              <div className="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-foreground">
+              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
                 Offervia • AI career suite
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -156,7 +156,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 ].map(({ icon: Icon, t }) => (
                   <div key={t} className="rounded-2xl border border-border bg-background/60 p-3">
                     <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-indigo-500/80" />
+                      <Icon className="h-4 w-4 text-primary/80" />
                       <div className="text-xs font-medium text-foreground">{t}</div>
                     </div>
                   </div>

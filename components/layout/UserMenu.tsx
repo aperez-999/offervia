@@ -88,7 +88,7 @@ export default function UserMenu({
         <span
           className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
             plan === "pro"
-              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+              ? "bg-success/15 text-success"
               : "bg-muted text-muted-foreground"
           }`}
           aria-label={`Plan: ${plan}`}
@@ -100,14 +100,14 @@ export default function UserMenu({
             variant="outline"
             size="sm"
             asChild
-            className="h-7 rounded-md border-border px-2 text-[10px] font-medium uppercase tracking-wide text-foreground/80 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-400"
+            className="h-7 rounded-md border-border px-2 text-[10px] font-medium uppercase tracking-wide text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
           >
             <Link href="/upgrade">Upgrade</Link>
           </Button>
         )}
         <DropdownMenuTrigger asChild>
           <button
-            className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+            className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             aria-label="Open user menu"
           >
             <Avatar className="h-7 w-7">
@@ -181,7 +181,7 @@ export default function UserMenu({
 
         <DropdownMenuItem
           onClick={onSignOut}
-          className="text-rose-600 cursor-pointer focus:text-rose-700"
+          className="text-destructive cursor-pointer focus:text-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out

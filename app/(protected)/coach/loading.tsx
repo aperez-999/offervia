@@ -61,7 +61,7 @@ export default function Loading() {
               {/* Typing indicator */}
               <div className="flex items-start gap-2">
                 <Skeleton className="mt-1 h-5 w-5 rounded-full" />
-                <div className="rounded-2xl border border-border bg-indigo-500/10 p-3">
+                <div className="rounded-2xl border border-border bg-primary/10 p-3">
                   <Skeleton className="h-4 w-40" />
                 </div>
               </div>

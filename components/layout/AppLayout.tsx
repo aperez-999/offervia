@@ -228,7 +228,7 @@ export default function AppLayout({
                             aria-current={active ? "page" : undefined}
                             className={[
                               "flex items-center gap-3 rounded-md px-3 py-2.5 border transition-colors",
-                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
+                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
                               active
                                 ? "border-border bg-foreground/[0.06] font-medium"
                                 : "border-transparent hover:bg-foreground/[0.04]",

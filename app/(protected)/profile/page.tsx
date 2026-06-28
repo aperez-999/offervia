@@ -178,7 +178,7 @@ export default function ProfilePage() {
           <CardContent className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Avatar className="h-20 w-20 ring-1 ring-white/10">
               <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-              <AvatarFallback className="bg-indigo-600 text-white text-xl">{initial}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-white text-xl">{initial}</AvatarFallback>
             </Avatar>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -195,7 +195,7 @@ export default function ProfilePage() {
               <Button
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading || loading}
-                className="bg-indigo-600 text-white hover:bg-indigo-500"
+                className="bg-primary text-white hover:bg-primary/90"
               >
                 {uploading ? "Uploading…" : "Change avatar"}
               </Button>
@@ -236,7 +236,7 @@ export default function ProfilePage() {
               <Button
                 onClick={saveName}
                 disabled={saving || loading}
-                className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               >
                 {saving ? "Saving…" : "Save changes"}
               </Button>

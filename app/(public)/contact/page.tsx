@@ -88,10 +88,10 @@ export default function ContactPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg flex items-center gap-3"
+                className="mb-6 p-4 bg-success/10  border border-success/30  rounded-lg flex items-center gap-3"
               >
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-emerald-800 dark:text-emerald-200 font-medium">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <p className="text-success font-medium">
                   Message sent successfully! We&apos;ll get back to you soon.
                 </p>
               </motion.div>
@@ -101,10 +101,10 @@ export default function ContactPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/30 rounded-lg flex items-center gap-3"
+                className="mb-6 p-4 bg-destructive/10  border border-destructive/30  rounded-lg flex items-center gap-3"
               >
-                <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                <p className="text-rose-800 dark:text-rose-200 font-medium">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                <p className="text-destructive font-medium">
                   Failed to send message. Please try again.
                 </p>
               </motion.div>
@@ -157,7 +157,7 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl font-semibold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-brand-gradient text-white py-4 px-8 rounded-xl font-semibold text-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 {isSubmitting ? (
                   <>
@@ -183,9 +183,9 @@ export default function ContactPage() {
           className="xl:col-span-1 space-y-6"
         >
           {/* Why Contact Us Card */}
-          <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-indigo-200/20 dark:border-indigo-800/30 backdrop-blur-sm">
+          <div className="bg-brand-gradient rounded-2xl p-6 border border-primary/30  backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-brand-gradient rounded-xl flex items-center justify-center">
                 <MessageSquareText className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-xl font-bold text-foreground">
@@ -200,7 +200,7 @@ export default function ContactPage() {
                 "Share feedback & improvements"
               ].map((item, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-brand-gradient rounded-full mt-2 flex-shrink-0"></div>
                   <span className="text-foreground/80 text-sm leading-relaxed">{item}</span>
                 </li>
               ))}
@@ -210,7 +210,7 @@ export default function ContactPage() {
           {/* Response Time Card */}
           <div className="bg-card rounded-2xl p-6 border border-border/50 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-success rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="h-5 w-5 text-white" />
               </div>
               <h3 className="text-xl font-bold text-foreground">
@@ -222,15 +222,15 @@ export default function ContactPage() {
             </p>
             <div className="space-y-2 text-xs text-foreground/60">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-success rounded-full"></div>
                 <span>Mon-Fri: 9 AM - 6 PM EST</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-warning rounded-full"></div>
                 <span>Weekends: Delayed responses</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-destructive rounded-full"></div>
                 <span>Urgent issues: Prioritized</span>
               </div>
             </div>

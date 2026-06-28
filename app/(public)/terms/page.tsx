@@ -54,7 +54,7 @@ export default function TermsPage() {
               By accessing or using Offervia, you agree to these Terms of Service and our{" "}
               <Link
                 href="/privacy"
-                className="underline decoration-indigo-500/60 underline-offset-4 hover:decoration-indigo-500"
+                className="underline decoration-primary/60 underline-offset-4 hover:decoration-primary"
               >
                 Privacy Policy
               </Link>
@@ -120,7 +120,7 @@ export default function TermsPage() {
               Questions about these terms?{" "}
               <Link
                 href="/contact"
-                className="underline decoration-indigo-500/60 underline-offset-4 hover:decoration-indigo-500"
+                className="underline decoration-primary/60 underline-offset-4 hover:decoration-primary"
               >
                 Contact us
               </Link>

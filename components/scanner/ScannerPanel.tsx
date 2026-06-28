@@ -273,7 +273,7 @@ export default function ScannerPanel() {
           action: (
             <Button
               size="default"
-              className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="cursor-pointer bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               onClick={() => router.push("/upgrade")}
             >
               Upgrade to Pro
@@ -402,7 +402,7 @@ export default function ScannerPanel() {
             <Textarea
               aria-label="Job description input"
               placeholder="Paste the full job description here..."
-              className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border pr-8 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border pr-8 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               value={jd}
               onChange={(e) => setJd(e.target.value)}
             />
@@ -442,7 +442,7 @@ export default function ScannerPanel() {
             <Button
               onClick={analyze}
               disabled={loading || jd.trim().length < 20}
-              className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="bg-primary cursor-pointer text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
               {loading ? (
                 <>
@@ -474,7 +474,7 @@ export default function ScannerPanel() {
               variant="outline"
               onClick={clearAll}
               disabled={loading || (!jd && !hasResult)}
-              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
               Clear
             </Button>
@@ -497,7 +497,7 @@ export default function ScannerPanel() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              className="h-8 bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="h-8 bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               onClick={continueToResumeTailor}
               disabled={loading || jd.trim().length < 20}
               title="Continue to resume tailor using this job description"
@@ -671,7 +671,7 @@ export default function ScannerPanel() {
                       </Button>
                       <Button
                         size="sm"
-                        className="h-8 bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                        className="h-8 bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         onClick={() => {
                           if (!h.jd_excerpt || h.jd_excerpt.trim().length < 20) {
                             toast({

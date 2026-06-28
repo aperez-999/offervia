@@ -344,7 +344,7 @@ export default function SettingsPage() {
                   type="checkbox"
                   checked={emailDigest}
                   onChange={(e) => setEmailDigest(e.target.checked)}
-                  className="h-4 w-4 rounded border-border bg-background accent-indigo-600"
+                  className="h-4 w-4 rounded border-border bg-background accent-primary"
                   disabled={loading}
                 />
                 <label htmlFor="digest" className="text-sm text-foreground/80">
@@ -357,7 +357,7 @@ export default function SettingsPage() {
               <Button
                 onClick={onSave}
                 disabled={saving || loading}
-                className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               >
                 {saving ? "Saving…" : "Save settings"}
               </Button>
@@ -416,7 +416,7 @@ export default function SettingsPage() {
               <Button
                 variant="outline"
                 asChild
-                className="border-rose-300/40 text-rose-600 hover:bg-rose-500/10 dark:border-rose-800/40 dark:text-rose-400"
+                className="border-destructive/30 text-destructive hover:bg-destructive/10  "
               >
                 <Link href="/contact">Contact support about account deletion</Link>
               </Button>

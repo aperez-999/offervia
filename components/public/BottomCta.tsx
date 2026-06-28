@@ -18,7 +18,7 @@ export default function BottomCta() {
             // Glass base
             "bg-white/70 dark:bg-neutral-900/40",
             // Subtle indigo tint & ring (consistent with other sections)
-            "ring-indigo-500/20",
+            "ring-primary/20",
             "p-6 text-center",
           ].join(" ")}
         >
@@ -34,9 +34,9 @@ export default function BottomCta() {
               href="/signup"
               className={[
                 "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium",
-                "bg-indigo-600 text-white hover:bg-indigo-500",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-                "dark:focus:ring-offset-black",
+                "bg-primary text-white hover:bg-primary/90",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                "ring-offset-background",
               ].join(" ")}
             >
               Get Started Now

@@ -7,7 +7,7 @@ const toneBg: Record<Tone, string> = {
   slate:
     "bg-gradient-to-b from-slate-500/[0.06] to-slate-900/[0.08] dark:from-slate-400/[0.06] dark:to-slate-900/[0.10]",
   indigo:
-    "bg-gradient-to-b from-indigo-500/[0.06] to-indigo-900/[0.08] dark:from-indigo-400/[0.06] dark:to-indigo-900/[0.10]",
+    "bg-primary/10",
   blue:
     "bg-gradient-to-b from-blue-500/[0.06] to-blue-900/[0.08] dark:from-blue-400/[0.06] dark:to-blue-900/[0.10]",
   neutral:

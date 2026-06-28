@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           {/* Intro callout */}
           <section
             id="introduction"
-            className="rounded-xl border border-white/10 bg-[rgba(99,102,241,0.05)] p-5 shadow-sm ring-1 ring-indigo-500/10 dark:border-white/10 dark:bg-[rgba(99,102,241,0.06)]"
+            className="rounded-xl border border-white/10 bg-[rgba(99,102,241,0.05)] p-5 shadow-sm ring-1 ring-primary/20 dark:border-white/10 dark:bg-[rgba(99,102,241,0.06)]"
           >
             <h2 className="text-base font-semibold text-foreground dark:text-white">Introduction</h2>
             <p className="mt-2 text-sm leading-relaxed text-foreground/90 dark:text-white">
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
               Questions about privacy?{" "}
               <Link
                 href="/contact"
-                className="underline decoration-indigo-500/60 underline-offset-4 hover:decoration-indigo-500"
+                className="underline decoration-primary/60 underline-offset-4 hover:decoration-primary"
               >
                 Contact us
               </Link>

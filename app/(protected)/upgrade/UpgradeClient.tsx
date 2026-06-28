@@ -56,7 +56,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* Hero */}
       <section className="text-center">
         <div className="mx-auto max-w-2xl">
-          <div className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+          <div className="inline-flex items-center rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-medium text-success">
             Upgrade to Pro
           </div>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -75,19 +75,19 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         </h2>
         <ul className="space-y-2 text-sm text-foreground/90">
           <li className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             <span><strong className="text-foreground">Faster iteration</strong> — generate more resume versions without slowing down your workflow.</span>
           </li>
           <li className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             <span><strong className="text-foreground">Better targeting</strong> — scan more JDs, close keyword gaps before you apply.</span>
           </li>
           <li className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             <span><strong className="text-foreground">Stronger interview readiness</strong> — more coaching reps when it matters.</span>
           </li>
           <li className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             <span><strong className="text-foreground">More control</strong> — keep the same workflow going across more roles each month.</span>
           </li>
         </ul>
@@ -124,13 +124,13 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-emerald-500/30 bg-card/60 shadow-sm ring-1 ring-emerald-500/10 dark:ring-emerald-500/10">
+        <Card className="rounded-2xl border border-success/30 bg-card/60 shadow-sm ring-1 ring-success/20 dark:ring-success/20">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground">
                 Pro
               </CardTitle>
-              <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="text-sm font-medium text-success">
                 $10/month
               </span>
             </div>
@@ -142,7 +142,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 className="flex items-center justify-between gap-2 text-sm"
               >
                 <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <Check className="h-4 w-4 shrink-0 text-success" />
                   {f.label}
                 </span>
                 <span className="font-medium text-foreground">{f.value}</span>
@@ -170,7 +170,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
             <Button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full max-w-sm cursor-pointer bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black sm:w-auto sm:px-8"
+              className="w-full max-w-sm cursor-pointer bg-success text-white shadow-sm hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background sm:w-auto sm:px-8"
             >
               {loading ? "Redirecting…" : "Upgrade to Pro — $10/month"}
             </Button>

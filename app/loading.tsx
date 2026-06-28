@@ -7,7 +7,7 @@ export default function Loading() {
           <div className="mx-auto h-8 w-72 rounded-md bg-foreground/[0.08] animate-pulse" />
           <div className="mx-auto mt-3 h-4 w-80 rounded-md bg-foreground/[0.08] animate-pulse" />
           <div className="mx-auto mt-6 flex justify-center gap-2">
-            <div className="h-9 w-28 rounded-md bg-indigo-500/30 animate-pulse" />
+            <div className="h-9 w-28 rounded-md bg-primary/10 animate-pulse" />
             <div className="h-9 w-28 rounded-md bg-foreground/[0.08] animate-pulse" />
           </div>
         </section>

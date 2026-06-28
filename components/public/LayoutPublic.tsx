@@ -87,7 +87,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             {/* Mobile menu button */}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black sm:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background sm:hidden"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
@@ -103,8 +103,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "features" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "features" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               Features
@@ -118,8 +118,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "how-it-works" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "how-it-works" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               How it works
@@ -133,8 +133,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "faq" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "faq" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               FAQ
@@ -142,14 +142,14 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
 
             <Link
               href="/contact"
-              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               Contact
             </Link>
 
             <Link
               href="/login"
-              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               Sign In
             </Link>
@@ -166,7 +166,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
               onClick={toggleTheme}
-              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               {mounted && (
                 <AnimatePresence mode="wait" initial={false}>

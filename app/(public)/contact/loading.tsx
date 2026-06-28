@@ -14,7 +14,7 @@ export default function LoadingContact() {
             </div>
           ))}
           <div className="flex items-center justify-end">
-            <div className="h-9 w-24 rounded-md bg-indigo-500/30 animate-pulse" />
+            <div className="h-9 w-24 rounded-md bg-primary/10 animate-pulse" />
           </div>
           <div className="h-3 w-64 place-self-center rounded-md bg-foreground/[0.06] animate-pulse" />
         </div>

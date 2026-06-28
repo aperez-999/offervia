@@ -212,13 +212,13 @@ export default function StudentsPage() {
     >
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
-          <GraduationCap className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <GraduationCap className="h-5 w-5 text-primary " />
           Student Exclusives
         </h1>
         <p className="mt-1 text-sm text-foreground/70">
           Verified discounts, credits, and student-only perks that can lower the cost of building skills and running your search. Look for the{" "}
           <span className="inline-flex items-center gap-1">
-            <ShieldCheck className="h-3 w-3 text-emerald-500" />
+            <ShieldCheck className="h-3 w-3 text-success" />
             <span>“.edu required”</span>
           </span>{" "}
           badge where applicable.
@@ -234,7 +234,7 @@ export default function StudentsPage() {
               onClick={() => setCat(c)}
               className={`rounded-full px-3 py-1 text-sm border transition ${
                 cat === c
-                  ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
+                  ? "border-primary/30 bg-primary/10 text-primary "
                   : "border-border hover:bg-foreground/[0.06] text-foreground/80"
               }`}
             >
@@ -270,7 +270,7 @@ export default function StudentsPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-foreground">{d.vendor}</CardTitle>
                 {d.requiresEdu && (
-                  <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 inline-flex items-center gap-1">
+                  <Badge className="border border-success/30 bg-success/10 text-success inline-flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3" />
                     .edu required
                   </Badge>
@@ -290,7 +290,7 @@ export default function StudentsPage() {
                 </div>
                 <Button
                   asChild
-                  className="bg-indigo-600 text-white hover:bg-indigo-500"
+                  className="bg-primary text-white hover:bg-primary/90"
                 >
                   <a href={d.url} target="_blank" rel="noopener noreferrer">
                     View <ExternalLink className="ml-1 h-4 w-4" />
@@ -305,7 +305,7 @@ export default function StudentsPage() {
       {/* Tip box */}
       <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <CardContent className="flex items-start gap-3 p-4">
-          <GraduationCap className="mt-0.5 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <GraduationCap className="mt-0.5 h-5 w-5 text-primary " />
           <div>
             <div className="text-sm font-medium text-foreground">Pro tip</div>
             <div className="text-sm text-foreground/70">

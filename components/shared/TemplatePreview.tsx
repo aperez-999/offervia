@@ -78,7 +78,7 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
             )}
           </Button>
           <a href={gmailHref} target="_blank" rel="noreferrer">
-            <Button className="bg-indigo-600 text-white hover:bg-indigo-500">
+            <Button className="bg-primary text-white hover:bg-primary/90">
               <ExternalLink className="mr-2 h-4 w-4" />
               Open in Gmail
             </Button>

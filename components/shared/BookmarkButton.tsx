@@ -78,7 +78,7 @@ export default function BookmarkButton({
         .join(" ")}
     >
       <Bookmark
-        className={`h-4 w-4 ${saved ? "fill-current text-indigo-600 dark:text-indigo-400" : "text-foreground/70"}`}
+        className={`h-4 w-4 ${saved ? "fill-current text-primary " : "text-foreground/70"}`}
       />
     </Button>
   );
