@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const video = videoRef.current;
@@ -18,11 +19,23 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-background">
-      {/* Abstract gradient backdrop: token-driven brand glow */}
+      {/* Abstract gradient backdrop: token-driven brand glow with gentle drift */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="brand-glow absolute inset-x-0 -top-24 h-96" />
-        <div className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-primary/10 blur-2xl" />
-        <div className="absolute -bottom-24 right-[-60px] h-64 w-64 rounded-full bg-[var(--chart-2)]/10 blur-3xl" />
+        <motion.div
+          className="brand-glow absolute inset-x-0 -top-24 h-96"
+          animate={reduce ? undefined : { opacity: [0.75, 1, 0.75] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-primary/10 blur-2xl"
+          animate={reduce ? undefined : { x: [0, 24, 0], y: [0, -18, 0] }}
+          transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-24 right-[-60px] h-64 w-64 rounded-full bg-[var(--chart-2)]/10 blur-3xl"
+          animate={reduce ? undefined : { x: [0, -28, 0], y: [0, 20, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pt-10 pb-10 sm:pt-12 sm:pb-14">
@@ -44,7 +57,7 @@ export default function Hero() {
 
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               Turn job descriptions into{" "}
-              <span className="text-brand-gradient">interviews</span>.
+              <span className="text-primary">interviews</span>.
             </h1>
 
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
@@ -77,6 +90,16 @@ export default function Hero() {
             <div className="group relative overflow-hidden rounded-3xl border border-border glass shadow-2xl shadow-primary/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40">
               {/* Soft brand glow framing the window */}
               <div className="pointer-events-none absolute -inset-px -z-10 bg-gradient-to-br from-primary/15 via-transparent to-[var(--chart-2)]/15" />
+
+              {/* Slow light sheen sweeping across the frame */}
+              {!reduce && (
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 -left-1/3 z-10 w-1/3 skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  animate={{ left: ["-33%", "133%"] }}
+                  transition={{ duration: 7, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
+                />
+              )}
 
               {/* Browser-style chrome */}
               <div className="flex items-center gap-2 border-b border-border/70 px-4 py-2.5">

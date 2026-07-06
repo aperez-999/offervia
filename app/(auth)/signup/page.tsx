@@ -34,10 +34,17 @@ export default function SignupPage() {
     <AuthLayout>
       <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
         <h1 className="text-xl font-semibold text-foreground">Create your Offervia account</h1>
-        <p className="mt-1 text-sm text-foreground/70">Start on the free tier — upgrade anytime.</p>
+        <p className="mt-1 text-sm text-foreground/70">Land more interviews — free to start, upgrade anytime.</p>
       </div>
 
       <SignupForm />
+
+      {/* Divider */}
+      <div className="mt-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium uppercase tracking-wide text-foreground/50">or sign up with</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       {/* Social sign-up (circle icons) */}
       <div className="mt-4 flex items-center justify-center gap-2">

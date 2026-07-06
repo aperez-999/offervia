@@ -1,17 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { Sun, Moon, Sparkles, ShieldCheck, Zap, Quote, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/brand/BrandLogo";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
+const PROOF_QUOTES = [
+  { q: "Tailored my resume in minutes and finally started hearing back.", a: "Maria · Product Designer" },
+  { q: "The scanner showed exactly which keywords I was missing.", a: "Devon · Data Analyst" },
+  { q: "Went from scattered tabs to one clear pipeline. Game changer.", a: "Priya · Software Engineer" },
+];
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [qi, setQi] = useState(0);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const id = setInterval(() => setQi((i) => (i + 1) % PROOF_QUOTES.length), 4800);
+    return () => clearInterval(id);
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* full-screen subtle animated gradient backdrop (token-driven) */}
@@ -109,34 +120,55 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               Scan the posting, tailor your resume, and track follow‑ups with a workflow designed for momentum.
             </p>
 
+            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <p className="text-sm text-foreground">
+                <span className="font-semibold text-primary">More callbacks</span>{" "}
+                from sharper, role‑matched applications.
+              </p>
+            </div>
+
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {[
                 { t: "Job scan insights", d: "Keyword gaps + strengths, instantly." },
                 { t: "Resume tailoring", d: "ATS-friendly edits that stay concise." },
                 { t: "Interview coach", d: "Practice prompts + targeted feedback." },
                 { t: "Application tracker", d: "Keep follow‑ups from slipping." },
-              ].map((x) => (
-                <div key={x.t} className="rounded-2xl border border-border bg-background/60 p-4">
+              ].map((x, i) => (
+                <motion.div
+                  key={x.t}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.15 + i * 0.08, ease: "easeOut" }}
+                  whileHover={{ y: -3 }}
+                  className="rounded-2xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30"
+                >
                   <div className="text-sm font-medium text-foreground">{x.t}</div>
                   <div className="mt-1 text-xs text-foreground/70">{x.d}</div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
-            <div className="mt-6 rounded-2xl border border-border bg-background/60 p-4">
-              <div className="text-sm font-medium text-foreground">Why it works</div>
-              <ul className="mt-2 space-y-2 text-xs text-foreground/70">
-                {[
-                  { icon: Zap, t: "Faster iteration per application" },
-                  { icon: ShieldCheck, t: "Clear, server-side AI processing" },
-                  { icon: Sparkles, t: "Workflow built for momentum" },
-                ].map(({ icon: Icon, t }) => (
-                  <li key={t} className="flex items-start gap-2">
-                    <Icon className="mt-0.5 h-4 w-4 text-primary/80" />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
+            {/* Rotating social proof */}
+            <div className="mt-6 min-h-[92px] rounded-2xl border border-border bg-background/60 p-4">
+              <Quote className="h-4 w-4 text-primary/70" />
+              <AnimatePresence mode="wait">
+                <motion.figure
+                  key={qi}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="mt-2"
+                >
+                  <blockquote className="text-sm leading-relaxed text-foreground/85">
+                    “{PROOF_QUOTES[qi].q}”
+                  </blockquote>
+                  <figcaption className="mt-1.5 text-xs font-medium text-foreground/60">
+                    {PROOF_QUOTES[qi].a}
+                  </figcaption>
+                </motion.figure>
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>

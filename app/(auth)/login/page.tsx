@@ -66,6 +66,13 @@ export default function LoginPage() {
 
       <LoginForm />
 
+      {/* Divider */}
+      <div className="mt-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium uppercase tracking-wide text-foreground/50">or continue with</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       {/* Social sign-in (circle icons) */}
       <div className="mt-4 flex items-center justify-center gap-2">
         {/* Google */}

@@ -12,7 +12,7 @@ const items = [
   },
   {
     title: "Handled with care",
-    desc: "Your inputs are processed through Offervia's server-side AI flow to generate results.",
+    desc: "Processed securely through Offervia's server-side AI.",
     icon: ShieldCheck,
     chip: "bg-success/10 text-success",
   },
@@ -38,10 +38,11 @@ export default function ProofBar() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.4, delay: idx * 0.04 }}
-                className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10"
+                whileHover={{ y: -3 }}
+                className="group rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 backdrop-blur transition-colors hover:border-primary/30 dark:ring-black/10"
               >
                 <div className="flex items-start gap-3">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${it.chip}`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${it.chip}`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
