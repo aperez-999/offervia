@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Sparkles, X } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Reveal } from "@/components/motion/Reveal";
+import QuickStart from "@/components/dashboard/QuickStart";
 
 import type { UsageSnapshot } from "@/lib/usage/read";
 import type { ScanAnalytics } from "@/lib/analytics/scan-analytics";
@@ -359,41 +362,73 @@ export default function DashboardClient({
       )}
 
       <section>
-        <Card className="rounded-2xl border border-primary/30 bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
-                  Continue your search
-                </Badge>
-                <h1 className="mt-3 text-2xl font-semibold text-foreground sm:text-3xl">
-                  Welcome back,{" "}
-                  <span className="text-brand-gradient">
-                    {friendlyName}
-                  </span>
-                </h1>
-                <p className="mt-2 text-sm text-foreground/75 sm:text-base">
-                  One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now.
-                </p>
-                <div className="mt-4 rounded-2xl border border-border bg-background/70 p-4 shadow-sm">
-                  <div className="text-sm font-medium text-foreground">{nextAction.title}</div>
-                  <div className="mt-1 text-sm text-foreground/70">{nextAction.desc}</div>
+        <Card className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] via-card/60 to-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
+          <CardContent className="relative p-5 sm:p-6">
+            <div className="max-w-3xl">
+              <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
+                Continue your search
+              </Badge>
+              <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                Welcome back,{" "}
+                <span className="text-primary">{friendlyName}</span>
+              </h1>
+              <p className="mt-2 text-sm text-foreground/75 sm:text-base">
+                One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now.
+              </p>
+            </div>
+
+            {/* Recommended next step — full-width band, CTA inline */}
+            <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-primary/80">
+                    Recommended next step
+                  </div>
+                  <div className="mt-0.5 text-sm font-medium text-foreground">{nextAction.title}</div>
+                  <div className="mt-0.5 text-sm text-foreground/70">{nextAction.desc}</div>
                 </div>
               </div>
-
-              <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[220px]">
-                <Link href={nextAction.href}>
-                  <Button className="w-full cursor-pointer bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    {nextAction.cta}
-                  </Button>
-                </Link>
-                <p className="text-xs text-foreground/60">
-                  Quick actions and recent activity are just below if you need a different path.
-                </p>
-              </div>
+              <Link href={nextAction.href} className="shrink-0">
+                <Button className="w-full cursor-pointer bg-primary text-white shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
+                  {nextAction.cta}
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
+      </section>
+
+      {/* Quick start (dismissable) */}
+      <AnimatePresence initial={false}>
+        {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
+          <QuickStart
+            items={onboardingItems}
+            done={onboardingProgress.done}
+            total={onboardingProgress.total}
+            pct={onboardingProgress.pct}
+            onDismiss={() => persistOnboarding({ dismissed: true })}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* At-a-glance stats */}
+      <section className="space-y-3">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+            Overview
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">At a glance</h2>
+        </div>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Reveal index={0}><Kpi title="Applications (total)" value={total} tone="slate" /></Reveal>
+          <Reveal index={1}><Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" /></Reveal>
+          <Reveal index={2}><Kpi title="Interviewing" value={interviewing} tone="blue" /></Reveal>
+          <Reveal index={3}><Kpi title="Offers" value={offers} tone="emerald" /></Reveal>
+        </div>
       </section>
 
       {/* KPIs + Goal/Streak */}
@@ -404,37 +439,42 @@ export default function DashboardClient({
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid items-start gap-4 lg:grid-cols-3">
           <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
                   Weekly Goal
                 </div>
-                <div className="mt-1 text-sm text-foreground/80">
-                  {appsThisWeek}/{weeklyGoalTarget} applications
-                </div>
-                <div className="mt-1 text-xs text-foreground/60">
-                  {emailDigestEnabled ? (
-                    <span>Weekly digest is on.</span>
-                  ) : (
-                    <span>
-                      Weekly digest is off.{" "}
-                      <Link href="/settings" className="underline text-primary">
-                        Enable it in settings
-                      </Link>
-                      .
-                    </span>
-                  )}
+                <div className="mt-1 flex items-baseline gap-1.5">
+                  <span className="text-xl font-semibold tabular-nums text-foreground sm:text-2xl">
+                    {appsThisWeek}/{weeklyGoalTarget}
+                  </span>
+                  <span className="text-xs text-foreground/60">applications</span>
                 </div>
               </div>
-              <Sparkles className="h-5 w-5 flex-shrink-0 text-primary" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                <Sparkles className="h-4.5 w-4.5" />
+              </span>
             </div>
             <Progress value={weeklyGoalPct} className="mt-3 h-2" />
+            <div className="mt-2 text-xs text-foreground/60">
+              {emailDigestEnabled ? (
+                <span>Weekly digest is on.</span>
+              ) : (
+                <span>
+                  Weekly digest is off.{" "}
+                  <Link href="/settings" className="underline text-primary">
+                    Enable it in settings
+                  </Link>
+                  .
+                </span>
+              )}
+            </div>
           </Card>
 
           <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
                   Streak
@@ -446,7 +486,9 @@ export default function DashboardClient({
                   Keep up the momentum with one small action today.
                 </p>
               </div>
-              <Flame className="h-6 w-6 flex-shrink-0 text-orange-500" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/15">
+                <Flame className="h-4.5 w-4.5" />
+              </span>
             </div>
           </Card>
 
@@ -520,66 +562,7 @@ export default function DashboardClient({
         </div>
       </section>
 
-      <section className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Kpi title="Applications (total)" value={total} tone="slate" />
-        <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
-        <Kpi title="Interviewing" value={interviewing} tone="blue" />
-        <Kpi title="Offers" value={offers} tone="emerald" />
-      </section>
-
       {!loading && total > 0 && <ApplicationPipeline apps={apps} />}
-
-      {/* Onboarding */}
-      {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
-        <section className="rounded-xl border border-border bg-card/60 px-4 py-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
-                Getting started
-              </div>
-              <div className="mt-1 text-sm text-foreground/80">
-                {onboardingProgress.done}/{onboardingProgress.total} completed
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 shrink-0 rounded-full p-0 hover:bg-foreground/[0.06]"
-              onClick={() => persistOnboarding({ dismissed: true })}
-              aria-label="Dismiss onboarding"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <Progress value={onboardingProgress.pct} className="mt-3 h-2" />
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {onboardingItems.map((it) => (
-              <li
-                key={it.key}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm text-foreground">
-                    {it.done ? "✓ " : ""}
-                    {it.label}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!it.done ? (
-                    <Button asChild size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
-                      <Link href={it.href}>Go</Link>
-                    </Button>
-                  ) : (
-                    <Badge className="border border-success/30 bg-success/10 text-success hover:bg-success/10">
-                      Done
-                    </Badge>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* Activity (main) + secondary rail */}
       <div className="grid gap-6 xl:grid-cols-3">
@@ -592,7 +575,7 @@ export default function DashboardClient({
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
         </div>
-        <div className="grid gap-4 grid-cols-1 2xl:grid-cols-2">
+        <div className="grid items-start gap-4 grid-cols-1 2xl:grid-cols-2">
         <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">

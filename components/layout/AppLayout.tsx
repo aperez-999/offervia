@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import UserMenu from "@/components/layout/UserMenu";
 import Footer from "@/components/public/Footer";
+import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
 
 const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalCommandMenu"), {
@@ -166,14 +167,14 @@ export default function AppLayout({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={[
-                        "flex items-center gap-2 rounded-md px-2 py-1.5 border transition-colors",
+                        "group flex items-center gap-2 rounded-md px-2 py-1.5 border transition-all duration-200",
                         "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                         active
                           ? "border-primary/20 bg-primary/10 text-primary font-medium"
-                          : "border-transparent hover:bg-accent hover:text-accent-foreground",
+                          : "border-transparent hover:bg-accent hover:text-accent-foreground motion-safe:hover:translate-x-0.5",
                       ].join(" ")}
                     >
-                      <Icon className="h-5 w-5 stroke-[1.5]" />
+                      <Icon className="h-5 w-5 stroke-[1.5] transition-transform duration-200 motion-safe:group-hover:scale-110" />
                       <span className="truncate">{item.label}</span>
                     </Link>
                   );
@@ -249,7 +250,7 @@ export default function AppLayout({
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
             <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              {children}
+              <PageTransition>{children}</PageTransition>
             </div>
           </main>
         </div>

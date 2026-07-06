@@ -392,7 +392,7 @@ export default function TemplatesPage() {
             ) : list.map((t) => (
               <article
                 key={t.key}
-                className="flex flex-col rounded-xl border border-border bg-background/60 p-4 shadow-sm transition-colors hover:border-primary/40"
+                className="card-hover flex flex-col rounded-xl border border-border bg-background/60 p-4 shadow-sm"
               >
                 <div className="mb-1 flex items-start justify-between gap-2">
                   <div className="text-sm font-medium text-foreground">

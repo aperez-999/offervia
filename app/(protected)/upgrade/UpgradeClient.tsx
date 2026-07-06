@@ -201,12 +201,16 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
           What Pro unlocks
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {PRO_PERKS.map((p) => {
+          {PRO_PERKS.map((p, i) => {
             const Icon = p.icon;
             return (
-              <div
+              <motion.div
                 key={p.title}
-                className="flex gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 }}
+                className="card-hover flex gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
               >
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -215,7 +219,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                   <p className="text-sm font-medium text-foreground">{p.title}</p>
                   <p className="mt-0.5 text-sm text-foreground/70">{p.body}</p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

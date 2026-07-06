@@ -330,7 +330,7 @@ export default function StudentsPage() {
             ) : filtered.map((d) => (
               <Card
                 key={d.id}
-                className="rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 transition-colors hover:border-primary/40 dark:ring-black/10"
+                className="card-hover rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between gap-2">

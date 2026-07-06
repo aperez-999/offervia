@@ -694,8 +694,8 @@ export default function TrackerPage() {
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-foreground/70">Filter:</span>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2.5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <span className="text-sm font-medium text-foreground/70">Filter:</span>
         <Select
           value={statusFilter}
           onValueChange={(value) => {

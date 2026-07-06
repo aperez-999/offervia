@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, UserRound, LogOut, Palette, CreditCard } from "lucide-react";
+import { Settings, UserRound, LogOut, Palette, CreditCard, Crown } from "lucide-react";
 
 type PlanType = "free" | "pro";
 
@@ -87,13 +87,14 @@ export default function UserMenu({
     <DropdownMenu>
       <div className="flex items-center gap-2">
         <span
-          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
             plan === "pro"
-              ? "bg-success/15 text-success"
+              ? "border border-reward/40 bg-reward/15 text-reward shadow-sm shadow-reward/10"
               : "bg-muted text-muted-foreground"
           }`}
           aria-label={`Plan: ${plan}`}
         >
+          {plan === "pro" && <Crown className="h-3 w-3" />}
           {plan === "pro" ? "Pro" : "Free"}
         </span>
         {plan === "free" && (
