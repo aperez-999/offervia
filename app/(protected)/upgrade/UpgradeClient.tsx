@@ -25,7 +25,7 @@ const COMPARISON = [
     free: `${PLAN_LIMITS.free.job_scans_per_month} / month`,
     pro: `${PLAN_LIMITS.pro.job_scans_per_month} / month`,
   },
-  { label: "Interview sessions", free: "Limited", pro: "Unlimited" },
+  { label: "Interview sessions", free: `${PLAN_LIMITS.free.interview_sessions_per_month} / month`, pro: "Unlimited" },
 ];
 
 const PRO_PERKS = [

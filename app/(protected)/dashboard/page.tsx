@@ -37,6 +37,7 @@ export default async function DashboardPage() {
         resume_tailor_per_month: limits.resume_tailor_per_month,
         coach_messages_per_month: limits.coach_messages_per_month,
         job_scans_per_month: limits.job_scans_per_month,
+        interview_sessions_per_month: limits.interview_sessions_per_month,
       }}
       analytics={analytics}
     />

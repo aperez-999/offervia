@@ -8,6 +8,7 @@ export type RateLimitKind =
   | "scanner"
   | "resume_tailor"
   | "job-scan"
+  | "interview"
   | "tracker_get"
   | "tracker_write"
   | "billing_checkout"
@@ -40,7 +41,7 @@ export function getIpUa(req: Request) {
  */
 export async function checkRateLimitForApi(
   req: Request,
-  kind: "coach" | "scanner" | "resume_tailor" | "job-scan",
+  kind: "coach" | "scanner" | "resume_tailor" | "job-scan" | "interview",
   customLimits?: {
     perMinute?: number;
     perHour?: number;

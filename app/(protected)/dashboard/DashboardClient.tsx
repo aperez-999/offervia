@@ -44,6 +44,7 @@ type PlanLimits = {
   resume_tailor_per_month: number;
   coach_messages_per_month: number;
   job_scans_per_month: number;
+  interview_sessions_per_month: number;
 };
 
 type Application = {
@@ -261,10 +262,11 @@ export default function DashboardClient({
           resumeTailor: usage.resumeTailor,
           coachMessages: usage.coachMessages,
           jobScans: usage.jobScans,
+          interviewSessions: usage.interviewSessions,
         },
         limits,
       }),
-    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor]
+    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor, usage.interviewSessions]
   );
 
   const nearingLimit = useMemo(
@@ -280,6 +282,7 @@ export default function DashboardClient({
       { key: "scan_jd", label: "Run a job scan", href: "/scanner", done: usage.jobScans > 0 },
       { key: "tailor_resume", label: "Tailor a resume", href: "/resume", done: usage.resumeTailor > 0 },
       { key: "coach_chat", label: "Ask the coach something", href: "/coach", done: usage.coachMessages > 0 },
+      { key: "mock_interview", label: "Run a mock interview", href: "/interview", done: usage.interviewSessions > 0 },
       { key: "set_weekly_goal", label: "Set a weekly goal", href: "/settings", done: weeklyGoalTarget > 0 },
       { key: "enable_digest", label: "Enable weekly digest", href: "/settings", done: emailDigestEnabled },
     ];
@@ -523,7 +526,7 @@ export default function DashboardClient({
                           : "font-medium text-foreground"
                       }
                     >
-                      {item.used} / {item.limit}
+                      {item.unlimited ? `${item.used} / ∞` : `${item.used} / ${item.limit}`}
                     </span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
@@ -536,7 +539,7 @@ export default function DashboardClient({
                           ? "bg-warning"
                           : "bg-primary")
                       }
-                      style={{ width: `${item.pct}%` }}
+                      style={{ width: `${item.unlimited ? 6 : item.pct}%` }}
                     />
                   </div>
                 </div>
@@ -743,6 +746,11 @@ export default function DashboardClient({
               <Link href="/scanner" className="block">
                 <ActionCard title="Scan Job Description">
                   Extract keywords and gaps from a job posting.
+                </ActionCard>
+              </Link>
+              <Link href="/interview" className="block">
+                <ActionCard title="Practice Interview">
+                  Run a scored mock interview tailored to your target role.
                 </ActionCard>
               </Link>
               <Link href="/tracker" className="block">

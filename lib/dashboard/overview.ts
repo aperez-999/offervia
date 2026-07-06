@@ -9,12 +9,13 @@ export type DashboardNextAction = {
 };
 
 export type DashboardUsageItem = {
-  key: "resume" | "coach" | "scan";
+  key: "resume" | "coach" | "scan" | "interview";
   label: string;
   used: number;
   limit: number;
   pct: number;
   state: ReturnType<typeof usageState>;
+  unlimited?: boolean;
 };
 
 export function getDashboardNextAction(input: {
@@ -85,14 +86,18 @@ export function getDashboardUsageItems(input: {
     resumeTailor: number;
     coachMessages: number;
     jobScans: number;
+    interviewSessions: number;
   };
   limits: {
     resume_tailor_per_month: number;
     coach_messages_per_month: number;
     job_scans_per_month: number;
+    interview_sessions_per_month: number;
   };
 }): DashboardUsageItem[] {
   const { usage, limits } = input;
+  const UNLIMITED_THRESHOLD = 9999;
+  const interviewUnlimited = limits.interview_sessions_per_month >= UNLIMITED_THRESHOLD;
 
   return [
     {
@@ -118,6 +123,19 @@ export function getDashboardUsageItems(input: {
       limit: limits.job_scans_per_month,
       pct: usagePct(usage.jobScans, limits.job_scans_per_month),
       state: usageState(usagePct(usage.jobScans, limits.job_scans_per_month)),
+    },
+    {
+      key: "interview",
+      label: "Mock Interviews",
+      used: usage.interviewSessions,
+      limit: limits.interview_sessions_per_month,
+      pct: interviewUnlimited
+        ? 0
+        : usagePct(usage.interviewSessions, limits.interview_sessions_per_month),
+      state: interviewUnlimited
+        ? "low"
+        : usageState(usagePct(usage.interviewSessions, limits.interview_sessions_per_month)),
+      unlimited: interviewUnlimited,
     },
   ];
 }
