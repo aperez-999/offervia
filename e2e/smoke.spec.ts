@@ -25,13 +25,12 @@ test.describe("authenticated smoke", () => {
       { path: "/dashboard", heading: /dashboard|welcome/i },
       { path: "/job-packet", heading: /job packet/i },
       { path: "/resume", heading: /resume tailor/i },
+      { path: "/cover-letter", heading: /cover letter/i },
       { path: "/tracker", heading: /job tracker/i },
       { path: "/coach", heading: /interview coach|resume feedback|cover letter help|career advice/i },
       { path: "/settings", heading: /settings/i },
       { path: "/profile", heading: /profile/i },
-      { path: "/resources", heading: /student resources/i },
-      { path: "/templates", heading: /templates/i },
-      { path: "/students", heading: /student exclusives/i },
+      { path: "/student-hub", heading: /student hub/i },
     ];
 
     for (const route of routes) {
