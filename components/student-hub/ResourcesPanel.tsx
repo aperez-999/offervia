@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExternalLink, Tag, CheckCircle2, Bookmark } from "lucide-react";
-import { PageContainer } from "@/components/layout/Page";
+
 
 type Resource = {
   id: string;
@@ -218,7 +218,7 @@ const CATALOG: Resource[] = [
 
 const CATEGORIES = ["All", "Learning", "Practice", "Tools", "Career"] as const;
 
-export default function ResourcesPage() {
+export default function ResourcesPanel() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<(typeof CATEGORIES)[number]>("All");
   const [activeTags, setActiveTags] = useState<string[]>([]);
@@ -261,7 +261,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <PageContainer>
+    <div className="space-y-6">
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <p className="text-xs font-medium uppercase tracking-wide text-primary">Curated library</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -453,6 +453,6 @@ export default function ResourcesPage() {
           </section>
         </div>
       </div>
-    </PageContainer>
+    </div>
   );
 }

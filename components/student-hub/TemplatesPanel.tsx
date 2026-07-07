@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, Copy as CopyIcon, Check as CheckIcon } from "lucide-react";
 import TemplatePreview from "@/components/shared/TemplatePreview";
 import BookmarkButton from "@/components/shared/BookmarkButton";
-import { PageContainer } from "@/components/layout/Page";
 import { useToast } from "@/hooks/use-toast";
 
 /** --------------------
@@ -183,7 +182,7 @@ function renderTemplate(raw: string, vars: Record<string, string | undefined>) {
   return raw.replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k]?.trim() ?? ""));
 }
 
-export default function TemplatesPage() {
+export default function TemplatesPanel() {
   const { toast } = useToast();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   // quick-fill vars (persisted locally)
@@ -278,7 +277,7 @@ export default function TemplatesPage() {
     : "#";
 
   return (
-    <PageContainer>
+    <div className="space-y-6">
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <p className="text-xs font-medium uppercase tracking-wide text-primary">Outreach toolkit</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -464,6 +463,6 @@ export default function TemplatesPage() {
           </a>
         </div>
       )}
-    </PageContainer>
+    </div>
   );
 }

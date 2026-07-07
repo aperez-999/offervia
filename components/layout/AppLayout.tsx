@@ -14,9 +14,7 @@ import {
   MessageSquare,
   MicVocal,
   ClipboardList,
-  BookOpen,
   GraduationCap,
-  Mail,
   Menu,
   X,
 } from "lucide-react";
@@ -47,9 +45,7 @@ const navItems: NavItem[] = [
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Interview", href: "/interview", icon: MicVocal },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
-  { label: "Templates", href: "/templates", icon: Mail },
-  { label: "Resources", href: "/resources", icon: BookOpen },
-  { label: "Student Exclusives", href: "/students", icon: GraduationCap },
+  { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
 ];
 
 type PlanType = "free" | "pro";

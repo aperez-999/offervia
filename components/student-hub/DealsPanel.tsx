@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, ExternalLink, ShieldCheck } from "lucide-react";
-import { PageContainer } from "@/components/layout/Page";
+
 
 type Deal = {
   id: string;
@@ -186,7 +186,7 @@ const CATS = [
   "Coding",
 ] as const;
 
-export default function StudentsPage() {
+export default function DealsPanel() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<(typeof CATS)[number]>("All");
   const [eduOnly, setEduOnly] = useState(false);
@@ -218,7 +218,7 @@ export default function StudentsPage() {
   };
 
   return (
-    <PageContainer>
+    <div className="space-y-6">
       <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <p className="text-xs font-medium uppercase tracking-wide text-primary">Student-only perks</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -369,6 +369,6 @@ export default function StudentsPage() {
           </section>
         </div>
       </div>
-    </PageContainer>
+    </div>
   );
 }

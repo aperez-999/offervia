@@ -4,6 +4,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse"],
 
+  async redirects() {
+    return [
+      { source: "/templates", destination: "/student-hub?tab=templates", permanent: false },
+      { source: "/resources", destination: "/student-hub?tab=resources", permanent: false },
+      { source: "/students", destination: "/student-hub?tab=deals", permanent: false },
+      { source: "/upcoming", destination: "/dashboard", permanent: false },
+    ];
+  },
+
   eslint: {
     ignoreDuringBuilds: false,
   },
