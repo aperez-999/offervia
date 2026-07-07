@@ -9,9 +9,9 @@ export default function Loading() {
         <Skeleton className="mt-2 h-4 w-80" />
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Sidebar (Modules) */}
-        <aside className="w-[260px] shrink-0">
+        <aside className="w-full shrink-0 lg:w-[260px]">
           <div className="rounded-xl border border-border bg-background p-3">
             <Skeleton className="h-3 w-24" />
             <div className="my-2 h-px bg-border" />
