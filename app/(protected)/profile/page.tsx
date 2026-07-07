@@ -5,9 +5,18 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import { SENIORITY_OPTIONS, WORK_PREF_OPTIONS } from "@/lib/profile/career";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const MAX_SIZE_MB = 4;
@@ -29,6 +38,18 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Career profile fields — feed personalization across scanner, resume,
+  // interview, and coach.
+  const [headline, setHeadline] = useState("");
+  const [targetRole, setTargetRole] = useState("");
+  const [seniority, setSeniority] = useState("");
+  const [keySkills, setKeySkills] = useState("");
+  const [locations, setLocations] = useState("");
+  const [workPref, setWorkPref] = useState("");
+  const [yearsExperience, setYearsExperience] = useState("");
+  const [bio, setBio] = useState("");
+  const [savingCareer, setSavingCareer] = useState(false);
 
   const initial = (name || email || "U").trim().charAt(0).toUpperCase();
 
@@ -52,6 +73,31 @@ export default function ProfilePage() {
 
         setName(prof?.full_name ?? authName);
         setAvatarUrl(prof?.avatar_url ?? authAvatar);
+
+        // Career fields live on the same row but may not exist pre-migration;
+        // query separately and ignore a missing-column error.
+        const { data: career } = await supabase
+          .from("profiles")
+          .select(
+            "headline, target_role, seniority, key_skills, locations, work_pref, years_experience, bio"
+          )
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (career) {
+          setHeadline(career.headline ?? "");
+          setTargetRole(career.target_role ?? "");
+          setSeniority(career.seniority ?? "");
+          setKeySkills(career.key_skills ?? "");
+          setLocations(career.locations ?? "");
+          setWorkPref(career.work_pref ?? "");
+          setYearsExperience(
+            typeof career.years_experience === "number"
+              ? String(career.years_experience)
+              : ""
+          );
+          setBio(career.bio ?? "");
+        }
       } finally {
         setLoading(false);
       }
@@ -90,6 +136,40 @@ export default function ProfilePage() {
       toast({ title: "Could not update profile", variant: "destructive" });
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function saveCareer() {
+    try {
+      setSavingCareer(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+
+      const years = yearsExperience.trim() === "" ? null : Number(yearsExperience);
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          id: user.id,
+          headline: headline.trim() || null,
+          target_role: targetRole.trim() || null,
+          seniority: seniority || null,
+          key_skills: keySkills.trim() || null,
+          locations: locations.trim() || null,
+          work_pref: workPref || null,
+          years_experience: years !== null && Number.isFinite(years) ? years : null,
+          bio: bio.trim() || null,
+        },
+        { onConflict: "id" }
+      );
+      if (error) throw error;
+      toast({ title: "Career details saved", description: "Your AI tools will now personalize to this." });
+    } catch {
+      toast({
+        title: "Could not save career details",
+        description: "If this persists, the profile migration may not be applied yet.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingCareer(false);
     }
   }
 
@@ -246,6 +326,132 @@ export default function ProfilePage() {
                   className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save changes"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Career details — powers AI personalization */}
+          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:col-span-full xl:col-start-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-foreground">Career details</CardTitle>
+              <CardDescription className="text-foreground/70">
+                Set this once. Scanner, Resume, Interview, and Coach personalize to it — no more re-typing your role.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-1 sm:col-span-2">
+                <label htmlFor="headline" className="text-sm text-foreground/80">Headline</label>
+                <Input
+                  id="headline"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  className="bg-background/80 text-foreground border-border"
+                  placeholder="e.g. Frontend engineer focused on React & design systems"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <label htmlFor="targetRole" className="text-sm text-foreground/80">Target role</label>
+                <Input
+                  id="targetRole"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  className="bg-background/80 text-foreground border-border"
+                  placeholder="e.g. Senior Product Designer"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <label htmlFor="seniority" className="text-sm text-foreground/80">Seniority</label>
+                <Select value={seniority} onValueChange={setSeniority} disabled={loading}>
+                  <SelectTrigger id="seniority" className="bg-background/80 text-foreground border-border">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SENIORITY_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-1">
+                <label htmlFor="years" className="text-sm text-foreground/80">Years of experience</label>
+                <Input
+                  id="years"
+                  type="number"
+                  min={0}
+                  max={60}
+                  inputMode="numeric"
+                  value={yearsExperience}
+                  onChange={(e) => setYearsExperience(e.target.value)}
+                  className="bg-background/80 text-foreground border-border"
+                  placeholder="e.g. 4"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <label htmlFor="workPref" className="text-sm text-foreground/80">Work preference</label>
+                <Select value={workPref} onValueChange={setWorkPref} disabled={loading}>
+                  <SelectTrigger id="workPref" className="bg-background/80 text-foreground border-border">
+                    <SelectValue placeholder="Select preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WORK_PREF_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-1 sm:col-span-2">
+                <label htmlFor="skills" className="text-sm text-foreground/80">Key skills</label>
+                <Input
+                  id="skills"
+                  value={keySkills}
+                  onChange={(e) => setKeySkills(e.target.value)}
+                  className="bg-background/80 text-foreground border-border"
+                  placeholder="Comma-separated, e.g. React, TypeScript, Figma, user research"
+                  disabled={loading}
+                />
+                <p className="text-xs text-foreground/50">Separate skills with commas.</p>
+              </div>
+
+              <div className="grid gap-1 sm:col-span-2">
+                <label htmlFor="locations" className="text-sm text-foreground/80">Preferred locations</label>
+                <Input
+                  id="locations"
+                  value={locations}
+                  onChange={(e) => setLocations(e.target.value)}
+                  className="bg-background/80 text-foreground border-border"
+                  placeholder="e.g. Remote (US), New York, London"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="grid gap-1 sm:col-span-2">
+                <label htmlFor="bio" className="text-sm text-foreground/80">About you</label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="min-h-24 bg-background/80 text-foreground border-border"
+                  placeholder="A sentence or two on your background, strengths, and what you're looking for."
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="pt-1 sm:col-span-2">
+                <Button
+                  onClick={saveCareer}
+                  disabled={savingCareer || loading}
+                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                >
+                  {savingCareer ? "Saving…" : "Save career details"}
                 </Button>
               </div>
             </CardContent>
