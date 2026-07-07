@@ -65,7 +65,7 @@ export async function POST(req: Request) {
           .gte("created_at", weekAgoIso),
         supabase
           .from("applications")
-          .select("company,role,follow_up_date,status")
+          .select("company,position,follow_up_date,status")
           .eq("user_id", userId)
           .not("follow_up_date", "is", null)
           .gte("follow_up_date", isoDate(now))
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
         `Offers: ${offers}`,
         ``,
         dueList.length ? `Follow-ups due soon:` : `No follow-ups due in the next 7 days.`,
-        ...dueList.map((a) => `- ${a.company} — ${a.role} (${a.status}) on ${a.follow_up_date}`),
+        ...dueList.map((a) => `- ${a.company} — ${a.position} (${a.status}) on ${a.follow_up_date}`),
         ``,
         `Manage email settings in Offervia → Settings.`,
       ].join("\n");
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
                     .map(
                       (a) =>
                         `<li><strong>${escapeHtml(String(a.company))}</strong> — ${escapeHtml(
-                          String(a.role)
+                          String(a.position)
                         )} <span style="color:#6b7280">(${escapeHtml(String(a.status))})</span> on ${escapeHtml(
                           String(a.follow_up_date)
                         )}</li>`
