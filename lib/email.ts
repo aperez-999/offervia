@@ -73,6 +73,7 @@ export async function sendUserDigestEmail(opts: {
   toEmail: string;
   subject: string;
   preheader?: string;
+  subtitle?: string;
   text: string;
   html: string;
 }) {
@@ -82,11 +83,11 @@ export async function sendUserDigestEmail(opts: {
     to: opts.toEmail,
     subject: opts.subject,
     text: opts.text,
-    html: wrapDigestHtml(opts.html, opts.preheader),
+    html: wrapDigestHtml(opts.html, opts.preheader, opts.subtitle),
   });
 }
 
-function wrapDigestHtml(inner: string, preheader?: string) {
+function wrapDigestHtml(inner: string, preheader?: string, subtitle = "Weekly summary") {
   const pre = preheader ? escapeHtml(preheader) : "";
   return `
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${pre}</div>
@@ -94,7 +95,7 @@ function wrapDigestHtml(inner: string, preheader?: string) {
       <div style="max-width:680px;margin:0 auto;padding:20px">
         <div style="margin-bottom:14px">
           <div style="font-weight:700;font-size:18px">Offervia</div>
-          <div style="color:#6b7280;font-size:13px">Weekly summary</div>
+          <div style="color:#6b7280;font-size:13px">${escapeHtml(subtitle)}</div>
         </div>
         <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px">
           ${inner}

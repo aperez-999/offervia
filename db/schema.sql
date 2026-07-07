@@ -105,6 +105,7 @@ create table if not exists public.user_prefs (
   default_mode text,
   weekly_goal integer,
   email_digest boolean not null default false,
+  daily_reminders boolean not null default false,
   onboarding_dismissed boolean not null default false,
   onboarding_completed jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()

@@ -73,7 +73,8 @@ db/audit/rls-verification.sql
 - `POST /api/create-portal-session`
 - `POST /api/stripe-webhook`
 - `POST /api/contact`
-- `POST /api/cron/weekly-digest`
+- `POST /api/cron/weekly-digest` — weekly summary; opt-in via `user_prefs.email_digest`
+- `POST /api/cron/follow-up-reminders` — daily due/overdue reminders; opt-in via `user_prefs.daily_reminders`
 
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL`

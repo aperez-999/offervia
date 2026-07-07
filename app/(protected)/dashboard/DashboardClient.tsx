@@ -55,6 +55,7 @@ type Application = {
   position: string;
   status: "Applied" | "Interviewing" | "Offer" | "Rejected";
   applied_on: string;
+  follow_up_date?: string | null;
   created_at: string;
 };
 
@@ -92,6 +93,11 @@ const PerformanceInsights = dynamic(
 
 const ApplicationPipeline = dynamic(
   () => import("@/components/dashboard/ApplicationPipeline"),
+  { ssr: false }
+);
+
+const FollowUpsDue = dynamic(
+  () => import("@/components/dashboard/FollowUpsDue"),
   { ssr: false }
 );
 
@@ -158,7 +164,7 @@ export default function DashboardClient({
           .maybeSingle(),
         supabase
           .from("applications")
-          .select("id,user_id,company,position,status,applied_on,created_at")
+          .select("id,user_id,company,position,status,applied_on,follow_up_date,created_at")
           .eq("user_id", user.id),
         supabase
           .from("messages")
@@ -566,6 +572,8 @@ export default function DashboardClient({
           </Card>
         </div>
       </section>
+
+      {!loading && total > 0 && <FollowUpsDue apps={apps} />}
 
       {!loading && total > 0 && <ApplicationPipeline apps={apps} />}
 
