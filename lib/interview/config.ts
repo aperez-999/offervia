@@ -15,6 +15,17 @@ export type TranscriptEntry = AnswerFeedback & {
   answer: string;
 };
 
+export type PastInterview = {
+  id: string;
+  roleTitle: string;
+  focus: InterviewFocus;
+  difficulty: InterviewDifficulty;
+  overallScore: number;
+  summary: string;
+  transcript: TranscriptEntry[];
+  createdAt: string;
+};
+
 export const QUESTION_COUNT = 5;
 
 export const FOCUS_OPTIONS: {
