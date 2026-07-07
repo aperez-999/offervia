@@ -32,14 +32,21 @@ export function buildQuestionUserPrompt(input: {
   focus: InterviewFocus;
   difficulty: InterviewDifficulty;
   count: number;
+  profileContext?: string;
 }): string {
-  const { roleTitle, focus, difficulty, count } = input;
+  const { roleTitle, focus, difficulty, count, profileContext } = input;
   return [
     `Role: ${roleTitle}`,
     `Difficulty: ${difficulty}. ${DIFFICULTY_GUIDANCE[difficulty]}`,
     `Focus: ${focus}. ${FOCUS_GUIDANCE[focus]}`,
+    profileContext ? `\n${profileContext}\n` : "",
+    profileContext
+      ? "Tailor questions to the candidate's background and skills above where relevant."
+      : "",
     `Produce exactly ${count} distinct questions, ordered from warm-up to hardest.`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function buildScoreSystemPrompt(): string {
@@ -56,14 +63,18 @@ export function buildScoreUserPrompt(input: {
   focus: InterviewFocus;
   question: string;
   answer: string;
+  profileContext?: string;
 }): string {
-  const { roleTitle, focus, question, answer } = input;
+  const { roleTitle, focus, question, answer, profileContext } = input;
   return [
     `Role: ${roleTitle} (focus: ${focus})`,
+    profileContext ? `\n${profileContext}\n` : "",
     `Question: ${question}`,
     `Candidate answer: ${answer}`,
     "Score this answer for how well it would land in a real interview.",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function buildSummarySystemPrompt(): string {

@@ -51,7 +51,7 @@ import {
 
 /* ------------------------------- Component ------------------------------- */
 
-export default function ResumeWizard() {
+export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: string }) {
   const router = useRouter();
   const search = useSearchParams();
   const { toast } = useToast();
@@ -67,7 +67,7 @@ export default function ResumeWizard() {
 
   // Step 2: company targeting
   const [companyName, setCompanyName] = useState("");
-  const [roleTitle, setRoleTitle] = useState("");
+  const [roleTitle, setRoleTitle] = useState(defaultRole);
   const [location, setLocation] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
 

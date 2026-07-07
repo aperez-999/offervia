@@ -179,11 +179,17 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
   );
 }
 
-export default function InterviewStudio({ plan = "free" }: { plan?: PlanType }) {
+export default function InterviewStudio({
+  plan = "free",
+  defaultRole = "",
+}: {
+  plan?: PlanType;
+  defaultRole?: string;
+}) {
   const { toast } = useToast();
 
   const [phase, setPhase] = useState<Phase>("setup");
-  const [roleTitle, setRoleTitle] = useState("");
+  const [roleTitle, setRoleTitle] = useState(defaultRole);
   const [focus, setFocus] = useState<InterviewFocus>("mixed");
   const [difficulty, setDifficulty] = useState<InterviewDifficulty>("standard");
 

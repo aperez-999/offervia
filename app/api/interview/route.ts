@@ -7,6 +7,8 @@ import { getServiceSupabase } from "@/lib/supabase/service";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { QUESTION_COUNT } from "@/lib/interview/config";
 import type { AnswerFeedback, TranscriptEntry } from "@/lib/interview/config";
+import { readCareerProfile } from "@/lib/profile/read";
+import { buildProfileContext } from "@/lib/profile/career";
 import {
   buildQuestionSystemPrompt,
   buildQuestionUserPrompt,
@@ -131,6 +133,9 @@ export async function POST(req: Request) {
 
   const supabase = getServiceSupabase();
 
+  // Personalize prompts with the candidate's career profile (empty-safe).
+  const profileContext = buildProfileContext(await readCareerProfile(supabase, userId));
+
   try {
     if (parsed.data.action === "start") {
       const gate = await checkFeatureGate(userId, "interview_session");
@@ -145,7 +150,7 @@ export async function POST(req: Request) {
       const { roleTitle, focus, difficulty } = parsed.data;
       const raw = await groqJson(
         buildQuestionSystemPrompt(),
-        buildQuestionUserPrompt({ roleTitle, focus, difficulty, count: QUESTION_COUNT }),
+        buildQuestionUserPrompt({ roleTitle, focus, difficulty, count: QUESTION_COUNT, profileContext }),
         700
       );
 
@@ -225,6 +230,7 @@ export async function POST(req: Request) {
             focus: session.focus,
             question,
             answer,
+            profileContext,
           }),
           500
         );
