@@ -38,6 +38,7 @@ export default async function DashboardPage() {
         coach_messages_per_month: limits.coach_messages_per_month,
         job_scans_per_month: limits.job_scans_per_month,
         interview_sessions_per_month: limits.interview_sessions_per_month,
+        cover_letters_per_month: limits.cover_letters_per_month,
       }}
       analytics={analytics}
     />

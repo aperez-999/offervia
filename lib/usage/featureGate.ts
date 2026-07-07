@@ -2,7 +2,7 @@ import { getUserSubscription } from "@/lib/subscription"
 import { getPlanLimits } from "@/lib/plans"
 import { getServiceSupabase } from "@/lib/supabase/service"
 
-export type GatedFeature = "resume_tailor" | "coach" | "job_scan" | "interview_session"
+export type GatedFeature = "resume_tailor" | "coach" | "job_scan" | "interview_session" | "cover_letter"
 
 export type FeatureGateResult =
   | { allowed: true }
@@ -14,11 +14,13 @@ const FEATURE_TO_LIMIT_KEY: Record<
   | "coach_messages_per_month"
   | "job_scans_per_month"
   | "interview_sessions_per_month"
+  | "cover_letters_per_month"
 > = {
   resume_tailor: "resume_tailor_per_month",
   coach: "coach_messages_per_month",
   job_scan: "job_scans_per_month",
   interview_session: "interview_sessions_per_month",
+  cover_letter: "cover_letters_per_month",
 }
 
 const FEATURE_TO_COLUMN: Record<
@@ -27,11 +29,13 @@ const FEATURE_TO_COLUMN: Record<
   | "coach_message_count"
   | "job_scan_count"
   | "interview_session_count"
+  | "cover_letter_count"
 > = {
   resume_tailor: "resume_tailor_count",
   coach: "coach_message_count",
   job_scan: "job_scan_count",
   interview_session: "interview_session_count",
+  cover_letter: "cover_letter_count",
 }
 
 function getCurrentMonth() {
@@ -52,22 +56,32 @@ export async function checkFeatureGate(
 
   const primary = await supabase
     .from("usage_snapshots")
-    .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count")
+    .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count, cover_letter_count")
     .eq("user_id", userId)
     .eq("month", month)
     .maybeSingle()
 
   let data = primary.data
-  // Fallback for databases where the interview migration hasn't run yet, so
-  // existing feature limits are never bypassed by a missing-column error.
+  // Progressive fallbacks so a database missing the newest columns never
+  // bypasses limits (a missing column returns an error, not zero rows).
   if (primary.error) {
-    const legacy = await supabase
+    const withInterview = await supabase
       .from("usage_snapshots")
-      .select("resume_tailor_count, coach_message_count, job_scan_count")
+      .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count")
       .eq("user_id", userId)
       .eq("month", month)
       .maybeSingle()
-    data = legacy.data as typeof data
+    if (withInterview.error) {
+      const legacy = await supabase
+        .from("usage_snapshots")
+        .select("resume_tailor_count, coach_message_count, job_scan_count")
+        .eq("user_id", userId)
+        .eq("month", month)
+        .maybeSingle()
+      data = legacy.data as typeof data
+    } else {
+      data = withInterview.data as typeof data
+    }
   }
 
   const column = FEATURE_TO_COLUMN[feature]

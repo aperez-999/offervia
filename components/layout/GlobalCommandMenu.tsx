@@ -20,6 +20,7 @@ import {
   Search,
   LayoutDashboard,
   FileText,
+  PenLine,
   Search as SearchIcon,
   MessageSquare,
   ClipboardList,
@@ -42,6 +43,7 @@ export const NAV_ITEMS: Nav[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Job Packet", href: "/job-packet", icon: Briefcase },
   { label: "Resume", href: "/resume", icon: FileText },
+  { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Interview", href: "/interview", icon: MicVocal },
@@ -128,6 +130,11 @@ export default function GlobalCommandMenu() {
               <FileText className="mr-2 h-4 w-4" />
               Tailor Resume
               <CommandShortcut>R</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => go("/cover-letter")}>
+              <PenLine className="mr-2 h-4 w-4" />
+              Write Cover Letter
+              <CommandShortcut>L</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => go("/scanner")}>
               <SearchIcon className="mr-2 h-4 w-4" />

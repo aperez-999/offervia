@@ -40,6 +40,15 @@ For an existing project that predates persisted onboarding fields:
 db/onboarding.sql
 ```
 
+For existing projects, apply these additive feature migrations (safe to re-run):
+
+```bash
+db/interview_sessions.sql      # interview_session_count usage column
+db/cover_letter_usage.sql      # cover_letter_count usage column
+db/career_profile.sql          # career profile fields
+db/daily_reminders_pref.sql    # daily follow-up reminder opt-in
+```
+
 Before release, also review:
 
 ```bash
@@ -56,6 +65,7 @@ db/audit/rls-verification.sql
 
 ## API Routes
 - `POST /api/resume-tailor`
+- `POST /api/cover-letter`
 - `POST /api/job-scan`
 - `POST /api/coach`
 - `GET|POST|PATCH|DELETE /api/tracker`

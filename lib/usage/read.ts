@@ -9,6 +9,7 @@ export type UsageSnapshot = {
   coachMessages: number
   jobScans: number
   interviewSessions: number
+  coverLetters: number
 }
 
 export async function getUsageSnapshot(userId: string): Promise<UsageSnapshot> {
@@ -17,25 +18,35 @@ export async function getUsageSnapshot(userId: string): Promise<UsageSnapshot> {
 
   const primary = await supabase
     .from("usage_snapshots")
-    .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count")
+    .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count, cover_letter_count")
     .eq("user_id", userId)
     .eq("month", month)
     .maybeSingle()
 
   let data = primary.data
-  // Fallback for databases where the interview migration hasn't run yet.
+  // Progressive fallbacks for databases missing the newest columns.
   if (primary.error) {
-    const legacy = await supabase
+    const withInterview = await supabase
       .from("usage_snapshots")
-      .select("resume_tailor_count, coach_message_count, job_scan_count")
+      .select("resume_tailor_count, coach_message_count, job_scan_count, interview_session_count")
       .eq("user_id", userId)
       .eq("month", month)
       .maybeSingle()
-    data = legacy.data as typeof data
+    if (withInterview.error) {
+      const legacy = await supabase
+        .from("usage_snapshots")
+        .select("resume_tailor_count, coach_message_count, job_scan_count")
+        .eq("user_id", userId)
+        .eq("month", month)
+        .maybeSingle()
+      data = legacy.data as typeof data
+    } else {
+      data = withInterview.data as typeof data
+    }
   }
 
   if (!data) {
-    return { resumeTailor: 0, coachMessages: 0, jobScans: 0, interviewSessions: 0 }
+    return { resumeTailor: 0, coachMessages: 0, jobScans: 0, interviewSessions: 0, coverLetters: 0 }
   }
 
   return {
@@ -43,5 +54,6 @@ export async function getUsageSnapshot(userId: string): Promise<UsageSnapshot> {
     coachMessages: Number(data.coach_message_count) || 0,
     jobScans: Number(data.job_scan_count) || 0,
     interviewSessions: Number(data.interview_session_count) || 0,
+    coverLetters: Number((data as { cover_letter_count?: number }).cover_letter_count) || 0,
   }
 }

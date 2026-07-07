@@ -1,0 +1,165 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import {
+  coverLetterSystemPrompt,
+  type CoverLetterTone,
+} from "@/lib/prompts/cover-letter-system";
+import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { incrementUsage } from "@/lib/usage/increment";
+import { getServiceSupabase } from "@/lib/supabase/service";
+import { readCareerProfile } from "@/lib/profile/read";
+import { buildProfileContext } from "@/lib/profile/career";
+import { fail } from "@/lib/api/response";
+import { captureServerException } from "@/lib/monitoring/sentry";
+
+const coverLetterSchema = z
+  .object({
+    resumeText: z.string().max(30000),
+    jobDescription: z.string().max(20000),
+    companyName: z.string().max(200).optional(),
+    roleTitle: z.string().max(200).optional(),
+    tone: z.enum(["professional", "warm", "confident"]).optional(),
+  })
+  .strict();
+
+function normalizeText(s: string) {
+  return (s || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\t/g, "  ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function sanitizeOutput(s: string) {
+  return (s || "")
+    .replace(/%PDF-[\s\S]*/g, "")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[[^\]]*your name[^\]]*\]/gi, "")
+    .replace(/\[[^\]]*company[^\]]*\]/gi, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+export async function POST(req: Request) {
+  const { checkRateLimitForApi } = await import("@/lib/rate-limit");
+  const rl = await checkRateLimitForApi(req, "cover_letter", {
+    perMinute: 4,
+    perDay: 60,
+  });
+
+  if (!rl.ok) {
+    const retry = rl.retryAfterSeconds || 60;
+    const msg =
+      rl.reason === "unauthorized"
+        ? "Authentication required."
+        : "Too many requests. Try again soon.";
+    return fail(
+      rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
+      msg,
+      rl.reason === "unauthorized" ? 401 : 429,
+      { headers: { "Retry-After": String(retry) } },
+    );
+  }
+
+  const userId = rl.userId!;
+
+  try {
+    const gate = await checkFeatureGate(userId, "cover_letter");
+    if (!gate.allowed) {
+      return fail(
+        "PLAN_LIMIT_REACHED",
+        "You've reached your monthly cover letter limit. Upgrade to Pro to continue.",
+        403,
+      );
+    }
+
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return fail("INVALID_INPUT", "Invalid request.", 400);
+    }
+
+    const parsed = coverLetterSchema.safeParse(body);
+    if (!parsed.success) {
+      return fail("INVALID_INPUT", "Invalid request.", 400);
+    }
+
+    let resumeText = normalizeText(parsed.data.resumeText);
+    let jobDescription = normalizeText(parsed.data.jobDescription);
+    const companyName = normalizeText(parsed.data.companyName || "");
+    const roleTitle = normalizeText(parsed.data.roleTitle || "");
+    const tone: CoverLetterTone = parsed.data.tone || "professional";
+
+    if (resumeText.length < 100) {
+      return fail("INVALID_INPUT", "Add more resume detail to generate a strong letter.", 400);
+    }
+    if (jobDescription.length < 20) {
+      return fail("INVALID_INPUT", "Add a job description to tailor the letter.", 400);
+    }
+
+    // Keep payload within free-tier context/TPM limits.
+    const JD_MAX = 1200;
+    const RESUME_MAX = 4500;
+    if (jobDescription.length > JD_MAX) jobDescription = jobDescription.slice(0, JD_MAX);
+    if (resumeText.length > RESUME_MAX) resumeText = resumeText.slice(0, RESUME_MAX);
+
+    const supabase = getServiceSupabase();
+    const profileContext = buildProfileContext(await readCareerProfile(supabase, userId));
+
+    const groq = getGroqClient();
+    const completion = await groq.chat.completions.create({
+      model: DEFAULT_GROQ_MODEL,
+      temperature: 0.7,
+      max_tokens: 900,
+      messages: [
+        {
+          role: "system",
+          content: coverLetterSystemPrompt({
+            companyName,
+            roleTitle,
+            tone,
+            resumeContent: resumeText,
+            jobDescription,
+            profileContext: profileContext || undefined,
+          }),
+        },
+        {
+          role: "user",
+          content: "Write the cover letter now, following every rule above.",
+        },
+      ],
+    });
+
+    const raw = completion.choices?.[0]?.message?.content || "";
+    const cleaned = sanitizeOutput(raw);
+
+    if (cleaned.length < 100) {
+      return fail("SERVER_ERROR", "Something went wrong. Try again.", 500);
+    }
+
+    await incrementUsage(userId, "cover_letter");
+    return NextResponse.json({ content: cleaned, tone });
+  } catch (err: unknown) {
+    captureServerException(err, { route: "api/cover-letter" });
+    const msg = err instanceof Error ? err.message : "Cover letter generation failed";
+    if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
+      return fail(
+        "INVALID_INPUT",
+        "Your resume and job description are too long for a single pass. Try shortening them.",
+        413,
+      );
+    }
+    return fail("SERVER_ERROR", "Something went wrong.", 500);
+  }
+}

@@ -9,7 +9,7 @@ export type DashboardNextAction = {
 };
 
 export type DashboardUsageItem = {
-  key: "resume" | "coach" | "scan" | "interview";
+  key: "resume" | "coach" | "scan" | "interview" | "cover_letter";
   label: string;
   used: number;
   limit: number;
@@ -87,12 +87,14 @@ export function getDashboardUsageItems(input: {
     coachMessages: number;
     jobScans: number;
     interviewSessions: number;
+    coverLetters: number;
   };
   limits: {
     resume_tailor_per_month: number;
     coach_messages_per_month: number;
     job_scans_per_month: number;
     interview_sessions_per_month: number;
+    cover_letters_per_month: number;
   };
 }): DashboardUsageItem[] {
   const { usage, limits } = input;
@@ -136,6 +138,14 @@ export function getDashboardUsageItems(input: {
         ? "low"
         : usageState(usagePct(usage.interviewSessions, limits.interview_sessions_per_month)),
       unlimited: interviewUnlimited,
+    },
+    {
+      key: "cover_letter",
+      label: "Cover Letters",
+      used: usage.coverLetters,
+      limit: limits.cover_letters_per_month,
+      pct: usagePct(usage.coverLetters, limits.cover_letters_per_month),
+      state: usageState(usagePct(usage.coverLetters, limits.cover_letters_per_month)),
     },
   ];
 }

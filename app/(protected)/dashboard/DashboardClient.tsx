@@ -45,6 +45,7 @@ type PlanLimits = {
   coach_messages_per_month: number;
   job_scans_per_month: number;
   interview_sessions_per_month: number;
+  cover_letters_per_month: number;
 };
 
 type Application = {
@@ -263,10 +264,11 @@ export default function DashboardClient({
           coachMessages: usage.coachMessages,
           jobScans: usage.jobScans,
           interviewSessions: usage.interviewSessions,
+          coverLetters: usage.coverLetters,
         },
         limits,
       }),
-    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor, usage.interviewSessions]
+    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor, usage.interviewSessions, usage.coverLetters]
   );
 
   const nearingLimit = useMemo(

@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           "/dashboard/",
           "/job-packet/",
           "/resume/",
+          "/cover-letter/",
           "/scanner/",
           "/coach/",
           "/interview/",

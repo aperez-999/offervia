@@ -5,6 +5,7 @@ export type UsageFeature =
   | "coach"
   | "job_scan"
   | "interview_session"
+  | "cover_letter"
 
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7)
@@ -32,12 +33,17 @@ export async function incrementUsage(
       coach_message_count: feature === "coach" ? 1 : 0,
       job_scan_count: feature === "job_scan" ? 1 : 0,
       interview_session_count: feature === "interview_session" ? 1 : 0,
+      cover_letter_count: feature === "cover_letter" ? 1 : 0,
     }
     const { error } = await supabase.from("usage_snapshots").insert(insertRow)
-    // Fallback for databases where the interview migration hasn't run yet.
+    // Progressive fallbacks for databases missing the newest columns.
     if (error) {
-      delete insertRow.interview_session_count
-      await supabase.from("usage_snapshots").insert(insertRow)
+      delete insertRow.cover_letter_count
+      const retry = await supabase.from("usage_snapshots").insert(insertRow)
+      if (retry.error) {
+        delete insertRow.interview_session_count
+        await supabase.from("usage_snapshots").insert(insertRow)
+      }
     }
   } else {
     const updateRow: Record<string, number> = {
@@ -51,14 +57,25 @@ export async function incrementUsage(
         feature === "interview_session"
           ? (data.interview_session_count ?? 0) + 1
           : (data.interview_session_count ?? 0),
+      cover_letter_count:
+        feature === "cover_letter"
+          ? (data.cover_letter_count ?? 0) + 1
+          : (data.cover_letter_count ?? 0),
     }
     const { error } = await supabase
       .from("usage_snapshots")
       .update(updateRow)
       .eq("id", data.id)
     if (error) {
-      delete updateRow.interview_session_count
-      await supabase.from("usage_snapshots").update(updateRow).eq("id", data.id)
+      delete updateRow.cover_letter_count
+      const retry = await supabase
+        .from("usage_snapshots")
+        .update(updateRow)
+        .eq("id", data.id)
+      if (retry.error) {
+        delete updateRow.interview_session_count
+        await supabase.from("usage_snapshots").update(updateRow).eq("id", data.id)
+      }
     }
   }
 }
