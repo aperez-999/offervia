@@ -123,6 +123,31 @@ export default function PerformanceInsights({
           </div>
         </>
       )}
+
+      {analytics.skillGaps.length > 0 && (
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="text-sm font-medium text-foreground">
+            Recurring skill gaps
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Skills flagged as missing most often across your scans — prioritize
+            these on your resume.
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {analytics.skillGaps.map((gap) => (
+              <li
+                key={gap.skill}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-sm text-amber-700 dark:text-amber-400"
+              >
+                <span className="font-medium">{gap.skill}</span>
+                <span className="rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold tabular-nums">
+                  {gap.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
