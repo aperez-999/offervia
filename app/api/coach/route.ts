@@ -180,7 +180,9 @@ export async function POST(req: Request) {
       const systemPrompt = buildSystemPrompt(mode, responseMode, profileContext);
       const modifiedMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
         { role: "system", content: systemPrompt },
-        ...messages.slice(1),
+        ...messages
+          .slice(1)
+          .filter((m) => m.role === "user" || m.role === "assistant"),
       ];
 
       const groq = getGroqClient();
