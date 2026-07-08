@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Copy, Download, FileText, Loader2, Sparkles } from "lucide-react";
+import { Copy, Download, FileText, Loader2, Sparkles, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Dropzone from "@/components/resume/Dropzone";
 import { useToast } from "@/hooks/use-toast";
-import { postJson } from "@/lib/safe-fetch";
+import { postJson, postForm, type SafeFetchResult } from "@/lib/safe-fetch";
+import { printAsPdf } from "@/lib/print-pdf";
 import { Reveal } from "@/components/motion/Reveal";
 import {
   COVER_LETTER_TONES,
@@ -27,6 +29,8 @@ export default function CoverLetterStudio({
   const reduceMotion = useReducedMotion();
 
   const [resumeText, setResumeText] = useState("");
+  const [resumeMode, setResumeMode] = useState<"paste" | "upload">("paste");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [roleTitle, setRoleTitle] = useState(defaultRole);
@@ -36,40 +40,60 @@ export default function CoverLetterStudio({
   const [letter, setLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const hasResume =
+    resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 100;
   const canGenerate =
-    resumeText.trim().length >= 100 && jobDescription.trim().length >= 20 && !generating;
+    hasResume && jobDescription.trim().length >= 20 && !generating;
+
+  function handleLimitReached() {
+    const msg =
+      "You've reached your monthly cover letter limit. Upgrade to Pro to continue.";
+    setError(msg);
+    toast({
+      title: "Limit reached",
+      description: msg,
+      variant: "upgrade",
+      duration: 8000,
+      action: (
+        <Button
+          size="default"
+          className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          onClick={() => router.push("/upgrade")}
+        >
+          Upgrade to Pro
+        </Button>
+      ),
+    });
+  }
 
   async function handleGenerate() {
     if (!canGenerate) return;
     setGenerating(true);
     setError(null);
     try {
-      const resp = await postJson<{ content?: string; tone?: string }>(
-        "/api/cover-letter",
-        { resumeText, jobDescription, companyName, roleTitle, tone },
-        { timeoutMs: 45_000 },
-      );
+      let resp: SafeFetchResult<{ content?: string; tone?: string }>;
+
+      if (resumeMode === "upload" && resumeFile) {
+        const form = new FormData();
+        form.append("file", resumeFile);
+        form.append("jobDescription", jobDescription);
+        form.append("companyName", companyName);
+        form.append("roleTitle", roleTitle);
+        form.append("tone", tone);
+        resp = await postForm<{ content?: string }>("/api/cover-letter", form, {
+          timeoutMs: 45_000,
+        });
+      } else {
+        resp = await postJson<{ content?: string; tone?: string }>(
+          "/api/cover-letter",
+          { resumeText, jobDescription, companyName, roleTitle, tone },
+          { timeoutMs: 45_000 },
+        );
+      }
 
       if (!resp.ok) {
         if (resp.status === 403) {
-          const msg =
-            "You've reached your monthly cover letter limit. Upgrade to Pro to continue.";
-          setError(msg);
-          toast({
-            title: "Limit reached",
-            description: msg,
-            variant: "upgrade",
-            duration: 8000,
-            action: (
-              <Button
-                size="default"
-                className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                onClick={() => router.push("/upgrade")}
-              >
-                Upgrade to Pro
-              </Button>
-            ),
-          });
+          handleLimitReached();
           return;
         }
         const msg =
@@ -154,24 +178,73 @@ export default function CoverLetterStudio({
           </div>
 
           <div>
-            <label
-              htmlFor="cl-resume"
-              className="mb-1.5 block text-sm font-medium text-foreground"
-            >
-              Your resume / experience
-            </label>
-            <Textarea
-              id="cl-resume"
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste your resume text or a summary of your experience…"
-              className="min-h-[160px] resize-y"
-            />
-            <p className="mt-1 text-xs text-foreground/50">
-              {resumeText.trim().length < 100
-                ? `Add at least ${100 - resumeText.trim().length} more characters.`
-                : "Looks good."}
-            </p>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label
+                htmlFor="cl-resume"
+                className="block text-sm font-medium text-foreground"
+              >
+                Your resume / experience
+              </label>
+              <div
+                className="inline-flex rounded-lg border border-border bg-background/50 p-0.5"
+                role="tablist"
+                aria-label="Resume input method"
+              >
+                {(["paste", "upload"] as const).map((m) => {
+                  const active = resumeMode === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setResumeMode(m)}
+                      className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground/60 hover:text-foreground"
+                      }`}
+                    >
+                      {m === "paste" ? "Paste" : "Upload"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {resumeMode === "paste" ? (
+              <>
+                <Textarea
+                  id="cl-resume"
+                  value={resumeText}
+                  onChange={(e) => setResumeText(e.target.value)}
+                  placeholder="Paste your resume text or a summary of your experience…"
+                  className="min-h-[160px] resize-y"
+                />
+                <p className="mt-1 text-xs text-foreground/50">
+                  {resumeText.trim().length < 100
+                    ? `Add at least ${100 - resumeText.trim().length} more characters.`
+                    : "Looks good."}
+                </p>
+              </>
+            ) : resumeFile ? (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background/60 p-3">
+                <span className="flex min-w-0 items-center gap-2 text-sm text-foreground">
+                  <FileText className="size-4 shrink-0 text-primary" />
+                  <span className="truncate">{resumeFile.name}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setResumeFile(null)}
+                  className="shrink-0 rounded-md p-1 text-foreground/50 transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  aria-label="Remove file"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ) : (
+              <Dropzone onFile={(f) => setResumeFile(f)} fileName={undefined} maxSizeMb={5} />
+            )}
           </div>
 
           <div>
@@ -257,6 +330,19 @@ export default function CoverLetterStudio({
               </Button>
               <Button variant="outline" size="sm" onClick={download}>
                 <Download className="size-3.5" /> .txt
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  printAsPdf(
+                    [companyName, roleTitle].filter(Boolean).join(" · ") ||
+                      "Cover letter",
+                    letter,
+                  )
+                }
+              >
+                <Printer className="size-3.5" /> PDF
               </Button>
             </div>
           ) : null}

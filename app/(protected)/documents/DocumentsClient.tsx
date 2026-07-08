@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { printAsPdf } from "@/lib/print-pdf";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -59,25 +60,6 @@ function formatDate(iso: string) {
   } catch {
     return iso.slice(0, 10);
   }
-}
-
-function printAsPdf(title: string, content: string) {
-  const w = window.open("", "_blank", "noopener,noreferrer,width=800,height=1000");
-  if (!w) return;
-  const safe = content
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8" />
-    <title>${title.replace(/</g, "")}</title>
-    <style>
-      @page { margin: 24mm; }
-      body { font: 12pt/1.6 -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #111; white-space: pre-wrap; }
-    </style></head><body>${safe}</body></html>`);
-  w.document.close();
-  w.focus();
-  // Give the new document a tick to render before printing.
-  setTimeout(() => w.print(), 250);
 }
 
 export default function DocumentsClient() {
