@@ -16,7 +16,12 @@ export const metadata: Metadata = createPageMetadata({
   index: false,
 });
 
-export default async function CoverLetterPage() {
+export default async function CoverLetterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string; company?: string }>;
+}) {
+  const sp = await searchParams;
   const cookieStore = await cookies();
   const supabase = createSupabaseServerClient({
     get(name: string) {
@@ -43,7 +48,11 @@ export default async function CoverLetterPage() {
         title="Cover letter generator"
         description="Turn your resume and a job description into a tailored, human-sounding cover letter — pick a tone and make it yours."
       />
-      <CoverLetterStudio plan={subscription.plan} defaultRole={career.targetRole} />
+      <CoverLetterStudio
+        plan={subscription.plan}
+        defaultRole={sp.role || career.targetRole}
+        defaultCompany={sp.company || ""}
+      />
     </PageContainer>
   );
 }

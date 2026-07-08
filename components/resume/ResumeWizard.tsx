@@ -134,6 +134,13 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     // intentionally run only when URL params change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+  // Prefill role/company when deep-linked from an application workspace.
+  useEffect(() => {
+    const role = search.get("role");
+    const company = search.get("company");
+    if (role) setRoleTitle(role);
+    if (company) setCompanyName(company);
+  }, [search]);
   useEffect(() => {
     try {
       localStorage.setItem(RESUME_JD_LS_KEY, jd);

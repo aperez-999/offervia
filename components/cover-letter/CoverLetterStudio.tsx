@@ -20,9 +20,11 @@ import type { PlanType } from "@/lib/plans";
 
 export default function CoverLetterStudio({
   defaultRole = "",
+  defaultCompany = "",
 }: {
   plan?: PlanType;
   defaultRole?: string;
+  defaultCompany?: string;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -32,7 +34,7 @@ export default function CoverLetterStudio({
   const [resumeMode, setResumeMode] = useState<"paste" | "upload">("paste");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
-  const [companyName, setCompanyName] = useState("");
+  const [companyName, setCompanyName] = useState(defaultCompany);
   const [roleTitle, setRoleTitle] = useState(defaultRole);
   const [tone, setTone] = useState<CoverLetterTone>("professional");
 

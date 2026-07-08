@@ -847,6 +847,14 @@ export default function TrackerPage() {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => router.push(`/tracker/${app.id}`)}
+                            className="h-7 border-border px-2 text-xs text-foreground hover:bg-foreground/[0.06]"
+                          >
+                            Open
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => openEdit(app)}
                             className="h-7 border-border px-2 text-xs text-foreground hover:bg-foreground/[0.06]"
                           >
@@ -961,6 +969,14 @@ export default function TrackerPage() {
                       {app.applied_on}
                     </TableCell>
                     <TableCell className="space-x-1 text-right sm:space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/tracker/${app.id}`)}
+                        className="border-border text-foreground hover:bg-foreground/[0.06]"
+                      >
+                        Open
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
