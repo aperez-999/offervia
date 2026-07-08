@@ -13,6 +13,7 @@ import { buildProfileContext } from "@/lib/profile/career";
 import { fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { saveDocument } from "@/lib/documents/save";
+import { extractResumeFile } from "@/lib/files/extract";
 
 const coverLetterSchema = z
   .object({
@@ -84,23 +85,59 @@ export async function POST(req: Request) {
       );
     }
 
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+    const contentType = req.headers.get("content-type") || "";
+    let resumeTextRaw = "";
+    let jobDescriptionRaw = "";
+    let companyNameRaw = "";
+    let roleTitleRaw = "";
+    let tone: CoverLetterTone = "professional";
+
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      jobDescriptionRaw = ((form.get("jobDescription") as string) || "").slice(0, 20000);
+      companyNameRaw = ((form.get("companyName") as string) || "").slice(0, 200);
+      roleTitleRaw = ((form.get("roleTitle") as string) || "").slice(0, 200);
+      const toneVal = (form.get("tone") as string) || "professional";
+      if (toneVal === "warm" || toneVal === "confident") tone = toneVal;
+
+      const pastedResume = ((form.get("resumeText") as string) || "").slice(0, 30000);
+      const file = form.get("file") as File | null;
+      if (file && file.size > 0) {
+        const extracted = await extractResumeFile(file, "api/cover-letter");
+        if (!extracted.ok) {
+          return fail(
+            extracted.status === 500 ? "SERVER_ERROR" : "INVALID_INPUT",
+            extracted.message,
+            extracted.status,
+          );
+        }
+        resumeTextRaw = extracted.text;
+      } else {
+        resumeTextRaw = pastedResume;
+      }
+    } else {
+      let body: unknown;
+      try {
+        body = await req.json();
+      } catch {
+        return fail("INVALID_INPUT", "Invalid request.", 400);
+      }
+
+      const parsed = coverLetterSchema.safeParse(body);
+      if (!parsed.success) {
+        return fail("INVALID_INPUT", "Invalid request.", 400);
+      }
+      resumeTextRaw = parsed.data.resumeText;
+      jobDescriptionRaw = parsed.data.jobDescription;
+      companyNameRaw = parsed.data.companyName || "";
+      roleTitleRaw = parsed.data.roleTitle || "";
+      tone = parsed.data.tone || "professional";
     }
 
-    const parsed = coverLetterSchema.safeParse(body);
-    if (!parsed.success) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
-    }
-
-    let resumeText = normalizeText(parsed.data.resumeText);
-    let jobDescription = normalizeText(parsed.data.jobDescription);
-    const companyName = normalizeText(parsed.data.companyName || "");
-    const roleTitle = normalizeText(parsed.data.roleTitle || "");
-    const tone: CoverLetterTone = parsed.data.tone || "professional";
+    let resumeText = normalizeText(resumeTextRaw);
+    let jobDescription = normalizeText(jobDescriptionRaw);
+    const companyName = normalizeText(companyNameRaw);
+    const roleTitle = normalizeText(roleTitleRaw);
 
     if (resumeText.length < 100) {
       return fail("INVALID_INPUT", "Add more resume detail to generate a strong letter.", 400);
