@@ -23,13 +23,13 @@ export function createPageMetadata({
 }: CreatePageMetadataOptions = {}): Metadata {
   const pageUrl = absoluteUrl(path);
   const normalizedTitle = title?.trim();
-  const socialTitle =
-    !normalizedTitle || normalizedTitle === SITE_NAME
-      ? SITE_DEFAULT_TITLE
-      : `${normalizedTitle} | ${SITE_NAME}`;
+  const isBrandTitle = !normalizedTitle || normalizedTitle === SITE_NAME;
+  const socialTitle = isBrandTitle
+    ? SITE_DEFAULT_TITLE
+    : `${normalizedTitle} | ${SITE_NAME}`;
 
   return {
-    title: normalizedTitle,
+    title: isBrandTitle ? { absolute: SITE_DEFAULT_TITLE } : normalizedTitle,
     description,
     alternates: {
       canonical: pageUrl,
