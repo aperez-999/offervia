@@ -36,7 +36,7 @@ export default function WizardSidebar({
                 <span
                   className={cn(
                     "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs",
-                    active ? "bg-primary text-white" : "bg-foreground/10 text-foreground/80"
+                    active ? "bg-primary-button text-white" : "bg-foreground/10 text-foreground/80"
                   )}
                 >
                   {index + 1}

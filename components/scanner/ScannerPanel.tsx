@@ -273,7 +273,7 @@ export default function ScannerPanel() {
           action: (
             <Button
               size="default"
-              className="cursor-pointer bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               onClick={() => router.push("/upgrade")}
             >
               Upgrade to Pro
@@ -445,7 +445,7 @@ export default function ScannerPanel() {
             <Button
               onClick={analyze}
               disabled={loading || jd.trim().length < 20}
-              className="bg-primary cursor-pointer text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              className="bg-primary-button cursor-pointer text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
               {loading ? (
                 <>
@@ -500,7 +500,7 @@ export default function ScannerPanel() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              className="h-8 bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               onClick={continueToResumeTailor}
               disabled={loading || jd.trim().length < 20}
               title="Continue to resume tailor using this job description"
@@ -675,7 +675,7 @@ export default function ScannerPanel() {
                       </Button>
                       <Button
                         size="sm"
-                        className="h-8 bg-success text-white hover:bg-success/100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                        className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                         onClick={() => {
                           if (!h.jd_excerpt || h.jd_excerpt.trim().length < 20) {
                             toast({

@@ -335,7 +335,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
             action: (
               <Button
                 size="default"
-                className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => router.push("/upgrade")}
               >
                 Upgrade to Pro
@@ -872,7 +872,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     <Button
                       disabled={generating || !resumeFile || jd.trim().length < 20}
                       onClick={handleGenerate}
-                      className="bg-primary cursor-pointer text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="bg-primary-button cursor-pointer text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       {generating ? (
                         <>
@@ -951,14 +951,14 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 3 && !step3Valid)}
-                  className="bg-primary text-white hover:bg-primary/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Continue
                 </Button>
               ) : (
                 <Button
                   onClick={() => setStep(1)}
-                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Start Over
                 </Button>

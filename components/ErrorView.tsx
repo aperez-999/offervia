@@ -63,7 +63,7 @@ export default function ErrorView({
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               Try again

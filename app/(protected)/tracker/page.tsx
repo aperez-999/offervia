@@ -562,7 +562,7 @@ export default function TrackerPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button onClick={openCreate} className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90">
                 Add Job
               </Button>
             </DialogTrigger>
@@ -641,7 +641,7 @@ export default function TrackerPage() {
                 <Button
                   onClick={onSave}
                   disabled={!isValid || submitting}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {submitting ? "Saving..." : editingId ? "Save Changes" : "Save"}
                 </Button>
@@ -686,7 +686,7 @@ export default function TrackerPage() {
             <Button
               onClick={quickAdd}
               disabled={quickSaving || !quickCompany.trim() || !quickPosition.trim()}
-              className="whitespace-nowrap bg-primary text-primary-foreground hover:bg-primary/90"
+              className="whitespace-nowrap bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
             >
               {quickSaving ? "Saving…" : "Add"}
             </Button>
@@ -932,7 +932,7 @@ export default function TrackerPage() {
                       <div className="flex flex-wrap items-center justify-center gap-2">
                         <Button
                           onClick={() => router.push("/job-packet")}
-                          className="bg-primary text-primary-foreground hover:bg-primary/90"
+                          className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                         >
                           Start Job Packet
                         </Button>

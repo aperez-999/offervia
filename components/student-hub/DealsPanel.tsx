@@ -356,7 +356,7 @@ export default function DealsPanel() {
                     </div>
                     <Button
                       asChild
-                      className="bg-primary text-white hover:bg-primary/90"
+                      className="bg-primary-button text-white hover:bg-primary-button/90"
                     >
                       <a href={d.url} target="_blank" rel="noopener noreferrer">
                         View <ExternalLink className="ml-1 h-4 w-4" />

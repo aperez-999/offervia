@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={status === "sending" || status === "sent"}
-            className="w-full h-10 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-60"
+            className="w-full h-10 rounded-md bg-primary-button text-white text-sm font-medium hover:bg-primary-button/90 disabled:opacity-60"
           >
             {status === "sending" ? "Sending…" : status === "sent" ? "Email sent" : "Send reset link"}
           </button>

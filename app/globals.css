@@ -33,6 +33,8 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-button: var(--primary-button);
+  --color-primary-button-foreground: var(--primary-button-foreground);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -77,6 +79,11 @@
 
   --primary: oklch(0.46 0.085 168);
   --primary-foreground: oklch(0.985 0.004 250);
+  /* Solid CTA fill — rich pine + light text, identical in both modes so filled
+     buttons never wash out. Kept separate from --primary, which must stay bright
+     on dark for text/tints/rings. */
+  --primary-button: oklch(0.46 0.085 168);
+  --primary-button-foreground: oklch(0.985 0.004 250);
   --secondary: oklch(0.965 0.004 250);
   --secondary-foreground: oklch(0.30 0.015 260);
   --muted: oklch(0.965 0.004 250);
@@ -140,6 +147,10 @@
 
   --primary: oklch(0.74 0.11 168);
   --primary-foreground: oklch(0.16 0.02 168);
+  /* Solid CTA fill stays rich pine + white on dark to match light mode and the
+     brand gradient (fixes pale/washed-out filled buttons). */
+  --primary-button: oklch(0.46 0.085 168);
+  --primary-button-foreground: oklch(0.985 0.004 250);
   --secondary: oklch(0.28 0.016 198);
   --secondary-foreground: oklch(0.93 0.006 200);
   --muted: oklch(0.28 0.016 198);

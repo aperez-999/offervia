@@ -173,7 +173,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 <Button
                   onClick={openBilling}
                   disabled={billingLoading}
-                  className="w-full bg-primary text-white shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="w-full bg-primary-button text-white shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
                   {billingLoading ? "Opening…" : "Manage billing"}
@@ -182,7 +182,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 <Button
                   onClick={handleUpgrade}
                   disabled={loading}
-                  className="w-full cursor-pointer bg-primary text-white shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="w-full cursor-pointer bg-primary-button text-white shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {loading ? "Redirecting…" : "Upgrade to Pro"}
                 </Button>

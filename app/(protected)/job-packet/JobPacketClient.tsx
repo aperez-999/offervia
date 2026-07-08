@@ -265,7 +265,7 @@ export default function JobPacketClient() {
             >
               Clear packet
             </Button>
-            <Button asChild className="bg-primary text-white hover:bg-primary/90">
+            <Button asChild className="bg-primary-button text-white hover:bg-primary-button/90">
               <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
@@ -312,7 +312,7 @@ export default function JobPacketClient() {
                       done
                         ? "bg-success text-white"
                         : active
-                        ? "bg-primary text-white"
+                        ? "bg-primary-button text-white"
                         : "bg-foreground/[0.06] text-foreground/60"
                     )}
                   >
@@ -426,7 +426,7 @@ export default function JobPacketClient() {
               <Button
                 onClick={() => void runScan()}
                 disabled={!canRunScan || loadingScan}
-                className="bg-primary text-white hover:bg-primary/90"
+                className="bg-primary-button text-white hover:bg-primary-button/90"
               >
                 {loadingScan ? (
                   <>
@@ -596,7 +596,7 @@ export default function JobPacketClient() {
                     <Button
                       size="sm"
                       onClick={continueToTracker}
-                      className="bg-success text-white hover:bg-success/100"
+                      className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                     >
                       Send to tracker
                     </Button>
@@ -612,7 +612,7 @@ export default function JobPacketClient() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={continueToResumeTailor}
-                  className="bg-primary text-white hover:bg-primary/90"
+                  className="bg-primary-button text-white hover:bg-primary-button/90"
                 >
                   {draft.tailoredResume ? "Refine in Resume Tailor" : "Open Resume Tailor"}
                 </Button>

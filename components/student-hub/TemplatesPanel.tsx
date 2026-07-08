@@ -353,7 +353,7 @@ export default function TemplatesPanel() {
                   onClick={() => setActiveTab(t)}
                   className={
                     activeTab === t
-                      ? "bg-primary text-white hover:bg-primary/90"
+                      ? "bg-primary-button text-white hover:bg-primary-button/90"
                       : "border-border text-foreground hover:bg-foreground/[0.06]"
                   }
                 >
@@ -423,7 +423,7 @@ export default function TemplatesPanel() {
                   <Button
                     size="sm"
                     onClick={() => setOpenKey(t.key)}
-                    className="bg-primary text-white hover:bg-primary/90"
+                    className="bg-primary-button text-white hover:bg-primary-button/90"
                   >
                     Preview
                   </Button>

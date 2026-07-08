@@ -59,7 +59,7 @@ export default function CoverLetterStudio({
       action: (
         <Button
           size="default"
-          className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           onClick={() => router.push("/upgrade")}
         >
           Upgrade to Pro

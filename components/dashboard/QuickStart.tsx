@@ -120,7 +120,7 @@ export default function QuickStart({
                       it.done
                         ? "bg-success/15 text-success"
                         : isNext
-                        ? "bg-primary text-white"
+                        ? "bg-primary-button text-white"
                         : "bg-foreground/10 text-foreground/70",
                     ].join(" ")}
                   >

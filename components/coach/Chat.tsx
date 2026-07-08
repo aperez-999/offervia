@@ -216,7 +216,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             action: (
               <Button
                 size="default"
-                className="cursor-pointer bg-success text-white hover:bg-success/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => router.push("/upgrade")}
               >
                 Upgrade to Pro
@@ -320,7 +320,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 onClick={() => setResponseMode("brief")}
                 className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "brief"
-                    ? "bg-primary text-white"
+                    ? "bg-primary-button text-white"
                     : "text-foreground/70 hover:text-foreground"
                 }`}
               >
@@ -330,7 +330,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 onClick={() => setResponseMode("detailed")}
                 className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
                   responseMode === "detailed"
-                    ? "bg-primary text-white"
+                    ? "bg-primary-button text-white"
                     : "text-foreground/70 hover:text-foreground"
                 }`}
               >
@@ -347,7 +347,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           <Button
             size="sm"
             onClick={() => scrollToBottom(true)}
-            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-primary text-white hover:bg-primary/90"
+            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-primary-button text-white hover:bg-primary-button/90"
           >
             <ChevronsDown className="mr-1 h-4 w-4" /> Jump to latest
           </Button>
@@ -467,7 +467,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             <Button
               onClick={() => void send()}
               disabled={!userId || loading || !input.trim()}
-              className="bg-primary text-white cursor-pointer hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="bg-primary-button text-white cursor-pointer hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <CornerDownRight className="mr-1 h-4 w-4" />
               Send

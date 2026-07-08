@@ -402,7 +402,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={onSave}
                   disabled={saving || loading}
-                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save profile"}
                 </Button>
@@ -548,7 +548,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={onSave}
                   disabled={saving || loading}
-                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save settings"}
                 </Button>
@@ -593,7 +593,7 @@ export default function SettingsPage() {
                     {billingLoading ? "Opening…" : "Manage billing"}
                   </Button>
                 ) : (
-                  <Button asChild className="bg-primary text-white hover:bg-primary/90">
+                  <Button asChild className="bg-primary-button text-white hover:bg-primary-button/90">
                     <Link href="/upgrade">Upgrade to Pro</Link>
                   </Button>
                 )}

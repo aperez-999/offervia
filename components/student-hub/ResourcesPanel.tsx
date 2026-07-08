@@ -423,7 +423,7 @@ export default function ResourcesPanel() {
                   <div className="flex items-center justify-between mt-4 pt-2">
                     <Button
                       asChild
-                      className="bg-primary text-white hover:bg-primary/90"
+                      className="bg-primary-button text-white hover:bg-primary-button/90"
                     >
                       <a href={r.url} target="_blank" rel="noopener noreferrer">
                         Open <ExternalLink className="ml-1 h-4 w-4" />

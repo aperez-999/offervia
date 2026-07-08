@@ -404,7 +404,7 @@ export default function DashboardClient({
                 </div>
               </div>
               <Link href={nextAction.href} className="shrink-0">
-                <Button className="w-full cursor-pointer bg-primary text-white shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
+                <Button className="w-full cursor-pointer bg-primary-button text-white shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
                   {nextAction.cta}
                 </Button>
               </Link>
@@ -619,7 +619,7 @@ export default function DashboardClient({
                 cta={
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href="/job-packet">
-                      <Button className="bg-primary text-white hover:bg-primary/90">Start Job Packet</Button>
+                      <Button className="bg-primary-button text-white hover:bg-primary-button/90">Start Job Packet</Button>
                     </Link>
                     <Link href="/tracker">
                       <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">

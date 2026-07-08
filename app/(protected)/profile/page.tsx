@@ -257,7 +257,7 @@ export default function ProfilePage() {
             <CardContent className="-mt-12 flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 ring-4 ring-card">
                 <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-                <AvatarFallback className="bg-primary text-white text-2xl">{initial}</AvatarFallback>
+                <AvatarFallback className="bg-primary-button text-white text-2xl">{initial}</AvatarFallback>
               </Avatar>
               <div className="mt-3 text-base font-semibold text-foreground">
                 {name || "Your name"}
@@ -278,7 +278,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || loading}
-                  className="w-full bg-primary text-white hover:bg-primary/90"
+                  className="w-full bg-primary-button text-white hover:bg-primary-button/90"
                 >
                   {uploading ? "Uploading…" : "Change avatar"}
                 </Button>
@@ -323,7 +323,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={saveName}
                   disabled={saving || loading}
-                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save changes"}
                 </Button>
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={saveCareer}
                   disabled={savingCareer || loading}
-                  className="bg-primary text-white hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {savingCareer ? "Saving…" : "Save career details"}
                 </Button>
