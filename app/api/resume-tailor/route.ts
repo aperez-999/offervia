@@ -7,6 +7,7 @@ import { incrementUsage } from "@/lib/usage/increment";
 import mammoth from "mammoth";
 import { fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
+import { saveDocument } from "@/lib/documents/save";
 
 const resumeTailorJsonSchema = z
   .object({
@@ -310,7 +311,19 @@ export async function POST(req: Request) {
     }
 
     await incrementUsage(userId, "resume_tailor");
-    return NextResponse.json({ content: normalizeText(cleaned) });
+
+    const tailored = normalizeText(cleaned);
+    const docTitle =
+      [roleTitle, companyName].filter(Boolean).join(" · ") || "Tailored resume";
+    await saveDocument({
+      userId,
+      kind: "resume",
+      title: docTitle,
+      content: tailored,
+      meta: { company: companyName, role: roleTitle },
+    });
+
+    return NextResponse.json({ content: tailored });
   } catch (err: unknown) {
     captureServerException(err, { route: "api/resume-tailor" });
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";

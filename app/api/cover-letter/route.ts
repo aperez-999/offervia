@@ -12,6 +12,7 @@ import { readCareerProfile } from "@/lib/profile/read";
 import { buildProfileContext } from "@/lib/profile/career";
 import { fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
+import { saveDocument } from "@/lib/documents/save";
 
 const coverLetterSchema = z
   .object({
@@ -149,6 +150,17 @@ export async function POST(req: Request) {
     }
 
     await incrementUsage(userId, "cover_letter");
+
+    const docTitle =
+      [companyName, roleTitle].filter(Boolean).join(" · ") || "Cover letter";
+    await saveDocument({
+      userId,
+      kind: "cover_letter",
+      title: docTitle,
+      content: cleaned,
+      meta: { tone, company: companyName, role: roleTitle },
+    });
+
     return NextResponse.json({ content: cleaned, tone });
   } catch (err: unknown) {
     captureServerException(err, { route: "api/cover-letter" });
