@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
 import { SENIORITY_OPTIONS, WORK_PREF_OPTIONS } from "@/lib/profile/career";
@@ -255,10 +256,30 @@ export default function ProfilePage() {
           <Card className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="h-20 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent" />
             <CardContent className="-mt-12 flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 ring-4 ring-card">
-                <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-                <AvatarFallback className="bg-primary-button text-white text-2xl">{initial}</AvatarFallback>
-              </Avatar>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading || loading}
+                aria-label="Change avatar"
+                className="group relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-card disabled:cursor-not-allowed"
+              >
+                <Avatar className="h-24 w-24 ring-4 ring-card transition-all duration-300 group-hover:ring-primary/40 motion-safe:group-hover:scale-[1.03]">
+                  <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
+                  <AvatarFallback className="bg-primary-button text-white text-2xl">{initial}</AvatarFallback>
+                </Avatar>
+                {/* Hover overlay */}
+                <span className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-foreground/45 text-white opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100">
+                  <Camera className="h-5 w-5" />
+                  <span className="text-[11px] font-medium">Change</span>
+                </span>
+                {/* Uploading state */}
+                {uploading && (
+                  <span className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <span className="absolute inset-0 rounded-full ring-2 ring-primary/50 motion-safe:animate-ping" />
+                  </span>
+                )}
+              </button>
               <div className="mt-3 text-base font-semibold text-foreground">
                 {name || "Your name"}
               </div>

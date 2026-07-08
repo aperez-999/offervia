@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
@@ -36,6 +37,7 @@ import {
   Monitor,
   Crown,
   Check,
+  Camera,
 } from "lucide-react";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
@@ -63,6 +65,7 @@ export default function SettingsPage() {
   // profile
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
 
   // preferences (DB-backed)
@@ -95,6 +98,7 @@ export default function SettingsPage() {
         setEmail(user.email ?? "");
         const meta = user.user_metadata || {};
         setName(meta.full_name || meta.name || "");
+        setAvatarUrl(meta.avatar_url || "");
         // Supabase sets email_confirmed_at when verified
         setEmailVerified(Boolean(user.email_confirmed_at));
 
@@ -372,6 +376,35 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/profile"
+                  aria-label="Edit avatar"
+                  className="group relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                >
+                  <Avatar className="h-16 w-16 ring-2 ring-border transition-all duration-300 group-hover:ring-primary/50 motion-safe:group-hover:scale-105">
+                    <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
+                    <AvatarFallback className="bg-primary-button text-white text-xl">
+                      {(name || email || "U").charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-foreground/40 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Camera className="h-5 w-5" />
+                  </span>
+                </Link>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold text-foreground">
+                    {name || "Your name"}
+                  </div>
+                  <div className="truncate text-xs text-foreground/60">{email}</div>
+                  <Link
+                    href="/profile"
+                    className="mt-1 inline-flex text-xs font-medium text-primary hover:underline"
+                  >
+                    Change photo
+                  </Link>
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <label className="text-sm text-foreground/80">Display name</label>

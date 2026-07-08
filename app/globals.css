@@ -266,6 +266,23 @@
     border-color: color-mix(in oklab, var(--brand) 30%, var(--border));
     box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--brand) 22%, transparent);
   }
+  /* Brand glow on hover — pairs with framer y-lift on cards that already move.
+     Adds a soft pine halo + border warm-up without owning the transform. */
+  .hover-glow {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .hover-glow:hover {
+    border-color: color-mix(in oklab, var(--brand) 38%, var(--border));
+    box-shadow: 0 12px 34px -12px color-mix(in oklab, var(--brand) 30%, transparent);
+  }
+  /* Slow ambient float for decorative blobs (reduced-motion disables it below). */
+  @keyframes float-slow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(var(--float-x, 16px), var(--float-y, -14px)); }
+  }
+  .animate-float-slow {
+    animation: float-slow 14s ease-in-out infinite;
+  }
   @keyframes shimmer {
     100% { transform: translateX(100%); }
   }
