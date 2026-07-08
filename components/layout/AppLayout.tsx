@@ -16,6 +16,7 @@ import {
   MicVocal,
   ClipboardList,
   GraduationCap,
+  Library,
   Menu,
   X,
 } from "lucide-react";
@@ -47,6 +48,7 @@ const navItems: NavItem[] = [
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Interview", href: "/interview", icon: MicVocal },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
+  { label: "Documents", href: "/documents", icon: Library },
   { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
 ];
 

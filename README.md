@@ -47,6 +47,7 @@ db/interview_sessions.sql      # interview_session_count usage column
 db/cover_letter_usage.sql      # cover_letter_count usage column
 db/career_profile.sql          # career profile fields
 db/daily_reminders_pref.sql    # daily follow-up reminder opt-in
+db/documents.sql               # saved cover letters & resumes history
 ```
 
 Before release, also review:

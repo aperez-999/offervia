@@ -27,6 +27,7 @@ test.describe("authenticated smoke", () => {
       { path: "/resume", heading: /resume tailor/i },
       { path: "/cover-letter", heading: /cover letter/i },
       { path: "/tracker", heading: /job tracker/i },
+      { path: "/documents", heading: /documents/i },
       { path: "/coach", heading: /interview coach|resume feedback|cover letter help|career advice/i },
       { path: "/settings", heading: /settings/i },
       { path: "/profile", heading: /profile/i },
