@@ -27,8 +27,16 @@ export function ToastProvider({ children }: { children?: React.ReactNode }) {
           }
           const id = opts.id ?? Math.random().toString(36).slice(2);
           const next = [...prev, { ...opts, id }];
-          // Auto-dismiss
-          const duration = opts.duration ?? 2200;
+          // Auto-dismiss. Errors linger longer so they can be read; toasts
+          // that carry an action stay longest so they can be acted on.
+          const fallbackDuration = opts.action
+            ? 6000
+            : opts.variant === "destructive"
+            ? 5000
+            : opts.variant === "upgrade"
+            ? 6000
+            : 2600;
+          const duration = opts.duration ?? fallbackDuration;
           setTimeout(() => {
             setToasts((curr) => curr.filter((t) => t.id !== id));
           }, duration);

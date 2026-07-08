@@ -41,6 +41,7 @@ export default async function DashboardPage() {
         cover_letters_per_month: limits.cover_letters_per_month,
       }}
       analytics={analytics}
+      periodEnd={subscription.currentPeriodEnd}
     />
   );
 }

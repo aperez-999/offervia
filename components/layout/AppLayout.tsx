@@ -19,6 +19,7 @@ import {
   Library,
   Menu,
   X,
+  ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +27,7 @@ import UserMenu from "@/components/layout/UserMenu";
 import Footer from "@/components/public/Footer";
 import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
+import ProCrest from "@/components/pro/ProCrest";
 
 const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalCommandMenu"), {
   ssr: false,
@@ -53,6 +55,55 @@ const navItems: NavItem[] = [
 ];
 
 type PlanType = "free" | "pro";
+
+function PlanCard({
+  plan,
+  onNavigate,
+}: {
+  plan: PlanType;
+  onNavigate?: () => void;
+}) {
+  if (plan === "pro") {
+    return (
+      <div className="rounded-xl border border-reward/30 bg-gradient-to-br from-reward/[0.12] via-transparent to-transparent p-3 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <ProCrest size="sm" />
+          <Sparkles className="h-3.5 w-3.5 text-reward/70" aria-hidden />
+        </div>
+        <p className="mt-2 text-[13px] font-medium text-foreground">Offervia Pro</p>
+        <p className="mt-0.5 text-xs text-foreground/60">
+          Higher limits and Pro insights are unlocked.
+        </p>
+        <Link
+          href="/settings#billing"
+          onClick={onNavigate}
+          className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-reward hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded"
+        >
+          Manage plan
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3 shadow-sm">
+      <p className="text-[13px] font-medium text-foreground">Free plan</p>
+      <p className="mt-0.5 text-xs text-foreground/60">
+        Unlock higher limits and Pro insights.
+      </p>
+      <Button
+        asChild
+        size="sm"
+        className="mt-2.5 h-8 w-full bg-primary-button text-white hover:bg-primary-button/90"
+      >
+        <Link href="/upgrade" onClick={onNavigate}>
+          Upgrade to Pro
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
 export default function AppLayout({
   children,
@@ -182,6 +233,10 @@ export default function AppLayout({
                   );
                 })}
               </nav>
+
+              <div className="mt-3 border-t border-border pt-3">
+                <PlanCard plan={plan} />
+              </div>
             </div>
           </aside>
 
@@ -243,6 +298,10 @@ export default function AppLayout({
                         );
                       })}
                     </nav>
+
+                    <div className="mt-4 border-t border-border pt-4">
+                      <PlanCard plan={plan} onNavigate={() => setSidebarOpen(false)} />
+                    </div>
                   </div>
                 </motion.aside>
               </>

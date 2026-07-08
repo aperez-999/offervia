@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import ProCrest from "@/components/pro/ProCrest";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 import {
   UserRound,
@@ -129,7 +130,7 @@ export default function SettingsPage() {
 
         if (prefsErr) {
           // Non-fatal; show toast but keep page usable
-          toast({ title: "Could not load preferences", variant: "destructive" });
+          toast({ title: "Could not load preferences", description: "Some settings may show defaults. Refresh to try again.", variant: "destructive" });
         }
 
         if (prefs) {
@@ -151,7 +152,7 @@ export default function SettingsPage() {
           setPeriodEnd((sub.current_period_end as string | null) ?? null);
         }
       } catch {
-        toast({ title: "Failed to load settings", variant: "destructive" });
+        toast({ title: "Failed to load settings", description: "Check your connection and refresh the page.", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -196,7 +197,7 @@ export default function SettingsPage() {
 
       toast({ title: "Settings saved" });
     } catch {
-      toast({ title: "Could not save settings", variant: "destructive" });
+      toast({ title: "Could not save settings", description: "Your changes weren't saved. Please try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -224,7 +225,7 @@ export default function SettingsPage() {
         window.location.href = data.url;
         return;
       }
-      toast({ title: "Billing portal unavailable. Try again.", variant: "destructive" });
+      toast({ title: data?.message || "Billing portal unavailable. Try again.", variant: "destructive" });
     } catch {
       toast({ title: "Billing portal unavailable. Try again.", variant: "destructive" });
     } finally {
@@ -296,7 +297,7 @@ export default function SettingsPage() {
 
       toast({ title: "Export ready" });
     } catch {
-      toast({ title: "Export failed", variant: "destructive" });
+      toast({ title: "Export failed", description: "We couldn't prepare your data. Please try again.", variant: "destructive" });
     } finally {
       setWorking(false);
     }
@@ -332,19 +333,13 @@ export default function SettingsPage() {
               Personalize your experience, manage your plan, and control your data.
             </p>
           </div>
-          <Badge
-            className={
-              plan === "pro"
-                ? "border border-primary/30 bg-primary/10 text-primary"
-                : "border border-border bg-background/60 text-foreground/70"
-            }
-          >
-            {plan === "pro" ? (
-              <span className="inline-flex items-center gap-1"><Crown className="h-3 w-3" /> Pro plan</span>
-            ) : (
-              "Free plan"
-            )}
-          </Badge>
+          {plan === "pro" ? (
+            <ProCrest size="md" label="Pro plan" />
+          ) : (
+            <Badge className="border border-border bg-background/60 text-foreground/70">
+              Free plan
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -600,7 +595,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-col gap-3 rounded-xl border border-border bg-background/60 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${plan === "pro" ? "bg-primary/10 text-primary" : "bg-foreground/5 text-foreground/60"}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${plan === "pro" ? "bg-reward/15 text-reward" : "bg-foreground/5 text-foreground/60"}`}>
                     <Crown className="h-5 w-5" />
                   </div>
                   <div>
@@ -631,6 +626,11 @@ export default function SettingsPage() {
                   </Button>
                 )}
               </div>
+              {plan === "pro" ? (
+                <p className="text-xs text-foreground/60">
+                  Update your payment method, download invoices, or cancel and switch back to Free at any time through the billing portal. Pro access continues until the end of your current period.
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 

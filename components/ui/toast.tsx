@@ -25,16 +25,16 @@ export type ToastProps = {
 }
 
 const toastVariants = cva(
-  "pointer-events-auto relative w-full rounded-lg border shadow-sm transition-colors",
+  "pointer-events-auto relative w-full rounded-lg border shadow-lg transition-colors",
   {
     variants: {
       variant: {
         default:
-          "bg-background text-foreground border-border p-4 pr-10",
+          "bg-popover text-popover-foreground border-border p-4 pr-10",
         destructive:
-          "border-destructive/30 bg-destructive/10 text-destructive p-4 pr-10",
+          "border-destructive/30 bg-[color-mix(in_oklch,var(--destructive)_10%,var(--popover))] text-destructive p-4 pr-10",
         upgrade:
-          "border-warning/30 bg-warning/10 text-foreground p-5 pr-10"
+          "border-warning/40 bg-[color-mix(in_oklch,var(--warning)_12%,var(--popover))] text-foreground p-5 pr-10"
       }
     },
     defaultVariants: {
@@ -44,11 +44,12 @@ const toastVariants = cva(
 )
 
 export function Toast({ title, description, variant = "default", action }: ToastProps) {
+  const isError = variant === "destructive";
   return (
     <div
       className={cn(toastVariants({ variant }))}
-      role="status"
-      aria-live="polite"
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
     >
       {title ? <div className="text-sm font-semibold">{title}</div> : null}
       {description ? (

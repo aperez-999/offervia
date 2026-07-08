@@ -135,7 +135,7 @@ export default function TrackerPage() {
 
     if (!res.ok) {
       if (res.status !== 401) {
-        toast({ title: "Failed to load tracker", variant: "destructive" });
+        toast({ title: "Failed to load tracker", description: "Check your connection and refresh the page.", variant: "destructive" });
       }
       setApps([]);
       setLoading(false);
@@ -248,7 +248,11 @@ export default function TrackerPage() {
       : await postJson<TrackerItemResponse>("/api/tracker", payload);
 
     if (!res.ok) {
-      toast({ title: "Failed to save job. Try again.", variant: "destructive" });
+      toast({
+        title: "Couldn't save this application",
+        description: "Check your connection and try again — your changes weren't lost.",
+        variant: "destructive",
+      });
       setSubmitting(false);
       return;
     }
@@ -298,7 +302,11 @@ export default function TrackerPage() {
 
     const res = await deleteJson(`/api/tracker?id=${encodeURIComponent(pendingDeleteId)}`);
     if (!res.ok) {
-      toast({ title: "Failed to delete job. Try again.", variant: "destructive" });
+      toast({
+        title: "Couldn't delete this application",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -320,7 +328,7 @@ export default function TrackerPage() {
     });
 
     if (!res.ok) {
-      toast({ title: "Could not add job", variant: "destructive" });
+      toast({ title: "Could not add job", description: "Your entry wasn't saved. Please try again.", variant: "destructive" });
       setQuickSaving(false);
       return;
     }
@@ -354,7 +362,7 @@ export default function TrackerPage() {
       setApps((current) =>
         current.map((entry) => (entry.id === app.id ? { ...entry, status: app.status } : entry))
       );
-      toast({ title: "Failed to update status", variant: "destructive" });
+      toast({ title: "Failed to update status", description: "We reverted the change. Please try again.", variant: "destructive" });
     }
 
     setUpdatingId(null);
@@ -376,7 +384,7 @@ export default function TrackerPage() {
       setApps((current) =>
         current.map((entry) => (entry.id === app.id ? { ...entry, status: previous } : entry))
       );
-      toast({ title: "Failed to update status", variant: "destructive" });
+      toast({ title: "Failed to update status", description: "We reverted the change. Please try again.", variant: "destructive" });
     } else {
       toast({ title: `Moved to ${next}` });
     }

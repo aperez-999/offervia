@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -20,6 +20,9 @@ import { Flame, Sparkles, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/motion/Reveal";
 import QuickStart from "@/components/dashboard/QuickStart";
+import ProCrest from "@/components/pro/ProCrest";
+import ErrorView from "@/components/ErrorView";
+import { useToast } from "@/hooks/use-toast";
 
 import type { UsageSnapshot } from "@/lib/usage/read";
 import type { ScanAnalytics } from "@/lib/analytics/scan-analytics";
@@ -86,6 +89,35 @@ type PlanType = "free" | "pro";
 
 export type { ScanAnalytics };
 
+function ProHealthStat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: number;
+  hint: string;
+}) {
+  return (
+    <Card className="rounded-2xl border border-reward/25 bg-gradient-to-br from-reward/[0.08] via-card/60 to-card/60 p-4 shadow-sm ring-1 ring-reward/10">
+      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+        {label}
+      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+        {value}
+        <span className="ml-0.5 text-base font-medium text-foreground/60">%</span>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
+        <div
+          className="h-full rounded-full bg-reward transition-all"
+          style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-foreground/60">{hint}</p>
+    </Card>
+  );
+}
+
 const PerformanceInsights = dynamic(
   () => import("@/components/dashboard/PerformanceInsights"),
   { ssr: false }
@@ -106,15 +138,18 @@ export default function DashboardClient({
   usage,
   limits,
   analytics = null,
+  periodEnd = null,
 }: {
   plan?: PlanType;
   usage: UsageSnapshot;
   limits: PlanLimits;
   analytics?: ScanAnalytics | null;
+  periodEnd?: string | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const upgrade = searchParams.get("upgrade");
+  const { toast } = useToast();
 
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const [loading, setLoading] = useState(true);
@@ -126,6 +161,7 @@ export default function DashboardClient({
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
   const [jobPacketDraft, setJobPacketDraft] = useState<JobPacketDraft | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   function dismissUpgradeBanner() {
     router.replace("/dashboard");
@@ -135,8 +171,10 @@ export default function DashboardClient({
     setJobPacketDraft(readJobPacketDraft());
   }, []);
 
-  useEffect(() => {
-    (async () => {
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
+    try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -156,7 +194,7 @@ export default function DashboardClient({
         return;
       }
 
-      const [{ data: prefs }, { data: appData }, { data: msgData }] = await Promise.all([
+      const [prefsRes, appsRes, msgsRes] = await Promise.all([
         supabase
           .from("user_prefs")
           .select("weekly_goal,email_digest,onboarding_dismissed,onboarding_completed")
@@ -173,6 +211,16 @@ export default function DashboardClient({
           .order("created_at", { ascending: false })
           .limit(8),
       ]);
+
+      // Applications are the core of the dashboard — if that query fails,
+      // surface a recoverable error instead of rendering a misleading empty state.
+      if (appsRes.error) {
+        throw appsRes.error;
+      }
+
+      const prefs = prefsRes.data;
+      const appData = appsRes.data;
+      const msgData = msgsRes.data;
 
       if (prefs) {
         const typed = prefs as unknown as OnboardingPrefs;
@@ -204,8 +252,21 @@ export default function DashboardClient({
       setApps(normalized);
       setRecentChats((msgData || []) as MsgRow[]);
       setLoading(false);
-    })();
-  }, [supabase]);
+    } catch (err) {
+      console.error("[dashboard] load failed", err);
+      setLoadError(true);
+      setLoading(false);
+      toast({
+        title: "Couldn't load your dashboard",
+        description: "Check your connection and try again.",
+        variant: "destructive",
+      });
+    }
+  }, [supabase, toast]);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   const { appsThisWeek, interviewing, offers, total } = useMemo(() => {
     const now = new Date();
@@ -220,6 +281,19 @@ export default function DashboardClient({
     const offers = apps.filter((a) => a.status === "Offer").length;
 
     return { appsThisWeek, interviewing, offers, total: apps.length };
+  }, [apps]);
+
+  const proHealth = useMemo(() => {
+    const t = apps.length;
+    const interviewingCount = apps.filter((a) => a.status === "Interviewing").length;
+    const offersCount = apps.filter((a) => a.status === "Offer").length;
+    const rejectedCount = apps.filter((a) => a.status === "Rejected").length;
+    const pct = (n: number) => (t > 0 ? Math.round((n / t) * 100) : 0);
+    return {
+      responseRate: pct(interviewingCount + offersCount + rejectedCount),
+      interviewRate: pct(interviewingCount),
+      offerRate: pct(offersCount),
+    };
   }, [apps]);
 
   const weeklyGoalPct = Math.max(
@@ -336,6 +410,18 @@ export default function DashboardClient({
     }
   }
 
+  if (loadError && !loading) {
+    return (
+      <div className="space-y-8">
+        <ErrorView
+          title="Couldn't load your dashboard"
+          description="We couldn't reach your workspace data. Check your connection and try again."
+          onRetry={loadDashboard}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Upgrade success / cancel banner */}
@@ -373,30 +459,63 @@ export default function DashboardClient({
       )}
 
       <section>
-        <Card className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] via-card/60 to-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
+        <Card className={
+          plan === "pro"
+            ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-gradient-to-br from-reward/[0.10] via-card/60 to-card/60 shadow-md ring-1 ring-reward/10"
+            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] via-card/60 to-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+        }>
+          <div className={
+            plan === "pro"
+              ? "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-reward/15 blur-3xl"
+              : "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl"
+          } />
           <CardContent className="relative p-5 sm:p-6">
             <div className="max-w-3xl">
-              <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
-                Continue your search
-              </Badge>
+              {plan === "pro" ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <ProCrest size="md" label="Pro member" />
+                  {periodEnd ? (
+                    <span className="text-xs text-foreground/60">
+                      Renews {new Date(periodEnd).toLocaleDateString()}
+                    </span>
+                  ) : null}
+                </div>
+              ) : (
+                <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
+                  Continue your search
+                </Badge>
+              )}
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 Welcome back,{" "}
-                <span className="text-primary">{friendlyName}</span>
+                <span className={plan === "pro" ? "text-reward" : "text-primary"}>{friendlyName}</span>
               </h1>
               <p className="mt-2 text-sm text-foreground/75 sm:text-base">
-                One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now.
+                {plan === "pro"
+                  ? "Your Pro workspace is running at full power — higher limits, performance insights, and priority tools are all unlocked."
+                  : "One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now."}
               </p>
             </div>
 
             {/* Recommended next step — full-width band, CTA inline */}
-            <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className={
+              plan === "pro"
+                ? "mt-5 flex flex-col gap-4 rounded-2xl border border-reward/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                : "mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
+            }>
               <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                <span className={
+                  plan === "pro"
+                    ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-reward/10 text-reward ring-1 ring-reward/20"
+                    : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20"
+                }>
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-primary/80">
+                  <div className={
+                    plan === "pro"
+                      ? "text-[11px] font-semibold uppercase tracking-wide text-reward/80"
+                      : "text-[11px] font-semibold uppercase tracking-wide text-primary/80"
+                  }>
                     Recommended next step
                   </div>
                   <div className="mt-0.5 text-sm font-medium text-foreground">{nextAction.title}</div>
@@ -441,6 +560,26 @@ export default function DashboardClient({
           <Reveal index={3}><Kpi title="Offers" value={offers} tone="emerald" /></Reveal>
         </div>
       </section>
+
+      {/* Pro: pipeline health */}
+      {plan === "pro" && !loading && total > 0 ? (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ProCrest size="sm" />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-reward/80">
+                Pipeline health
+              </div>
+              <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are converting</h2>
+            </div>
+          </div>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <ProHealthStat label="Response rate" value={proHealth.responseRate} hint="Apps that got any employer response" />
+            <ProHealthStat label="Interview rate" value={proHealth.interviewRate} hint="Apps that reached an interview" />
+            <ProHealthStat label="Offer rate" value={proHealth.offerRate} hint="Apps that turned into an offer" />
+          </div>
+        </section>
+      ) : null}
 
       {/* KPIs + Goal/Streak */}
       <section className="space-y-3">

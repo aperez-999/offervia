@@ -47,7 +47,7 @@ export default function UserMenu({
         return;
       }
       toast({
-        title: "Billing portal unavailable. Try again.",
+        title: data?.message || "Billing portal unavailable. Try again.",
         variant: "destructive",
       });
     } catch {
