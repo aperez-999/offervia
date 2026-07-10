@@ -87,7 +87,7 @@ export default function UserMenu({
     <DropdownMenu>
       <div className="flex items-center gap-2">
         <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
             plan === "pro"
               ? "border border-reward/40 bg-reward/15 text-reward shadow-sm shadow-reward/10"
               : "bg-muted text-muted-foreground"
@@ -102,14 +102,14 @@ export default function UserMenu({
             variant="outline"
             size="sm"
             asChild
-            className="h-7 rounded-md border-border px-2 text-[10px] font-medium uppercase tracking-wide text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
+            className="h-7 rounded-md border-border px-2 text-[10px] font-medium text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
           >
             <Link href="/upgrade">Upgrade</Link>
           </Button>
         )}
         <DropdownMenuTrigger asChild>
           <button
-            className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+            className="inline-flex cursor-pointer h-8 w-8 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             aria-label="Open user menu"
           >
             <Avatar className="h-7 w-7">

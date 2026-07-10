@@ -307,7 +307,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   const ModeIcon = meta.icon;
 
   return (
-    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 sm:h-[72vh] dark:ring-black/10">
+    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 sm:h-[72vh] dark:ring-black/10">
       <CardHeader className="border-b border-border/60 pb-3">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -428,9 +428,9 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                   <Bot className="h-4 w-4" />
                 </span>
                 <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-background/70 px-4 py-3 shadow-sm">
-                  <span className="size-2 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.3s]" />
-                  <span className="size-2 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.15s]" />
-                  <span className="size-2 animate-bounce rounded-full bg-primary/60" />
+                  <span className="size-2 typing-dot rounded-full bg-primary/60 [animation-delay:-0.32s]" />
+                  <span className="size-2 typing-dot rounded-full bg-primary/60 [animation-delay:-0.16s]" />
+                  <span className="size-2 typing-dot rounded-full bg-primary/60" />
                 </div>
               </div>
             )}

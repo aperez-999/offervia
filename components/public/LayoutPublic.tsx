@@ -168,7 +168,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
               onClick={(e) => toggleTheme(e)}
-              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
+              className="ml-1 inline-flex h-9 w-9 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               {mounted && (
                 <AnimatePresence mode="wait" initial={false}>
