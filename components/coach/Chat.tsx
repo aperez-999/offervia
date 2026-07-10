@@ -303,51 +303,61 @@ function InnerChat({ mode }: { mode: CoachMode }) {
     }, 0);
   }, [lastUserMessage, send, sending]);
 
+  const meta = COACH_MODE_META[mode];
+  const ModeIcon = meta.icon;
+
   return (
-    <Card className="flex h-[60vh] sm:h-[70vh] min-h-[400px] flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <CardHeader className="pb-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-foreground text-lg sm:text-xl">{MODE_LABELS[mode]}</CardTitle>
-            <div className="text-sm text-foreground/70">
-              {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
+    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 sm:h-[72vh] dark:ring-black/10">
+      <CardHeader className="border-b border-border/60 pb-3">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+              <ModeIcon className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <CardTitle className="truncate text-base text-foreground sm:text-lg">
+                {MODE_LABELS[mode]}
+              </CardTitle>
+              <p className="truncate text-xs text-foreground/60 sm:text-sm">
+                {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs text-foreground/60">Reply style:</span>
-            <div className="flex rounded-lg border border-border bg-background/50 p-1">
-              <button
-                onClick={() => setResponseMode("brief")}
-                className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
-                  responseMode === "brief"
-                    ? "bg-primary-button text-white"
-                    : "text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                Brief
-              </button>
-              <button
-                onClick={() => setResponseMode("detailed")}
-                className={`px-2 sm:px-3 py-1 text-xs rounded-md transition-colors ${
-                  responseMode === "detailed"
-                    ? "bg-primary-button text-white"
-                    : "text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                Detailed
-              </button>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <span className="text-xs text-foreground/50">Reply</span>
+            <div
+              className="flex rounded-lg border border-border bg-background/50 p-0.5"
+              role="tablist"
+              aria-label="Reply style"
+            >
+              {(["brief", "detailed"] as const).map((rm) => (
+                <button
+                  key={rm}
+                  type="button"
+                  role="tab"
+                  aria-selected={responseMode === rm}
+                  onClick={() => setResponseMode(rm)}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    responseMode === rm
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/60 hover:text-foreground"
+                  }`}
+                >
+                  {rm}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="relative flex-1 overflow-y-auto" ref={listRef}>
+      <CardContent className="relative flex-1 space-y-4 overflow-y-auto py-4" ref={listRef}>
         {/* jump to latest */}
         {showJump && (
           <Button
             size="sm"
             onClick={() => scrollToBottom(true)}
-            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 bg-primary-button text-white hover:bg-primary-button/90"
+            className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
           >
             <ChevronsDown className="mr-1 h-4 w-4" /> Jump to latest
           </Button>
@@ -366,37 +376,40 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {grouped.map((group, gi) => (
-              <div key={gi} className="space-y-3">
+              <div key={gi} className="space-y-4">
                 <div className="sticky top-0 z-10 mx-auto w-fit rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-foreground/70 backdrop-blur">
                   {group.label}
                 </div>
                 {group.items.map((m, idx) => {
+                  const isUser = m.role === "user";
                   const isLastAssistant =
                     m.role === "assistant" &&
                     gi === grouped.length - 1 &&
                     idx === group.items.length - 1;
                   return (
-                    <div key={m.id} className="flex items-start gap-2">
-                      {m.role === "assistant" ? (
-                        <Bot className="mt-0.5 h-5 w-5 text-primary" />
-                      ) : (
-                        <User className="order-2 ml-auto mt-0.5 h-5 w-5 text-foreground/70" />
-                      )}
-                      <div className="flex-1">
+                    <div
+                      key={m.id}
+                      className={`flex items-start gap-2.5 ${isUser ? "flex-row-reverse" : ""}`}
+                    >
+                      <span
+                        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ring-1 ${
+                          isUser
+                            ? "bg-foreground/[0.06] text-foreground/70 ring-border"
+                            : "bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-primary/20"
+                        }`}
+                      >
+                        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      </span>
+                      <div className={`flex min-w-0 max-w-[85%] flex-col ${isUser ? "items-end" : "items-start"}`}>
                         <MessageBubble role={m.role} content={m.content} />
-                        <div
-                          className={
-                            "mt-1 flex items-center justify-between text-[11px] text-foreground/50 " +
-                            (m.role === "user" ? "flex-row-reverse" : "")
-                          }
-                        >
+                        <div className="mt-1 flex items-center gap-2 text-[11px] text-foreground/45">
                           <span>{formatTime(m.created_at)}</span>
                           {isLastAssistant && lastUserMessage && (
                             <button
                               onClick={regenerate}
-                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-primary hover:bg-primary/10"
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                               title="Regenerate reply"
                             >
                               <RotateCcw className="h-3 w-3" /> Regenerate
@@ -410,13 +423,14 @@ function InnerChat({ mode }: { mode: CoachMode }) {
               </div>
             ))}
             {sending && (
-              <div className="flex items-start gap-2">
-                <Bot className="mt-0.5 h-5 w-5 text-primary" />
-                <div>
-                  <div className="mb-1 text-xs text-foreground/60">Coach</div>
-                  <div className="inline-block max-w-[85%] animate-pulse rounded-xl border border-border bg-primary/10 px-3 py-2 text-sm text-foreground">
-                    Working on your reply...
-                  </div>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+                  <Bot className="h-4 w-4" />
+                </span>
+                <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-background/70 px-4 py-3 shadow-sm">
+                  <span className="size-2 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.3s]" />
+                  <span className="size-2 animate-bounce rounded-full bg-primary/60 [animation-delay:-0.15s]" />
+                  <span className="size-2 animate-bounce rounded-full bg-primary/60" />
                 </div>
               </div>
             )}
@@ -424,30 +438,12 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         )}
       </CardContent>
 
-      <CardFooter className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
-        <div className="flex items-center justify-between sm:justify-start gap-2">
-          <ClearChatButton
-            disabled={!userId || loading || messages.length === 0}
-            onConfirm={async () => {
-              if (!userId) return;
-              const res = await fetch(`/api/coach?mode=${encodeURIComponent(mode)}`, {
-                method: "DELETE",
-              });
-              if (res.ok) {
-                toast({ title: "Chat cleared" });
-                setMessages([]);
-              } else {
-                toast({ title: "Failed to clear chat", variant: "destructive" });
-              }
-            }}
-          />
-        </div>
-
-        <div className="flex flex-1 items-start gap-2">
+      <CardFooter className="flex-col items-stretch gap-2 border-t border-border/60 pt-3">
+        <div className="flex items-end gap-2 rounded-2xl border border-border bg-background/70 p-1.5 shadow-sm transition-colors focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <Textarea
             aria-label="Chat input"
-            placeholder={userId ? "Ask a question or paste a draft for feedback..." : "Sign in to chat"}
-            className="min-h-[44px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            placeholder={userId ? "Ask a question or paste a draft for feedback…" : "Sign in to chat"}
+            className="max-h-40 min-h-[44px] resize-none border-0 bg-transparent px-2.5 py-2 text-foreground shadow-none placeholder:text-foreground/40 focus-visible:ring-0"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={!userId || loading || sending}
@@ -465,22 +461,44 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           />
           {!sending ? (
             <Button
+              size="icon"
               onClick={() => void send()}
               disabled={!userId || loading || !input.trim()}
-              className="bg-primary-button text-white cursor-pointer hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="Send message"
+              className="size-10 shrink-0 cursor-pointer rounded-xl bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              <CornerDownRight className="mr-1 h-4 w-4" />
-              Send
+              <CornerDownRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button
               variant="outline"
               onClick={stop}
-              className="border-border text-foreground hover:bg-foreground/[0.06]"
+              className="h-10 shrink-0 rounded-xl border-border text-foreground hover:bg-foreground/[0.06]"
             >
               Stop
             </Button>
           )}
+        </div>
+
+        <div className="flex items-center justify-between gap-2 px-1">
+          <ClearChatButton
+            disabled={!userId || loading || messages.length === 0}
+            onConfirm={async () => {
+              if (!userId) return;
+              const res = await fetch(`/api/coach?mode=${encodeURIComponent(mode)}`, {
+                method: "DELETE",
+              });
+              if (res.ok) {
+                toast({ title: "Chat cleared" });
+                setMessages([]);
+              } else {
+                toast({ title: "Failed to clear chat", variant: "destructive" });
+              }
+            }}
+          />
+          <span className="hidden text-[11px] text-foreground/40 sm:block">
+            Enter to send · Shift+Enter for a new line
+          </span>
         </div>
       </CardFooter>
     </Card>
@@ -491,17 +509,11 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
 export default function Chat({ mode = "interview" as CoachMode }: { mode?: CoachMode }) {
   const [active, setActive] = useState<CoachMode>(mode);
-  const activeMeta = COACH_MODE_META[active];
-  const ActiveIcon = activeMeta.icon;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
       <CoachSidebar active={active} onChange={setActive} />
       <section className="min-w-0 flex-1">
-        <header className="mb-3 flex items-center gap-2">
-          <ActiveIcon className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-semibold text-foreground">{activeMeta.label}</h1>
-        </header>
         <InnerChat mode={active} />
       </section>
     </div>

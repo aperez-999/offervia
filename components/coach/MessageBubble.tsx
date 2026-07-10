@@ -54,28 +54,26 @@ export default function MessageBubble({
     : formattedContent;
   
   return (
-    <div className={isUser ? "text-right" : "text-left"}>
-      <div className="mb-1 text-xs text-foreground/60">
-        {isUser ? "You" : "Coach"}
-      </div>
-      <div
-        className={
-          "inline-block max-w-[85%] rounded-xl px-4 py-3 text-sm shadow-sm border whitespace-pre-wrap leading-relaxed " +
-          (isUser
-            ? "bg-background/80 text-foreground border-border"
-            : "bg-card/60 text-foreground border-border")
-        }
-      >
-        {displayContent}
-        {shouldTruncate && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="ml-2 text-xs text-primary hover:text-primary/90 underline"
-          >
-            {isExpanded ? "Show Less" : "Show More"}
-          </button>
-        )}
-      </div>
+    <div
+      className={
+        "inline-block max-w-full rounded-2xl px-4 py-2.5 text-sm shadow-sm border whitespace-pre-wrap leading-relaxed " +
+        (isUser
+          ? "rounded-br-sm bg-primary text-primary-foreground border-primary/20"
+          : "rounded-bl-sm bg-background/70 text-foreground border-border")
+      }
+    >
+      {displayContent}
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={
+            "ml-2 text-xs underline underline-offset-2 " +
+            (isUser ? "text-primary-foreground/80 hover:text-primary-foreground" : "text-primary hover:text-primary/90")
+          }
+        >
+          {isExpanded ? "Show less" : "Show more"}
+        </button>
+      )}
     </div>
   );
 }

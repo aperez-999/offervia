@@ -14,7 +14,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
-import { printAsPdf } from "@/lib/print-pdf";
+import { printAsPdf, printHtmlDocument } from "@/lib/print-pdf";
+import {
+  ResumeDocument,
+  isLikelyStructuredResume,
+  resumeToPrintHtml,
+} from "@/components/resume/TailoredResumeDocument";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -133,6 +138,14 @@ export default function DocumentsClient() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }, []);
+
+  const exportPdf = useCallback((doc: DocRow) => {
+    if (doc.kind === "resume" && isLikelyStructuredResume(doc.content)) {
+      printHtmlDocument(resumeToPrintHtml(doc.content, doc.title));
+    } else {
+      printAsPdf(doc.title, doc.content);
+    }
   }, []);
 
   const remove = useCallback(
@@ -269,9 +282,15 @@ export default function DocumentsClient() {
                     className="overflow-hidden border-t border-border/60"
                   >
                     <div className="p-4">
-                      <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-background/60 p-3 font-sans text-sm leading-relaxed text-foreground/90">
-                        {doc.content}
-                      </pre>
+                      {doc.kind === "resume" && isLikelyStructuredResume(doc.content) ? (
+                        <div className="max-h-[28rem] overflow-auto rounded-lg bg-neutral-200/70 p-3 dark:bg-neutral-800/60">
+                          <ResumeDocument text={doc.content} />
+                        </div>
+                      ) : (
+                        <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-background/60 p-3 font-sans text-sm leading-relaxed text-foreground/90">
+                          {doc.content}
+                        </pre>
+                      )}
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button size="sm" variant="outline" onClick={() => copy(doc.content)}>
                           <Copy className="size-3.5" /> Copy
@@ -282,7 +301,7 @@ export default function DocumentsClient() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => printAsPdf(doc.title, doc.content)}
+                          onClick={() => exportPdf(doc)}
                         >
                           <Printer className="size-3.5" /> PDF
                         </Button>
