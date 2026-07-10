@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, Sparkles, ShieldCheck, Zap, CreditCard } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/plans";
+import { useToast } from "@/hooks/use-toast";
 
 type PlanType = "free" | "pro";
 
@@ -36,6 +37,7 @@ const PRO_PERKS = [
 ];
 
 export default function UpgradeClient({ plan }: { plan: PlanType }) {
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
   const isPro = plan === "pro";
@@ -53,8 +55,16 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         window.location.href = data.url;
         return;
       }
+      toast({
+        title: data?.message || "Couldn't start checkout. Please try again.",
+        variant: "destructive",
+      });
       setLoading(false);
     } catch {
+      toast({
+        title: "Couldn't start checkout. Please try again.",
+        variant: "destructive",
+      });
       setLoading(false);
     }
   }
@@ -72,8 +82,16 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         window.location.href = data.url;
         return;
       }
+      toast({
+        title: data?.message || "Billing portal unavailable. Try again.",
+        variant: "destructive",
+      });
       setBillingLoading(false);
     } catch {
+      toast({
+        title: "Billing portal unavailable. Try again.",
+        variant: "destructive",
+      });
       setBillingLoading(false);
     }
   }
