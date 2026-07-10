@@ -66,7 +66,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-3xl">
+          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-4xl">
             <HeroDemo />
           </div>
         </motion.div>

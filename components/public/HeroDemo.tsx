@@ -396,7 +396,7 @@ function TailorPane({ reduce }: { reduce: boolean }) {
 function CoverPane({ reduce }: { reduce: boolean }) {
   const lines = [
     "Dear Hiring Manager,",
-    "I'm excited to apply for the Senior Frontend Engineer role at Boats Group.",
+    "I'm excited to apply for the Senior Frontend Engineer role at Northwind Labs.",
     "My work shipping React + TypeScript features maps directly to your team's goals.",
   ];
   return (
@@ -439,7 +439,7 @@ function CoverPane({ reduce }: { reduce: boolean }) {
           >
             Best,
             <br />
-            Alejandro
+            Jordan Rivera
           </motion.p>
         </div>
       </div>
@@ -523,7 +523,7 @@ function TrackPane({ reduce }: { reduce: boolean }) {
                 className="rounded-lg border border-border bg-card p-2.5 shadow-sm"
               >
                 <p className="text-xs font-semibold text-foreground">Frontend Engineer</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">Boats Group</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Northwind Labs</p>
                 <span
                   className="mt-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
                   style={{
