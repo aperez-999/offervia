@@ -23,8 +23,6 @@ const STEPS: Step[] = [
   { key: "track", label: "Track", icon: CheckCircle2 },
 ];
 
-const STEP_MS = 3000;
-
 const KEYWORDS = ["React", "TypeScript", "REST APIs", "CI/CD", "Agile"];
 
 const BULLETS = [
@@ -38,39 +36,118 @@ const BULLETS = [
   },
 ];
 
+const DWELL = 1900;
+const TRAVEL = 620;
+const CLICK = 280;
+const CYCLE = DWELL + TRAVEL + CLICK;
+
 export default function HeroDemo() {
   const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [clicking, setClicking] = useState(false);
 
-  const advance = useCallback(() => {
-    setStep((s) => (s + 1) % STEPS.length);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const coordsFor = useCallback((i: number) => {
+    const btn = btnRefs.current[i];
+    const frame = frameRef.current;
+    if (!btn || !frame) return null;
+    const b = btn.getBoundingClientRect();
+    const f = frame.getBoundingClientRect();
+    return { x: b.left - f.left + b.width / 2 - 3, y: b.top - f.top + b.height / 2 - 2 };
   }, []);
 
+  // Rest the cursor on the active tab once layout is measurable.
+  useEffect(() => {
+    if (reduce) return;
+    const id = requestAnimationFrame(() => setCursor(coordsFor(step)));
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+
+  // Self-driving loop: dwell → glide cursor to next tab → click → advance.
   useEffect(() => {
     if (reduce) {
       setStep(3);
       return;
     }
     if (paused) return;
-    timer.current = setTimeout(advance, STEP_MS);
+    let t2: ReturnType<typeof setTimeout>;
+    let t3: ReturnType<typeof setTimeout>;
+    const t1 = setTimeout(() => {
+      const next = (step + 1) % STEPS.length;
+      const pos = coordsFor(next);
+      if (pos) setCursor(pos);
+      t2 = setTimeout(() => {
+        setClicking(true);
+        t3 = setTimeout(() => {
+          setClicking(false);
+          setStep(next);
+        }, CLICK);
+      }, TRAVEL);
+    }, DWELL);
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
-  }, [step, paused, reduce, advance]);
+  }, [step, paused, reduce, coordsFor]);
 
   const goTo = (i: number) => {
-    if (timer.current) clearTimeout(timer.current);
     setStep(i);
+    const pos = coordsFor(i);
+    if (pos) setCursor(pos);
   };
 
   return (
     <div
-      className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/5 dark:shadow-black/40"
+      ref={frameRef}
+      className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/5 dark:shadow-black/40"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
+      {/* Self-driving cursor overlay */}
+      {!reduce && cursor && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute left-0 top-0 z-20"
+          animate={{ x: cursor.x, y: cursor.y }}
+          transition={{ duration: TRAVEL / 1000, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <motion.div
+            animate={clicking ? { scale: 0.82 } : { scale: 1 }}
+            transition={{ duration: 0.14, ease: "easeOut" }}
+            className="relative"
+          >
+            {/* Click ripple */}
+            <AnimatePresence>
+              {clicking && (
+                <motion.span
+                  key="ripple"
+                  initial={{ scale: 0.4, opacity: 0.5 }}
+                  animate={{ scale: 2.4, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="absolute -left-1 -top-1 h-6 w-6 rounded-full bg-primary/30"
+                />
+              )}
+            </AnimatePresence>
+            <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-md">
+              <path
+                d="M5 3l14 7-6 2.2L10 19 5 3z"
+                fill="var(--foreground)"
+                stroke="var(--background)"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-2.5">
         <div className="flex items-center gap-1.5">
@@ -103,6 +180,9 @@ export default function HeroDemo() {
             <button
               key={s.key}
               type="button"
+              ref={(el) => {
+                btnRefs.current[i] = el;
+              }}
               onClick={() => goTo(i)}
               aria-current={active ? "step" : undefined}
               className={[
@@ -148,7 +228,7 @@ export default function HeroDemo() {
               initial={false}
               animate={{ width: i < step ? "100%" : i === step ? "100%" : "0%" }}
               transition={{
-                duration: i === step && !paused && !reduce ? STEP_MS / 1000 : 0.3,
+                duration: i === step && !paused && !reduce ? CYCLE / 1000 : 0.3,
                 ease: "linear",
               }}
             />
