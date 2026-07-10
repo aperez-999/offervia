@@ -15,7 +15,7 @@ Offervia is an AI-assisted job search app for job seekers, students, and early-c
 - `Supabase` for auth, Postgres, RLS, storage, and service-role admin tasks
 - `Groq` for AI generation
 - `Stripe` for subscriptions
-- `Nodemailer` for contact mail and weekly digest emails
+- `Nodemailer` for contact mail
 
 ## Project Structure
 - `app/`: App Router pages, layouts, and API routes
@@ -74,8 +74,6 @@ db/audit/rls-verification.sql
 - `POST /api/create-portal-session`
 - `POST /api/stripe-webhook`
 - `POST /api/contact`
-- `POST /api/cron/weekly-digest` — weekly summary; opt-in via `user_prefs.email_digest`
-- `POST /api/cron/follow-up-reminders` — daily due/overdue reminders; opt-in via `user_prefs.daily_reminders`
 
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -95,7 +93,6 @@ db/audit/rls-verification.sql
 - `CONTACT_TO`
 - `CONTACT_FROM_NAME`
 - `CONTACT_FROM_EMAIL`
-- `CRON_SECRET`
 - `NEXT_PUBLIC_SENTRY_DSN`
 - `SENTRY_ORG`
 - `SENTRY_PROJECT`
@@ -185,7 +182,6 @@ Server-only env vars:
 - `CONTACT_TO`
 - `CONTACT_FROM_NAME`
 - `CONTACT_FROM_EMAIL`
-- `CRON_SECRET`
 - `SENTRY_ORG`
 - `SENTRY_PROJECT`
 - `SENTRY_AUTH_TOKEN` when source maps are enabled

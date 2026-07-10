@@ -73,7 +73,6 @@ type MsgRow = {
 
 type OnboardingPrefs = {
   weekly_goal?: number | null;
-  email_digest?: boolean | null;
   onboarding_dismissed?: boolean | null;
   onboarding_completed?: Record<string, boolean> | null;
 };
@@ -157,7 +156,6 @@ export default function DashboardClient({
   const [recentChats, setRecentChats] = useState<MsgRow[]>([]);
   const [friendlyName, setFriendlyName] = useState<string>("there");
   const [weeklyGoalTarget, setWeeklyGoalTarget] = useState<number>(5);
-  const [emailDigestEnabled, setEmailDigestEnabled] = useState<boolean>(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
   const [jobPacketDraft, setJobPacketDraft] = useState<JobPacketDraft | null>(null);
@@ -197,7 +195,7 @@ export default function DashboardClient({
       const [prefsRes, appsRes, msgsRes] = await Promise.all([
         supabase
           .from("user_prefs")
-          .select("weekly_goal,email_digest,onboarding_dismissed,onboarding_completed")
+          .select("weekly_goal,onboarding_dismissed,onboarding_completed")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
@@ -226,9 +224,6 @@ export default function DashboardClient({
         const typed = prefs as unknown as OnboardingPrefs;
         if (typeof typed.weekly_goal === "number" && Number.isFinite(typed.weekly_goal)) {
           setWeeklyGoalTarget(Math.max(0, Math.min(50, Math.round(typed.weekly_goal))));
-        }
-        if (typeof typed.email_digest === "boolean") {
-          setEmailDigestEnabled(typed.email_digest);
         }
         if (typeof typed.onboarding_dismissed === "boolean") {
           setOnboardingDismissed(typed.onboarding_dismissed);
@@ -366,13 +361,12 @@ export default function DashboardClient({
       { key: "coach_chat", label: "Ask the coach something", href: "/coach", done: usage.coachMessages > 0 },
       { key: "mock_interview", label: "Run a mock interview", href: "/interview", done: usage.interviewSessions > 0 },
       { key: "set_weekly_goal", label: "Set a weekly goal", href: "/settings", done: weeklyGoalTarget > 0 },
-      { key: "enable_digest", label: "Enable weekly digest", href: "/settings", done: emailDigestEnabled },
     ];
     return items.map((it) => ({
       ...it,
       done: it.done || onboardingCompleted[it.key] === true,
     }));
-  }, [apps.length, emailDigestEnabled, onboardingCompleted, usage, weeklyGoalTarget]);
+  }, [apps.length, onboardingCompleted, usage, weeklyGoalTarget]);
 
   const onboardingProgress = useMemo(() => {
     const total = onboardingItems.length || 1;
@@ -609,13 +603,13 @@ export default function DashboardClient({
             </div>
             <Progress value={weeklyGoalPct} className="mt-3 h-2" />
             <div className="mt-2 text-xs text-foreground/60">
-              {emailDigestEnabled ? (
-                <span>Weekly digest is on.</span>
+              {weeklyGoalTarget > 0 && appsThisWeek >= weeklyGoalTarget ? (
+                <span>Weekly goal reached — nice work.</span>
               ) : (
                 <span>
-                  Weekly digest is off.{" "}
-                  <Link href="/settings" className="underline text-primary">
-                    Enable it in settings
+                  {Math.max(0, weeklyGoalTarget - appsThisWeek)} to go this week.{" "}
+                  <Link href="/tracker" className="underline text-primary">
+                    Log an application
                   </Link>
                   .
                 </span>

@@ -46,8 +46,6 @@ type UserPrefsRow = {
   user_id: string;
   default_mode: CoachMode | null;
   weekly_goal: number | null;
-  email_digest: boolean | null;
-  daily_reminders: boolean | null;
 };
 
 const SECTIONS = [
@@ -72,8 +70,6 @@ export default function SettingsPage() {
   // preferences (DB-backed)
   const [weeklyGoal, setWeeklyGoal] = useState<number>(5);
   const [defaultMode, setDefaultMode] = useState<CoachMode>("interview");
-  const [emailDigest, setEmailDigest] = useState<boolean>(false);
-  const [dailyReminders, setDailyReminders] = useState<boolean>(false);
 
   // plan
   const [plan, setPlan] = useState<"free" | "pro">("free");
@@ -104,29 +100,11 @@ export default function SettingsPage() {
         setEmailVerified(Boolean(user.email_confirmed_at));
 
         // Load prefs from DB (if row missing, defaults stay as-is).
-        // daily_reminders is newest — fall back if the column isn't migrated yet.
-        let prefs:
-          | (Partial<UserPrefsRow> & Record<string, unknown>)
-          | null = null;
-        let prefsErr: unknown = null;
-        {
-          const full = await supabase
-            .from("user_prefs")
-            .select("default_mode, weekly_goal, email_digest, daily_reminders")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (full.error) {
-            const legacy = await supabase
-              .from("user_prefs")
-              .select("default_mode, weekly_goal, email_digest")
-              .eq("user_id", user.id)
-              .maybeSingle();
-            prefs = legacy.data;
-            prefsErr = legacy.error;
-          } else {
-            prefs = full.data;
-          }
-        }
+        const { data: prefs, error: prefsErr } = await supabase
+          .from("user_prefs")
+          .select("default_mode, weekly_goal")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
         if (prefsErr) {
           // Non-fatal; show toast but keep page usable
@@ -136,9 +114,6 @@ export default function SettingsPage() {
         if (prefs) {
           if (prefs.default_mode) setDefaultMode(prefs.default_mode as CoachMode);
           if (typeof prefs.weekly_goal === "number") setWeeklyGoal(prefs.weekly_goal);
-          if (typeof prefs.email_digest === "boolean") setEmailDigest(prefs.email_digest);
-          if (typeof prefs.daily_reminders === "boolean")
-            setDailyReminders(prefs.daily_reminders);
         }
 
         // Load subscription/plan (own row via RLS)
@@ -175,23 +150,11 @@ export default function SettingsPage() {
         user_id: user.id,
         default_mode: defaultMode,
         weekly_goal: weeklyGoal,
-        email_digest: emailDigest,
-        daily_reminders: dailyReminders,
       };
 
-      let upsertErr: unknown = null;
-      const upsert = await supabase
+      const { error: upsertErr } = await supabase
         .from("user_prefs")
         .upsert(payload, { onConflict: "user_id" });
-      if (upsert.error) {
-        // daily_reminders column may not be migrated yet — retry without it.
-        const { daily_reminders: _omit, ...legacyPayload } = payload;
-        void _omit;
-        const retry = await supabase
-          .from("user_prefs")
-          .upsert(legacyPayload, { onConflict: "user_id" });
-        upsertErr = retry.error;
-      }
 
       if (upsertErr) throw upsertErr;
 
@@ -532,43 +495,6 @@ export default function SettingsPage() {
                 />
                 <div className="text-xs text-foreground/60">
                   Used on the dashboard for progress nudges.
-                </div>
-              </div>
-
-              <div className="grid gap-2 sm:col-span-2">
-                <label className="text-sm text-foreground/80">Weekly email digest</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id="digest"
-                    type="checkbox"
-                    checked={emailDigest}
-                    onChange={(e) => setEmailDigest(e.target.checked)}
-                    className="h-4 w-4 rounded border-border bg-background accent-primary"
-                    disabled={loading}
-                  />
-                  <label htmlFor="digest" className="text-sm text-foreground/80">
-                    Send a weekly summary (applications & reminders)
-                  </label>
-                </div>
-              </div>
-
-              <div className="grid gap-2 sm:col-span-2">
-                <label className="text-sm text-foreground/80">Daily follow-up reminders</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id="daily-reminders"
-                    type="checkbox"
-                    checked={dailyReminders}
-                    onChange={(e) => setDailyReminders(e.target.checked)}
-                    className="h-4 w-4 rounded border-border bg-background accent-primary"
-                    disabled={loading}
-                  />
-                  <label htmlFor="daily-reminders" className="text-sm text-foreground/80">
-                    Email me when a follow-up is due or overdue
-                  </label>
-                </div>
-                <div className="text-xs text-foreground/60">
-                  Separate from the weekly digest. Only sends on days you have follow-ups due.
                 </div>
               </div>
 
