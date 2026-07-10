@@ -18,8 +18,8 @@ const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), 
 });
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Job Scanner",
-  description: "Scan job descriptions for requirements, gaps, and stronger application angles before you tailor.",
+  title: "ATS Keyword Scanner",
+  description: "Compare your resume against a job description to see matched keywords, gaps, and ATS optimization tips before you apply.",
   path: "/scanner",
   index: false,
 });

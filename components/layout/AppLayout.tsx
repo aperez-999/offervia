@@ -46,7 +46,7 @@ const navItems: NavItem[] = [
   { label: "Job Packet", href: "/job-packet", icon: Sparkles },
   { label: "Resume", href: "/resume", icon: FileText },
   { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
-  { label: "Scanner", href: "/scanner", icon: Search },
+  { label: "ATS Scanner", href: "/scanner", icon: Search },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Interview", href: "/interview", icon: MicVocal },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },

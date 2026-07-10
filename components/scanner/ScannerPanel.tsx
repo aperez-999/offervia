@@ -1,895 +1,514 @@
-// app/(protected)/scanner/page.tsx
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import {
+  Check,
   ClipboardCopy,
-  Download,
-  History,
-  Trash2,
-  Search as SearchIcon,
+  FileText,
   Sparkles,
+  Star,
+  Target,
+  Wand2,
+  X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { postJson } from "@/lib/safe-fetch";
-import { getBrowserSupabase } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Reveal } from "@/components/motion/Reveal";
+import Dropzone from "@/components/resume/Dropzone";
+import { useToast } from "@/hooks/use-toast";
+import { postForm, postJson, type SafeFetchResult } from "@/lib/safe-fetch";
 import {
-  hasMeaningfulJobPacketDraft,
-  readJobPacketDraft,
-  updateJobPacketDraft,
-} from "@/lib/job-packet";
-import {
-  approxTokens,
-  CloudScan,
-  detectTechs,
-  EXAMPLE_JOB_DESCRIPTION,
-  formatScanResultForReadability,
-  SCANNER_DRAFT_LS_KEY,
-  SCANNER_HISTORY_LS_KEY,
-  SCANNER_RESUME_DESIRED_STEP_LS_KEY,
-  SCANNER_RESUME_JD_LS_KEY,
-  scanResultToText,
-  titleFromJD,
-  type ScanEntry,
-  type ScanResultContent,
-} from "@/lib/scanner/utils";
+  ATS_HISTORY_LS_KEY,
+  ATS_RESUME_JD_LS_KEY,
+  type AtsHistoryEntry,
+  type AtsResult,
+} from "@/lib/ats/utils";
+
+const EXAMPLE_JD = `Frontend Engineer
+
+We're hiring a Frontend Engineer to build accessible, performant web apps. You'll implement UI components, collaborate with design, write tests, and improve performance.
+
+Requirements: JavaScript, TypeScript, React, HTML, CSS, REST APIs, unit testing (Jest). Must have 3+ years of experience and a Bachelor's degree.
+Nice to have: Next.js, Tailwind CSS, accessibility (a11y), CI/CD, performance profiling.`;
+
+function scoreLabel(score: number): { label: string; tone: string } {
+  if (score >= 80) return { label: "Excellent match", tone: "text-success" };
+  if (score >= 60) return { label: "Good match", tone: "text-primary" };
+  if (score >= 40) return { label: "Fair match", tone: "text-warning" };
+  return { label: "Needs work", tone: "text-destructive" };
+}
+
+function loadHistory(): AtsHistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(ATS_HISTORY_LS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as AtsHistoryEntry[]).slice(0, 6) : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function ScannerPanel() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = useMemo(() => getBrowserSupabase(), []);
+  const reduceMotion = useReducedMotion();
+
+  const [resumeMode, setResumeMode] = useState<"paste" | "upload">("paste");
+  const [resumeText, setResumeText] = useState("");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jd, setJd] = useState("");
   const [loading, setLoading] = useState(false);
-  const [scanResult, setScanResult] = useState<ScanResultContent | null>(null);
-  const [legacyResult, setLegacyResult] = useState<string>("");
-  const [history, setHistory] = useState<ScanEntry[]>([]);
-  const [cloudHistory, setCloudHistory] = useState<CloudScan[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmKind, setConfirmKind] = useState<"cloud_all" | "cloud_one" | "local_all" | null>(null);
-  const [pendingCloudId, setPendingCloudId] = useState<string | null>(null);
+  const [result, setResult] = useState<AtsResult | null>(null);
+  const [history, setHistory] = useState<AtsHistoryEntry[]>([]);
 
-  const hasResult = !!scanResult || !!legacyResult;
-
-  const resultText = scanResult ? scanResultToText(scanResult) : legacyResult;
-
-  const abortRef = useRef<AbortController | null>(null);
-  const canceledRef = useRef(false);
-
-  // draft + history bootstrap
   useEffect(() => {
-    try {
-      const d = localStorage.getItem(SCANNER_DRAFT_LS_KEY);
-      if (d) setJd(d);
-      const raw = localStorage.getItem(SCANNER_HISTORY_LS_KEY);
-      if (raw) setHistory(JSON.parse(raw));
-    } catch {}
+    setHistory(loadHistory());
   }, []);
 
-  useEffect(() => {
-    const packetDraft = readJobPacketDraft();
-    if (!packetDraft || !hasMeaningfulJobPacketDraft(packetDraft)) return;
-    setJd((prev) => prev || packetDraft.jobDescription);
-  }, []);
+  const resumeReady =
+    resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 50;
+  const canScan = resumeReady && jd.trim().length >= 20 && !loading;
 
-  // Cloud scan history (Supabase) — optional; keep local history as primary fallback.
-  useEffect(() => {
-    (async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user?.id) return;
+  const scoreRing = useMemo(() => {
+    const s = result?.match_score ?? 0;
+    return `conic-gradient(var(--ring-color) ${s * 3.6}deg, var(--ring-track) 0deg)`;
+  }, [result]);
 
-        const { data, error: qErr } = await supabase
-          .from("job_scans")
-          .select("id,title,jd_excerpt,match_score,strengths,missing_skills,summary,created_at")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-        if (qErr || !data) return;
-
-        const normalized = (data as Array<Record<string, unknown>>).map((r) => ({
-          id: String(r.id),
-          title: typeof r.title === "string" ? r.title : "Job scan",
-          jd_excerpt: typeof r.jd_excerpt === "string" ? r.jd_excerpt : "",
-          match_score: typeof r.match_score === "number" ? r.match_score : Number(r.match_score) || 0,
-          strengths: Array.isArray(r.strengths) ? (r.strengths as string[]) : [],
-          missing_skills: Array.isArray(r.missing_skills) ? (r.missing_skills as string[]) : [],
-          summary: typeof r.summary === "string" ? r.summary : String(r.summary ?? ""),
-          created_at: typeof r.created_at === "string" ? r.created_at : String(r.created_at ?? ""),
-        }));
-
-        setCloudHistory(normalized);
-      } catch {
-        // noop
-      }
-    })();
-  }, [supabase]);
-  useEffect(() => {
-    try {
-      localStorage.setItem(SCANNER_DRAFT_LS_KEY, jd);
-    } catch {}
-  }, [jd]);
-
-  const techs = useMemo(() => detectTechs(jd), [jd]);
-
-  function persistHistory(next: ScanEntry[]) {
+  function pushHistory(entry: AtsResult) {
+    const record: AtsHistoryEntry = {
+      id: `${Date.now()}`,
+      created_at: Date.now(),
+      role_title: entry.role_title,
+      match_score: entry.match_score,
+      jd_excerpt: jd.trim().slice(0, 120),
+    };
+    const next = [record, ...history].slice(0, 6);
     setHistory(next);
     try {
-      localStorage.setItem(SCANNER_HISTORY_LS_KEY, JSON.stringify(next));
+      localStorage.setItem(ATS_HISTORY_LS_KEY, JSON.stringify(next));
     } catch {}
   }
 
-  function openConfirm(kind: "cloud_all" | "cloud_one" | "local_all", cloudId?: string) {
-    setConfirmKind(kind);
-    setPendingCloudId(cloudId ?? null);
-    setConfirmOpen(true);
-  }
-
-  async function runConfirmDelete() {
-    const kind = confirmKind;
-    setConfirmOpen(false);
-
-    if (!kind) return;
-
-    if (kind === "local_all") {
-      persistHistory([]);
-      toast({ title: "Device history cleared" });
-      return;
-    }
-
-    // Cloud deletes require auth + RLS delete policy
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user?.id) {
-        toast({ title: "Sign in required", variant: "destructive" });
-        return;
-      }
-
-      if (kind === "cloud_one" && pendingCloudId) {
-        const { error: delErr } = await supabase
-          .from("job_scans")
-          .delete()
-          .eq("id", pendingCloudId)
-          .eq("user_id", user.id);
-        if (delErr) throw delErr;
-        setCloudHistory((prev) => prev.filter((x) => x.id !== pendingCloudId));
-        toast({ title: "Deleted cloud scan" });
-        return;
-      }
-
-      if (kind === "cloud_all") {
-        const { error: delErr } = await supabase
-          .from("job_scans")
-          .delete()
-          .eq("user_id", user.id);
-        if (delErr) throw delErr;
-        setCloudHistory([]);
-        toast({ title: "Cloud history cleared" });
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error("[scanner] cloud delete failed", msg);
-      toast({ title: "Delete failed", description: "Try again in a moment.", variant: "destructive" });
-    } finally {
-      setPendingCloudId(null);
-      setConfirmKind(null);
-    }
-  }
-
-  function addToHistory(jdText: string, resPayload: string) {
-    const entry: ScanEntry = {
-      id: `${Date.now()}`,
-      jd: jdText,
-      result: resPayload,
-      created_at: Date.now(),
-      title: titleFromJD(jdText),
-      techs: detectTechs(jdText),
-    };
-    const next = [entry, ...history].slice(0, 10); // keep last 10
-    persistHistory(next);
-  }
-
-  async function analyze() {
-    const text = jd.trim();
-    if (text.length < 20) {
-      setError("Please paste a longer job description.");
-      toast({
-        title: "Please paste a longer job description",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  async function handleScan() {
+    if (!canScan) return;
     setLoading(true);
-    setScanResult(null);
-    setLegacyResult("");
     setError(null);
-
-    canceledRef.current = false;
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    const res = await postJson<{
-      content?: ScanResultContent;
-      error?: string;
-    }>("/api/job-scan", { jd: text }, { timeoutMs: 20000, retries: 0, signal: controller.signal });
-
-    abortRef.current = null;
-    setLoading(false);
-
-    // If user canceled during the request
-    if (canceledRef.current) {
-      setError("Canceled.");
-      canceledRef.current = false;
-      return;
-    }
-
-    if (!res.ok) {
-      if (res.status === 429) {
-        const msg = res.error || "You've hit today's free limit for scans.";
-        setError(msg);
-        toast({
-          title: "Rate limit reached",
-          description: msg,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (res.status === 403 && res.error === "PLAN_LIMIT_REACHED") {
-        const msg =
-          "You've reached your monthly job scan limit. Upgrade to Pro to continue.";
-        setError(msg);
-        toast({
-          title: "Limit reached",
-          description: msg,
-          variant: "upgrade",
-          duration: 8000,
-          action: (
-            <Button
-              size="default"
-              className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-              onClick={() => router.push("/upgrade")}
-            >
-              Upgrade to Pro
-            </Button>
-          ),
-        });
-        return;
-      }
-
-      const friendly =
-        res.cause === "timeout"
-          ? "The scan timed out. Try again with a shorter JD."
-          : res.cause === "network"
-          ? "Network error. Check your connection and try again."
-          : res.cause === "server"
-          ? "Service is having trouble. Try again shortly."
-          : res.error || "Scan failed.";
-      setError(friendly);
-      toast({ title: "Scan failed", description: friendly, variant: "destructive" });
-      return;
-    }
-
-    const content = res.data?.content;
-    if (content && typeof content.match_score === "number" && Array.isArray(content.strengths) && Array.isArray(content.missing_skills) && typeof content.summary === "string") {
-      setScanResult(content);
-      addToHistory(text, JSON.stringify(content));
-      updateJobPacketDraft({
-        currentStep: "resume",
-        jobDescription: text,
-        scanResult: content,
-      });
-    } else {
-      setLegacyResult(formatScanResultForReadability(JSON.stringify(content ?? res.data ?? "")));
-      addToHistory(text, JSON.stringify(content ?? res.data ?? ""));
-    }
-    toast({ title: "Scan complete" });
-  }
-
-  function continueToResumeTailor() {
-    const text = jd.trim();
-    if (text.length < 20) {
-      toast({ title: "Paste a longer job description first.", variant: "destructive" });
-      return;
-    }
     try {
-      localStorage.setItem(SCANNER_RESUME_JD_LS_KEY, text);
-      // Since we can't carry a File object across routes, land the user on Step 1 (upload),
-      // then let ResumeWizard auto-advance to the JD step once a resume is attached.
-      localStorage.setItem(SCANNER_RESUME_DESIRED_STEP_LS_KEY, "3");
+      let resp: SafeFetchResult<{ content?: AtsResult }>;
+      if (resumeMode === "upload" && resumeFile) {
+        const form = new FormData();
+        form.append("file", resumeFile);
+        form.append("jd", jd);
+        resp = await postForm<{ content?: AtsResult }>("/api/ats-scan", form, {
+          timeoutMs: 45_000,
+        });
+      } else {
+        resp = await postJson<{ content?: AtsResult }>(
+          "/api/ats-scan",
+          { resumeText: resumeText.trim(), jd: jd.trim() },
+          { timeoutMs: 45_000 },
+        );
+      }
+
+      if (!resp.ok) {
+        const msg =
+          resp.error ||
+          (resp.status === 429
+            ? "Too many scans. Try again in a moment."
+            : "Scan failed. Please try again.");
+        setError(msg);
+        toast({ title: "Scan failed", description: msg, variant: "destructive" });
+        return;
+      }
+
+      const content = resp.data?.content;
+      if (!content) {
+        const msg = "Scan failed. Please try again.";
+        setError(msg);
+        toast({ title: "Scan failed", description: msg, variant: "destructive" });
+        return;
+      }
+
+      setResult(content);
+      pushHistory(content);
+      toast({
+        title: `${content.match_score}% keyword match`,
+        description: `${content.matched_count} of ${content.total} keywords found in your resume.`,
+      });
     } catch {
-      // noop
+      const msg = "Something went wrong. Please try again.";
+      setError(msg);
+      toast({ title: "Scan failed", description: msg, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    updateJobPacketDraft({
-      currentStep: "resume",
-      jobDescription: text,
-    });
-    router.push("/resume?from=scanner");
   }
 
-  function clearAll() {
-    setJd("");
-    setScanResult(null);
-    setLegacyResult("");
-    setError(null);
+  function tailorResume() {
+    try {
+      localStorage.setItem(ATS_RESUME_JD_LS_KEY, jd.trim());
+    } catch {}
+    const role = result?.role_title && result.role_title !== "This role" ? result.role_title : "";
+    const params = new URLSearchParams({ from: "scanner", step: "3" });
+    if (role) params.set("role", role);
+    router.push(`/resume?${params.toString()}`);
   }
 
-  function copy(text: string, label = "Copied") {
-    navigator.clipboard.writeText(text).then(
-      () => toast({ title: label }),
-      () => toast({ title: "Copy failed", variant: "destructive" })
+  function copyMissing() {
+    if (!result?.missing.length) return;
+    navigator.clipboard.writeText(result.missing.join(", ")).then(
+      () => toast({ title: "Missing keywords copied" }),
+      () => toast({ title: "Copy failed", variant: "destructive" }),
     );
   }
 
-  function download(text: string, filename: string) {
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  const label = result ? scoreLabel(result.match_score) : null;
 
   return (
     <div className="space-y-6">
-      {/* Heading */}
-      <section>
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">Step 1 · Analyze</p>
-        <h1 className="mt-1 text-2xl font-semibold text-foreground">
-          Job Description Scanner
+      <header className="space-y-1.5">
+        <h1 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
+          <Target className="size-6 text-primary" /> ATS Keyword Scanner
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Paste a job description to surface the skills, gaps, and themes you should carry into the rest of your workflow.
+        <p className="max-w-2xl text-sm text-foreground/60">
+          Paste your resume and a job description to see the exact keywords an
+          applicant tracking system scans for — what you already match, what
+          you&apos;re missing, and how to fix it before you apply.
         </p>
-      </section>
+      </header>
 
-      {/* Input + Results side-by-side on large screens */}
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-      {/* Input Card */}
-      <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-foreground">Paste Job Description</CardTitle>
-
-          {/* Error surface */}
-          {error && (
-            <div className="mt-2">
-              <Alert variant="destructive">
-                <AlertTitle>Unable to analyze</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-foreground/60">
-            <span>
-              Characters: <span className="text-foreground/80">{jd.length}</span>
-            </span>
-            <span>
-              ~Tokens: <span className="text-foreground/80">{approxTokens(jd)}</span>
-            </span>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-3">
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-foreground/50" />
-            <Textarea
-              aria-label="Job description input"
-              placeholder="Paste the full job description here..."
-              className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border pr-8 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-              value={jd}
-              onChange={(e) => setJd(e.target.value)}
-            />
-          </div>
-
-          {techs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-foreground/60">Detected:</span>
-              {techs.map((t) => (
-                <Badge
-                  key={t}
-                  variant="outline"
-                  className="border-border text-foreground/80"
-                  title="Detected keyword"
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        {/* Inputs */}
+        <Reveal className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm">
+          <div className="space-y-4">
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label
+                  htmlFor="ats-resume"
+                  className="block text-sm font-medium text-foreground"
                 >
-                  {t}
-                </Badge>
-              ))}
-              <Button
-                size="sm"
-                variant="outline"
-                className="ml-1 h-7 border-border text-foreground hover:bg-foreground/[0.06]"
-                onClick={() => copy(techs.join(", "), "Copied keywords")}
-              >
-                <ClipboardCopy className="mr-1 h-3.5 w-3.5" /> Copy keywords
-              </Button>
+                  Your resume
+                </label>
+                <div
+                  className="inline-flex rounded-lg border border-border bg-background/50 p-0.5"
+                  role="tablist"
+                  aria-label="Resume input method"
+                >
+                  {(["paste", "upload"] as const).map((m) => {
+                    const active = resumeMode === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setResumeMode(m)}
+                        className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                          active
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground/60 hover:text-foreground"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {resumeMode === "paste" ? (
+                <>
+                  <Textarea
+                    id="ats-resume"
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="Paste your resume text here…"
+                    className="min-h-[140px] max-h-[220px] resize-none overflow-auto"
+                  />
+                  <p className="mt-1 text-xs text-foreground/50">
+                    {resumeText.trim().length < 50
+                      ? `Add at least ${50 - resumeText.trim().length} more characters.`
+                      : "Looks good."}
+                  </p>
+                </>
+              ) : resumeFile ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background/60 p-3">
+                  <span className="flex min-w-0 items-center gap-2 text-sm text-foreground">
+                    <FileText className="size-4 shrink-0 text-primary" />
+                    <span className="truncate">{resumeFile.name}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setResumeFile(null)}
+                    className="shrink-0 rounded-md p-1 text-foreground/50 transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    aria-label="Remove file"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <Dropzone onFile={(f) => setResumeFile(f)} maxSizeMb={5} />
+              )}
             </div>
-          )}
 
-          <p className="text-xs text-foreground/60">
-            You can paste raw text from PDF, DOCX, or job posting links.
-          </p>
-        </CardContent>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label
+                  htmlFor="ats-jd"
+                  className="block text-sm font-medium text-foreground"
+                >
+                  Job description
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setJd(EXAMPLE_JD)}
+                  className="text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                  Use example
+                </button>
+              </div>
+              <Textarea
+                id="ats-jd"
+                value={jd}
+                onChange={(e) => setJd(e.target.value)}
+                placeholder="Paste the job description you're applying to…"
+                className="min-h-[160px] max-h-[260px] resize-none overflow-auto"
+              />
+            </div>
 
-        <CardFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-2">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <Button
-              onClick={analyze}
-              disabled={loading || jd.trim().length < 20}
-              className="bg-primary-button cursor-pointer text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              onClick={handleScan}
+              disabled={!canScan}
+              className="w-full"
+              size="lg"
             >
               {loading ? (
                 <>
-                  <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing…
+                  <Sparkles className="size-4 animate-spin" /> Scanning…
                 </>
               ) : (
                 <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Analyze Job Description
+                  <Target className="size-4" /> Scan for keywords
                 </>
               )}
             </Button>
 
-            {loading && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  canceledRef.current = true;
-                  abortRef.current?.abort();
-                }}
-                className="border-border text-foreground hover:bg-foreground/[0.06]"
-              >
-                Cancel
-              </Button>
+            {error ? (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            ) : null}
+
+            {history.length > 0 && (
+              <div className="border-t border-border pt-3">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground/40">
+                  Recent scans
+                </p>
+                <ul className="space-y-1.5">
+                  {history.map((h) => (
+                    <li
+                      key={h.id}
+                      className="flex items-center justify-between gap-2 text-sm"
+                    >
+                      <span className="min-w-0 truncate text-foreground/70">
+                        {h.role_title || h.jd_excerpt || "Job scan"}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${scoreLabel(h.match_score).tone} bg-foreground/[0.04]`}
+                      >
+                        {h.match_score}%
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-
-            <Button
-              variant="outline"
-              onClick={clearAll}
-              disabled={loading || (!jd && !hasResult)}
-              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-            >
-              Clear
-            </Button>
           </div>
+        </Reveal>
 
-          <button
-            type="button"
-            className="text-xs text-foreground/70 cursor-pointer underline underline-offset-4 hover:text-foreground"
-            onClick={() => setJd(EXAMPLE_JOB_DESCRIPTION)}
-          >
-            Paste example job description
-          </button>
-        </CardFooter>
-      </Card>
+        {/* Results */}
+        <Reveal
+          index={1}
+          className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm lg:sticky lg:top-20"
+        >
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={reduceMotion ? undefined : { opacity: 0 }}
+                animate={reduceMotion ? undefined : { opacity: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0 }}
+                className="space-y-4"
+                aria-hidden
+              >
+                <div className="mx-auto size-28 animate-pulse rounded-full bg-foreground/10" />
+                <div className="space-y-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-4 animate-pulse rounded bg-foreground/10"
+                      style={{ width: `${88 - (i % 3) * 14}%` }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            ) : result ? (
+              <motion.div
+                key="result"
+                initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                className="space-y-5"
+              >
+                {/* Score */}
+                <div className="flex items-center gap-4">
+                  <div
+                    className="grid size-24 shrink-0 place-items-center rounded-full"
+                    style={
+                      {
+                        background: scoreRing,
+                        "--ring-color":
+                          result.match_score >= 60
+                            ? "var(--primary-button)"
+                            : result.match_score >= 40
+                              ? "oklch(0.75 0.15 80)"
+                              : "var(--destructive)",
+                        "--ring-track": "color-mix(in oklch, var(--foreground) 10%, transparent)",
+                      } as React.CSSProperties
+                    }
+                  >
+                    <div className="grid size-[76px] place-items-center rounded-full bg-card">
+                      <span className="text-2xl font-bold text-foreground">
+                        {result.match_score}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-lg font-semibold ${label?.tone}`}>
+                      {label?.label}
+                    </p>
+                    <p className="text-sm text-foreground/60">
+                      {result.matched_count} of {result.total} keywords matched
+                    </p>
+                    {result.must_total > 0 && (
+                      <p className="mt-0.5 text-xs text-foreground/50">
+                        Required keywords: {result.must_matched}/{result.must_total} covered
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-      {/* Results Card */}
-      <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-foreground">Results</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-              onClick={continueToResumeTailor}
-              disabled={loading || jd.trim().length < 20}
-              title="Continue to resume tailor using this job description"
-            >
-              Continue to Resume Tailor
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-              onClick={() => resultText && copy(resultText, "Copied analysis")}
-              disabled={!hasResult}
-            >
-              <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-              onClick={() =>
-                resultText &&
-                download(
-                  resultText,
-                  `offervia-scan-${new Date().toISOString().slice(0, 10)}.txt`
-                )
-              }
-              disabled={!hasResult}
-            >
-              <Download className="mr-2 h-4 w-4" /> Download
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <AnimatePresence mode="wait" initial={false}>
-          {loading ? (
-            <div className="space-y-2">
-              <div className="h-4 w-2/3 animate-pulse rounded bg-foreground/[0.06]" />
-              <div className="h-4 w-4/5 animate-pulse rounded bg-foreground/[0.06]" />
-              <div className="h-4 w-3/5 animate-pulse rounded bg-foreground/[0.06]" />
-              <div className="mt-2 h-24 animate-pulse rounded bg-foreground/[0.06]" />
-            </div>
-          ) : scanResult ? (
-            <motion.div
-              key="scanResult"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="space-y-6"
-              aria-label="Scan results"
-            >
-              <div className="mb-6">
-                <p className="text-sm text-muted-foreground">Match Score</p>
-                <p className="text-3xl font-semibold text-foreground">
-                  {scanResult.match_score}%
+                {/* Matched */}
+                {result.matched.length > 0 && (
+                  <div>
+                    <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
+                      <Check className="size-4 text-success" /> Matched keywords
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.matched.map((k) => (
+                        <span
+                          key={k}
+                          className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
+                        >
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Missing */}
+                {result.missing.length > 0 && (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                        <X className="size-4 text-destructive" /> Missing keywords
+                      </p>
+                      <button
+                        type="button"
+                        onClick={copyMissing}
+                        className="flex items-center gap-1 text-xs font-medium text-foreground/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      >
+                        <ClipboardCopy className="size-3.5" /> Copy
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.keywords
+                        .filter((k) => !k.matched)
+                        .map((k) => (
+                          <span
+                            key={k.term}
+                            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                              k.importance === "must"
+                                ? "border-destructive/30 bg-destructive/10 text-destructive"
+                                : "border-warning/30 bg-warning/10 text-warning"
+                            }`}
+                            title={k.importance === "must" ? "Required by this job" : "Preferred"}
+                          >
+                            {k.importance === "must" && <Star className="size-3 fill-current" />}
+                            {k.term}
+                          </span>
+                        ))}
+                    </div>
+                    <p className="mt-2 text-xs text-foreground/45">
+                      <Star className="mr-1 inline size-3 fill-current text-destructive" />
+                      = required by the job. Only add keywords you can honestly back up.
+                    </p>
+                  </div>
+                )}
+
+                {/* Tips */}
+                {result.tips.length > 0 && (
+                  <div className="rounded-xl border border-border bg-background/50 p-3.5">
+                    <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
+                      <Sparkles className="size-4 text-primary" /> How to improve
+                    </p>
+                    <ul className="space-y-1.5">
+                      {result.tips.map((tip, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-2 text-sm text-foreground/70"
+                        >
+                          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary/60" />
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                  <Button onClick={tailorResume} className="flex-1">
+                    <Wand2 className="size-4" /> Tailor my resume
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setResult(null);
+                      setError(null);
+                    }}
+                  >
+                    New scan
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="flex min-h-[360px] flex-col items-center justify-center gap-2 text-center text-sm text-foreground/50">
+                <Target className="size-9 text-foreground/25" />
+                <p>Your keyword match report will appear here.</p>
+                <p className="max-w-xs text-xs text-foreground/40">
+                  Add your resume and a job description, then scan to see matched
+                  keywords, gaps, and ATS tips.
                 </p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Strengths</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
-                  {scanResult.strengths.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Missing Skills</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
-                  {scanResult.missing_skills.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Summary</p>
-                <p className="mt-2 text-sm text-foreground">{scanResult.summary}</p>
-              </div>
-            </motion.div>
-          ) : legacyResult ? (
-            <motion.pre
-              key="legacyResult"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              aria-label="Scan results"
-              className="whitespace-pre-wrap rounded-xl border border-border bg-background/60 p-3 text-sm text-foreground"
-            >
-              {legacyResult}
-            </motion.pre>
-          ) : (
-            <motion.p
-              key="empty"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="text-sm text-foreground/60"
-            >
-              No scan yet. Paste a job description, run the analysis, then continue into Resume Tailor when you are ready.
-            </motion.p>
-          )}
+            )}
           </AnimatePresence>
-        </CardContent>
-      </Card>
+        </Reveal>
       </div>
-
-      {/* History */}
-      <div className="grid items-start gap-4 xl:grid-cols-2">
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <History className="h-5 w-5 text-foreground/70" />
-              <CardTitle className="text-foreground">Across devices</CardTitle>
-            </div>
-            {cloudHistory.length > 0 && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                onClick={() => openConfirm("cloud_all")}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Clear
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {cloudHistory.length === 0 ? (
-              <p className="text-sm text-foreground/60">No cloud scans yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {cloudHistory.map((h) => (
-                  <li key={h.id} className="rounded-md border border-border bg-background/60 p-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-medium text-foreground">{h.title}</div>
-                        <div className="text-xs text-foreground/70">Match score: {h.match_score}%</div>
-                      </div>
-                      <div className="text-[11px] text-foreground/60">
-                        {h.created_at ? new Date(h.created_at).toLocaleString() : ""}
-                      </div>
-                    </div>
-                    <div className="mt-2 text-sm text-foreground/80">
-                      {h.summary}
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => {
-                          // Always load results. JD excerpt is optional (older scans won't have it).
-                          if (h.jd_excerpt) setJd(h.jd_excerpt);
-                          setScanResult({
-                            match_score: h.match_score,
-                            strengths: h.strengths,
-                            missing_skills: h.missing_skills,
-                            summary: h.summary,
-                          });
-                          setLegacyResult("");
-                          toast({
-                            title: h.jd_excerpt ? "Loaded cloud scan" : "Loaded results (legacy scan)",
-                            description: h.jd_excerpt
-                              ? undefined
-                              : "This older scan didn’t save the job description text, but the results are still available.",
-                          });
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                      >
-                        Load
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-                        onClick={() => {
-                          if (!h.jd_excerpt || h.jd_excerpt.trim().length < 20) {
-                            toast({
-                              title: "This scan can’t continue yet",
-                              description:
-                                "This older scan didn’t save job description text. Run a new scan to enable continuing from cloud history.",
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                          try {
-                            localStorage.setItem(SCANNER_RESUME_JD_LS_KEY, h.jd_excerpt);
-                            localStorage.setItem(SCANNER_RESUME_DESIRED_STEP_LS_KEY, "3");
-                          } catch {
-                            // noop
-                          }
-                          updateJobPacketDraft({
-                            currentStep: "resume",
-                            jobDescription: h.jd_excerpt,
-                            scanResult: {
-                              match_score: h.match_score,
-                              strengths: h.strengths,
-                              missing_skills: h.missing_skills,
-                              summary: h.summary,
-                            },
-                          });
-                          router.push("/resume?from=scanner");
-                        }}
-                      >
-                        Continue to Resume Tailor
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => openConfirm("cloud_one", h.id)}
-                        title="Delete this scan"
-                        aria-label="Delete this scan"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {h.missing_skills.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {h.missing_skills.slice(0, 8).map((t) => (
-                          <Badge key={t} variant="outline" className="border-border text-foreground/80">
-                            {t}
-                          </Badge>
-                        ))}
-                        {h.missing_skills.length > 8 && (
-                          <span className="text-[11px] text-foreground/60">
-                            +{h.missing_skills.length - 8} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <History className="h-5 w-5 text-foreground/70" />
-              <CardTitle className="text-foreground">On this device</CardTitle>
-            </div>
-            {history.length > 0 && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                onClick={() => openConfirm("local_all")}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Clear
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {history.length === 0 ? (
-              <p className="text-sm text-foreground/60">No device scans yet.</p>
-            ) : (
-              <ul className="space-y-3">
-                {history.map((h) => (
-                  <li
-                    key={h.id}
-                    className="flex flex-col gap-2 rounded-lg border border-border bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-medium text-foreground">
-                        {h.title}
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
-                        {h.techs.slice(0, 6).map((t) => (
-                          <Badge
-                            key={t}
-                            variant="outline"
-                            className="border-border text-foreground/80"
-                          >
-                            {t}
-                          </Badge>
-                        ))}
-                        {h.techs.length > 6 && (
-                          <span className="text-[11px] text-foreground/60">
-                            +{h.techs.length - 6} more
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 text-[11px] text-foreground/60">
-                        {new Date(h.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => {
-                          setJd(h.jd);
-                          setError(null);
-                          try {
-                            const parsed = JSON.parse(h.result) as unknown;
-                            if (
-                              parsed &&
-                              typeof parsed === "object" &&
-                              "match_score" in parsed &&
-                              "strengths" in parsed &&
-                              "missing_skills" in parsed &&
-                              "summary" in parsed
-                            ) {
-                              setScanResult(parsed as ScanResultContent);
-                              setLegacyResult("");
-                            } else {
-                              setScanResult(null);
-                              setLegacyResult(h.result);
-                            }
-                          } catch {
-                            setScanResult(null);
-                            setLegacyResult(h.result);
-                          }
-                          toast({ title: "Loaded scan" });
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                      >
-                        Load
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => {
-                          try {
-                            const parsed = JSON.parse(h.result) as unknown;
-                            if (
-                              parsed &&
-                              typeof parsed === "object" &&
-                              "match_score" in parsed &&
-                              "strengths" in parsed
-                            ) {
-                              copy(scanResultToText(parsed as ScanResultContent), "Copied analysis");
-                            } else {
-                              copy(h.result, "Copied analysis");
-                            }
-                          } catch {
-                            copy(h.result, "Copied analysis");
-                          }
-                        }}
-                      >
-                        <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => {
-                          const next = history.filter((x) => x.id !== h.id);
-                          persistHistory(next);
-                        }}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete history?</DialogTitle>
-            <DialogDescription>
-              {confirmKind === "cloud_all" && "This will permanently delete your cloud scan history across devices."}
-              {confirmKind === "cloud_one" && "This will permanently delete this cloud scan entry."}
-              {confirmKind === "local_all" && "This will clear scan history stored on this device only."}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={runConfirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

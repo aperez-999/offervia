@@ -144,10 +144,10 @@ export default function CoverLetterStudio({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
       {/* Inputs */}
-      <Reveal className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
-        <div className="space-y-5">
+      <Reveal className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm">
+        <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label
@@ -221,7 +221,7 @@ export default function CoverLetterStudio({
                   value={resumeText}
                   onChange={(e) => setResumeText(e.target.value)}
                   placeholder="Paste your resume text or a summary of your experience…"
-                  className="min-h-[160px] resize-y"
+                  className="min-h-[120px] max-h-[180px] resize-none overflow-auto"
                 />
                 <p className="mt-1 text-xs text-foreground/50">
                   {resumeText.trim().length < 100
@@ -261,7 +261,7 @@ export default function CoverLetterStudio({
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               placeholder="Paste the job description you're applying to…"
-              className="min-h-[140px] resize-y"
+              className="min-h-[140px] max-h-[240px] resize-none overflow-auto"
             />
           </div>
 
@@ -319,7 +319,7 @@ export default function CoverLetterStudio({
       {/* Output */}
       <Reveal
         index={1}
-        className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm"
+        className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm lg:sticky lg:top-20"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -350,7 +350,7 @@ export default function CoverLetterStudio({
           ) : null}
         </div>
 
-        <div className="mt-4 min-h-[360px]">
+        <div className="mt-4 max-h-[60vh] min-h-[360px] overflow-auto pr-1">
           <AnimatePresence mode="wait">
             {generating ? (
               <motion.div
