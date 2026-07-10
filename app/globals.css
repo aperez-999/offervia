@@ -282,6 +282,18 @@
   .typing-dot {
     animation: typing-dot 1.2s ease-in-out infinite;
   }
+  /* Continuous marquee (testimonials). Track duplicates its content, so a
+     -50% translate loops seamlessly. Paused on hover via arbitrary variant. */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee var(--marquee-duration, 46s) linear infinite;
+  }
+  .animate-marquee-reverse {
+    animation: marquee var(--marquee-duration, 46s) linear infinite reverse;
+  }
 }
 
 /* View Transitions: smooth dissolve on theme switch.
