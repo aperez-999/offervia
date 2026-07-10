@@ -9,8 +9,10 @@ import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_SHARE_IMAGE_ALT,
+  SITE_KEYWORDS,
   getSiteUrl,
 } from "@/lib/site";
+import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,14 +40,32 @@ export const metadata: Metadata = {
     template: "%s | Offervia",
   },
   description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: SITE_NAME, url: getSiteUrl() }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  formatDetection: { telephone: false, address: false, email: false },
   alternates: {
     canonical: getSiteUrl(),
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   openGraph: {
     title: SITE_DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
     url: getSiteUrl(),
     siteName: SITE_NAME,
+    locale: "en_US",
     images: [{ url: "/og-image.png", width: 1774, height: 887, alt: SITE_SHARE_IMAGE_ALT }],
     type: "website",
   },
@@ -66,6 +86,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" }],
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -76,6 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}>
+        <OrganizationJsonLd />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ToastProvider>
             {children}

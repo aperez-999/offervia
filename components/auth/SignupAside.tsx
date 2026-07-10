@@ -50,10 +50,25 @@ export default function SignupAside() {
         };
 
   return (
-    <div className="space-y-5">
+    <div className="relative space-y-5">
+      {/* Ambient breathing glow (matches landing hero) */}
+      {!reduce && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute -right-6 -top-10 -z-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl"
+          animate={{ opacity: [0.5, 0.85, 0.5], scale: [1, 1.06, 1] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+
       <motion.div {...rise(0)}>
         <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <motion.span
+            animate={reduce ? undefined : { rotate: [0, 12, -8, 0], scale: [1, 1.15, 1] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+          </motion.span>
           Free to start
         </div>
         <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground text-balance">
@@ -68,7 +83,8 @@ export default function SignupAside() {
       {/* What you'll unlock */}
       <motion.div
         {...rise(0.08)}
-        className="rounded-3xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+        whileHover={reduce ? undefined : { y: -3 }}
+        className="rounded-3xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 transition-shadow hover:shadow-md dark:ring-black/10"
       >
         <div className="text-sm font-medium text-foreground">What you’ll unlock</div>
         <ul className="mt-4 space-y-3">
@@ -80,9 +96,18 @@ export default function SignupAside() {
                 {...rise(0.16 + i * 0.09)}
                 className="flex items-start gap-3"
               >
-                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${b.chip}`}>
+                <motion.span
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${b.chip}`}
+                  animate={reduce ? undefined : { y: [0, -3, 0] }}
+                  transition={{
+                    duration: 3.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.6 + i * 0.35,
+                  }}
+                >
                   <Icon className="h-4 w-4" />
-                </span>
+                </motion.span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-medium text-foreground">{b.title}</span>
