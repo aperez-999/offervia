@@ -213,9 +213,11 @@
 }
 
 @layer utilities {
-  /* Brand fill — restrained pine, solid (no gradient). */
+  /* Brand fill — restrained pine, solid (no gradient). Uses the button token so
+     the fill stays the same deep green in light and dark (white text sits on it),
+     rather than lightening in dark mode like the --brand accent used for text. */
   .bg-brand-gradient {
-    background-color: var(--brand);
+    background-color: var(--primary-button);
   }
   /* Reward (brass) — reserved for offer/Pro/celebration moments, solid. */
   .bg-reward-gradient {

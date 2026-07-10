@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Sparkles, ShieldCheck, Zap, Quote, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/brand/BrandLogo";
+import HeroDemo from "@/components/public/HeroDemo";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
 const PROOF_QUOTES = [
@@ -102,25 +103,27 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Split layout (marketing + form) */}
       <main className="mx-auto grid min-h-[calc(100vh-56px)] max-w-7xl items-center gap-6 px-4 py-8 sm:py-12 lg:grid-cols-2 lg:gap-10 lg:px-8">
-        {/* Left: value prop (hidden on small screens) */}
+        {/* Left: value prop + live interactive demo (hidden on small screens) */}
         <div className="hidden lg:block">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="rounded-3xl border border-border bg-card p-8 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40"
+            className="space-y-5"
           >
-            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
-              Offervia • AI career suite
+            <div>
+              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
+                Offervia • AI career suite
+              </div>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground text-balance">
+                The fastest way to go from job post → offer.
+              </h2>
+              <p className="mt-3 max-w-xl text-sm text-foreground/70">
+                Scan the posting, tailor your resume, and track follow‑ups with a workflow designed for momentum.
+              </p>
             </div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
-              The fastest way to go from job post → offer.
-            </h2>
-            <p className="mt-3 text-sm text-foreground/70">
-              Scan the posting, tailor your resume, and track follow‑ups with a workflow designed for momentum.
-            </p>
 
-            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="flex items-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
               <TrendingUp className="h-5 w-5 text-primary" />
               <p className="text-sm text-foreground">
                 <span className="font-semibold text-primary">More callbacks</span>{" "}
@@ -128,29 +131,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {[
-                { t: "Job scan insights", d: "Keyword gaps + strengths, instantly." },
-                { t: "Resume tailoring", d: "ATS-friendly edits that stay concise." },
-                { t: "Interview coach", d: "Practice prompts + targeted feedback." },
-                { t: "Application tracker", d: "Keep follow‑ups from slipping." },
-              ].map((x, i) => (
-                <motion.div
-                  key={x.t}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.15 + i * 0.08, ease: "easeOut" }}
-                  whileHover={{ y: -3 }}
-                  className="rounded-2xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30"
-                >
-                  <div className="text-sm font-medium text-foreground">{x.t}</div>
-                  <div className="mt-1 text-xs text-foreground/70">{x.d}</div>
-                </motion.div>
-              ))}
-            </div>
+            {/* Live, self-driving product demo — same interactive mock as the landing page */}
+            <HeroDemo />
 
             {/* Rotating social proof */}
-            <div className="mt-6 min-h-[92px] rounded-2xl border border-border bg-background/60 p-4">
+            <div className="min-h-[84px] rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <Quote className="h-4 w-4 text-primary/70" />
               <AnimatePresence mode="wait">
                 <motion.figure
