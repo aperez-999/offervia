@@ -132,7 +132,7 @@ export default function ProfilePage() {
     try {
       setSaving(true);
       await syncProfile({ full_name: name || null });
-      toast({ title: "Profile updated" });
+      toast({ variant: "success", title: "Profile updated" });
     } catch {
       toast({ title: "Could not update profile", variant: "destructive" });
     } finally {
@@ -162,7 +162,7 @@ export default function ProfilePage() {
         { onConflict: "id" }
       );
       if (error) throw error;
-      toast({ title: "Career details saved", description: "Your AI tools will now personalize to this." });
+      toast({ variant: "success", title: "Career details saved", description: "Your AI tools will now personalize to this." });
     } catch {
       toast({
         title: "Could not save career details",
@@ -212,7 +212,7 @@ export default function ProfilePage() {
 
       await syncProfile({ avatar_url: publicUrl });
       setAvatarUrl(publicUrl);
-      toast({ title: "Avatar updated" });
+      toast({ variant: "success", title: "Avatar updated" });
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       console.error(errorMessage);
@@ -235,7 +235,7 @@ export default function ProfilePage() {
       }
       await syncProfile({ avatar_url: null });
       setAvatarUrl("");
-      toast({ title: "Avatar removed" });
+      toast({ variant: "success", title: "Avatar removed" });
     } catch {
       toast({ title: "Could not remove avatar", variant: "destructive" });
     } finally {

@@ -489,7 +489,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 method: "DELETE",
               });
               if (res.ok) {
-                toast({ title: "Chat cleared" });
+                toast({ variant: "success", title: "Chat cleared" });
                 setMessages([]);
               } else {
                 toast({ title: "Failed to clear chat", variant: "destructive" });

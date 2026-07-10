@@ -120,7 +120,7 @@ export default function ApplicationWorkspace({
       });
       return;
     }
-    toast({ title: "Saved" });
+    toast({ variant: "success", title: "Saved" });
     router.refresh();
   }, [app.id, company, position, status, appliedOn, followUp, notes, toast, router]);
 
@@ -133,14 +133,14 @@ export default function ApplicationWorkspace({
       toast({ title: "Could not delete", variant: "destructive" });
       return;
     }
-    toast({ title: "Application deleted" });
+    toast({ variant: "success", title: "Application deleted" });
     router.push("/tracker");
   }, [app.id, toast, router]);
 
   const copyDoc = useCallback(
     (content: string) => {
       navigator.clipboard.writeText(content).then(
-        () => toast({ title: "Copied to clipboard" }),
+        () => toast({ variant: "success", title: "Copied to clipboard" }),
         () => toast({ title: "Copy failed", variant: "destructive" }),
       );
     },

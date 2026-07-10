@@ -109,7 +109,7 @@ export default function CoverLetterStudio({
       }
 
       setLetter(String(resp.data?.content || ""));
-      toast({ title: "Cover letter ready" });
+      toast({ variant: "success", title: "Cover letter ready" });
     } catch {
       const msg = "Something went wrong. Please try again.";
       setError(msg);
@@ -121,7 +121,7 @@ export default function CoverLetterStudio({
 
   function copy() {
     navigator.clipboard.writeText(letter).then(
-      () => toast({ title: "Copied to clipboard" }),
+      () => toast({ variant: "success", title: "Copied to clipboard" }),
       () => toast({ title: "Copy failed", variant: "destructive" }),
     );
   }

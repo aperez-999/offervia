@@ -1,6 +1,13 @@
 import * as React from "react"
 import { cva } from "class-variance-authority"
-import { X } from "lucide-react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Sparkles,
+  X,
+  type LucideIcon,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -15,61 +22,132 @@ export function useToastProvider() {
   return ctx
 }
 
+export type ToastVariant =
+  | "default"
+  | "success"
+  | "destructive"
+  | "info"
+  | "upgrade"
+
 export type ToastProps = {
   id?: string
   title?: React.ReactNode
   description?: React.ReactNode
-  variant?: "default" | "destructive" | "upgrade"
+  variant?: ToastVariant
   action?: React.ReactNode
   duration?: number
 }
 
 const toastVariants = cva(
-  "pointer-events-auto relative w-full rounded-lg border shadow-lg transition-colors",
+  "pointer-events-auto relative flex w-full gap-3 overflow-hidden rounded-xl border p-4 pr-9 shadow-lg ring-1 ring-black/5 backdrop-blur-sm transition-colors dark:ring-white/5",
   {
     variants: {
       variant: {
-        default:
-          "bg-popover text-popover-foreground border-border p-4 pr-10",
+        default: "border-border bg-popover text-popover-foreground",
+        success:
+          "border-success/25 bg-[color-mix(in_oklch,var(--success)_9%,var(--popover))] text-popover-foreground",
         destructive:
-          "border-destructive/30 bg-[color-mix(in_oklch,var(--destructive)_10%,var(--popover))] text-destructive p-4 pr-10",
+          "border-destructive/25 bg-[color-mix(in_oklch,var(--destructive)_9%,var(--popover))] text-popover-foreground",
+        info: "border-info/25 bg-[color-mix(in_oklch,var(--info)_9%,var(--popover))] text-popover-foreground",
         upgrade:
-          "border-warning/40 bg-[color-mix(in_oklch,var(--warning)_12%,var(--popover))] text-foreground p-5 pr-10"
-      }
+          "border-warning/35 bg-[color-mix(in_oklch,var(--warning)_12%,var(--popover))] text-popover-foreground",
+      },
     },
     defaultVariants: {
-      variant: "default"
-    }
+      variant: "default",
+    },
   }
 )
 
-export function Toast({ title, description, variant = "default", action }: ToastProps) {
-  const isError = variant === "destructive";
+const iconStyles: Record<
+  ToastVariant,
+  { Icon: LucideIcon; chip: string }
+> = {
+  default: { Icon: Info, chip: "bg-foreground/[0.07] text-foreground/70" },
+  success: { Icon: CheckCircle2, chip: "bg-success/15 text-success" },
+  destructive: { Icon: AlertCircle, chip: "bg-destructive/15 text-destructive" },
+  info: { Icon: Info, chip: "bg-info/15 text-info" },
+  upgrade: { Icon: Sparkles, chip: "bg-warning/20 text-warning" },
+}
+
+const accentBar: Record<ToastVariant, string> = {
+  default: "bg-foreground/25",
+  success: "bg-success",
+  destructive: "bg-destructive",
+  info: "bg-info",
+  upgrade: "bg-warning",
+}
+
+export function Toast({
+  title,
+  description,
+  variant = "default",
+  action,
+  duration,
+}: ToastProps) {
+  const isError = variant === "destructive"
+  const { Icon, chip } = iconStyles[variant] ?? iconStyles.default
+
   return (
     <div
       className={cn(toastVariants({ variant }))}
       role={isError ? "alert" : "status"}
       aria-live={isError ? "assertive" : "polite"}
     >
-      {title ? <div className="text-sm font-semibold">{title}</div> : null}
-      {description ? (
-        <div className="mt-1.5 break-words text-sm text-foreground/90">{description}</div>
-      ) : null}
-      {action ? <div className="mt-4">{action}</div> : null}
+      {/* left accent */}
+      <span
+        aria-hidden
+        className={cn("absolute inset-y-0 left-0 w-1", accentBar[variant])}
+      />
+
+      <span
+        aria-hidden
+        className={cn(
+          "mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg",
+          chip
+        )}
+      >
+        <Icon className="size-[18px]" />
+      </span>
+
+      <div className="min-w-0 flex-1 pt-0.5">
+        {title ? (
+          <div className="text-sm font-semibold leading-snug">{title}</div>
+        ) : null}
+        {description ? (
+          <div className="mt-1 break-words text-sm leading-relaxed text-foreground/75">
+            {description}
+          </div>
+        ) : null}
+        {action ? <div className="mt-3">{action}</div> : null}
+      </div>
+
       <button
-        className="absolute right-2 top-2 rounded p-1 text-foreground/60 hover:bg-foreground/[0.06]"
+        className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 transition-colors hover:bg-foreground/[0.08] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Close"
         data-close="true"
       >
         <X className="h-4 w-4" />
       </button>
+
+      {/* auto-dismiss progress bar */}
+      {duration && duration > 0 ? (
+        <span
+          aria-hidden
+          className={cn(
+            "toast-progress absolute bottom-0 left-0 h-0.5 w-full origin-left",
+            accentBar[variant]
+          )}
+          style={{ animationDuration: `${duration}ms` }}
+        />
+      ) : null}
     </div>
   )
 }
 
 export function ToastViewport({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-4 z-50 mx-auto w-full max-w-sm space-y-2 px-4">
+    <div className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-full max-w-sm flex-col gap-2 px-4">
       {children}
     </div>
   )

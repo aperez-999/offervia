@@ -121,7 +121,7 @@ export default function DocumentsClient() {
   const copy = useCallback(
     (content: string) => {
       navigator.clipboard.writeText(content).then(
-        () => toast({ title: "Copied to clipboard" }),
+        () => toast({ variant: "success", title: "Copied to clipboard" }),
         () => toast({ title: "Copy failed", variant: "destructive" }),
       );
     },
@@ -158,7 +158,7 @@ export default function DocumentsClient() {
         return;
       }
       setDocs((prev) => prev.filter((d) => d.id !== id));
-      toast({ title: "Deleted" });
+      toast({ variant: "success", title: "Deleted" });
     },
     [supabase, toast],
   );

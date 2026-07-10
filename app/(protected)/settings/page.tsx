@@ -195,7 +195,7 @@ export default function SettingsPage() {
 
       if (upsertErr) throw upsertErr;
 
-      toast({ title: "Settings saved" });
+      toast({ variant: "success", title: "Settings saved" });
     } catch {
       toast({ title: "Could not save settings", description: "Your changes weren't saved. Please try again.", variant: "destructive" });
     } finally {
@@ -295,7 +295,7 @@ export default function SettingsPage() {
       a.click();
       URL.revokeObjectURL(url);
 
-      toast({ title: "Export ready" });
+      toast({ variant: "success", title: "Export ready" });
     } catch {
       toast({ title: "Export failed", description: "We couldn't prepare your data. Please try again.", variant: "destructive" });
     } finally {
@@ -319,7 +319,7 @@ export default function SettingsPage() {
         localStorage.removeItem(k);
       } catch {}
     }
-    toast({ title: "Local data cleared" });
+    toast({ variant: "success", title: "Local data cleared" });
   }
 
   return (

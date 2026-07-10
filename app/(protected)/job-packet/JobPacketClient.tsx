@@ -134,7 +134,7 @@ export default function JobPacketClient() {
 
   function copy(text: string, label = "Copied") {
     navigator.clipboard.writeText(text).then(
-      () => toast({ title: label }),
+      () => toast({ variant: "success", title: label }),
       () => toast({ title: "Copy failed", variant: "destructive" })
     );
   }
@@ -173,7 +173,7 @@ export default function JobPacketClient() {
       currentStep: "resume",
       trackerDraft,
     });
-    toast({
+    toast({ variant: "success",
       title: "Scan complete",
       description: "Role themes are ready. Continue into Resume Tailor to tailor your resume and get a personalized match.",
     });
@@ -231,7 +231,7 @@ export default function JobPacketClient() {
     clearJobPacketDraft();
     setDraft(createEmptyJobPacketDraft());
     setError(null);
-    toast({ title: "Job Packet cleared" });
+    toast({ variant: "success", title: "Job Packet cleared" });
   }
 
   return (

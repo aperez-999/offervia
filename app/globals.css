@@ -289,6 +289,14 @@
   .animate-shimmer {
     animation: shimmer 1.6s infinite;
   }
+  @keyframes toast-progress {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+  .toast-progress {
+    animation: toast-progress linear forwards;
+    opacity: 0.5;
+  }
 }
 
 /* View Transitions: smooth dissolve on theme switch.

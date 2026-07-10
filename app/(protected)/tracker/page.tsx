@@ -280,7 +280,7 @@ export default function TrackerPage() {
       });
       setOpenedFromPacket(false);
     }
-    toast({
+    toast({ variant: "success",
       title: saved && openedFromPacket ? "Application saved from Job Packet" : "Application saved",
       description:
         saved && openedFromPacket
@@ -311,7 +311,7 @@ export default function TrackerPage() {
     }
 
     setApps((current) => current.filter((app) => app.id !== pendingDeleteId));
-    toast({ title: "Application removed" });
+    toast({ variant: "success", title: "Application removed" });
     setConfirmOpen(false);
     setPendingDeleteId(null);
   }
@@ -337,7 +337,7 @@ export default function TrackerPage() {
     if (saved) {
       setApps((current) => [saved, ...current]);
     }
-    toast({
+    toast({ variant: "success",
       title: "Application added",
       description: "Your tracker has a new entry ready for follow-up.",
     });
@@ -386,7 +386,7 @@ export default function TrackerPage() {
       );
       toast({ title: "Failed to update status", description: "We reverted the change. Please try again.", variant: "destructive" });
     } else {
-      toast({ title: `Moved to ${next}` });
+      toast({ variant: "success", title: `Moved to ${next}` });
     }
 
     setUpdatingId(null);

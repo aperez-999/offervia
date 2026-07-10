@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (searchParams.get("reset") === "1") {
-      toast({ title: "Password reset successful — please sign in." });
+      toast({ variant: "success", title: "Password reset successful — please sign in." });
       router.replace("/login");
     }
     if (searchParams.get("auth_error") === "oauth_callback_failed") {

@@ -240,7 +240,7 @@ export default function TemplatesPanel() {
       await navigator.clipboard.writeText(renderTemplate(t.body, vars));
       setCopiedKey(t.key);
       window.setTimeout(() => setCopiedKey((k) => (k === t.key ? null : k)), 1500);
-      toast({ title: "Template copied", description: "Personalized with your quick-fill details." });
+      toast({ variant: "success", title: "Template copied", description: "Personalized with your quick-fill details." });
     } catch {
       toast({ title: "Couldn’t copy", description: "Copy is unavailable in this browser.", variant: "destructive" });
     }

@@ -128,7 +128,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
 
     if (from === "job-packet") {
       const bits = [packetDraft.companyName, packetDraft.roleTitle].filter(Boolean).join(" · ");
-      toast({
+      toast({ variant: "info",
         title: "Job context loaded from your packet",
         description: bits
           ? `${bits} and the job description carried over. Upload your resume to continue.`
@@ -149,7 +149,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     setStep(next);
     const from = search.get("from") || "";
     if (from === "scanner" || from.startsWith("scanner")) {
-      toast({
+      toast({ variant: "info",
         title: "Job description ready",
         description: "Your job description was carried over from the Scanner.",
       });
@@ -279,7 +279,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       // noop
     }
 
-    toast({
+    toast({ variant: "success",
       title: "Resume added",
       description: packetContext
         ? autoAdvanced
@@ -410,7 +410,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
           trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
         });
       }
-      toast({ title: "Tailored draft generated" });
+      toast({ variant: "success", title: "Tailored draft generated" });
     } catch (e: unknown) {
       const msg = e instanceof Error && e.name === "AbortError"
         ? "The request timed out. Please try again."
@@ -464,7 +464,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
 
   function copy(text: string, label = "Copied") {
     navigator.clipboard.writeText(text).then(
-      () => toast({ title: label }),
+      () => toast({ variant: "success", title: label }),
       () => toast({ title: "Copy failed", variant: "destructive" })
     );
   }

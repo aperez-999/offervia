@@ -135,7 +135,7 @@ export default function ScannerPanel() {
 
       setResult(content);
       pushHistory(content);
-      toast({
+      toast({ variant: "info",
         title: `${content.match_score}% keyword match`,
         description: `${content.matched_count} of ${content.total} keywords found in your resume.`,
       });
@@ -161,7 +161,7 @@ export default function ScannerPanel() {
   function copyMissing() {
     if (!result?.missing.length) return;
     navigator.clipboard.writeText(result.missing.join(", ")).then(
-      () => toast({ title: "Missing keywords copied" }),
+      () => toast({ variant: "success", title: "Missing keywords copied" }),
       () => toast({ title: "Copy failed", variant: "destructive" }),
     );
   }

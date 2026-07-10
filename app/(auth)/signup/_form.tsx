@@ -52,7 +52,7 @@ export default function SignupForm() {
     }
 
     // Success: show verification toast immediately
-    toast({
+    toast({ variant: "success",
       title: "Account created successfully — check your email to confirm your account.",
       description: result.data.data.message,
     });
