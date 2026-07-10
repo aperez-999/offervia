@@ -1,6 +1,9 @@
 const INTERNAL_PATH_PATTERN = /^\/(?!\/).*/;
 export const OAUTH_NEXT_COOKIE = "offervia_oauth_next";
 
+// Any origin the browser can't reach means the path resolved off-site.
+const PLACEHOLDER_ORIGIN = "https://placeholder.invalid";
+
 export function sanitizeRedirectPath(rawPath: string | null | undefined, fallback = "/dashboard") {
   if (!rawPath) return fallback;
 
@@ -11,8 +14,19 @@ export function sanitizeRedirectPath(rawPath: string | null | undefined, fallbac
     return fallback;
   }
 
+  // Reject control chars and backslashes: the URL parser normalizes "\" to "/",
+  // so "/\evil.com" would otherwise resolve to an off-site absolute URL.
+  if (/[\u0000-\u001f\u007f\\]/.test(decoded)) return fallback;
   if (!INTERNAL_PATH_PATTERN.test(decoded)) return fallback;
-  if (decoded.includes("\n") || decoded.includes("\r")) return fallback;
+
+  // Defense in depth: confirm the path stays same-origin when resolved.
+  try {
+    if (new URL(decoded, PLACEHOLDER_ORIGIN).origin !== PLACEHOLDER_ORIGIN) {
+      return fallback;
+    }
+  } catch {
+    return fallback;
+  }
 
   return decoded;
 }
