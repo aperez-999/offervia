@@ -2,26 +2,44 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FileText, Sparkles, Target, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  FileText,
+  Sparkles,
+  Mail,
+  MessageSquare,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  Bot,
+  Check,
+} from "lucide-react";
 
 /**
  * Interactive product demo — a hand-built, token-driven mock of the Offervia
- * workflow (scan → match → tailor → track). No video: real DOM elements the
- * user can step through. Dark/light compatible, reduced-motion safe.
+ * workflow. A self-driving cursor clicks through five real features:
+ * Scanner → Resume Tailor → Cover Letter → Interview Coach → Tracker.
+ * No video: real DOM. Dark/light compatible, reduced-motion safe.
  */
 
 type Step = {
   key: string;
   label: string;
+  url: string;
   icon: typeof FileText;
 };
 
 const STEPS: Step[] = [
-  { key: "scan", label: "Scan JD", icon: FileText },
-  { key: "match", label: "Match", icon: Target },
-  { key: "tailor", label: "Tailor", icon: Sparkles },
-  { key: "track", label: "Track", icon: CheckCircle2 },
+  { key: "scan", label: "Scan", url: "scanner", icon: FileText },
+  { key: "tailor", label: "Tailor", url: "resume", icon: Sparkles },
+  { key: "cover", label: "Cover", url: "cover-letter", icon: Mail },
+  { key: "coach", label: "Coach", url: "coach", icon: MessageSquare },
+  { key: "track", label: "Track", url: "tracker", icon: CheckCircle2 },
 ];
+
+const DWELL = 2100;
+const TRAVEL = 620;
+const CLICK = 280;
+const CYCLE = DWELL + TRAVEL + CLICK;
 
 const KEYWORDS = ["React", "TypeScript", "REST APIs", "CI/CD", "Agile"];
 
@@ -35,11 +53,6 @@ const BULLETS = [
     after: "Led REST API integration across 3 services in Agile sprints.",
   },
 ];
-
-const DWELL = 1900;
-const TRAVEL = 620;
-const CLICK = 280;
-const CYCLE = DWELL + TRAVEL + CLICK;
 
 export default function HeroDemo() {
   const reduce = useReducedMotion();
@@ -71,7 +84,7 @@ export default function HeroDemo() {
   // Self-driving loop: dwell → glide cursor to next tab → click → advance.
   useEffect(() => {
     if (reduce) {
-      setStep(3);
+      setStep(4);
       return;
     }
     if (paused) return;
@@ -122,7 +135,6 @@ export default function HeroDemo() {
             transition={{ duration: 0.14, ease: "easeOut" }}
             className="relative"
           >
-            {/* Click ripple */}
             <AnimatePresence>
               {clicking && (
                 <motion.span
@@ -157,7 +169,7 @@ export default function HeroDemo() {
         </div>
         <div className="mx-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          offervia.app/{STEPS[step].key === "scan" ? "job-packet" : STEPS[step].key}
+          offervia.app/{STEPS[step].url}
         </div>
         <span className="hidden items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary sm:inline-flex">
           <span className="relative flex h-1.5 w-1.5">
@@ -202,7 +214,7 @@ export default function HeroDemo() {
       </div>
 
       {/* Stage */}
-      <div className="relative min-h-[288px] bg-background p-5">
+      <div className="relative min-h-[320px] bg-background p-5">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -212,9 +224,10 @@ export default function HeroDemo() {
             transition={{ duration: 0.35, ease: "easeOut" }}
           >
             {step === 0 && <ScanPane reduce={!!reduce} />}
-            {step === 1 && <MatchPane reduce={!!reduce} />}
-            {step === 2 && <TailorPane reduce={!!reduce} />}
-            {step === 3 && <TrackPane reduce={!!reduce} />}
+            {step === 1 && <TailorPane reduce={!!reduce} />}
+            {step === 2 && <CoverPane reduce={!!reduce} />}
+            {step === 3 && <CoachPane reduce={!!reduce} />}
+            {step === 4 && <TrackPane reduce={!!reduce} />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -239,38 +252,34 @@ export default function HeroDemo() {
   );
 }
 
-function PaneLabel({ children }: { children: React.ReactNode }) {
-  return <p className="mb-3 text-sm font-semibold text-foreground">{children}</p>;
-}
-
-function ScanPane({ reduce }: { reduce: boolean }) {
+function PaneHead({
+  icon: Icon,
+  title,
+  sub,
+  badge,
+}: {
+  icon: typeof FileText;
+  title: string;
+  sub: string;
+  badge?: React.ReactNode;
+}) {
   return (
-    <div>
-      <PaneLabel>Paste a job description</PaneLabel>
-      <div className="rounded-xl border border-border bg-muted/30 p-4">
-        <div className="space-y-2">
-          {[92, 78, 85, 64].map((w, i) => (
-            <div
-              key={i}
-              className="h-2.5 rounded-full bg-foreground/10"
-              style={{ width: `${w}%` }}
-            />
-          ))}
+    <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2.5">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-4 w-4" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <p className="text-xs text-muted-foreground">{sub}</p>
         </div>
       </div>
-      <motion.div
-        className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        animate={reduce ? undefined : { scale: [1, 0.96, 1] }}
-        transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.6 }}
-      >
-        <Sparkles className="h-4 w-4" />
-        Scan job
-      </motion.div>
+      {badge}
     </div>
   );
 }
 
-function MatchPane({ reduce }: { reduce: boolean }) {
+function ScanPane({ reduce }: { reduce: boolean }) {
   const [score, setScore] = useState(reduce ? 92 : 0);
   useEffect(() => {
     if (reduce) return;
@@ -286,41 +295,58 @@ function MatchPane({ reduce }: { reduce: boolean }) {
   }, [reduce]);
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div className="flex items-center gap-4">
-        <div className="relative grid h-24 w-24 shrink-0 place-items-center">
-          <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--muted)" strokeWidth="8" />
-            <circle
-              cx="50"
-              cy="50"
-              r="42"
-              fill="none"
-              stroke="var(--primary)"
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 42}
-              strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
-            />
-          </svg>
-          <span className="absolute text-2xl font-bold text-foreground tabular-nums">{score}%</span>
+    <div>
+      <PaneHead
+        icon={FileText}
+        title="Job Description Scanner"
+        sub="Extract requirements and score your fit"
+      />
+      <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <p className="mb-2.5 text-xs font-medium text-foreground">Senior Frontend Engineer</p>
+          <div className="space-y-2">
+            {[96, 82, 88, 70].map((w, i) => (
+              <div
+                key={i}
+                className="h-2.5 rounded-full bg-foreground/10"
+                style={{ width: `${w}%` }}
+              />
+            ))}
+          </div>
         </div>
-        <div>
-          <PaneLabel>Match score</PaneLabel>
-          <p className="max-w-[16rem] text-sm text-muted-foreground">
-            Strong fit. 5 key skills matched to the posting.
-          </p>
+        <div className="flex items-center gap-4 sm:flex-col sm:gap-2">
+          <div className="relative grid h-24 w-24 shrink-0 place-items-center">
+            <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--muted)" strokeWidth="8" />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="var(--primary)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 42}
+                strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
+              />
+            </svg>
+            <span className="absolute text-xl font-bold text-foreground tabular-nums">
+              {score}%
+            </span>
+          </div>
+          <p className="text-xs font-medium text-success sm:text-center">Strong match</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-1.5 sm:ml-auto sm:max-w-[10rem] sm:justify-end">
+      <div className="mt-3 flex flex-wrap gap-1.5">
         {KEYWORDS.map((k, i) => (
           <motion.span
             key={k}
             initial={reduce ? false : { opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: reduce ? 0 : 0.5 + i * 0.12 }}
-            className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
+            transition={{ delay: reduce ? 0 : 0.5 + i * 0.1 }}
+            className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
           >
+            <Check className="h-3 w-3" />
             {k}
           </motion.span>
         ))}
@@ -332,7 +358,17 @@ function MatchPane({ reduce }: { reduce: boolean }) {
 function TailorPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
-      <PaneLabel>Tailoring your resume</PaneLabel>
+      <PaneHead
+        icon={Sparkles}
+        title="Resume Tailor"
+        sub="Rewrite bullets to match the role"
+        badge={
+          <span className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2 py-1 text-[11px] font-medium text-success">
+            <ShieldCheck className="h-3 w-3" />
+            ATS-ready · 94
+          </span>
+        }
+      />
       <div className="space-y-2.5">
         {BULLETS.map((b, i) => (
           <div key={i} className="rounded-xl border border-border bg-card p-3">
@@ -357,23 +393,129 @@ function TailorPane({ reduce }: { reduce: boolean }) {
   );
 }
 
-function TrackPane({ reduce }: { reduce: boolean }) {
-  const cols = [
-    { key: "applied", label: "Applied", tint: "var(--status-applied)" },
-    { key: "interviewing", label: "Interviewing", tint: "var(--status-interviewing)" },
-    { key: "offer", label: "Offer", tint: "var(--status-offer)" },
+function CoverPane({ reduce }: { reduce: boolean }) {
+  const lines = [
+    "Dear Hiring Manager,",
+    "I'm excited to apply for the Senior Frontend Engineer role at Boats Group.",
+    "My work shipping React + TypeScript features maps directly to your team's goals.",
   ];
   return (
     <div>
-      <PaneLabel>Tracked in your pipeline</PaneLabel>
+      <PaneHead
+        icon={Mail}
+        title="Cover Letter"
+        sub="Personalized to the company and role"
+        badge={
+          <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
+            <Sparkles className="h-3 w-3" />
+            Tailored
+          </span>
+        }
+      />
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="space-y-2.5">
+          {lines.map((l, i) => (
+            <motion.p
+              key={i}
+              initial={reduce ? false : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: reduce ? 0 : i * 0.45, duration: 0.4 }}
+              className={
+                i === 0 ? "text-sm font-medium text-foreground" : "text-sm text-foreground/80"
+              }
+            >
+              {l}
+            </motion.p>
+          ))}
+          <div className="space-y-2 pt-1">
+            <div className="h-2.5 w-[88%] rounded-full bg-foreground/10" />
+            <div className="h-2.5 w-[72%] rounded-full bg-foreground/10" />
+          </div>
+          <motion.p
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: reduce ? 0 : 1.5 }}
+            className="pt-1 text-sm text-foreground/80"
+          >
+            Best,
+            <br />
+            Alejandro
+          </motion.p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoachPane({ reduce }: { reduce: boolean }) {
+  return (
+    <div>
+      <PaneHead
+        icon={MessageSquare}
+        title="AI Interview Coach"
+        sub="Practice answers with instant feedback"
+        badge={
+          <span className="inline-flex items-center gap-1 rounded-full border border-info/30 bg-info/10 px-2 py-1 text-[11px] font-medium text-info">
+            STAR method
+          </span>
+        }
+      />
+      <div className="space-y-3">
+        <div className="flex justify-end">
+          <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-3.5 py-2 text-sm text-primary-foreground">
+            How do I answer &ldquo;tell me about a challenge you solved&rdquo;?
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
+            <Bot className="h-4 w-4" />
+          </span>
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduce ? 0 : 0.6, duration: 0.4 }}
+            className="max-w-[80%] rounded-2xl rounded-bl-sm border border-border bg-card px-3.5 py-2.5 text-sm text-foreground/90"
+          >
+            Start with the <span className="font-medium text-foreground">Situation</span>, name the{" "}
+            <span className="font-medium text-foreground">Task</span>, then walk through your{" "}
+            <span className="font-medium text-foreground">Action</span> and the measurable{" "}
+            <span className="font-medium text-foreground">Result</span>.
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TrackPane({ reduce }: { reduce: boolean }) {
+  const cols = [
+    { key: "applied", label: "Applied", tint: "var(--status-applied)", count: 8 },
+    { key: "interviewing", label: "Interviewing", tint: "var(--status-interviewing)", count: 4 },
+    { key: "offer", label: "Offer", tint: "var(--status-offer)", count: 1 },
+  ];
+  return (
+    <div>
+      <PaneHead
+        icon={CheckCircle2}
+        title="Application Tracker"
+        sub="Every application and follow-up in one board"
+        badge={
+          <span className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
+            13 active
+          </span>
+        }
+      />
       <div className="grid grid-cols-3 gap-2">
         {cols.map((c) => (
           <div key={c.key} className="rounded-xl border border-border bg-muted/30 p-2">
-            <div className="mb-2 flex items-center gap-1.5 px-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: c.tint }} />
-              <span className="text-[11px] font-medium text-muted-foreground">{c.label}</span>
+            <div className="mb-2 flex items-center justify-between px-1">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full" style={{ background: c.tint }} />
+                <span className="text-[11px] font-medium text-muted-foreground">{c.label}</span>
+              </span>
+              <span className="text-[10px] font-semibold text-muted-foreground">{c.count}</span>
             </div>
-            {c.key === "interviewing" && (
+            {c.key === "interviewing" ? (
               <motion.div
                 initial={reduce ? false : { opacity: 0, y: 10, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -393,6 +535,11 @@ function TrackPane({ reduce }: { reduce: boolean }) {
                   Interview set
                 </span>
               </motion.div>
+            ) : (
+              <div className="space-y-1.5 rounded-lg border border-border bg-card p-2.5">
+                <div className="h-2 w-[80%] rounded-full bg-foreground/10" />
+                <div className="h-2 w-[55%] rounded-full bg-foreground/10" />
+              </div>
             )}
           </div>
         ))}
