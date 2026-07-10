@@ -2,20 +2,10 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import HeroDemo from "./HeroDemo";
 
 export default function Hero() {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const reduce = useReducedMotion();
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      const setRate = () => (video.playbackRate = 1.75);
-      video.addEventListener("loadedmetadata", setRate);
-      return () => video.removeEventListener("loadedmetadata", setRate);
-    }
-  }, []);
 
   return (
     <section className="relative overflow-hidden bg-background">
@@ -25,16 +15,6 @@ export default function Hero() {
           className="brand-glow absolute inset-x-0 -top-24 h-96"
           animate={reduce ? undefined : { opacity: [0.75, 1, 0.75] }}
           transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-primary/10 blur-2xl"
-          animate={reduce ? undefined : { x: [0, 24, 0], y: [0, -18, 0] }}
-          transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-24 right-[-60px] h-64 w-64 rounded-full bg-[var(--chart-2)]/10 blur-3xl"
-          animate={reduce ? undefined : { x: [0, -28, 0], y: [0, 20, 0] }}
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -86,55 +66,8 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-5xl">
-            <div className="group relative overflow-hidden rounded-3xl border border-border glass shadow-2xl shadow-primary/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40">
-              {/* Soft brand glow framing the window */}
-              <div className="pointer-events-none absolute -inset-px -z-10 bg-gradient-to-br from-primary/15 via-transparent to-[var(--chart-2)]/15" />
-
-              {/* Slow light sheen sweeping across the frame */}
-              {!reduce && (
-                <motion.div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 -left-1/3 z-10 w-1/3 skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                  animate={{ left: ["-33%", "133%"] }}
-                  transition={{ duration: 7, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
-                />
-              )}
-
-              {/* Browser-style chrome */}
-              <div className="flex items-center gap-2 border-b border-border/70 px-4 py-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-3 w-3 rounded-full bg-destructive/70" />
-                  <span className="h-3 w-3 rounded-full bg-warning/70" />
-                  <span className="h-3 w-3 rounded-full bg-success/70" />
-                </div>
-                <div className="mx-auto flex items-center gap-1.5 rounded-md bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  offervia.app/job-packet
-                </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                  </span>
-                  Live demo
-                </span>
-              </div>
-
-              <video
-                ref={videoRef}
-                className="aspect-[16/9] w-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-                aria-label="Offervia product demo: scan a job description, tailor a resume, and add it to your tracker"
-              >
-                <source src="/demo.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+          <div className="mx-auto mt-10 mb-10 sm:mb-12 max-w-3xl">
+            <HeroDemo />
           </div>
         </motion.div>
       </div>
