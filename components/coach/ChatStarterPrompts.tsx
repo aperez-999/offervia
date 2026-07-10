@@ -16,7 +16,7 @@ export default function ChatStarterPrompts({
 
   return (
     <div className="mx-auto max-w-md px-4">
-      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+      <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
         <Icon className="size-6" />
       </span>
       <p className="mt-3 text-sm text-foreground/70">{meta.intro}</p>

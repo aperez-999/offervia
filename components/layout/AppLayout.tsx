@@ -65,7 +65,7 @@ function PlanCard({
 }) {
   if (plan === "pro") {
     return (
-      <div className="rounded-xl border border-reward/30 bg-gradient-to-br from-reward/[0.12] via-transparent to-transparent p-3 shadow-sm">
+      <div className="rounded-xl border border-reward/30 bg-reward/10 p-3 shadow-sm">
         <div className="flex items-center justify-between gap-2">
           <ProCrest size="sm" />
           <Sparkles className="h-3.5 w-3.5 text-reward/70" aria-hidden />
@@ -167,7 +167,7 @@ export default function AppLayout({
 
       {/* Header */}
       <header className="sticky top-0 z-40">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-background/80 backdrop-blur" />
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 pt-3">
           <div className="pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur">
             <div className="flex h-12 items-center justify-between px-3 sm:px-4">

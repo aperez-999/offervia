@@ -213,49 +213,27 @@
 }
 
 @layer utilities {
-  /* Brand gradient + helpers shared across landing, auth, app.
-     Restrained pine depth — no purple, no neon glow. */
+  /* Brand fill — restrained pine, solid (no gradient). */
   .bg-brand-gradient {
-    background-image: linear-gradient(
-      135deg,
-      oklch(0.48 0.085 168) 0%,
-      oklch(0.42 0.09 172) 100%
-    );
+    background-color: var(--brand);
   }
-  /* Reward (brass) gradient — reserved for offer/Pro/celebration moments */
+  /* Reward (brass) — reserved for offer/Pro/celebration moments, solid. */
   .bg-reward-gradient {
-    background-image: linear-gradient(
-      135deg,
-      oklch(0.64 0.09 78) 0%,
-      oklch(0.56 0.09 68) 100%
-    );
+    background-color: var(--reward);
   }
   .text-brand-gradient {
-    background-image: linear-gradient(
-      120deg,
-      var(--brand) 0%,
-      oklch(0.58 0.10 150) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--brand);
   }
   .ring-brand {
     --tw-ring-color: var(--brand);
   }
-  /* Frosted glass surface */
+  /* Opaque card surface (formerly frosted glass). */
   .glass {
-    background-color: color-mix(in oklab, var(--card) 70%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: var(--card);
   }
-  /* Soft ambient brand glow for hero/section backdrops — whisper pine */
+  /* Soft ambient brand tint for hero/section backdrops — solid, no gradient. */
   .brand-glow {
-    background-image: radial-gradient(
-      60% 60% at 50% 0%,
-      color-mix(in oklab, var(--brand) 12%, transparent) 0%,
-      transparent 70%
-    );
+    background-color: color-mix(in oklab, var(--brand) 6%, transparent);
   }
   /* Subtle card lift on hover */
   .card-hover {

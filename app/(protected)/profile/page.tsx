@@ -254,7 +254,7 @@ export default function ProfilePage() {
         <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
           {/* Identity card */}
           <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-            <div className="h-20 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent" />
+            <div className="h-20 bg-primary/10" />
             <CardContent className="-mt-12 flex flex-col items-center text-center">
               <button
                 type="button"

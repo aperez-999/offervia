@@ -154,7 +154,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         </Card>
 
         {/* Pro */}
-        <Card className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-b from-primary/[0.08] via-card/70 to-card/60 shadow-xl shadow-primary/10 ring-2 ring-primary/25">
+        <Card className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card shadow-xl shadow-primary/10 ring-2 ring-primary/25">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"

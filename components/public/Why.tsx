@@ -30,7 +30,7 @@ export default function Why() {
 
   return (
     <section className="relative bg-background">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-border" />
       <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
         <motion.div
           initial={{ opacity: 0, y: 12 }}

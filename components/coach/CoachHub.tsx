@@ -17,7 +17,7 @@ export default function CoachHub() {
     <div className="space-y-6 py-6 sm:py-8">
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
-          <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+          <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
             <Sparkles className="size-5" />
           </span>
           AI Coach

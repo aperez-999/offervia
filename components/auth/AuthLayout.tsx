@@ -43,7 +43,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* minimal header (matched to public layout styles) */}
       <header className="sticky top-0 z-40">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-background/80 backdrop-blur" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
           <div className="pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur">
             <div className="flex h-12 items-center justify-between px-3 sm:px-4">

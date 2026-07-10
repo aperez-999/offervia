@@ -60,7 +60,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-background text-foreground scroll-smooth">
       <header className="sticky top-0 z-40">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-background/80 backdrop-blur" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
           <div
             className={[

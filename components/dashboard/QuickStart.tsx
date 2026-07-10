@@ -51,7 +51,7 @@ export default function QuickStart({
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       aria-label="Quick start"
     >
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card/60 to-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-6">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-6">
 
         <div className="relative flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">

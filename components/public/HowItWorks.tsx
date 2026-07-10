@@ -24,7 +24,7 @@ export default function HowItWorks() {
 
   return (
     <section id="how-it-works" className="relative bg-background scroll-mt-20">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-border" />
       <div className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -43,7 +43,7 @@ export default function HowItWorks() {
         </motion.div>
 
         <div className="relative mt-12 grid gap-6 sm:grid-cols-3">
-          <div aria-hidden className="pointer-events-none absolute left-0 right-0 top-12 hidden h-px bg-gradient-to-r from-transparent via-border to-transparent sm:block" />
+          <div aria-hidden className="pointer-events-none absolute left-0 right-0 top-12 hidden h-px bg-border sm:block" />
           {steps.map((s, i) => {
             const Icon = s.icon;
             return (

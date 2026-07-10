@@ -99,7 +99,7 @@ function ProHealthStat({
   hint: string;
 }) {
   return (
-    <Card className="rounded-2xl border border-reward/25 bg-gradient-to-br from-reward/[0.08] via-card/60 to-card/60 p-4 shadow-sm ring-1 ring-reward/10">
+    <Card className="rounded-2xl border border-reward/25 bg-card p-4 shadow-sm ring-1 ring-reward/10">
       <div className="text-xs font-medium text-foreground/60">
         {label}
       </div>
@@ -461,8 +461,8 @@ export default function DashboardClient({
       <section>
         <Card className={
           plan === "pro"
-            ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-gradient-to-br from-reward/[0.10] via-card/60 to-card/60 shadow-md ring-1 ring-reward/10"
-            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] via-card/60 to-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+            ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-card shadow-md ring-1 ring-reward/10"
+            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
         }>
           <div className={
             plan === "pro"

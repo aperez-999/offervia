@@ -13,7 +13,7 @@ export default function BottomCta() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/[0.10] via-card/70 to-card/60 p-8 text-center shadow-xl shadow-primary/10 ring-1 ring-primary/20 sm:p-12"
+          className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-xl shadow-primary/10 ring-1 ring-primary/20 sm:p-12"
         >
           <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "-22px", ["--float-y" as string]: "18px" }} />
           <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-brand/15 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "20px", ["--float-y" as string]: "-16px", animationDelay: "-6s" }} />

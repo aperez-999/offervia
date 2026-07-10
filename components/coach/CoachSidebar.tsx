@@ -62,14 +62,14 @@ export default function CoachSidebar({
                 onClick={() => onChange(key)}
                 className={`group mb-1 cursor-pointer flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors
                   ${selected
-                    ? "border-primary/30 bg-gradient-to-br from-primary/[0.14] to-primary-button/[0.06]"
+                    ? "border-primary/30 bg-primary/10"
                     : "border-transparent hover:bg-foreground/[0.06]"}
                 `}
               >
                 <span
                   className={`grid h-8 w-8 place-items-center rounded-lg border flex-shrink-0
                     ${selected
-                      ? "border-primary/30 bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20"
+                      ? "border-primary/30 bg-primary/10 text-primary ring-1 ring-primary/20"
                       : "border-border bg-background/80 text-foreground/70"}
                   `}
                 >

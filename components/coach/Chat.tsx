@@ -311,7 +311,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       <CardHeader className="border-b border-border/60 pb-3">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
               <ModeIcon className="size-5" />
             </span>
             <div className="min-w-0">
@@ -397,7 +397,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                         className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ring-1 ${
                           isUser
                             ? "bg-foreground/[0.06] text-foreground/70 ring-border"
-                            : "bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-primary/20"
+                            : "bg-primary/10 text-primary ring-primary/20"
                         }`}
                       >
                         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -424,7 +424,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             ))}
             {sending && (
               <div className="flex items-start gap-2.5">
-                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary/25 to-primary-button/20 text-primary ring-1 ring-primary/20">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
                   <Bot className="h-4 w-4" />
                 </span>
                 <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-background/70 px-4 py-3 shadow-sm">

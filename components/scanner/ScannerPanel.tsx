@@ -73,9 +73,13 @@ export default function ScannerPanel() {
     resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 50;
   const canScan = resumeReady && jd.trim().length >= 20 && !loading;
 
-  const scoreRing = useMemo(() => {
+  const ringColor = useMemo(() => {
     const s = result?.match_score ?? 0;
-    return `conic-gradient(var(--ring-color) ${s * 3.6}deg, var(--ring-track) 0deg)`;
+    return s >= 60
+      ? "var(--primary-button)"
+      : s >= 40
+        ? "oklch(0.75 0.15 80)"
+        : "var(--destructive)";
   }, [result]);
 
   function pushHistory(entry: AtsResult) {
@@ -365,26 +369,31 @@ export default function ScannerPanel() {
               >
                 {/* Score */}
                 <div className="flex items-center gap-4">
-                  <div
-                    className="grid size-24 shrink-0 place-items-center rounded-full"
-                    style={
-                      {
-                        background: scoreRing,
-                        "--ring-color":
-                          result.match_score >= 60
-                            ? "var(--primary-button)"
-                            : result.match_score >= 40
-                              ? "oklch(0.75 0.15 80)"
-                              : "var(--destructive)",
-                        "--ring-track": "color-mix(in oklch, var(--foreground) 10%, transparent)",
-                      } as React.CSSProperties
-                    }
-                  >
-                    <div className="grid size-[76px] place-items-center rounded-full bg-card">
-                      <span className="text-2xl font-bold text-foreground">
-                        {result.match_score}%
-                      </span>
-                    </div>
+                  <div className="relative grid size-24 shrink-0 place-items-center">
+                    <svg viewBox="0 0 100 100" className="size-24 -rotate-90">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        fill="none"
+                        stroke="color-mix(in oklch, var(--foreground) 10%, transparent)"
+                        strokeWidth="8"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        fill="none"
+                        stroke={ringColor}
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 42}
+                        strokeDashoffset={2 * Math.PI * 42 * (1 - result.match_score / 100)}
+                      />
+                    </svg>
+                    <span className="absolute text-2xl font-bold text-foreground">
+                      {result.match_score}%
+                    </span>
                   </div>
                   <div className="min-w-0">
                     <p className={`text-lg font-semibold ${label?.tone}`}>

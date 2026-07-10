@@ -76,7 +76,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
 export default function Faq() {
   return (
     <section id="faq" className="relative bg-background scroll-mt-20">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-border" />
       <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
