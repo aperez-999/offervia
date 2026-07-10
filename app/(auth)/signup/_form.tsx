@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/safe-fetch";
 import { useToast } from "@/hooks/use-toast";
+import AuthField, { PasswordToggle } from "@/components/auth/AuthField";
 
 const schema = z
   .object({
@@ -63,82 +64,58 @@ export default function SignupForm() {
 
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-1">
-        <label className="block text-sm font-medium text-foreground">Name</label>
-        <div className="relative">
-          <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="Your name"
-            {...register("name")}
-          />
-        </div>
-        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-      </div>
+      <AuthField
+        id="signup-name"
+        label="Name"
+        icon={UserIcon}
+        type="text"
+        autoComplete="name"
+        placeholder="Your name"
+        registration={register("name")}
+        error={errors.name?.message}
+      />
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium text-foreground">Email</label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="email"
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="you@example.com"
-            {...register("email")}
-          />
-        </div>
-        {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-      </div>
+      <AuthField
+        id="signup-email"
+        label="Email"
+        icon={Mail}
+        type="email"
+        autoComplete="email"
+        placeholder="you@example.com"
+        registration={register("email")}
+        error={errors.email?.message}
+      />
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium text-foreground">Password</label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type={showPw ? "text" : "password"}
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 pr-16 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="Enter at least 6 characters"
-            {...register("password")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPw((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-foreground/70 underline hover:text-foreground"
-          >
-            {showPw ? "Hide" : "Show"}
-          </button>
-        </div>
-        {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
-      </div>
+      <AuthField
+        id="signup-password"
+        label="Password"
+        icon={Lock}
+        type={showPw ? "text" : "password"}
+        autoComplete="new-password"
+        placeholder="Enter at least 6 characters"
+        registration={register("password")}
+        error={errors.password?.message}
+        rightSlot={<PasswordToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />}
+      />
 
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">Confirm password</label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type={showPw2 ? "text" : "password"}
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 pr-16 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="Make sure passwords match"
-            {...register("confirm")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPw2((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground underline"
-          >
-            {showPw2 ? "Hide" : "Show"}
-          </button>
-        </div>
-        {errors.confirm && <p className="text-sm text-destructive">{errors.confirm.message}</p>}
-      </div>
+      <AuthField
+        id="signup-confirm"
+        label="Confirm password"
+        icon={Lock}
+        type={showPw2 ? "text" : "password"}
+        autoComplete="new-password"
+        placeholder="Make sure passwords match"
+        registration={register("confirm")}
+        error={errors.confirm?.message}
+        rightSlot={<PasswordToggle shown={showPw2} onToggle={() => setShowPw2((v) => !v)} />}
+      />
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-70 disabled:cursor-not-allowed"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

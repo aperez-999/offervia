@@ -1,29 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Sparkles, ShieldCheck, Zap, Quote, TrendingUp } from "lucide-react";
+import { Sun, Moon, Sparkles, ShieldCheck, Zap, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/brand/BrandLogo";
-import HeroDemo from "@/components/public/HeroDemo";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
-const PROOF_QUOTES = [
-  { q: "Tailored my resume in minutes and finally started hearing back.", a: "Maria · Product Designer" },
-  { q: "The scanner showed exactly which keywords I was missing.", a: "Devon · Data Analyst" },
-  { q: "Went from scattered tabs to one clear pipeline. Game changer.", a: "Priya · Software Engineer" },
-];
+/** Calm reassurance panel used when a page doesn't supply its own aside
+ *  (e.g. forgot / reset password). */
+function DefaultAside() {
+  return (
+    <div className="space-y-5">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
+        <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+        Account security
+      </div>
+      <h2 className="text-3xl font-semibold tracking-tight text-foreground text-balance">
+        Your account, safe and sound.
+      </h2>
+      <p className="max-w-xl text-sm text-foreground/70">
+        We’ll get you back in quickly. Your data stays private and encrypted — no
+        spam, ever.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { icon: Lock, t: "Encrypted" },
+          { icon: ShieldCheck, t: "Private by default" },
+          { icon: Sparkles, t: "Built for momentum" },
+        ].map(({ icon: Icon, t }) => (
+          <div
+            key={t}
+            className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+          >
+            <Icon className="h-4 w-4 text-primary/80" />
+            <div className="mt-2 text-sm font-medium text-foreground">{t}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+  aside,
+}: {
+  children: React.ReactNode;
+  aside?: React.ReactNode;
+}) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [qi, setQi] = useState(0);
   useEffect(() => setMounted(true), []);
-  useEffect(() => {
-    const id = setInterval(() => setQi((i) => (i + 1) % PROOF_QUOTES.length), 4800);
-    return () => clearInterval(id);
-  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* full-screen subtle animated gradient backdrop (token-driven) */}
@@ -103,58 +132,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Split layout (marketing + form) */}
       <main className="mx-auto grid min-h-[calc(100vh-56px)] max-w-7xl items-center gap-6 px-4 py-8 sm:py-12 lg:grid-cols-2 lg:gap-10 lg:px-8">
-        {/* Left: value prop + live interactive demo (hidden on small screens) */}
+        {/* Left: page-specific marketing aside (hidden on small screens) */}
         <div className="hidden lg:block">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="space-y-5"
           >
-            <div>
-              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
-                Offervia • AI career suite
-              </div>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground text-balance">
-                The fastest way to go from job post → offer.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm text-foreground/70">
-                Scan the posting, tailor your resume, and track follow‑ups with a workflow designed for momentum.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <p className="text-sm text-foreground">
-                <span className="font-semibold text-primary">More callbacks</span>{" "}
-                from sharper, role‑matched applications.
-              </p>
-            </div>
-
-            {/* Live, self-driving product demo — same interactive mock as the landing page */}
-            <HeroDemo />
-
-            {/* Rotating social proof */}
-            <div className="min-h-[84px] rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              <Quote className="h-4 w-4 text-primary/70" />
-              <AnimatePresence mode="wait">
-                <motion.figure
-                  key={qi}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="mt-2"
-                >
-                  <blockquote className="text-sm leading-relaxed text-foreground/85">
-                    “{PROOF_QUOTES[qi].q}”
-                  </blockquote>
-                  <figcaption className="mt-1.5 text-xs font-medium text-foreground/60">
-                    {PROOF_QUOTES[qi].a}
-                  </figcaption>
-                </motion.figure>
-              </AnimatePresence>
-            </div>
+            {aside ?? <DefaultAside />}
           </motion.div>
         </div>
 

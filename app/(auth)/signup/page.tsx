@@ -2,6 +2,7 @@
 
 import { postJson } from "@/lib/safe-fetch";
 import AuthLayout from "@/components/auth/AuthLayout";
+import SignupAside from "@/components/auth/SignupAside";
 import SignupForm from "./_form";
 import Link from "next/link";
 import { Linkedin } from "lucide-react";
@@ -31,9 +32,9 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout aside={<SignupAside />}>
       <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
-        <h1 className="text-xl font-semibold text-foreground">Create your Offervia account</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">Create your Offervia account</h1>
         <p className="mt-1 text-sm text-foreground/70">Land more interviews — free to start, upgrade anytime.</p>
       </div>
 

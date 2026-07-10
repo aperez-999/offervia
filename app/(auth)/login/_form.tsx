@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { postJson } from "@/lib/safe-fetch";
 import { sanitizeRedirectPath } from "@/lib/auth/redirect";
+import AuthField, { PasswordToggle } from "@/components/auth/AuthField";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -60,48 +61,37 @@ export default function LoginForm() {
 
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-foreground">Email</label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="email"
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="you@example.com"
-            {...register("email")}
-          />
-        </div>
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
-      </div>
+      <AuthField
+        id="login-email"
+        label="Email"
+        icon={Mail}
+        type="email"
+        autoComplete="email"
+        placeholder="you@example.com"
+        registration={register("email")}
+        error={errors.email?.message}
+      />
 
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-foreground">Password</label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type={showPw ? "text" : "password"}
-            className="h-11 w-full rounded-lg border border-border bg-background/80 px-3 pl-10 pr-16 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-            placeholder="Enter your password"
-            {...register("password")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPw((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-foreground/70 underline hover:text-foreground"
+      <div>
+        <AuthField
+          id="login-password"
+          label="Password"
+          icon={Lock}
+          type={showPw ? "text" : "password"}
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          registration={register("password")}
+          error={errors.password?.message}
+          rightSlot={<PasswordToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />}
+        />
+        <div className="mt-1.5 text-right text-xs">
+          <a
+            href="/forgot-password"
+            className="rounded font-medium text-foreground/70 underline-offset-2 hover:text-foreground hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {showPw ? "Hide" : "Show"}
-          </button>
-        </div>
-        <div className="mt-1 text-right text-xs">
-          <a href="/forgot-password" className="text-foreground/70 underline hover:text-foreground">
             Forgot password?
           </a>
         </div>
-        {errors.password && (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        )}
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -109,7 +99,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

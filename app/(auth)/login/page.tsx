@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { postJson } from "@/lib/safe-fetch";
 import { sanitizeRedirectPath } from "@/lib/auth/redirect";
 import AuthLayout from "@/components/auth/AuthLayout";
+import LoginAside from "@/components/auth/LoginAside";
 import LoginForm from "./_form";
 import Link from "next/link";
 import { Linkedin } from "lucide-react";
@@ -58,9 +59,9 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout aside={<LoginAside />}>
       <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
-        <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">Welcome back</h1>
         <p className="mt-1 text-sm text-foreground/70">Let’s help you land your next offer.</p>
       </div>
 
