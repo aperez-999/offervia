@@ -439,7 +439,7 @@ export default function SettingsPage() {
                   className="border-border text-foreground hover:bg-foreground/[0.06]"
                   asChild
                 >
-                  <a href="/profile">Edit avatar</a>
+                  <Link href="/profile">Edit avatar</Link>
                 </Button>
                 <Button
                   variant="outline"
