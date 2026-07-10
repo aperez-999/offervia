@@ -205,8 +205,8 @@ export default function AppLayout({
         <div className="flex gap-8 py-6 sm:py-8">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-60 shrink-0">
-            <div className="sticky top-20 rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
+            <div className="sticky top-20 rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+              <div className="mb-2 text-[11px] font-semibold text-foreground/60">
                 Navigation
               </div>
               <div className="mb-2 h-px bg-border" />
@@ -310,7 +310,7 @@ export default function AppLayout({
 
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
-            <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <PageTransition>{children}</PageTransition>
             </div>
           </main>

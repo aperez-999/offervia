@@ -108,7 +108,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="rounded-3xl border border-border bg-card/60 p-8 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 backdrop-blur dark:shadow-black/40"
+            className="rounded-3xl border border-border bg-card p-8 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40"
           >
             <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">
               Offervia • AI career suite
@@ -180,7 +180,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="mx-auto w-full max-w-md"
         >
-          <div className="rounded-3xl border border-border bg-card/60 p-6 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 backdrop-blur dark:shadow-black/40">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-black/10 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40">
             {/* Mobile-only mini value prop to make auth feel premium */}
             <div className="mb-5 lg:hidden">
               <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-foreground">

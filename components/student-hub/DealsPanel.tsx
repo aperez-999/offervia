@@ -219,8 +219,8 @@ export default function DealsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">Student-only perks</p>
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs font-medium text-primary">Student-only perks</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
@@ -234,15 +234,15 @@ export default function DealsPanel() {
           <div className="flex gap-2 text-center">
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{DEALS.length}</div>
-              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Perks</div>
+              <div className="text-[11px] text-foreground/60">Perks</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-success">{freeCount}</div>
-              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Free</div>
+              <div className="text-[11px] text-foreground/60">Free</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{eduCount}</div>
-              <div className="text-[11px] uppercase tracking-wide text-foreground/60">.edu</div>
+              <div className="text-[11px] text-foreground/60">.edu</div>
             </div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function DealsPanel() {
       <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
         {/* Filter rail */}
         <aside className="space-y-6 xl:sticky xl:top-24">
-          <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="mb-3 flex items-center justify-between">
               <div className="font-medium text-foreground">Filters</div>
               {hasFilters && (
@@ -261,7 +261,7 @@ export default function DealsPanel() {
               )}
             </div>
 
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground/50">Category</div>
+            <div className="mb-2 text-xs font-medium text-foreground/50">Category</div>
             <div className="mb-4 flex flex-col gap-1">
               {CATS.map((c) => (
                 <button
@@ -290,7 +290,7 @@ export default function DealsPanel() {
             </div>
           </section>
 
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardContent className="flex items-start gap-3 p-4">
               <GraduationCap className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <div>
@@ -319,7 +319,7 @@ export default function DealsPanel() {
 
           <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
             {filtered.length === 0 ? (
-              <Card className="rounded-xl border border-dashed border-border bg-card/40 shadow-sm sm:col-span-2 2xl:col-span-3">
+              <Card className="rounded-xl border border-dashed border-border bg-card shadow-sm sm:col-span-2 2xl:col-span-3">
                 <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
                   <p className="text-sm font-medium text-foreground">No student perks match that filter.</p>
                   <p className="mt-2 max-w-md text-sm text-foreground/70">
@@ -330,7 +330,7 @@ export default function DealsPanel() {
             ) : filtered.map((d) => (
               <Card
                 key={d.id}
-                className="card-hover rounded-xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="card-hover rounded-xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between gap-2">

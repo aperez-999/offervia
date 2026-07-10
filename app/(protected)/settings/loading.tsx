@@ -11,7 +11,7 @@ export default function Loading() {
 
       <div className="grid items-start gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
         {/* Section nav rail */}
-        <div className="hidden rounded-2xl border border-border bg-card/60 p-3 shadow-sm xl:block">
+        <div className="hidden rounded-2xl border border-border bg-card p-3 shadow-sm xl:block">
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, index) => (
               <Skeleton key={index} className="h-10 w-full rounded-lg" />
@@ -22,7 +22,7 @@ export default function Loading() {
         {/* Settings sections */}
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm">
+            <div key={index} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <Skeleton className="h-5 w-40" />
               <Skeleton className="mt-2 h-4 w-64" />
               <div className="mt-6 space-y-4">

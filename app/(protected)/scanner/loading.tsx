@@ -10,7 +10,7 @@ export default function Loading() {
       </div>
 
       {/* Input card */}
-      <div className="max-w-3xl rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="max-w-3xl rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <Skeleton className="h-5 w-48" />
         <div className="mt-4 space-y-2">
           <Skeleton className="h-40 w-full rounded-lg" />
@@ -27,7 +27,7 @@ export default function Loading() {
       </div>
 
       {/* Results card */}
-      <div className="max-w-3xl rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="max-w-3xl rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <Skeleton className="h-5 w-32" />
         <div className="mt-3 space-y-2">
           <Skeleton className="h-4 w-full" />

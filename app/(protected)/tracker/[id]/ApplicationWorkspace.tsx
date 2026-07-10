@@ -178,7 +178,7 @@ export default function ApplicationWorkspace({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left: details form */}
         <div className="space-y-6 lg:col-span-2">
-          <section className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-foreground">Application details</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -280,7 +280,7 @@ export default function ApplicationWorkspace({
           </section>
 
           {/* Related documents */}
-          <section className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">Related documents</h2>
               <Button asChild variant="ghost" size="sm" className="text-foreground/60">
@@ -338,7 +338,7 @@ export default function ApplicationWorkspace({
 
         {/* Right: insights + actions */}
         <div className="space-y-6">
-          <section className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <h2 className="mb-3 text-sm font-semibold text-foreground">Generate for this role</h2>
             <div className="flex flex-col gap-2">
               <Button asChild variant="outline" className="justify-start">
@@ -360,7 +360,7 @@ export default function ApplicationWorkspace({
           </section>
 
           {bestScan ? (
-            <section className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Latest scan match</h2>

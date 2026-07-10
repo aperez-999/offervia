@@ -18,7 +18,7 @@ export default function Loading() {
       </div>
 
       {/* Active step body */}
-      <div className="rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+      <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <Skeleton className="h-6 w-48" />
         <Skeleton className="mt-2 h-4 w-80" />
         <Skeleton className="mt-6 h-40 w-full rounded-xl" />

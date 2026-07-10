@@ -19,11 +19,11 @@ export default function PerformanceInsights({
 }) {
   return (
     <section
-      className="rounded-xl border border-border bg-card/60 px-6 py-5"
+      className="rounded-xl border border-border bg-card px-6 py-5"
       aria-label="Performance Insights"
     >
       <div className="mb-4">
-        <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+        <div className="text-xs font-semibold text-foreground/60">
           Pro insights
         </div>
         <h3 className="mt-1 text-lg font-semibold text-foreground">Performance insights</h3>
@@ -33,7 +33,7 @@ export default function PerformanceInsights({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Average Match Score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -41,7 +41,7 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Best Score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -49,7 +49,7 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Total Scans
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -57,7 +57,7 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Improvement
           </div>
           <div className="mt-1 text-2xl font-semibold">

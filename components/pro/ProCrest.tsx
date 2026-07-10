@@ -25,7 +25,7 @@ export default function ProCrest({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-reward/40 bg-reward/15 font-semibold uppercase tracking-wide text-reward shadow-sm shadow-reward/10",
+        "inline-flex items-center rounded-full border border-reward/40 bg-reward/15 font-semibold text-reward shadow-sm shadow-reward/10",
         sizes,
         className
       )}

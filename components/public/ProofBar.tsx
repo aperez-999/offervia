@@ -39,7 +39,7 @@ export default function ProofBar() {
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.4, delay: idx * 0.04 }}
                 whileHover={{ y: -3 }}
-                className="group rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 backdrop-blur hover-glow dark:ring-black/10"
+                className="group rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 hover-glow dark:ring-black/10"
               >
                 <div className="flex items-start gap-3">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${it.chip}`}>

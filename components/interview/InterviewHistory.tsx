@@ -71,7 +71,7 @@ export default function InterviewHistory({
 
   return (
     <Reveal className="mt-8">
-      <section className="rounded-2xl border border-border bg-card/70 p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background/60 text-primary">
@@ -169,7 +169,7 @@ export default function InterviewHistory({
                           return (
                             <div
                               key={i}
-                              className="rounded-lg border border-border bg-card/60 p-4"
+                              className="rounded-lg border border-border bg-card p-4"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <p className="text-sm font-medium text-foreground">
@@ -187,7 +187,7 @@ export default function InterviewHistory({
                               {(t.strengths?.length || t.improvements?.length) ? (
                                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                                   <div>
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/55">
+                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/55">
                                       <CheckCircle2 className="size-3.5 text-primary" />{" "}
                                       Strengths
                                     </div>
@@ -209,7 +209,7 @@ export default function InterviewHistory({
                                     </ul>
                                   </div>
                                   <div>
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/55">
+                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/55">
                                       <TrendingUp className="size-3.5 text-amber-500" />{" "}
                                       Improve
                                     </div>

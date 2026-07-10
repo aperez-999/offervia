@@ -146,7 +146,7 @@ export default function CoverLetterStudio({
   return (
     <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
       {/* Inputs */}
-      <Reveal className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm">
+      <Reveal className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -319,7 +319,7 @@ export default function CoverLetterStudio({
       {/* Output */}
       <Reveal
         index={1}
-        className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm lg:sticky lg:top-20"
+        className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:sticky lg:top-20"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">

@@ -120,7 +120,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* Pricing cards */}
       <section className="grid items-stretch gap-6 lg:grid-cols-2">
         {/* Free */}
-        <Card className="flex flex-col rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="flex flex-col rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardContent className="flex flex-1 flex-col p-6 sm:p-8">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Free</h2>
@@ -215,7 +215,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
 
       {/* Perks */}
       <section>
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-foreground/60">
+        <h2 className="mb-4 text-xs font-semibold text-foreground/60">
           What Pro unlocks
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -228,7 +228,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 }}
-                className="card-hover flex gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="card-hover flex gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
               >
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />

@@ -14,7 +14,7 @@ export default function Loading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+            className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
           >
             <Skeleton className="h-3 w-32" />
             <Skeleton className="mt-3 h-7 w-16" />
@@ -23,7 +23,7 @@ export default function Loading() {
       </div>
 
       {/* Quick Actions */}
-      <div className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <Skeleton className="h-5 w-40" />
         <Skeleton className="mt-2 h-4 w-56" />
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,7 +44,7 @@ export default function Loading() {
         {[0, 1].map((k) => (
           <div
             key={k}
-            className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+            className="rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
           >
             <Skeleton className="h-5 w-48" />
             <Skeleton className="mt-2 h-4 w-56" />

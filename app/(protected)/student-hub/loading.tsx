@@ -11,7 +11,7 @@ export default function Loading() {
       </div>
 
       {/* Tab bar */}
-      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card/60 p-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <div key={index} className="flex items-center gap-3 rounded-xl px-3.5 py-3">
             <Skeleton className="size-9 rounded-lg" />
@@ -24,7 +24,7 @@ export default function Loading() {
       </div>
 
       {/* Panel header card */}
-      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="mt-2 h-7 w-48" />
         <Skeleton className="mt-2 h-4 w-full max-w-lg" />

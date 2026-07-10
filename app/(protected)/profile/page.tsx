@@ -245,15 +245,15 @@ export default function ProfilePage() {
 
   return (
       <PageContainer>
-        <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <p className="text-xs font-medium uppercase tracking-wide text-primary">Your identity</p>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <p className="text-xs font-medium text-primary">Your identity</p>
           <h1 className="mt-1 text-2xl font-semibold text-foreground">Profile</h1>
           <p className="mt-1 text-sm text-foreground/70">Manage your avatar and public details.</p>
         </div>
 
         <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
           {/* Identity card */}
-          <Card className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="h-20 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent" />
             <CardContent className="-mt-12 flex flex-col items-center text-center">
               <button
@@ -319,7 +319,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Public info */}
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Public info</CardTitle>
               <CardDescription className="text-foreground/70">What others may see in shared artifacts</CardDescription>
@@ -353,7 +353,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Career details — powers AI personalization */}
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:col-span-full xl:col-start-2">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:col-span-full xl:col-start-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Career details</CardTitle>
               <CardDescription className="text-foreground/70">

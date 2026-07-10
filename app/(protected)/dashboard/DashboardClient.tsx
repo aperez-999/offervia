@@ -100,7 +100,7 @@ function ProHealthStat({
 }) {
   return (
     <Card className="rounded-2xl border border-reward/25 bg-gradient-to-br from-reward/[0.08] via-card/60 to-card/60 p-4 shadow-sm ring-1 ring-reward/10">
-      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+      <div className="text-xs font-medium text-foreground/60">
         {label}
       </div>
       <div className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
@@ -513,8 +513,8 @@ export default function DashboardClient({
                 <div className="min-w-0">
                   <div className={
                     plan === "pro"
-                      ? "text-[11px] font-semibold uppercase tracking-wide text-reward/80"
-                      : "text-[11px] font-semibold uppercase tracking-wide text-primary/80"
+                      ? "text-[11px] font-semibold text-reward/80"
+                      : "text-[11px] font-semibold text-primary/80"
                   }>
                     Recommended next step
                   </div>
@@ -548,7 +548,7 @@ export default function DashboardClient({
       {/* At-a-glance stats */}
       <section className="space-y-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Overview
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">At a glance</h2>
@@ -567,7 +567,7 @@ export default function DashboardClient({
           <div className="flex items-center gap-2">
             <ProCrest size="sm" />
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-reward/80">
+              <div className="text-xs font-semibold text-reward/80">
                 Pipeline health
               </div>
               <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are converting</h2>
@@ -584,16 +584,16 @@ export default function DashboardClient({
       {/* KPIs + Goal/Streak */}
       <section className="space-y-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Progress
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
         </div>
         <div className="grid items-start gap-4 lg:grid-cols-3">
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Weekly Goal
                 </div>
                 <div className="mt-1 flex items-baseline gap-1.5">
@@ -623,10 +623,10 @@ export default function DashboardClient({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Streak
                 </div>
                 <div className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
@@ -642,10 +642,10 @@ export default function DashboardClient({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Usage This Month
                 </div>
                 <p className="mt-1 text-sm text-foreground/70">
@@ -722,13 +722,13 @@ export default function DashboardClient({
           {/* Two-up: Recent Applications + Recent Chats */}
           <section className="space-y-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Recent activity
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
         </div>
         <div className="grid items-start gap-4 grid-cols-1 2xl:grid-cols-2">
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -804,7 +804,7 @@ export default function DashboardClient({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -873,7 +873,7 @@ export default function DashboardClient({
         <div className="space-y-6">
       {/* Quick actions */}
       <section>
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Quick Actions</CardTitle>
             <CardDescription className="text-foreground/70">

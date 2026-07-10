@@ -63,8 +63,6 @@ export default function ContactPage() {
       {/* Token-driven backdrop, consistent with the app */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="brand-glow absolute inset-x-0 -top-24 h-96" />
-        <div className="absolute top-40 -left-40 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-24 right-[-60px] h-64 w-64 rounded-full bg-[var(--chart-2)]/10 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -78,7 +76,7 @@ export default function ContactPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
             <MessageSquareText className="h-6 w-6" />
           </div>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="mt-4 text-xs font-semibold text-primary">
             We&apos;re listening
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
@@ -97,7 +95,7 @@ export default function ContactPage() {
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="lg:col-span-2"
           >
-            <div className="rounded-3xl border border-border bg-card/60 p-6 shadow-2xl shadow-black/5 ring-1 ring-white/5 backdrop-blur dark:ring-black/10 dark:shadow-black/40 sm:p-8">
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-black/5 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40 sm:p-8">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-foreground">Send us a message</h2>
                 <p className="mt-1 text-sm text-foreground/60">
@@ -205,7 +203,6 @@ export default function ContactPage() {
           >
             {/* Why contact us — premium gradient panel */}
             <div className="bg-brand-gradient relative overflow-hidden rounded-2xl p-6 text-white shadow-lg shadow-primary/30">
-              <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
                   <Sparkles className="h-5 w-5" />
@@ -228,7 +225,7 @@ export default function ContactPage() {
             </div>
 
             {/* Response time */}
-            <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
                   <Clock className="h-5 w-5" />
@@ -255,7 +252,7 @@ export default function ContactPage() {
             </div>
 
             {/* Connect */}
-            <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10 text-info">
                   <Github className="h-5 w-5" />

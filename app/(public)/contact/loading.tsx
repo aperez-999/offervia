@@ -6,7 +6,7 @@ export default function LoadingContact() {
           <div className="mx-auto mt-2 h-4 w-80 rounded-md bg-foreground/[0.08] animate-pulse" />
         </header>
   
-        <div className="mx-auto grid gap-4 rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:max-w-xl">
+        <div className="mx-auto grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:max-w-xl">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="grid gap-2">
               <div className="h-4 w-24 rounded-md bg-foreground/[0.08] animate-pulse" />

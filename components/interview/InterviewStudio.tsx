@@ -82,7 +82,7 @@ function ScoreRing({ score, size = 132 }: { score: number; size?: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-3xl font-bold ${tone.text}`}>{score}</span>
-        <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">{band.label}</span>
+        <span className="text-xs font-medium text-foreground/60">{band.label}</span>
       </div>
     </div>
   );
@@ -132,7 +132,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
   const band = scoreBand(feedback.score);
   const tone = toneToClasses[band.tone];
   return (
-    <div className="rounded-xl border border-border bg-card/70 p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm font-semibold text-foreground">Feedback</div>
         <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${tone.chip}`}>
@@ -141,7 +141,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/60">
             <CheckCircle2 className="size-3.5 text-primary" /> Strengths
           </div>
           <ul className="mt-2 space-y-1.5">
@@ -155,7 +155,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
           </ul>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/60">
             <TrendingUp className="size-3.5 text-amber-500" /> Improve
           </div>
           <ul className="mt-2 space-y-1.5">
@@ -516,12 +516,12 @@ export default function InterviewStudio({
           </div>
 
           <div className="space-y-3 px-6 py-6 sm:px-8">
-            <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Per-question breakdown</div>
+            <div className="text-xs font-semibold text-foreground/60">Per-question breakdown</div>
             {answered.map((t, i) => {
               const band = scoreBand(t.score);
               const tone = toneToClasses[band.tone];
               return (
-                <Reveal key={i} index={i} className="rounded-xl border border-border bg-card/60 p-4">
+                <Reveal key={i} index={i} className="rounded-xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm font-medium text-foreground">{t.question}</p>
                     <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${tone.chip}`}>

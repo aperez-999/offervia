@@ -28,7 +28,7 @@ export default function Loading() {
 
         {/* Chat panel */}
         <main className="min-w-0 flex-1">
-          <div className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 p-0 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card p-0 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             {/* Chat header */}
             <div className="border-b border-border p-5">
               <Skeleton className="h-5 w-48" />

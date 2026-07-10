@@ -515,7 +515,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     <div className="space-y-6">
       {/* Header */}
       <section>
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">Step 2 · Tailor</p>
+        <p className="text-xs font-medium text-primary">Step 2 · Tailor</p>
         <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Move through the steps to tailor one resume draft to one role with cleaner, more consistent context.
@@ -980,7 +980,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       />
                     )
                   ) : (
-                    <div className="flex h-[68vh] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/40 p-6 text-center">
+                    <div className="flex h-[68vh] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                         <Sparkles className="h-6 w-6 text-primary" />
                       </div>

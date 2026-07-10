@@ -6,8 +6,8 @@ import { Sparkles } from "lucide-react";
 const Chat = dynamic(() => import("./Chat"), {
   loading: () => (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-      <div className="h-[220px] w-full rounded-2xl border border-border bg-card/60 lg:w-[280px]" />
-      <div className="h-[70vh] min-h-[400px] flex-1 rounded-2xl border border-border bg-card/60" />
+      <div className="h-[220px] w-full rounded-2xl border border-border bg-card lg:w-[280px]" />
+      <div className="h-[70vh] min-h-[400px] flex-1 rounded-2xl border border-border bg-card" />
     </div>
   ),
 });

@@ -241,7 +241,7 @@ export default function JobPacketClient() {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="space-y-8 py-6 sm:py-8"
     >
-      <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -297,7 +297,7 @@ export default function JobPacketClient() {
             <Card
               key={step.id}
               className={cn(
-                "rounded-2xl border bg-card/60 shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10",
+                "rounded-2xl border bg-card shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10",
                 active
                   ? "border-primary/50 ring-primary/20 dark:ring-primary/20"
                   : done
@@ -323,12 +323,12 @@ export default function JobPacketClient() {
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-sm text-foreground">{step.title}</CardTitle>
                       {active && (
-                        <Badge className="border-primary/30 bg-primary/10 text-[10px] font-medium uppercase tracking-wide text-primary">
+                        <Badge className="border-primary/30 bg-primary/10 text-[10px] font-medium text-primary">
                           Now
                         </Badge>
                       )}
                       {done && (
-                        <Badge className="border-success/30 bg-success/10 text-[10px] font-medium uppercase tracking-wide text-success">
+                        <Badge className="border-success/30 bg-success/10 text-[10px] font-medium text-success">
                           Done
                         </Badge>
                       )}
@@ -343,7 +343,7 @@ export default function JobPacketClient() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.85fr)]">
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">1. Job context</CardTitle>
             <CardDescription className="text-foreground/70">
@@ -454,7 +454,7 @@ export default function JobPacketClient() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">2. Job description scan</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -474,7 +474,7 @@ export default function JobPacketClient() {
                 <>
                   <div className="rounded-xl border border-border bg-background/50 p-4">
                     <div className="flex items-center justify-between">
-                      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                      <div className="text-xs font-medium text-foreground/60">
                         Role fit potential
                       </div>
                       <span
@@ -518,7 +518,7 @@ export default function JobPacketClient() {
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                    <div className="text-xs font-medium text-foreground/60">
                       What this role rewards
                     </div>
                     <ul className="mt-2 space-y-1.5 text-sm text-foreground">
@@ -532,7 +532,7 @@ export default function JobPacketClient() {
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                    <div className="text-xs font-medium text-foreground/60">
                       Common gaps to cover
                     </div>
                     <ul className="mt-2 space-y-1.5 text-sm text-foreground">
@@ -546,7 +546,7 @@ export default function JobPacketClient() {
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                    <div className="text-xs font-medium text-foreground/60">
                       Role focus
                     </div>
                     <p className="mt-2 text-sm text-foreground/80">{draft.scanResult.summary}</p>
@@ -565,7 +565,7 @@ export default function JobPacketClient() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">3. Resume + tracker handoff</CardTitle>
               <CardDescription className="text-foreground/70">

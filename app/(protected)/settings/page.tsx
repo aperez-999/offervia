@@ -324,8 +324,8 @@ export default function SettingsPage() {
 
   return (
     <PageContainer>
-      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">Account</p>
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs font-medium text-primary">Account</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
@@ -346,7 +346,7 @@ export default function SettingsPage() {
       <div className="grid items-start gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
         {/* Section nav */}
         <aside className="xl:sticky xl:top-24">
-          <nav className="rounded-2xl border border-border bg-card/60 p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
               <a
                 key={id}
@@ -363,7 +363,7 @@ export default function SettingsPage() {
         {/* Sections */}
         <div className="space-y-6">
           {/* Profile */}
-          <Card id="profile" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="profile" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Profile</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -454,7 +454,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Appearance */}
-          <Card id="appearance" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="appearance" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Appearance</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -491,7 +491,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Preferences */}
-          <Card id="preferences" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="preferences" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Preferences</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -585,7 +585,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Plan & billing */}
-          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Plan &amp; billing</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -635,7 +635,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Data & Privacy */}
-          <Card id="data" className="scroll-mt-24 rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="data" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Data &amp; privacy</CardTitle>
               <CardDescription className="text-foreground/70">

@@ -3,8 +3,8 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-16">
-      <div className="rounded-2xl border border-border bg-card/60 p-8 text-center shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs uppercase tracking-wide text-foreground/60">404</p>
+      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs text-foreground/60">404</p>
         <h1 className="mt-2 text-2xl font-semibold text-foreground">Page not found</h1>
         <p className="mt-2 text-sm text-foreground/70">
           The page you’re looking for doesn’t exist or was moved.

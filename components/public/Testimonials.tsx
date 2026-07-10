@@ -36,7 +36,7 @@ export default function Testimonials() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Testimonials</p>
+          <p className="text-xs font-semibold text-primary">Testimonials</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
             Real job seekers. Real results.
           </h2>
@@ -54,7 +54,7 @@ export default function Testimonials() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.45, delay: i * 0.05 }}
               whileHover={{ y: -4 }}
-              className="flex flex-col rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 backdrop-blur transition-shadow hover:shadow-md dark:ring-black/10"
+              className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 transition-shadow hover:shadow-md dark:ring-black/10"
             >
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.chip}`}>
                 <Quote className="h-5 w-5" />

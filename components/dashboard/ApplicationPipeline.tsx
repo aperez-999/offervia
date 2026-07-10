@@ -85,12 +85,12 @@ export default function ApplicationPipeline({ apps }: { apps: PipelineApp[] }) {
 
   return (
     <section
-      className="rounded-xl border border-border bg-card/60 px-4 py-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:px-6 sm:py-5"
+      className="rounded-xl border border-border bg-card px-4 py-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:px-6 sm:py-5"
       aria-label="Application pipeline"
     >
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Pipeline
           </div>
           <h3 className="mt-1 text-lg font-semibold text-foreground">Your application funnel</h3>

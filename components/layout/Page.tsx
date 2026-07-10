@@ -40,7 +40,7 @@ export function PageHeader({
     >
       <div className="min-w-0 space-y-1.5">
         {eyebrow ? (
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             {eyebrow}
           </div>
         ) : null}
@@ -83,7 +83,7 @@ export function PageSection({
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div className="space-y-1">
             {eyebrow ? (
-              <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+              <div className="text-xs font-semibold text-foreground/60">
                 {eyebrow}
               </div>
             ) : null}

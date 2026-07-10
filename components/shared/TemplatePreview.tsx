@@ -43,7 +43,7 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl rounded-2xl border border-border bg-card/90 shadow-xl backdrop-blur">
+      <DialogContent className="max-w-2xl rounded-2xl border border-border bg-card shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-foreground">{title}</DialogTitle>
           {/* Add a visually-hidden description to satisfy aria-describedby */}

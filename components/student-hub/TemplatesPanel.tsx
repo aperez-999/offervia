@@ -278,8 +278,8 @@ export default function TemplatesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">Outreach toolkit</p>
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <p className="text-xs font-medium text-primary">Outreach toolkit</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Templates</h1>
@@ -290,11 +290,11 @@ export default function TemplatesPanel() {
           <div className="flex gap-2 text-center">
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{TEMPLATES.length}</div>
-              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Templates</div>
+              <div className="text-[11px] text-foreground/60">Templates</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{savedIds.size}</div>
-              <div className="text-[11px] uppercase tracking-wide text-foreground/60">Saved</div>
+              <div className="text-[11px] text-foreground/60">Saved</div>
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function TemplatesPanel() {
       <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
         {/* Rail: quick fill + categories */}
         <aside className="space-y-6 xl:sticky xl:top-24">
-          <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="mb-1 font-medium text-foreground">Quick fill</div>
             <p className="mb-3 text-xs text-foreground/60">
               Add your recurring details once so every preview and copy is personalized.
@@ -342,7 +342,7 @@ export default function TemplatesPanel() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="mb-3 font-medium text-foreground">Categories</div>
             <div className="flex flex-wrap gap-2">
               {TABS.map((t) => (

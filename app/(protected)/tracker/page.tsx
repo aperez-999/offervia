@@ -508,7 +508,7 @@ export default function TrackerPage() {
 
   return (
     <div className="space-y-8 py-6 sm:py-8">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
           <p className="mt-1 text-sm text-foreground/70">
@@ -542,7 +542,7 @@ export default function TrackerPage() {
             <SelectTrigger className="w-[110px] border-border bg-background/80 text-foreground">
               <SelectValue placeholder="Rows" />
             </SelectTrigger>
-            <SelectContent className="border-border bg-card/80 text-foreground">
+            <SelectContent className="border-border bg-card text-foreground">
               {TRACKER_PAGE_SIZE_OPTIONS.map((value) => (
                 <SelectItem key={value} value={String(value)}>
                   {value} / page
@@ -575,7 +575,7 @@ export default function TrackerPage() {
               </Button>
             </DialogTrigger>
 
-            <DialogContent className="rounded-2xl border border-border bg-card/80 text-foreground shadow-lg">
+            <DialogContent className="rounded-2xl border border-border bg-card text-foreground shadow-lg">
               <DialogHeader>
                 <DialogTitle className="text-foreground">
                   {editingId ? "Edit application" : "Add application"}
@@ -612,7 +612,7 @@ export default function TrackerPage() {
                     <SelectTrigger className="border-border bg-background/80 text-foreground">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent className="border-border bg-card/80 text-foreground">
+                    <SelectContent className="border-border bg-card text-foreground">
                       {TRACKER_STATUS_OPTIONS.map((value) => (
                         <SelectItem key={value} value={value}>
                           {value}
@@ -666,7 +666,7 @@ export default function TrackerPage() {
         <Kpi title="Offers" value={kpis.offer} />
       </section>
 
-      <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <div className="mb-1 text-sm font-medium text-foreground">Quick add</div>
         <p className="mb-3 text-xs text-foreground/60">
           Add a role in a few seconds, then come back later for edits and follow-up planning.
@@ -702,7 +702,7 @@ export default function TrackerPage() {
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2.5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <span className="text-sm font-medium text-foreground/70">Filter:</span>
         <Select
           value={statusFilter}
@@ -715,7 +715,7 @@ export default function TrackerPage() {
           <SelectTrigger className="w-40 border-border bg-background/80 text-foreground">
             <SelectValue placeholder="All" />
           </SelectTrigger>
-          <SelectContent className="border-border bg-card/80 text-foreground">
+          <SelectContent className="border-border bg-card text-foreground">
             <SelectItem value="All">All</SelectItem>
             {TRACKER_STATUS_OPTIONS.map((value) => (
               <SelectItem key={value} value={value}>
@@ -783,7 +783,7 @@ export default function TrackerPage() {
                   setDraggingId(null);
                   if (dragged) void moveToStatus(dragged, column.status);
                 }}
-                className={`flex flex-col rounded-2xl border bg-card/60 shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10 ${
+                className={`flex flex-col rounded-2xl border bg-card shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10 ${
                   dragOverStatus === column.status
                     ? "border-primary/60 bg-primary/[0.04]"
                     : "border-border"
@@ -886,7 +886,7 @@ export default function TrackerPage() {
           })}
         </div>
       ) : (
-      <div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -1040,7 +1040,7 @@ export default function TrackerPage() {
       )}
 
       <ConfirmDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <ConfirmContent className="rounded-2xl border border-border bg-card/80 text-foreground shadow-lg">
+        <ConfirmContent className="rounded-2xl border border-border bg-card text-foreground shadow-lg">
           <ConfirmHeader>
             <ConfirmTitle className="text-foreground">Remove this application?</ConfirmTitle>
             <ConfirmDescription className="text-foreground/70">
@@ -1067,8 +1067,8 @@ export default function TrackerPage() {
 
 function Kpi({ title, value }: { title: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-      <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">{title}</div>
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="text-xs font-medium text-foreground/60">{title}</div>
       <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
     </div>
   );

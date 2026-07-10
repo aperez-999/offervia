@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-md mx-auto rounded-2xl border border-border bg-card/70 backdrop-blur-lg shadow-xl p-6">
+      <div className="w-full max-w-md mx-auto rounded-2xl border border-border bg-card shadow-xl p-6">
         <h1 className="text-xl font-semibold text-foreground">Forgot your password?</h1>
         <p className="mt-1 text-sm text-foreground/70">
           Enter your email and we’ll send you a secure reset link.

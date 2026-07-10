@@ -33,7 +33,7 @@ export default function ErrorView({
   }
 
   return (
-    <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
       <CardHeader className="pb-2">
         <div className="flex items-start gap-3">
           <div className="rounded-md bg-foreground/5 p-2">

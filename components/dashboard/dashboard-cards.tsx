@@ -38,9 +38,9 @@ export function Kpi({
       : "bg-muted-foreground/40";
 
   return (
-    <Card className="card-hover rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-4">
+    <Card className="card-hover rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-4">
       <div className="flex items-center justify-between gap-2">
-        <div className="truncate text-xs font-medium uppercase tracking-wide text-foreground/60">
+        <div className="truncate text-xs font-medium text-foreground/60">
           {title}
         </div>
         <div className={`h-2.5 w-2.5 rounded-full ${toneClass}`} aria-hidden />

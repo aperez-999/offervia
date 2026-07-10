@@ -33,7 +33,7 @@ export default function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">How it works</p>
+          <p className="text-xs font-semibold text-primary">How it works</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
             A simple, repeatable loop
           </h2>
@@ -54,12 +54,12 @@ export default function HowItWorks() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: i * 0.05 }}
                 whileHover={{ y: -4 }}
-                className="relative rounded-2xl border border-border bg-card/60 p-6 text-center shadow-sm ring-1 ring-white/5 backdrop-blur transition-shadow hover:shadow-md dark:ring-black/10"
+                className="relative rounded-2xl border border-border bg-card p-6 text-center shadow-sm ring-1 ring-white/5 transition-shadow hover:shadow-md dark:ring-black/10"
               >
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="mt-3 text-xs font-medium uppercase tracking-wide text-foreground/50">
+                <div className="mt-3 text-xs font-medium text-foreground/50">
                   Step {i + 1}
                 </div>
                 <h3 className="mt-1 text-base font-semibold text-foreground">{s.title}</h3>

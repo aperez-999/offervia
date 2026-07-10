@@ -42,7 +42,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.35, delay: idx * 0.03 }}
-      className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10"
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
     >
       <button
         type="button"
@@ -85,7 +85,7 @@ export default function Faq() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">FAQ</p>
+          <p className="text-xs font-semibold text-primary">FAQ</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
             Frequently asked questions
           </h2>

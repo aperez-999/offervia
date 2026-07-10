@@ -180,7 +180,7 @@ export default function DocumentsClient() {
 
   if (docs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card/40 px-6 py-16 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
         <FileText className="size-8 text-foreground/30" />
         <p className="text-sm font-medium text-foreground">No saved documents yet</p>
         <p className="max-w-sm text-sm text-foreground/60">
@@ -237,7 +237,7 @@ export default function DocumentsClient() {
           return (
             <li
               key={doc.id}
-              className="overflow-hidden rounded-2xl border border-border bg-card/70 shadow-sm"
+              className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
             >
               <div className="flex items-center gap-3 p-4">
                 <span

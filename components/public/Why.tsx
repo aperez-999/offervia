@@ -39,7 +39,7 @@ export default function Why() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Why Offervia</p>
+          <p className="text-xs font-semibold text-primary">Why Offervia</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
             A workflow that keeps you moving
           </h2>
@@ -59,7 +59,7 @@ export default function Why() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
                 whileHover={{ y: -4 }}
-                className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm ring-1 ring-white/5 backdrop-blur transition-shadow hover:shadow-md dark:ring-black/10"
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 transition-shadow hover:shadow-md dark:ring-black/10"
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${it.chip}`}>
                   <Icon className="h-5 w-5" />

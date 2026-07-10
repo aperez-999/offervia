@@ -56,7 +56,7 @@ export default function StudentHubClient() {
       <div
         role="tablist"
         aria-label="Student Hub sections"
-        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card/60 p-2 shadow-sm ring-1 ring-white/5 sm:grid-cols-3 dark:ring-black/10"
+        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 sm:grid-cols-3 dark:ring-black/10"
       >
         {TABS.map((tab) => {
           const selected = tab.key === active;

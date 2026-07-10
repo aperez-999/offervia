@@ -16,8 +16,8 @@ export default function WizardSidebar({
 }) {
   return (
     <aside className="w-full shrink-0 lg:w-72">
-      <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="mb-2 text-[11px] font-semibold text-foreground/60">
           Wizard
         </div>
         <nav className="space-y-2">

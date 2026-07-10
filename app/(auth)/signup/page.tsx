@@ -42,7 +42,7 @@ export default function SignupPage() {
       {/* Divider */}
       <div className="mt-5 flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
-        <span className="text-xs font-medium uppercase tracking-wide text-foreground/50">or sign up with</span>
+        <span className="text-xs font-medium text-foreground/50">or sign up with</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 

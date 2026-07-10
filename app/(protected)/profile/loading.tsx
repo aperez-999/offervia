@@ -11,7 +11,7 @@ export default function Loading() {
 
       <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
         {/* Avatar card */}
-        <div className="rounded-2xl border border-border bg-card/60 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card shadow-sm">
           <Skeleton className="h-24 w-full rounded-t-2xl" />
           <div className="-mt-12 flex flex-col items-center px-6 pb-6 text-center">
             <Skeleton className="size-24 rounded-full" />
@@ -22,7 +22,7 @@ export default function Loading() {
         </div>
 
         {/* Form card */}
-        <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="mt-2 h-4 w-64" />
           <div className="mt-6 space-y-4">

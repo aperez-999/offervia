@@ -13,7 +13,7 @@ export default function Loading() {
       {/* Plan cards */}
       <div className="grid items-stretch gap-6 lg:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (
-          <div key={index} className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm sm:p-8">
+          <div key={index} className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="mt-4 h-9 w-32" />
             <div className="mt-6 space-y-3">

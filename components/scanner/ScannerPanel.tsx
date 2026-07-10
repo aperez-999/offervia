@@ -183,7 +183,7 @@ export default function ScannerPanel() {
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         {/* Inputs */}
-        <Reveal className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm">
+        <Reveal className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="space-y-4">
             <div>
               <div className="mb-1.5 flex items-center justify-between">
@@ -305,7 +305,7 @@ export default function ScannerPanel() {
 
             {history.length > 0 && (
               <div className="border-t border-border pt-3">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground/40">
+                <p className="mb-2 text-xs font-medium text-foreground/40">
                   Recent scans
                 </p>
                 <ul className="space-y-1.5">
@@ -333,7 +333,7 @@ export default function ScannerPanel() {
         {/* Results */}
         <Reveal
           index={1}
-          className="rounded-2xl border border-border bg-card/70 p-5 shadow-sm lg:sticky lg:top-20"
+          className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:sticky lg:top-20"
         >
           <AnimatePresence mode="wait">
             {loading ? (

@@ -13,7 +13,7 @@ export default function Loading() {
       {/* Two-column studio */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Inputs */}
-        <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -43,7 +43,7 @@ export default function Loading() {
         </div>
 
         {/* Output */}
-        <div className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <Skeleton className="h-5 w-40" />
           <div className="mt-6 space-y-3">
             {["w-[90%]", "w-[78%]", "w-[66%]", "w-[88%]", "w-[80%]", "w-[70%]", "w-[85%]", "w-[60%]"].map(

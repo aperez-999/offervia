@@ -34,8 +34,6 @@ export default function TermsPage() {
       {/* Token-driven backdrop, consistent with the app */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="brand-glow absolute inset-x-0 -top-24 h-96" />
-        <div className="absolute top-32 -left-40 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-24 right-[-60px] h-64 w-64 rounded-full bg-[var(--chart-2)]/10 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-5xl px-4 py-16 sm:py-20">
@@ -44,7 +42,7 @@ export default function TermsPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
             <Scale className="h-6 w-6" />
           </div>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="mt-4 text-xs font-semibold text-primary">
             The ground rules
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
@@ -53,7 +51,7 @@ export default function TermsPage() {
           <p className="mx-auto mt-3 max-w-2xl text-sm text-foreground/70">
             Please read these terms carefully before using Offervia. They keep the platform fair, safe, and reliable for everyone.
           </p>
-          <div className="mx-auto mt-4 w-fit rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-foreground/70 backdrop-blur">
+          <div className="mx-auto mt-4 w-fit rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/70">
             Last updated: {lastUpdated}
           </div>
         </header>
@@ -61,8 +59,8 @@ export default function TermsPage() {
         <div className="mt-12 grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
           {/* Sticky TOC (desktop) */}
           <aside className="sticky top-24 hidden h-fit self-start lg:block animate-in fade-in-0 slide-in-from-left-3 duration-700">
-            <nav className="rounded-2xl border border-border bg-card/60 p-2 shadow-sm ring-1 ring-white/5 backdrop-blur dark:ring-black/10">
-              <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-foreground/50">
+            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+              <p className="px-3 py-2 text-xs font-semibold text-foreground/50">
                 On this page
               </p>
               {sections.map((s) => (
@@ -209,7 +207,7 @@ export default function TermsPage() {
             <div className="pt-2">
               <a
                 href="#"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-primary/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-primary/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <ArrowUp className="h-3.5 w-3.5" />
                 Back to top
