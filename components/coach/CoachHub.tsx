@@ -2,12 +2,51 @@
 
 import dynamic from "next/dynamic";
 import { Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Chat = dynamic(() => import("./Chat"), {
   loading: () => (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-      <div className="h-[220px] w-full rounded-2xl border border-border bg-card lg:w-[280px]" />
-      <div className="h-[70vh] min-h-[400px] flex-1 rounded-2xl border border-border bg-card" />
+      <aside className="w-full shrink-0 lg:w-[280px]">
+        <div className="rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Skeleton className="h-3 w-24" />
+          <div className="my-2 h-px bg-border" />
+          <div className="space-y-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5 rounded-md" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+      <div className="flex h-[70vh] min-h-[400px] flex-1 flex-col rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="border-b border-border p-5">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="mt-2 h-4 w-72" />
+        </div>
+        <div className="flex-1 space-y-4 overflow-hidden p-5">
+          <div className="flex items-start gap-2">
+            <Skeleton className="mt-1 h-5 w-5 rounded-full" />
+            <div className="rounded-2xl border border-border bg-background/70 p-3">
+              <Skeleton className="h-4 w-64" />
+              <Skeleton className="mt-2 h-4 w-44" />
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <div className="ml-auto rounded-2xl border border-border bg-background/70 p-3">
+              <Skeleton className="h-4 w-56" />
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-border p-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-full rounded-md" />
+            <Skeleton className="h-11 w-24 rounded-md" />
+          </div>
+        </div>
+      </div>
     </div>
   ),
 });
