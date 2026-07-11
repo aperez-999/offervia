@@ -22,11 +22,17 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
+    const isProd = process.env.NODE_ENV === "production";
+    // 'unsafe-eval' is only required by the Next.js dev runtime (React Refresh).
+    // Production builds don't need it, so we drop it to tighten script-src.
+    const scriptSrc = isProd
+      ? "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com"
+      : "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com";
     const securityHeaders = [
       {
         key: "Content-Security-Policy",
         value:
-          "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.groq.com https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com; frame-src 'self' blob:; form-action 'self';",
+          `default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.groq.com https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com; frame-src 'self' blob:; form-action 'self';`,
       },
       {
         key: "X-Frame-Options",
