@@ -14,6 +14,7 @@ import {
   Github,
 } from "lucide-react";
 import { InputField, TextareaField } from "@/components/ui/FormFields";
+import { captureClientException } from "@/lib/monitoring/sentry";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -45,6 +46,7 @@ export default function ContactPage() {
       }
     } catch (error) {
       console.error("Contact form error:", error);
+      captureClientException(error, { scope: "contact.submit" });
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);

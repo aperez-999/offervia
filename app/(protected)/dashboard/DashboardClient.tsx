@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { captureClientException } from "@/lib/monitoring/sentry";
 
 import {
   Card,
@@ -249,6 +250,7 @@ export default function DashboardClient({
       setLoading(false);
     } catch (err) {
       console.error("[dashboard] load failed", err);
+      captureClientException(err, { scope: "dashboard.load" });
       setLoadError(true);
       setLoading(false);
       toast({

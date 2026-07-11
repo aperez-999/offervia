@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { captureClientException } from "@/lib/monitoring/sentry";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,6 +217,7 @@ export default function ProfilePage() {
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       console.error(errorMessage);
+      captureClientException(e, { scope: "profile.avatar-upload" });
       toast({
         title: "Upload failed",
         description: "Check the 'avatars' bucket and Storage policies.",
