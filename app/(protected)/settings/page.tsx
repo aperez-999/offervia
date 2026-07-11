@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import { SettingsSkeleton } from "@/components/settings/SettingsSkeleton";
 import ProCrest from "@/components/pro/ProCrest";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 import {
@@ -283,6 +284,10 @@ export default function SettingsPage() {
       } catch {}
     }
     toast({ variant: "success", title: "Local data cleared" });
+  }
+
+  if (loading) {
+    return <SettingsSkeleton />;
   }
 
   return (

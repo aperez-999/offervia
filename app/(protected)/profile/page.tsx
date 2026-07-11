@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import { ProfileSkeleton } from "@/components/profile/ProfileSkeleton";
 import { SENIORITY_OPTIONS, WORK_PREF_OPTIONS } from "@/lib/profile/career";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
@@ -243,6 +244,10 @@ export default function ProfilePage() {
     } finally {
       setUploading(false);
     }
+  }
+
+  if (loading) {
+    return <ProfileSkeleton />;
   }
 
   return (
