@@ -2,6 +2,7 @@
 
 import { postJson } from "@/lib/safe-fetch";
 import AuthLayout from "@/components/auth/AuthLayout";
+import SignupAside from "@/components/auth/SignupAside";
 import SignupForm from "./_form";
 import Link from "next/link";
 import { Linkedin } from "lucide-react";
@@ -31,13 +32,20 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthLayout>
-      <div className="mb-5 text-center">
-        <h1 className="text-xl font-semibold text-foreground">Create your Offervia account</h1>
-        <p className="mt-1 text-sm text-foreground/70">Start on the free tier — upgrade anytime.</p>
+    <AuthLayout aside={<SignupAside />}>
+      <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">Create your Offervia account</h1>
+        <p className="mt-1 text-sm text-foreground/70">Land more interviews — free to start, upgrade anytime.</p>
       </div>
 
       <SignupForm />
+
+      {/* Divider */}
+      <div className="mt-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium text-foreground/50">or sign up with</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       {/* Social sign-up (circle icons) */}
       <div className="mt-4 flex items-center justify-center gap-2">
@@ -46,7 +54,7 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with Google"
           onClick={() => startOAuth("google")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign up with Google"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-4 w-4" aria-hidden="true">
@@ -62,7 +70,7 @@ export default function SignupPage() {
           type="button"
           aria-label="Sign up with LinkedIn"
           onClick={() => startOAuth("linkedin_oidc")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign up with LinkedIn"
         >
           <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />

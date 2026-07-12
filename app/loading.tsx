@@ -7,7 +7,7 @@ export default function Loading() {
           <div className="mx-auto h-8 w-72 rounded-md bg-foreground/[0.08] animate-pulse" />
           <div className="mx-auto mt-3 h-4 w-80 rounded-md bg-foreground/[0.08] animate-pulse" />
           <div className="mx-auto mt-6 flex justify-center gap-2">
-            <div className="h-9 w-28 rounded-md bg-indigo-500/30 animate-pulse" />
+            <div className="h-9 w-28 rounded-md bg-primary/10 animate-pulse" />
             <div className="h-9 w-28 rounded-md bg-foreground/[0.08] animate-pulse" />
           </div>
         </section>
@@ -17,7 +17,7 @@ export default function Loading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+              className="rounded-xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
             >
               <div className="h-5 w-28 rounded-md bg-foreground/[0.08] animate-pulse" />
               <div className="mt-3 h-4 w-full rounded-md bg-foreground/[0.06] animate-pulse" />

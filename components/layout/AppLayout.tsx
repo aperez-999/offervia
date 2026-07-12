@@ -10,20 +10,24 @@ import {
   LayoutDashboard,
   Sparkles,
   FileText,
+  PenLine,
   Search,
   MessageSquare,
+  MicVocal,
   ClipboardList,
-  BookOpen,
   GraduationCap,
-  Mail,
+  Library,
   Menu,
   X,
+  ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import UserMenu from "@/components/layout/UserMenu";
 import Footer from "@/components/public/Footer";
+import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
+import ProCrest from "@/components/pro/ProCrest";
 
 const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalCommandMenu"), {
   ssr: false,
@@ -41,15 +45,65 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Job Packet", href: "/job-packet", icon: Sparkles },
   { label: "Resume", href: "/resume", icon: FileText },
-  { label: "Scanner", href: "/scanner", icon: Search },
+  { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
+  { label: "ATS Scanner", href: "/scanner", icon: Search },
   { label: "Coach", href: "/coach", icon: MessageSquare },
+  { label: "Interview", href: "/interview", icon: MicVocal },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
-  { label: "Templates", href: "/templates", icon: Mail },
-  { label: "Resources", href: "/resources", icon: BookOpen },
-  { label: "Student Exclusives", href: "/students", icon: GraduationCap },
+  { label: "Documents", href: "/documents", icon: Library },
+  { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
 ];
 
 type PlanType = "free" | "pro";
+
+function PlanCard({
+  plan,
+  onNavigate,
+}: {
+  plan: PlanType;
+  onNavigate?: () => void;
+}) {
+  if (plan === "pro") {
+    return (
+      <div className="rounded-xl border border-reward/30 bg-reward/10 p-3 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <ProCrest size="sm" />
+          <Sparkles className="h-3.5 w-3.5 text-reward/70" aria-hidden />
+        </div>
+        <p className="mt-2 text-[13px] font-medium text-foreground">Offervia Pro</p>
+        <p className="mt-0.5 text-xs text-foreground/60">
+          Higher limits and Pro insights are unlocked.
+        </p>
+        <Link
+          href="/settings#billing"
+          onClick={onNavigate}
+          className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-reward hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded"
+        >
+          Manage plan
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3 shadow-sm">
+      <p className="text-[13px] font-medium text-foreground">Free plan</p>
+      <p className="mt-0.5 text-xs text-foreground/60">
+        Unlock higher limits and Pro insights.
+      </p>
+      <Button
+        asChild
+        size="sm"
+        className="mt-2.5 h-8 w-full bg-primary-button text-white hover:bg-primary-button/90"
+      >
+        <Link href="/upgrade" onClick={onNavigate}>
+          Upgrade to Pro
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
 export default function AppLayout({
   children,
@@ -108,14 +162,13 @@ export default function AppLayout({
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Subtle app backdrop */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-200/40 via-indigo-100/20 to-transparent blur-3xl dark:hidden" />
-        <div className="hidden dark:block absolute -top-24 left-1/2 h-72 w-[1200px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-900/25 via-indigo-800/15 to-transparent blur-3xl" />
+        <div className="brand-glow absolute inset-x-0 -top-24 h-72" />
       </div>
 
       {/* Header */}
       <header className="sticky top-0 z-40">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-background/80 backdrop-blur" />
+        <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 pt-3">
           <div className="pointer-events-auto rounded-2xl border border-border/70 bg-background/70 shadow-sm backdrop-blur">
             <div className="flex h-12 items-center justify-between px-3 sm:px-4">
           <div className="flex items-center gap-2">
@@ -134,7 +187,7 @@ export default function AppLayout({
               className="flex items-center transition-opacity hover:opacity-90"
               aria-label="Offervia"
             >
-              <BrandLogo width={190} height={48} priority className="h-10 sm:h-11" />
+              <BrandLogo width={132} height={32} priority className="h-7 sm:h-8" />
             </Link>
           </div>
 
@@ -148,12 +201,12 @@ export default function AppLayout({
       </header>
 
       {/* Main content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex-1 w-full">
-        <div className="flex gap-6 py-6">
+      <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10 flex-1 w-full">
+        <div className="flex gap-8 py-6 sm:py-8">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-56 shrink-0">
-            <div className="sticky top-20 rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
+          <aside className="hidden lg:block w-60 shrink-0">
+            <div className="sticky top-20 rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+              <div className="mb-2 text-[11px] font-semibold text-foreground/60">
                 Navigation
               </div>
               <div className="mb-2 h-px bg-border" />
@@ -167,19 +220,23 @@ export default function AppLayout({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={[
-                        "flex items-center gap-2 rounded-md px-2 py-1.5 border transition-colors",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
+                        "group flex items-center gap-2 rounded-md px-2 py-1.5 border transition-all duration-200",
+                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                         active
-                          ? "border-indigo-500/20 bg-indigo-500/10 font-medium"
-                          : "border-transparent hover:bg-foreground/[0.04]",
+                          ? "border-primary/20 bg-primary/10 text-primary font-medium"
+                          : "border-transparent hover:bg-accent hover:text-accent-foreground motion-safe:hover:translate-x-0.5",
                       ].join(" ")}
                     >
-                      <Icon className="h-5 w-5 stroke-[1.5]" />
+                      <Icon className="h-5 w-5 stroke-[1.5] transition-transform duration-200 motion-safe:group-hover:scale-110" />
                       <span className="truncate">{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
+
+              <div className="mt-3 border-t border-border pt-3">
+                <PlanCard plan={plan} />
+              </div>
             </div>
           </aside>
 
@@ -229,7 +286,7 @@ export default function AppLayout({
                             aria-current={active ? "page" : undefined}
                             className={[
                               "flex items-center gap-3 rounded-md px-3 py-2.5 border transition-colors",
-                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black",
+                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
                               active
                                 ? "border-border bg-foreground/[0.06] font-medium"
                                 : "border-transparent hover:bg-foreground/[0.04]",
@@ -241,6 +298,10 @@ export default function AppLayout({
                         );
                       })}
                     </nav>
+
+                    <div className="mt-4 border-t border-border pt-4">
+                      <PlanCard plan={plan} onNavigate={() => setSidebarOpen(false)} />
+                    </div>
                   </div>
                 </motion.aside>
               </>
@@ -249,8 +310,8 @@ export default function AppLayout({
 
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
-            <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              {children}
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+              <PageTransition>{children}</PageTransition>
             </div>
           </main>
         </div>

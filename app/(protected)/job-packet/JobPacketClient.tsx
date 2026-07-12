@@ -10,6 +10,7 @@ import {
   Building2,
   CheckCircle2,
   ClipboardCopy,
+  Info,
   Link as LinkIcon,
   MapPin,
   Sparkles,
@@ -23,6 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { postJson } from "@/lib/safe-fetch";
+import { cn } from "@/lib/utils";
 import {
   clearJobPacketDraft,
   createEmptyJobPacketDraft,
@@ -53,7 +55,7 @@ const STEP_CONFIG = [
     id: "scan",
     number: 2,
     title: "Run the scan",
-    desc: "Surface strengths, gaps, and keyword themes before you tailor anything.",
+    desc: "Read what the role rewards and the common gaps to cover before you tailor anything.",
   },
   {
     id: "resume",
@@ -111,6 +113,10 @@ export default function JobPacketClient() {
 
   const progress = useMemo(() => detectProgress(draft), [draft]);
   const pct = useMemo(() => progressPercent(draft), [draft]);
+  const activeStepId = useMemo(() => {
+    const order = ["details", "scan", "resume", "tracker"] as const;
+    return order.find((id) => !progress[id]) ?? "tracker";
+  }, [progress]);
   const canRunScan = draft.jobDescription.trim().length >= 20;
   const trackerDraft = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -128,7 +134,7 @@ export default function JobPacketClient() {
 
   function copy(text: string, label = "Copied") {
     navigator.clipboard.writeText(text).then(
-      () => toast({ title: label }),
+      () => toast({ variant: "success", title: label }),
       () => toast({ title: "Copy failed", variant: "destructive" })
     );
   }
@@ -167,9 +173,9 @@ export default function JobPacketClient() {
       currentStep: "resume",
       trackerDraft,
     });
-    toast({
+    toast({ variant: "success",
       title: "Scan complete",
-      description: "Your packet is ready to continue into Resume Tailor with the same job context.",
+      description: "Role themes are ready. Continue into Resume Tailor to tailor your resume and get a personalized match.",
     });
   }
 
@@ -225,7 +231,7 @@ export default function JobPacketClient() {
     clearJobPacketDraft();
     setDraft(createEmptyJobPacketDraft());
     setError(null);
-    toast({ title: "Job Packet cleared" });
+    toast({ variant: "success", title: "Job Packet cleared" });
   }
 
   return (
@@ -233,12 +239,13 @@ export default function JobPacketClient() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-4 p-4 sm:space-y-6 sm:p-6"
+      className="space-y-8 py-6 sm:py-8"
     >
-      <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-foreground">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
               Flagship workflow
             </div>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
@@ -259,7 +266,7 @@ export default function JobPacketClient() {
             >
               Clear packet
             </Button>
-            <Button asChild className="bg-indigo-600 text-white hover:bg-indigo-500">
+            <Button asChild className="bg-primary-button text-white hover:bg-primary-button/90">
               <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
@@ -274,7 +281,7 @@ export default function JobPacketClient() {
         </div>
 
         {draft.completedAt && (
-          <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-foreground">
+          <div className="mt-4 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm text-foreground">
             This packet already made it into your tracker. Reopen Resume Tailor if you want another pass,
             or start a fresh packet for the next role.
           </div>
@@ -283,29 +290,52 @@ export default function JobPacketClient() {
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {STEP_CONFIG.map((step) => {
-          const done =
-            step.id === "details"
-              ? progress.details
-              : step.id === "scan"
-              ? progress.scan
-              : step.id === "resume"
-              ? progress.resume
-              : progress.tracker;
+          const done = progress[step.id];
+          const active = !done && step.id === activeStepId;
 
           return (
             <Card
               key={step.id}
-              className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+              className={cn(
+                "rounded-2xl border bg-card shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10",
+                active
+                  ? "border-primary/50 ring-primary/20 dark:ring-primary/20"
+                  : done
+                  ? "border-success/30"
+                  : "border-border"
+              )}
             >
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between gap-2">
-                  <Badge variant="outline" className="border-border text-foreground/80">
-                    Step {step.number}
-                  </Badge>
-                  {done && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                      done
+                        ? "bg-success text-white"
+                        : active
+                        ? "bg-primary-button text-white"
+                        : "bg-foreground/[0.06] text-foreground/60"
+                    )}
+                  >
+                    {done ? <CheckCircle2 className="h-4 w-4" /> : step.number}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-sm text-foreground">{step.title}</CardTitle>
+                      {active && (
+                        <Badge className="border-primary/30 bg-primary/10 text-[10px] font-medium text-primary">
+                          Now
+                        </Badge>
+                      )}
+                      {done && (
+                        <Badge className="border-success/30 bg-success/10 text-[10px] font-medium text-success">
+                          Done
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="mt-1 text-foreground/70">{step.desc}</CardDescription>
+                  </div>
                 </div>
-                <CardTitle className="text-base text-foreground">{step.title}</CardTitle>
-                <CardDescription className="text-foreground/70">{step.desc}</CardDescription>
               </CardHeader>
             </Card>
           );
@@ -313,7 +343,7 @@ export default function JobPacketClient() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.85fr)]">
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">1. Job context</CardTitle>
             <CardDescription className="text-foreground/70">
@@ -386,7 +416,7 @@ export default function JobPacketClient() {
                   })
                 }
                 placeholder="Paste the full job description here..."
-                className="min-h-[260px] border-border bg-background/80 text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="min-h-[260px] border-border bg-background/80 text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               />
               <div className="text-xs text-foreground/60">
                 {draft.jobDescription.length} characters
@@ -397,7 +427,7 @@ export default function JobPacketClient() {
               <Button
                 onClick={() => void runScan()}
                 disabled={!canRunScan || loadingScan}
-                className="bg-indigo-600 text-white hover:bg-indigo-500"
+                className="bg-primary-button text-white hover:bg-primary-button/90"
               >
                 {loadingScan ? (
                   <>
@@ -424,11 +454,12 @@ export default function JobPacketClient() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-foreground">2. Scan summary</CardTitle>
+              <CardTitle className="text-foreground">2. Job description scan</CardTitle>
               <CardDescription className="text-foreground/70">
-                Review the packet scan before you tailor the resume.
+                A read on the role itself — what it rewards and the gaps to cover. Your resume is
+                scored later, in Resume Tailor.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -441,57 +472,100 @@ export default function JobPacketClient() {
 
               {draft.scanResult ? (
                 <>
-                  <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                      Match score
+                  <div className="rounded-xl border border-border bg-background/50 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-medium text-foreground/60">
+                        Role fit potential
+                      </div>
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
+                          draft.scanResult.match_score >= 75
+                            ? "bg-success/10 text-success"
+                            : draft.scanResult.match_score >= 50
+                            ? "bg-warning/10 text-warning"
+                            : "bg-destructive/10 text-destructive"
+                        )}
+                      >
+                        {draft.scanResult.match_score >= 75
+                          ? "Strong potential"
+                          : draft.scanResult.match_score >= 50
+                          ? "Moderate"
+                          : "Stretch role"}
+                      </span>
                     </div>
                     <div className="mt-1 text-3xl font-semibold text-foreground">
                       {draft.scanResult.match_score}%
                     </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-foreground/[0.08]">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          draft.scanResult.match_score >= 75
+                            ? "bg-success"
+                            : draft.scanResult.match_score >= 50
+                            ? "bg-warning"
+                            : "bg-destructive"
+                        )}
+                        style={{ width: `${Math.min(100, Math.max(0, draft.scanResult.match_score))}%` }}
+                      />
+                    </div>
+                    <p className="mt-3 flex items-start gap-1.5 text-xs text-foreground/55">
+                      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      Based on the job description only — how attainable this role is for a strong
+                      candidate. Upload your resume in Resume Tailor for a personalized match score.
+                    </p>
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                      Strengths
+                    <div className="text-xs font-medium text-foreground/60">
+                      What this role rewards
                     </div>
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
+                    <ul className="mt-2 space-y-1.5 text-sm text-foreground">
                       {draft.scanResult.strengths.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                          <span>{item}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                      Missing skills
+                    <div className="text-xs font-medium text-foreground/60">
+                      Common gaps to cover
                     </div>
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
+                    <ul className="mt-2 space-y-1.5 text-sm text-foreground">
                       {draft.scanResult.missing_skills.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item} className="flex items-start gap-2">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-warning" />
+                          <span>{item}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
-                      Summary
+                    <div className="text-xs font-medium text-foreground/60">
+                      Role focus
                     </div>
                     <p className="mt-2 text-sm text-foreground/80">{draft.scanResult.summary}</p>
                   </div>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-foreground">
-                    Next step: open Resume Tailor to apply these themes to your current resume draft.
+                  <div className="rounded-xl border border-success/30 bg-success/10 p-3 text-sm text-foreground">
+                    Next step: open Resume Tailor to weave these themes into your resume and get your
+                    personalized match.
                   </div>
                 </>
               ) : (
                 <div className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-foreground/60">
-                  Run the packet scan to surface strengths, gaps, and the themes your tailored resume
-                  should emphasize next.
+                  Run the scan to read what this role rewards, the common gaps to cover, and the
+                  themes your tailored resume should emphasize next.
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">3. Resume + tracker handoff</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -510,7 +584,7 @@ export default function JobPacketClient() {
               </div>
 
               {draft.tailoredResume ? (
-                <div className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+                <div className="space-y-3 rounded-xl border border-success/30 bg-success/10 p-3">
                   <div className="text-sm font-medium text-foreground">
                     Tailored resume ready
                   </div>
@@ -530,7 +604,7 @@ export default function JobPacketClient() {
                     <Button
                       size="sm"
                       onClick={continueToTracker}
-                      className="bg-emerald-600 text-white hover:bg-emerald-500"
+                      className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                     >
                       Send to tracker
                     </Button>
@@ -546,7 +620,7 @@ export default function JobPacketClient() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={continueToResumeTailor}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500"
+                  className="bg-primary-button text-white hover:bg-primary-button/90"
                 >
                   {draft.tailoredResume ? "Refine in Resume Tailor" : "Open Resume Tailor"}
                 </Button>

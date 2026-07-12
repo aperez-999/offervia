@@ -2,16 +2,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-6 sm:py-8">
       {/* Header */}
       <div>
         <Skeleton className="h-7 w-56" />
         <Skeleton className="mt-2 h-4 w-80" />
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Sidebar (Modules) */}
-        <aside className="w-[260px] shrink-0">
+        <aside className="w-full shrink-0 lg:w-[260px]">
           <div className="rounded-xl border border-border bg-background p-3">
             <Skeleton className="h-3 w-24" />
             <div className="my-2 h-px bg-border" />
@@ -28,7 +28,7 @@ export default function Loading() {
 
         {/* Chat panel */}
         <main className="min-w-0 flex-1">
-          <div className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card/60 p-0 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="flex h-[70vh] min-h-[420px] flex-col rounded-2xl border border-border bg-card p-0 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             {/* Chat header */}
             <div className="border-b border-border p-5">
               <Skeleton className="h-5 w-48" />
@@ -61,7 +61,7 @@ export default function Loading() {
               {/* Typing indicator */}
               <div className="flex items-start gap-2">
                 <Skeleton className="mt-1 h-5 w-5 rounded-full" />
-                <div className="rounded-2xl border border-border bg-indigo-500/10 p-3">
+                <div className="rounded-2xl border border-border bg-primary/10 p-3">
                   <Skeleton className="h-4 w-40" />
                 </div>
               </div>

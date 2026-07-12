@@ -7,6 +7,8 @@ import { fail } from "@/lib/api/response";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { captureServerException } from "@/lib/monitoring/sentry";
+import { readCareerProfile } from "@/lib/profile/read";
+import { buildProfileContext } from "@/lib/profile/career";
 
 export type CoachMode = "interview" | "resume" | "cover_letter" | "career";
 
@@ -70,12 +72,19 @@ async function getAuthenticatedUserId(req: Request): Promise<string | null> {
   return user.id;
 }
 
-function buildSystemPrompt(mode: CoachMode, responseMode?: "brief" | "detailed") {
+function buildSystemPrompt(
+  mode: CoachMode,
+  responseMode?: "brief" | "detailed",
+  profileContext?: string
+) {
   const baseSystemPrompt = SYSTEM_PROMPTS[mode];
+  const profileBlock = profileContext
+    ? `\n\n${profileContext}\nUse this context to tailor advice to the candidate. Do not restate it back to them.`
+    : "";
   if (responseMode === "brief") {
-    return `${baseSystemPrompt}\n\nIMPORTANT: Keep responses concise and practical. Limit to 3-5 sentences or key bullet points. Be direct and actionable.`;
+    return `${baseSystemPrompt}${profileBlock}\n\nIMPORTANT: Keep responses concise and practical. Limit to 3-5 sentences or key bullet points. Be direct and actionable.`;
   }
-  return `${baseSystemPrompt}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
+  return `${baseSystemPrompt}${profileBlock}\n\nIMPORTANT: Provide detailed, thoughtful explanations when needed. Structure your responses clearly with proper formatting and comprehensive information.`;
 }
 
 async function insertMessage(message: {
@@ -165,10 +174,15 @@ export async function POST(req: Request) {
     });
 
     try {
-      const systemPrompt = buildSystemPrompt(mode, responseMode);
+      const profileContext = buildProfileContext(
+        await readCareerProfile(getServiceSupabase(), userId)
+      );
+      const systemPrompt = buildSystemPrompt(mode, responseMode, profileContext);
       const modifiedMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
         { role: "system", content: systemPrompt },
-        ...messages.slice(1),
+        ...messages
+          .slice(1)
+          .filter((m) => m.role === "user" || m.role === "assistant"),
       ];
 
       const groq = getGroqClient();

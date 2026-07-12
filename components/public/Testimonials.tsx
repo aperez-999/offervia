@@ -1,107 +1,108 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User2 } from "lucide-react";
+import { Quote } from "lucide-react";
+
+type Item = { quote: string; role: string; chip: string };
+
+const ITEMS: Item[] = [
+  {
+    quote:
+      "I tailored my resume to the posting and started getting callbacks the same week. It felt built for candidates, not HR.",
+    role: "New Grad",
+    chip: "bg-primary/10 text-primary",
+  },
+  {
+    quote:
+      "The JD scanner showed exactly what to emphasize. It saved hours and made my applications more focused.",
+    role: "Career Switcher",
+    chip: "bg-success/10 text-success",
+  },
+  {
+    quote:
+      "Interview practice was realistic and short. I knew what to say and why — and landed more onsite rounds.",
+    role: "Software Engineer",
+    chip: "bg-warning/10 text-warning",
+  },
+  {
+    quote:
+      "The tracker finally gave my search a system. No more spreadsheets — I can see every follow-up at a glance.",
+    role: "Product Manager",
+    chip: "bg-info/10 text-info",
+  },
+  {
+    quote:
+      "Cover letters used to take me an hour each. Now they're tailored to the company in seconds and actually sound like me.",
+    role: "Marketing Analyst",
+    chip: "bg-reward/10 text-reward",
+  },
+  {
+    quote:
+      "Going from scan to tailored resume to tracked application in one flow kept my momentum up during a tough search.",
+    role: "Data Analyst",
+    chip: "bg-primary/10 text-primary",
+  },
+];
+
+function Card({ t }: { t: Item }) {
+  return (
+    <blockquote className="flex w-[300px] shrink-0 flex-col rounded-2xl border border-border bg-card p-6 shadow-sm sm:w-[340px]">
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.chip}`}>
+        <Quote className="h-5 w-5" />
+      </div>
+      <p className="mt-4 flex-1 text-sm leading-relaxed text-foreground/80">“{t.quote}”</p>
+      <div className="mt-4 text-xs font-medium text-foreground/60">{t.role}</div>
+    </blockquote>
+  );
+}
+
+function Row({ reverse }: { reverse?: boolean }) {
+  // Duplicate the list so the -50% translate loops seamlessly.
+  const cards = [...ITEMS, ...ITEMS];
+  return (
+    <div className="group flex overflow-hidden">
+      <div
+        className={`flex w-max gap-4 pr-4 ${
+          reverse ? "animate-marquee-reverse" : "animate-marquee"
+        } group-hover:[animation-play-state:paused]`}
+      >
+        {cards.map((t, i) => (
+          <Card key={i} t={t} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Testimonials() {
-  const items = [
-    {
-      quote:
-        "I tailored my resume to the posting and started getting callbacks the same week. It felt built for candidates, not HR.",
-      role: "New Grad",
-    },
-    {
-      quote:
-        "The JD scanner showed exactly what to emphasize. It saved hours and made my applications more focused.",
-      role: "Career Switcher",
-    },
-    {
-      quote:
-        "Interview practice was realistic and short. I knew what to say and why — and landed more onsite rounds.",
-      role: "Software Engineer",
-    },
-  ];
-
-  // Per-card accents to differentiate pills (light & dark)
-  const accents = [
-    {
-      icon: "text-indigo-500 dark:text-indigo-400",
-      lightBg: "bg-indigo-50",
-      darkBg: "dark:bg-indigo-500/5",
-      ring: "ring-indigo-500/20",
-    },
-    {
-      icon: "text-emerald-500 dark:text-emerald-400",
-      lightBg: "bg-emerald-50",
-      darkBg: "dark:bg-emerald-500/5",
-      ring: "ring-emerald-500/20",
-    },
-    {
-      icon: "text-amber-500 dark:text-amber-300",
-      lightBg: "bg-amber-50",
-      darkBg: "dark:bg-amber-500/5",
-      ring: "ring-amber-500/20",
-    },
-  ];
-
   return (
     <section id="testimonials" className="relative bg-background scroll-mt-20">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
-        <motion.h2
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-border" />
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-2xl font-semibold text-foreground dark:text-white"
+          className="mx-auto max-w-2xl text-center"
         >
-          Real job seekers. Real results.
-        </motion.h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-foreground/70">
-          Built for momentum: clearer applications, faster iteration, and more confidence per submission.
-        </p>
+          <p className="text-xs font-semibold text-primary">Testimonials</p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
+            Real job seekers. Real results.
+          </h2>
+          <p className="mt-3 text-sm text-foreground/70">
+            Clearer applications, faster iteration, and more confidence per submission.
+          </p>
+        </motion.div>
+      </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {items.map((t, i) => {
-            const a = accents[i % accents.length];
-            return (
-              <motion.blockquote
-                key={i}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.45, delay: i * 0.05 }}
-                whileHover={{ y: -4 }}
-                className={[
-                  // pill container
-                  "rounded-2xl border border-border p-6 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md",
-                  // base backgrounds
-                  "bg-white/70 dark:bg-neutral-900/40",
-                  // accented backgrounds (override base subtly)
-                  a.lightBg,
-                  a.darkBg,
-                ].join(" ")}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={[
-                      "h-9 w-9 rounded-full flex items-center justify-center",
-                      "bg-white dark:bg-neutral-900",
-                      "ring-2", a.ring,
-                    ].join(" ")}
-                  >
-                    <User2 className={`h-5 w-5 ${a.icon}`} />
-                  </div>
-                  <div className="text-xs font-medium text-gray-900 dark:text-white">{t.role}</div>
-                </div>
-
-                <p className="mt-4 text-sm leading-relaxed text-gray-800 dark:text-white">
-                  “{t.quote}”
-                </p>
-              </motion.blockquote>
-            );
-          })}
-        </div>
+      {/* Marquee rows with edge fade masks */}
+      <div
+        className="relative flex flex-col gap-4 pb-16 sm:pb-24 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+        style={{ ["--marquee-duration" as string]: "48s" }}
+      >
+        <Row />
+        <Row reverse />
       </div>
     </section>
   );

@@ -9,6 +9,7 @@ import Faq from "@/components/public/Faq";
 import HowItWorks from "@/components/public/HowItWorks";
 import BottomCta from "@/components/public/BottomCta";
 import Footer from "@/components/public/Footer";
+import { SoftwareApplicationJsonLd } from "@/components/seo/JsonLd";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -40,6 +41,7 @@ export default async function HomePage({
 
   return (
     <div className="relative">
+      <SoftwareApplicationJsonLd />
       <Hero />
       <ProofBar />
       <Features />

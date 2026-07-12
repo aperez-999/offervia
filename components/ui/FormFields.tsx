@@ -38,14 +38,14 @@ export function InputField({
             "w-full rounded-lg border border-border bg-background/80",
             Icon ? "pl-9 pr-3" : "px-3",
             "py-2.5 text-sm text-foreground placeholder:text-foreground/40",
-            "focus:outline-none focus:ring-2 focus:ring-indigo-500",
-            "focus:ring-offset-2 dark:focus:ring-offset-black",
+            "focus:outline-none focus:ring-2 focus:ring-ring",
+            "focus:ring-offset-2 ring-offset-background",
             className || "",
           ].join(" ")}
         />
       </div>
       {hint && <p className="text-xs text-foreground/60">{hint}</p>}
-      {error && <p className="text-xs text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -79,14 +79,14 @@ export function TextareaField({
             "min-h-[140px] w-full rounded-lg border border-border bg-background/80",
             Icon ? "pl-9 pr-3" : "px-3",
             "py-2.5 text-sm text-foreground placeholder:text-foreground/40",
-            "focus:outline-none focus:ring-2 focus:ring-indigo-500",
-            "focus:ring-offset-2 dark:focus:ring-offset-black",
+            "focus:outline-none focus:ring-2 focus:ring-ring",
+            "focus:ring-offset-2 ring-offset-background",
             className || "",
           ].join(" ")}
         />
       </div>
       {hint && <p className="text-xs text-foreground/60">{hint}</p>}
-      {error && <p className="text-xs text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

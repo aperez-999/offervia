@@ -53,11 +53,15 @@ describe("getDashboardUsageItems", () => {
         resumeTailor: 7,
         coachMessages: 10,
         jobScans: 2,
+        interviewSessions: 1,
+        coverLetters: 0,
       },
       limits: {
         resume_tailor_per_month: 10,
         coach_messages_per_month: 10,
         job_scans_per_month: 20,
+        interview_sessions_per_month: 5,
+        cover_letters_per_month: 3,
       },
     });
 
@@ -65,9 +69,28 @@ describe("getDashboardUsageItems", () => {
       "Resume Tailors",
       "AI Coach",
       "Job Scans",
+      "Mock Interviews",
+      "Cover Letters",
     ]);
     expect(items[0].state).toBe("warn");
     expect(items[1].state).toBe("high");
     expect(items[2].state).toBe("low");
+    expect(items[3].state).toBe("low");
+  });
+
+  it("marks an effectively-unlimited interview limit as unlimited", () => {
+    const items = getDashboardUsageItems({
+      usage: { resumeTailor: 0, coachMessages: 0, jobScans: 0, interviewSessions: 3, coverLetters: 0 },
+      limits: {
+        resume_tailor_per_month: 150,
+        coach_messages_per_month: 1000,
+        job_scans_per_month: 300,
+        interview_sessions_per_month: 999999,
+        cover_letters_per_month: 100,
+      },
+    });
+    const interview = items.find((item) => item.key === "interview");
+    expect(interview?.unlimited).toBe(true);
+    expect(interview?.pct).toBe(0);
   });
 });

@@ -69,44 +69,6 @@ export async function sendContactEmail(opts: {
   });
 }
 
-export async function sendUserDigestEmail(opts: {
-  toEmail: string;
-  subject: string;
-  preheader?: string;
-  text: string;
-  html: string;
-}) {
-  const transporter = getMailer();
-  return transporter.sendMail({
-    from: `"${serverEnv.CONTACT_FROM_NAME || "Offervia"}" <${serverEnv.CONTACT_FROM_EMAIL}>`,
-    to: opts.toEmail,
-    subject: opts.subject,
-    text: opts.text,
-    html: wrapDigestHtml(opts.html, opts.preheader),
-  });
-}
-
-function wrapDigestHtml(inner: string, preheader?: string) {
-  const pre = preheader ? escapeHtml(preheader) : "";
-  return `
-    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${pre}</div>
-    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45">
-      <div style="max-width:680px;margin:0 auto;padding:20px">
-        <div style="margin-bottom:14px">
-          <div style="font-weight:700;font-size:18px">Offervia</div>
-          <div style="color:#6b7280;font-size:13px">Weekly summary</div>
-        </div>
-        <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px">
-          ${inner}
-        </div>
-        <div style="margin-top:14px;color:#6b7280;font-size:12px">
-          Manage email settings in your Offervia settings page.
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 function escapeHtml(s: string) {
   return s
     .replace(/&/g, "&amp;")

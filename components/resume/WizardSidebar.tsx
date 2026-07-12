@@ -16,8 +16,8 @@ export default function WizardSidebar({
 }) {
   return (
     <aside className="w-full shrink-0 lg:w-72">
-      <div className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-foreground/60">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="mb-2 text-[11px] font-semibold text-foreground/60">
           Wizard
         </div>
         <nav className="space-y-2">
@@ -29,14 +29,14 @@ export default function WizardSidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors",
                   active
-                    ? "border-indigo-500/40 bg-indigo-500/10 ring-1 ring-indigo-500/20"
+                    ? "border-primary/30 bg-primary/10 ring-1 ring-ring"
                     : "border-border hover:bg-foreground/[0.05]"
                 )}
               >
                 <span
                   className={cn(
                     "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs",
-                    active ? "bg-indigo-600 text-white" : "bg-foreground/10 text-foreground/80"
+                    active ? "bg-primary-button text-white" : "bg-foreground/10 text-foreground/80"
                   )}
                 >
                   {index + 1}

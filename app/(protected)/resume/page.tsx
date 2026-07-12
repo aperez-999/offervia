@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPageMetadata } from "@/lib/metadata";
+import { PageContainer } from "@/components/layout/Page";
+import { createSupabaseServerClient } from "@/lib/supabase/ssr";
+import { readCareerProfile } from "@/lib/profile/read";
 
 const ResumeWizard = dynamic(() => import("@/components/resume/ResumeWizard"), {
   loading: () => (
@@ -24,10 +28,22 @@ export const metadata: Metadata = createPageMetadata({
   index: false,
 });
 
-export default function ResumePage() {
+export default async function ResumePage() {
+  const cookieStore = await cookies();
+  const supabase = createSupabaseServerClient({
+    get(name: string) {
+      return cookieStore.get(name)?.value;
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const career = user?.id ? await readCareerProfile(supabase, user.id) : null;
+
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <ResumeWizard />
-    </div>
+    <PageContainer>
+      <ResumeWizard defaultRole={career?.targetRole ?? ""} />
+    </PageContainer>
   );
 }

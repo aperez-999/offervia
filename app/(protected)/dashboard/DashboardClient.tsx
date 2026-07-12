@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
+import { captureClientException } from "@/lib/monitoring/sentry";
 
 import {
   Card,
@@ -17,6 +18,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flame, Sparkles, X } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Reveal } from "@/components/motion/Reveal";
+import QuickStart from "@/components/dashboard/QuickStart";
+import ProCrest from "@/components/pro/ProCrest";
+import ErrorView from "@/components/ErrorView";
+import { useToast } from "@/hooks/use-toast";
 
 import type { UsageSnapshot } from "@/lib/usage/read";
 import type { ScanAnalytics } from "@/lib/analytics/scan-analytics";
@@ -41,6 +48,8 @@ type PlanLimits = {
   resume_tailor_per_month: number;
   coach_messages_per_month: number;
   job_scans_per_month: number;
+  interview_sessions_per_month: number;
+  cover_letters_per_month: number;
 };
 
 type Application = {
@@ -50,6 +59,7 @@ type Application = {
   position: string;
   status: "Applied" | "Interviewing" | "Offer" | "Rejected";
   applied_on: string;
+  follow_up_date?: string | null;
   created_at: string;
 };
 
@@ -64,7 +74,6 @@ type MsgRow = {
 
 type OnboardingPrefs = {
   weekly_goal?: number | null;
-  email_digest?: boolean | null;
   onboarding_dismissed?: boolean | null;
   onboarding_completed?: Record<string, boolean> | null;
 };
@@ -80,8 +89,47 @@ type PlanType = "free" | "pro";
 
 export type { ScanAnalytics };
 
+function ProHealthStat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: number;
+  hint: string;
+}) {
+  return (
+    <Card className="rounded-2xl border border-reward/25 bg-card p-4 shadow-sm ring-1 ring-reward/10">
+      <div className="text-xs font-medium text-foreground/60">
+        {label}
+      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+        {value}
+        <span className="ml-0.5 text-base font-medium text-foreground/60">%</span>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
+        <div
+          className="h-full rounded-full bg-reward transition-all"
+          style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-foreground/60">{hint}</p>
+    </Card>
+  );
+}
+
 const PerformanceInsights = dynamic(
   () => import("@/components/dashboard/PerformanceInsights"),
+  { ssr: false }
+);
+
+const ApplicationPipeline = dynamic(
+  () => import("@/components/dashboard/ApplicationPipeline"),
+  { ssr: false }
+);
+
+const FollowUpsDue = dynamic(
+  () => import("@/components/dashboard/FollowUpsDue"),
   { ssr: false }
 );
 
@@ -90,15 +138,18 @@ export default function DashboardClient({
   usage,
   limits,
   analytics = null,
+  periodEnd = null,
 }: {
   plan?: PlanType;
   usage: UsageSnapshot;
   limits: PlanLimits;
   analytics?: ScanAnalytics | null;
+  periodEnd?: string | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const upgrade = searchParams.get("upgrade");
+  const { toast } = useToast();
 
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const [loading, setLoading] = useState(true);
@@ -106,10 +157,10 @@ export default function DashboardClient({
   const [recentChats, setRecentChats] = useState<MsgRow[]>([]);
   const [friendlyName, setFriendlyName] = useState<string>("there");
   const [weeklyGoalTarget, setWeeklyGoalTarget] = useState<number>(5);
-  const [emailDigestEnabled, setEmailDigestEnabled] = useState<boolean>(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
   const [jobPacketDraft, setJobPacketDraft] = useState<JobPacketDraft | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   function dismissUpgradeBanner() {
     router.replace("/dashboard");
@@ -119,8 +170,10 @@ export default function DashboardClient({
     setJobPacketDraft(readJobPacketDraft());
   }, []);
 
-  useEffect(() => {
-    (async () => {
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
+    try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -140,15 +193,15 @@ export default function DashboardClient({
         return;
       }
 
-      const [{ data: prefs }, { data: appData }, { data: msgData }] = await Promise.all([
+      const [prefsRes, appsRes, msgsRes] = await Promise.all([
         supabase
           .from("user_prefs")
-          .select("weekly_goal,email_digest,onboarding_dismissed,onboarding_completed")
+          .select("weekly_goal,onboarding_dismissed,onboarding_completed")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
           .from("applications")
-          .select("id,user_id,company,position,status,applied_on,created_at")
+          .select("id,user_id,company,position,status,applied_on,follow_up_date,created_at")
           .eq("user_id", user.id),
         supabase
           .from("messages")
@@ -158,13 +211,20 @@ export default function DashboardClient({
           .limit(8),
       ]);
 
+      // Applications are the core of the dashboard — if that query fails,
+      // surface a recoverable error instead of rendering a misleading empty state.
+      if (appsRes.error) {
+        throw appsRes.error;
+      }
+
+      const prefs = prefsRes.data;
+      const appData = appsRes.data;
+      const msgData = msgsRes.data;
+
       if (prefs) {
         const typed = prefs as unknown as OnboardingPrefs;
         if (typeof typed.weekly_goal === "number" && Number.isFinite(typed.weekly_goal)) {
           setWeeklyGoalTarget(Math.max(0, Math.min(50, Math.round(typed.weekly_goal))));
-        }
-        if (typeof typed.email_digest === "boolean") {
-          setEmailDigestEnabled(typed.email_digest);
         }
         if (typeof typed.onboarding_dismissed === "boolean") {
           setOnboardingDismissed(typed.onboarding_dismissed);
@@ -188,8 +248,22 @@ export default function DashboardClient({
       setApps(normalized);
       setRecentChats((msgData || []) as MsgRow[]);
       setLoading(false);
-    })();
-  }, [supabase]);
+    } catch (err) {
+      console.error("[dashboard] load failed", err);
+      captureClientException(err, { scope: "dashboard.load" });
+      setLoadError(true);
+      setLoading(false);
+      toast({
+        title: "Couldn't load your dashboard",
+        description: "Check your connection and try again.",
+        variant: "destructive",
+      });
+    }
+  }, [supabase, toast]);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   const { appsThisWeek, interviewing, offers, total } = useMemo(() => {
     const now = new Date();
@@ -204,6 +278,19 @@ export default function DashboardClient({
     const offers = apps.filter((a) => a.status === "Offer").length;
 
     return { appsThisWeek, interviewing, offers, total: apps.length };
+  }, [apps]);
+
+  const proHealth = useMemo(() => {
+    const t = apps.length;
+    const interviewingCount = apps.filter((a) => a.status === "Interviewing").length;
+    const offersCount = apps.filter((a) => a.status === "Offer").length;
+    const rejectedCount = apps.filter((a) => a.status === "Rejected").length;
+    const pct = (n: number) => (t > 0 ? Math.round((n / t) * 100) : 0);
+    return {
+      responseRate: pct(interviewingCount + offersCount + rejectedCount),
+      interviewRate: pct(interviewingCount),
+      offerRate: pct(offersCount),
+    };
   }, [apps]);
 
   const weeklyGoalPct = Math.max(
@@ -253,10 +340,12 @@ export default function DashboardClient({
           resumeTailor: usage.resumeTailor,
           coachMessages: usage.coachMessages,
           jobScans: usage.jobScans,
+          interviewSessions: usage.interviewSessions,
+          coverLetters: usage.coverLetters,
         },
         limits,
       }),
-    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor]
+    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor, usage.interviewSessions, usage.coverLetters]
   );
 
   const nearingLimit = useMemo(
@@ -272,14 +361,14 @@ export default function DashboardClient({
       { key: "scan_jd", label: "Run a job scan", href: "/scanner", done: usage.jobScans > 0 },
       { key: "tailor_resume", label: "Tailor a resume", href: "/resume", done: usage.resumeTailor > 0 },
       { key: "coach_chat", label: "Ask the coach something", href: "/coach", done: usage.coachMessages > 0 },
+      { key: "mock_interview", label: "Run a mock interview", href: "/interview", done: usage.interviewSessions > 0 },
       { key: "set_weekly_goal", label: "Set a weekly goal", href: "/settings", done: weeklyGoalTarget > 0 },
-      { key: "enable_digest", label: "Enable weekly digest", href: "/settings", done: emailDigestEnabled },
     ];
     return items.map((it) => ({
       ...it,
       done: it.done || onboardingCompleted[it.key] === true,
     }));
-  }, [apps.length, emailDigestEnabled, onboardingCompleted, usage, weeklyGoalTarget]);
+  }, [apps.length, onboardingCompleted, usage, weeklyGoalTarget]);
 
   const onboardingProgress = useMemo(() => {
     const total = onboardingItems.length || 1;
@@ -317,18 +406,30 @@ export default function DashboardClient({
     }
   }
 
+  if (loadError && !loading) {
+    return (
+      <div className="space-y-8">
+        <ErrorView
+          title="Couldn't load your dashboard"
+          description="We couldn't reach your workspace data. Check your connection and try again."
+          onRetry={loadDashboard}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Upgrade success / cancel banner */}
       {upgrade === "success" && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-800 dark:text-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-success">
           <p className="text-sm font-medium">
             🎉 Welcome to Pro! Your limits have been unlocked.
           </p>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 shrink-0 rounded-full p-0 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+            className="h-8 w-8 shrink-0 rounded-full p-0 text-success hover:bg-success/20"
             onClick={dismissUpgradeBanner}
             aria-label="Dismiss"
           >
@@ -354,84 +455,174 @@ export default function DashboardClient({
       )}
 
       <section>
-        <Card className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-card via-card/95 to-indigo-500/5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-300">
+        <Card className={
+          plan === "pro"
+            ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-card shadow-md ring-1 ring-reward/10"
+            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+        }>
+          <div className={
+            plan === "pro"
+              ? "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-reward/15 blur-3xl"
+              : "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl"
+          } />
+          <CardContent className="relative p-5 sm:p-6">
+            <div className="max-w-3xl">
+              {plan === "pro" ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <ProCrest size="md" label="Pro member" />
+                  {periodEnd ? (
+                    <span className="text-xs text-foreground/60">
+                      Renews {new Date(periodEnd).toLocaleDateString()}
+                    </span>
+                  ) : null}
+                </div>
+              ) : (
+                <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
                   Continue your search
                 </Badge>
-                <h1 className="mt-3 text-2xl font-semibold text-foreground sm:text-3xl">
-                  Welcome back,{" "}
-                  <span className="bg-gradient-to-r from-indigo-500 to-indigo-400 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-300">
-                    {friendlyName}
-                  </span>
-                </h1>
-                <p className="mt-2 text-sm text-foreground/75 sm:text-base">
-                  One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now.
-                </p>
-                <div className="mt-4 rounded-2xl border border-border bg-background/70 p-4 shadow-sm">
-                  <div className="text-sm font-medium text-foreground">{nextAction.title}</div>
-                  <div className="mt-1 text-sm text-foreground/70">{nextAction.desc}</div>
+              )}
+              <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                Welcome back,{" "}
+                <span className={plan === "pro" ? "text-reward" : "text-primary"}>{friendlyName}</span>
+              </h1>
+              <p className="mt-2 text-sm text-foreground/75 sm:text-base">
+                {plan === "pro"
+                  ? "Your Pro workspace is running at full power — higher limits, performance insights, and priority tools are all unlocked."
+                  : "One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now."}
+              </p>
+            </div>
+
+            {/* Recommended next step — full-width band, CTA inline */}
+            <div className={
+              plan === "pro"
+                ? "mt-5 flex flex-col gap-4 rounded-2xl border border-reward/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                : "mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
+            }>
+              <div className="flex items-start gap-3">
+                <span className={
+                  plan === "pro"
+                    ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-reward/10 text-reward ring-1 ring-reward/20"
+                    : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20"
+                }>
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className={
+                    plan === "pro"
+                      ? "text-[11px] font-semibold text-reward/80"
+                      : "text-[11px] font-semibold text-primary/80"
+                  }>
+                    Recommended next step
+                  </div>
+                  <div className="mt-0.5 text-sm font-medium text-foreground">{nextAction.title}</div>
+                  <div className="mt-0.5 text-sm text-foreground/70">{nextAction.desc}</div>
                 </div>
               </div>
-
-              <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[220px]">
-                <Link href={nextAction.href}>
-                  <Button className="w-full cursor-pointer bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black">
-                    {nextAction.cta}
-                  </Button>
-                </Link>
-                <p className="text-xs text-foreground/60">
-                  Quick actions and recent activity are just below if you need a different path.
-                </p>
-              </div>
+              <Link href={nextAction.href} className="shrink-0">
+                <Button className="w-full cursor-pointer bg-primary-button text-white shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
+                  {nextAction.cta}
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
       </section>
 
+      {/* Quick start (dismissable) */}
+      <AnimatePresence initial={false}>
+        {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
+          <QuickStart
+            items={onboardingItems}
+            done={onboardingProgress.done}
+            total={onboardingProgress.total}
+            pct={onboardingProgress.pct}
+            onDismiss={() => persistOnboarding({ dismissed: true })}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* At-a-glance stats */}
+      <section className="space-y-3">
+        <div>
+          <div className="text-xs font-semibold text-foreground/60">
+            Overview
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">At a glance</h2>
+        </div>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Reveal index={0}><Kpi title="Applications (total)" value={total} tone="slate" /></Reveal>
+          <Reveal index={1}><Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" /></Reveal>
+          <Reveal index={2}><Kpi title="Interviewing" value={interviewing} tone="blue" /></Reveal>
+          <Reveal index={3}><Kpi title="Offers" value={offers} tone="emerald" /></Reveal>
+        </div>
+      </section>
+
+      {/* Pro: pipeline health */}
+      {plan === "pro" && !loading && total > 0 ? (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ProCrest size="sm" />
+            <div>
+              <div className="text-xs font-semibold text-reward/80">
+                Pipeline health
+              </div>
+              <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are converting</h2>
+            </div>
+          </div>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <ProHealthStat label="Response rate" value={proHealth.responseRate} hint="Apps that got any employer response" />
+            <ProHealthStat label="Interview rate" value={proHealth.interviewRate} hint="Apps that reached an interview" />
+            <ProHealthStat label="Offer rate" value={proHealth.offerRate} hint="Apps that turned into an offer" />
+          </div>
+        </section>
+      ) : null}
+
       {/* KPIs + Goal/Streak */}
       <section className="space-y-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Progress
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
         </div>
-        <div className="grid gap-3 lg:grid-cols-3">
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-            <div className="flex items-center justify-between">
+        <div className="grid items-start gap-4 lg:grid-cols-3">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Weekly Goal
                 </div>
-                <div className="mt-1 text-sm text-foreground/80">
-                  {appsThisWeek}/{weeklyGoalTarget} applications
-                </div>
-                <div className="mt-1 text-xs text-foreground/60">
-                  {emailDigestEnabled ? (
-                    <span>Weekly digest is on.</span>
-                  ) : (
-                    <span>
-                      Weekly digest is off.{" "}
-                      <Link href="/settings" className="underline text-indigo-600 dark:text-indigo-300">
-                        Enable it in settings
-                      </Link>
-                      .
-                    </span>
-                  )}
+                <div className="mt-1 flex items-baseline gap-1.5">
+                  <span className="text-xl font-semibold tabular-nums text-foreground sm:text-2xl">
+                    {appsThisWeek}/{weeklyGoalTarget}
+                  </span>
+                  <span className="text-xs text-foreground/60">applications</span>
                 </div>
               </div>
-              <Sparkles className="h-5 w-5 flex-shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                <Sparkles className="h-4.5 w-4.5" />
+              </span>
             </div>
             <Progress value={weeklyGoalPct} className="mt-3 h-2" />
+            <div className="mt-2 text-xs text-foreground/60">
+              {weeklyGoalTarget > 0 && appsThisWeek >= weeklyGoalTarget ? (
+                <span>Weekly goal reached — nice work.</span>
+              ) : (
+                <span>
+                  {Math.max(0, weeklyGoalTarget - appsThisWeek)} to go this week.{" "}
+                  <Link href="/tracker" className="underline text-primary">
+                    Log an application
+                  </Link>
+                  .
+                </span>
+              )}
+            </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-            <div className="flex items-center justify-between">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Streak
                 </div>
                 <div className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
@@ -441,14 +632,16 @@ export default function DashboardClient({
                   Keep up the momentum with one small action today.
                 </p>
               </div>
-              <Flame className="h-6 w-6 flex-shrink-0 text-orange-500" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/15">
+                <Flame className="h-4.5 w-4.5" />
+              </span>
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+                <div className="text-xs font-medium text-foreground/60">
                   Usage This Month
                 </div>
                 <p className="mt-1 text-sm text-foreground/70">
@@ -456,7 +649,7 @@ export default function DashboardClient({
                 </p>
               </div>
               {nearingLimit && plan === "free" ? (
-                <Badge className="border border-amber-500/20 bg-amber-500/10 text-amber-700 hover:bg-amber-500/10 dark:text-amber-300">
+                <Badge className="border border-warning/30 bg-warning/10 text-warning hover:bg-warning/10">
                   Near limit
                 </Badge>
               ) : null}
@@ -470,13 +663,13 @@ export default function DashboardClient({
                     <span
                       className={
                         item.state === "high"
-                          ? "font-medium text-red-500"
+                          ? "font-medium text-destructive"
                           : item.state === "warn"
-                          ? "font-medium text-amber-500"
+                          ? "font-medium text-warning"
                           : "font-medium text-foreground"
                       }
                     >
-                      {item.used} / {item.limit}
+                      {item.unlimited ? `${item.used} / ∞` : `${item.used} / ${item.limit}`}
                     </span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
@@ -484,12 +677,12 @@ export default function DashboardClient({
                       className={
                         "h-full rounded-full transition-all " +
                         (item.state === "high"
-                          ? "bg-red-500"
+                          ? "bg-destructive"
                           : item.state === "warn"
-                          ? "bg-amber-500"
-                          : "bg-indigo-600 dark:bg-indigo-400")
+                          ? "bg-warning"
+                          : "bg-primary")
                       }
-                      style={{ width: `${item.pct}%` }}
+                      style={{ width: `${item.unlimited ? 6 : item.pct}%` }}
                     />
                   </div>
                 </div>
@@ -497,14 +690,14 @@ export default function DashboardClient({
             </div>
 
             {nearingLimit && plan === "free" ? (
-              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-foreground/80">
                   You&apos;re getting close to a monthly limit. Upgrade if you want to keep the workflow moving without interruption.
                 </p>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-amber-500/30 bg-amber-500/10 text-amber-800 hover:bg-amber-500/20 dark:text-amber-200"
+                  className="border-warning/30 bg-warning/10 text-warning hover:bg-warning/20"
                   onClick={() => router.push("/upgrade")}
                 >
                   Upgrade
@@ -515,75 +708,23 @@ export default function DashboardClient({
         </div>
       </section>
 
-      <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Kpi title="Applications (total)" value={total} tone="slate" />
-        <Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" />
-        <Kpi title="Interviewing" value={interviewing} tone="blue" />
-        <Kpi title="Offers" value={offers} tone="emerald" />
-      </section>
+      {!loading && total > 0 && <FollowUpsDue apps={apps} />}
 
-      {/* Onboarding */}
-      {!onboardingDismissed && onboardingProgress.done < onboardingProgress.total && (
-        <section className="rounded-xl border border-border bg-card/60 px-4 py-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
-                Getting started
-              </div>
-              <div className="mt-1 text-sm text-foreground/80">
-                {onboardingProgress.done}/{onboardingProgress.total} completed
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 shrink-0 rounded-full p-0 hover:bg-foreground/[0.06]"
-              onClick={() => persistOnboarding({ dismissed: true })}
-              aria-label="Dismiss onboarding"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <Progress value={onboardingProgress.pct} className="mt-3 h-2" />
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {onboardingItems.map((it) => (
-              <li
-                key={it.key}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/60 px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm text-foreground">
-                    {it.done ? "✓ " : ""}
-                    {it.label}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!it.done ? (
-                    <Button asChild size="sm" variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
-                      <Link href={it.href}>Go</Link>
-                    </Button>
-                  ) : (
-                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
-                      Done
-                    </Badge>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {!loading && total > 0 && <ApplicationPipeline apps={apps} />}
 
-      {/* Two-up: Recent Applications + Recent Chats */}
-      <section className="space-y-3">
+      {/* Activity (main) + secondary rail */}
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
+          {/* Two-up: Recent Applications + Recent Chats */}
+          <section className="space-y-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-semibold text-foreground/60">
             Recent activity
           </div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
         </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="grid items-start gap-4 grid-cols-1 2xl:grid-cols-2">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -613,7 +754,7 @@ export default function DashboardClient({
                 cta={
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href="/job-packet">
-                      <Button className="bg-indigo-600 text-white hover:bg-indigo-500">Start Job Packet</Button>
+                      <Button className="bg-primary-button text-white hover:bg-primary-button/90">Start Job Packet</Button>
                     </Link>
                     <Link href="/tracker">
                       <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">
@@ -659,7 +800,7 @@ export default function DashboardClient({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -710,7 +851,7 @@ export default function DashboardClient({
                     <Link href="/coach">
                       <Button
                         variant="ghost"
-                        className="text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-300"
+                        className="text-primary hover:bg-primary/10"
                       >
                         Open
                       </Button>
@@ -723,10 +864,12 @@ export default function DashboardClient({
         </Card>
         </div>
       </section>
+        </div>
 
+        <div className="space-y-6">
       {/* Quick actions */}
       <section>
-        <Card className="rounded-2xl border border-border bg-card/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">Quick Actions</CardTitle>
             <CardDescription className="text-foreground/70">
@@ -734,7 +877,7 @@ export default function DashboardClient({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <Link href="/job-packet" className="block">
                 <ActionCard title="Run Job Packet">
                   Move from JD to tailored draft to tracked application in one guided flow.
@@ -750,6 +893,11 @@ export default function DashboardClient({
                   Extract keywords and gaps from a job posting.
                 </ActionCard>
               </Link>
+              <Link href="/interview" className="block">
+                <ActionCard title="Practice Interview">
+                  Run a scored mock interview tailored to your target role.
+                </ActionCard>
+              </Link>
               <Link href="/tracker" className="block">
                 <ActionCard title="Track Applications">
                   Keep tabs on every application you send.
@@ -759,6 +907,8 @@ export default function DashboardClient({
           </CardContent>
         </Card>
       </section>
+        </div>
+      </div>
 
       {/* Pro: Performance Insights */}
       {plan === "pro" && analytics ? <PerformanceInsights analytics={analytics} /> : null}

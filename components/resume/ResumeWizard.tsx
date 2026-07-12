@@ -17,6 +17,10 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  CheckCircle2,
+  Eye,
+  Pencil,
+  Printer,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +40,12 @@ import {
 import Dropzone from "@/components/resume/Dropzone";
 import StepContainer from "@/components/resume/StepContainer";
 import WizardSidebar from "@/components/resume/WizardSidebar";
+import { printHtmlDocument } from "@/lib/print-pdf";
+import {
+  ResumeDocument,
+  isLikelyStructuredResume,
+  resumeToPrintHtml,
+} from "@/components/resume/TailoredResumeDocument";
 import {
   approxTokens,
   bytesToStr,
@@ -50,7 +60,7 @@ import {
 
 /* ------------------------------- Component ------------------------------- */
 
-export default function ResumeWizard() {
+export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: string }) {
   const router = useRouter();
   const search = useSearchParams();
   const { toast } = useToast();
@@ -66,7 +76,7 @@ export default function ResumeWizard() {
 
   // Step 2: company targeting
   const [companyName, setCompanyName] = useState("");
-  const [roleTitle, setRoleTitle] = useState("");
+  const [roleTitle, setRoleTitle] = useState(defaultRole);
   const [location, setLocation] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
 
@@ -78,8 +88,10 @@ export default function ResumeWizard() {
   const [aiText, setAiText] = useState<string>("");
   const [generating, setGenerating] = useState(false);
   const [templateMode, setTemplateMode] = useState(true);
+  const [generatedWithTemplate, setGeneratedWithTemplate] = useState<boolean | null>(null);
   const [showExpanded, setShowExpanded] = useState(false);
   const [packetContext, setPacketContext] = useState(false);
+  const [outputView, setOutputView] = useState<"preview" | "edit">("preview");
 
   // PDF zoom
   const [zoom, setZoom] = useState<"fit" | "110" | "125" | "150">("fit");
@@ -113,6 +125,18 @@ export default function ResumeWizard() {
       }
       return prev || packetDraft.jobDescription;
     });
+
+    if (from === "job-packet") {
+      const bits = [packetDraft.companyName, packetDraft.roleTitle].filter(Boolean).join(" · ");
+      toast({ variant: "info",
+        title: "Job context loaded from your packet",
+        description: bits
+          ? `${bits} and the job description carried over. Upload your resume to continue.`
+          : "Your job description carried over. Upload your resume to continue.",
+      });
+    }
+    // Run once on arrival for the current URL params.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   // Allow deep-linking into a step (used by Job Packet handoff from Scanner)
@@ -125,13 +149,20 @@ export default function ResumeWizard() {
     setStep(next);
     const from = search.get("from") || "";
     if (from === "scanner" || from.startsWith("scanner")) {
-      toast({
+      toast({ variant: "info",
         title: "Job description ready",
         description: "Your job description was carried over from the Scanner.",
       });
     }
     // intentionally run only when URL params change
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+  // Prefill role/company when deep-linked from an application workspace.
+  useEffect(() => {
+    const role = search.get("role");
+    const company = search.get("company");
+    if (role) setRoleTitle(role);
+    if (company) setCompanyName(company);
   }, [search]);
   useEffect(() => {
     try {
@@ -232,6 +263,7 @@ export default function ResumeWizard() {
     }
 
     // If the user came from the Scanner Job Packet handoff, auto-advance once a resume exists.
+    let autoAdvanced = false;
     try {
       const desired = localStorage.getItem(RESUME_DESIRED_STEP_LS_KEY);
       if (desired) {
@@ -239,12 +271,24 @@ export default function ResumeWizard() {
         if (Number.isFinite(parsed)) {
           const nextStep = Math.max(1, Math.min(resumeWizardSteps.length, Math.floor(parsed)));
           setStep(nextStep);
+          autoAdvanced = nextStep > 1;
         }
         localStorage.removeItem(RESUME_DESIRED_STEP_LS_KEY);
       }
     } catch {
       // noop
     }
+
+    toast({ variant: "success",
+      title: "Resume added",
+      description: packetContext
+        ? autoAdvanced
+          ? `${file.name} saved with your job context. Jumping to Tailor & Review.`
+          : `${file.name} saved with your job context.`
+        : autoAdvanced
+        ? `${file.name} uploaded. Jumping to Tailor & Review.`
+        : `${file.name} is ready to tailor.`,
+    });
 
     // Try to store text for simple text files; PDFs/DOCX will be handled server-side
     try {
@@ -327,7 +371,7 @@ export default function ResumeWizard() {
             action: (
               <Button
                 size="default"
-                className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => router.push("/upgrade")}
               >
                 Upgrade to Pro
@@ -351,6 +395,8 @@ export default function ResumeWizard() {
       }
 
       setAiText(String(resp.data?.content || ""));
+      setOutputView("preview");
+      setGeneratedWithTemplate(templateMode);
       if (packetContext) {
         updateJobPacketDraft({
           currentStep: "tracker",
@@ -364,7 +410,7 @@ export default function ResumeWizard() {
           trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
         });
       }
-      toast({ title: "Tailored draft generated" });
+      toast({ variant: "success", title: "Tailored draft generated" });
     } catch (e: unknown) {
       const msg = e instanceof Error && e.name === "AbortError"
         ? "The request timed out. Please try again."
@@ -418,7 +464,7 @@ export default function ResumeWizard() {
 
   function copy(text: string, label = "Copied") {
     navigator.clipboard.writeText(text).then(
-      () => toast({ title: label }),
+      () => toast({ variant: "success", title: label }),
       () => toast({ title: "Copy failed", variant: "destructive" })
     );
   }
@@ -435,6 +481,20 @@ export default function ResumeWizard() {
     URL.revokeObjectURL(url);
   }
 
+  function saveAsPdf() {
+    if (!aiText.trim()) return;
+    const docTitle = [companyName, roleTitle].filter(Boolean).join(" - ") || "Tailored Resume";
+    const html = resumeToPrintHtml(aiText, docTitle);
+    const ok = printHtmlDocument(html);
+    if (!ok) {
+      toast({
+        title: "Couldn't open the print dialog",
+        description: "Use Download for a text copy, or try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
   // targetingSummary removed - not used in current implementation
 
   const isPdf =
@@ -442,16 +502,21 @@ export default function ResumeWizard() {
     (resumeFileName.toLowerCase().endsWith(".pdf") ||
       (resumeFile && resumeFile.type === "application/pdf"));
 
-  const zoomValue = zoom === "fit" ? 1 : Number(zoom) / 100;
+  // Fit the page to the iframe width; "zoom" is achieved by widening the
+  // iframe (and letting FitH re-fit), which the native viewer renders crisply
+  // and lets us center horizontally with mx-auto.
+  const pdfSrc = previewUrl ? `${previewUrl}#toolbar=0&navpanes=0&view=FitH` : "";
+  const zoomWidth = zoom === "fit" ? "100%" : `${zoom}%`;
 
   /* -------------------------------- Render -------------------------------- */
 
   return (
     <>
-    <div className="space-y-4 sm:space-y-6 w-full max-w-[2000px] mx-auto px-2 md:px-4">
+    <div className="space-y-6">
       {/* Header */}
       <section>
-        <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
+        <p className="text-xs font-medium text-primary">Step 2 · Tailor</p>
+        <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Move through the steps to tailor one resume draft to one role with cleaner, more consistent context.
         </p>
@@ -459,9 +524,9 @@ export default function ResumeWizard() {
 
       <Progress value={progress} className="h-2" />
 
-      {/* Responsive two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 lg:gap-8">
-      <WizardSidebar steps={[...resumeWizardSteps]} current={step} />
+      {/* Responsive layout: wizard rail for input steps, full-width workspace on review */}
+      <div className={`grid grid-cols-1 gap-4 lg:gap-8 ${step === 4 ? "" : "lg:grid-cols-[16rem_minmax(0,1fr)]"}`}>
+      {step !== 4 && <WizardSidebar steps={[...resumeWizardSteps]} current={step} />}
 
         <div className="space-y-4 sm:space-y-6 min-w-0">
           <AnimatePresence mode="wait" initial={false}>
@@ -481,10 +546,37 @@ export default function ResumeWizard() {
                   const fromScanner = from === "scanner" || from.startsWith("scanner");
                   return fromScanner && jd.trim().length >= 20 && !resumeFileName;
                 })() && (
-                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:text-emerald-100 dark:border-emerald-500/20">
+                    <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
                     <div className="font-medium">Job description loaded</div>
-                    <div className="mt-0.5 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+                    <div className="mt-0.5 text-xs text-success/80">
                       Upload your resume to keep the Job Packet moving.
+                    </div>
+                  </div>
+                )}
+                {packetContext && !resumeFileName && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
+                    <div className="flex items-center gap-1.5 font-medium text-primary">
+                      <Sparkles className="h-3.5 w-3.5" /> Job context loaded from your packet
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {companyName && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-background/60 px-2 py-0.5 text-xs text-foreground/80">
+                          <Building2 className="h-3 w-3" /> {companyName}
+                        </span>
+                      )}
+                      {roleTitle && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-background/60 px-2 py-0.5 text-xs text-foreground/80">
+                          <Briefcase className="h-3 w-3" /> {roleTitle}
+                        </span>
+                      )}
+                      {jd.trim().length >= 20 && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-background/60 px-2 py-0.5 text-xs text-foreground/80">
+                          <FileText className="h-3 w-3" /> Job description
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2 text-xs text-foreground/60">
+                      Upload your resume and we&apos;ll jump you straight to Tailor &amp; Review.
                     </div>
                   </div>
                 )}
@@ -628,7 +720,7 @@ export default function ResumeWizard() {
                   value={jd}
                   onChange={(e) => setJd(e.target.value)}
                   placeholder="Paste the full job description here..."
-                  className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 />
 
                 {techs.length > 0 && (
@@ -678,8 +770,8 @@ export default function ResumeWizard() {
               title="Tailor & Review"
               description="Preview your resume on the left and generate an AI-tailored version on the right."
             >
-              {/* Horizontal layout: switches at lg (≥1024px) */}
-              <div className="grid lg:grid-rows-2 gap-8">
+              {/* Preview and AI output side-by-side on wide screens */}
+              <div className="grid items-start gap-8 xl:grid-cols-2">
                 {/* Top: File preview */}
                 <div className="lg:row-span-1">
                   <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -741,23 +833,16 @@ export default function ResumeWizard() {
                     </div>
                   </div>
 
-                  <div className="h-[40vh] overflow-hidden rounded-xl border border-border bg-background/60 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+                  <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-neutral-200/70 shadow-sm ring-1 ring-white/5 dark:bg-neutral-800/60 dark:ring-black/10">
                     {resumeFile ? (
                       isPdf && previewUrl ? (
-                        <div className="h-full w-full overflow-auto">
-                          <iframe
-                            src={previewUrl + (zoom === "fit" ? "#toolbar=0&view=FitH" : "#toolbar=0")}
-                            title="PDF preview"
-                            style={{
-                              transform: zoom === "fit" ? "none" : `scale(${zoomValue})`,
-                              transformOrigin: "top left",
-                              width: zoom === "fit" ? "100%" : `${100 / zoomValue}%`,
-                              height: zoom === "fit" ? "100%" : `${100 / zoomValue}%`,
-                              border: "0",
-                            }}
-                            className="block"
-                          />
-                        </div>
+                        <iframe
+                          key={zoomWidth}
+                          src={pdfSrc}
+                          title="PDF preview"
+                          style={{ width: zoomWidth }}
+                          className="mx-auto block h-full border-0 bg-transparent"
+                        />
                       ) : (
                         <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                           <FileText className="mb-3 h-6 w-6 text-foreground/50" />
@@ -778,21 +863,75 @@ export default function ResumeWizard() {
 
                 {/* Bottom: AI tailored */}
                 <div className="lg:row-span-1 space-y-3 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-lg font-semibold text-foreground">AI Tailored Resume</h2>
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={templateMode}
-                          onChange={(e) => setTemplateMode(e.target.checked)}
-                          className="h-4 w-4 accent-indigo-600"
-                          title="When on, the AI returns a clean, sectioned resume template."
-                        />
-                        <span className="text-foreground/70">Template output</span>
-                      </label>
+                  <div className="flex flex-col gap-3 mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-semibold text-foreground">AI Tailored Resume</h2>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={templateMode}
+                          onClick={() => setTemplateMode((v) => !v)}
+                          title="When on, the AI returns a clean, sectioned resume template. When off, it keeps your original structure."
+                          className="group inline-flex items-center gap-2 rounded-full border border-border bg-background/60 py-1 pl-1 pr-2.5 text-xs font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        >
+                          <span
+                            className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ${
+                              templateMode ? "bg-primary" : "bg-foreground/25"
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                                templateMode ? "translate-x-3.5" : "translate-x-0.5"
+                              }`}
+                            />
+                          </span>
+                          Template format
+                        </button>
+                        {aiText && generatedWithTemplate !== null && generatedWithTemplate !== templateMode && (
+                          <span className="hidden items-center rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning sm:inline-flex">
+                            Regenerate to apply
+                          </span>
+                        )}
+                      </div>
+                      {aiText && (
+                        <div className="inline-flex items-center rounded-lg border border-border bg-background/60 p-0.5 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => setOutputView("preview")}
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 transition-colors ${
+                              outputView === "preview"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-foreground/70 hover:text-foreground"
+                            }`}
+                          >
+                            <Eye className="h-3.5 w-3.5" /> Preview
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOutputView("edit")}
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 transition-colors ${
+                              outputView === "edit"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-foreground/70 hover:text-foreground"
+                            }`}
+                          >
+                            <Pencil className="h-3.5 w-3.5" /> Edit
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        disabled={!aiText}
+                        className="h-8 bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={saveAsPdf}
+                        title="Open a print dialog to save as PDF"
+                      >
+                        <Printer className="mr-1 h-4 w-4" />
+                        Save as PDF
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
@@ -801,7 +940,7 @@ export default function ResumeWizard() {
                         onClick={() => aiText && download(aiText, "tailored-resume.txt")}
                       >
                         <Download className="mr-1 h-4 w-4" />
-                        Download
+                        .txt
                       </Button>
                       <Button
                         size="sm"
@@ -828,15 +967,35 @@ export default function ResumeWizard() {
                   </div>
 
                   {aiText ? (
-                    <Textarea
-                      spellCheck
-                      className="h-[40vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
-                      value={aiText}
-                      onChange={(e) => setAiText(e.target.value)}
-                    />
+                    outputView === "preview" && isLikelyStructuredResume(aiText) ? (
+                      <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-muted/40 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+                        <ResumeDocument text={aiText} />
+                      </div>
+                    ) : (
+                      <Textarea
+                        spellCheck
+                        className="h-[68vh] resize-none rounded-xl border border-border bg-background/80 p-3 text-sm text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        value={aiText}
+                        onChange={(e) => setAiText(e.target.value)}
+                      />
+                    )
                   ) : (
-                    <div className="h-[40vh] rounded-xl border border-border bg-card/60 p-3 text-sm text-foreground shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-                      <p className="text-foreground/60">No tailored draft yet. Generate one when your resume and job description are ready.</p>
+                    <div className="flex h-[68vh] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <Sparkles className="h-6 w-6 text-primary" />
+                      </div>
+                      <p className="mt-4 text-sm font-medium text-foreground">No tailored draft yet</p>
+                      <p className="mt-1 max-w-xs text-sm text-foreground/60">
+                        Generate an AI-tailored version once your resume and job description are ready.
+                      </p>
+                      <div className="mt-4 flex flex-col gap-1.5 text-xs">
+                        <span className={`inline-flex items-center gap-1.5 ${resumeFile ? "text-success" : "text-foreground/50"}`}>
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Resume uploaded
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 ${jd.trim().length >= 20 ? "text-success" : "text-foreground/50"}`}>
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Job description added
+                        </span>
+                      </div>
                     </div>
                   )}
 
@@ -849,7 +1008,7 @@ export default function ResumeWizard() {
                     <Button
                       disabled={generating || !resumeFile || jd.trim().length < 20}
                       onClick={handleGenerate}
-                      className="bg-indigo-600 cursor-pointer text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="bg-primary-button cursor-pointer text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       {generating ? (
                         <>
@@ -867,21 +1026,7 @@ export default function ResumeWizard() {
                     <Button
                       variant="outline"
                       disabled={!aiText}
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
-                      onClick={() => {
-                        toast({
-                          title: "Draft accepted",
-                          description: "You can keep editing here, copy it out, or send it to the tracker next.",
-                        });
-                      }}
-                    >
-                      Mark as ready
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      disabled={!aiText}
-                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                      className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       onClick={addToTracker}
                       title="Create a tracker entry prefilled from this job"
                     >
@@ -918,7 +1063,7 @@ export default function ResumeWizard() {
               variant="outline"
               onClick={onBack}
               disabled={step === 1}
-              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+              className="border-border cursor-pointer text-foreground hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Back
             </Button>
@@ -928,14 +1073,14 @@ export default function ResumeWizard() {
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 3 && !step3Valid)}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Continue
                 </Button>
               ) : (
                 <Button
                   onClick={() => setStep(1)}
-                  className="bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Start Over
                 </Button>
@@ -946,16 +1091,34 @@ export default function ResumeWizard() {
       </div>
     </div>
     {showExpanded && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl">
-          <button
-            onClick={() => setShowExpanded(false)}
-            className="absolute right-4 top-4 text-foreground/60 hover:text-foreground"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-          <pre className="whitespace-pre-wrap text-sm text-foreground">{aiText}</pre>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="relative flex w-full max-w-4xl max-h-[92vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <h3 className="text-sm font-semibold text-foreground">AI Tailored Resume</h3>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                className="h-8 bg-primary-button text-white hover:bg-primary-button/90"
+                onClick={saveAsPdf}
+              >
+                <Printer className="mr-1 h-4 w-4" /> Save as PDF
+              </Button>
+              <button
+                onClick={() => setShowExpanded(false)}
+                className="rounded-md p-1.5 text-foreground/60 hover:bg-foreground/[0.06] hover:text-foreground"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+          <div className="overflow-y-auto bg-muted/40 p-4 sm:p-6">
+            {isLikelyStructuredResume(aiText) ? (
+              <ResumeDocument text={aiText} />
+            ) : (
+              <pre className="whitespace-pre-wrap font-sans text-sm text-foreground">{aiText}</pre>
+            )}
+          </div>
         </div>
       </div>
     )}

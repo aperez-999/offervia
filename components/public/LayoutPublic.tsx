@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrandLogo from "@/components/brand/BrandLogo";
+import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 
 export default function LayoutPublic({ children }: { children: React.ReactNode }) {
   // Smooth in-page scroll
@@ -50,15 +51,16 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
   useEffect(() => setMounted(true), []);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const toggleTheme = () => {
+  const toggleTheme = (e?: React.MouseEvent) => {
     if (!mounted) return;
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    switchTheme(() => setTheme(next), originFromEvent(e));
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground scroll-smooth">
       <header className="sticky top-0 z-40">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/70 to-transparent backdrop-blur" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-background/80 backdrop-blur" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-3">
           <div
             className={[
@@ -75,10 +77,10 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             aria-label="Offervia — Home"
           >
             <BrandLogo
-              width={190}
-              height={48}
+              width={132}
+              height={32}
               priority
-              className="h-10 transition-transform group-hover:scale-[1.02] sm:h-11"
+              className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8"
             />
           </Link>
 
@@ -87,7 +89,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             {/* Mobile menu button */}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black sm:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background sm:hidden"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
@@ -103,8 +105,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "features" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "features" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               Features
@@ -118,8 +120,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "how-it-works" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "how-it-works" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               How it works
@@ -133,8 +135,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black",
-                activeId === "faq" ? "bg-indigo-500/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
+                activeId === "faq" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
               FAQ
@@ -142,21 +144,21 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
 
             <Link
               href="/contact"
-              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               Contact
             </Link>
 
             <Link
               href="/login"
-              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               Sign In
             </Link>
 
             <Link
               href="/signup"
-              className="hidden sm:inline-flex rounded-full bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="bg-brand-gradient hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
               Sign Up
             </Link>
@@ -165,8 +167,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             <button
               aria-label="Toggle theme"
               aria-pressed={mounted && resolvedTheme === "dark"}
-              onClick={toggleTheme}
-              className="ml-1 inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 dark:focus:ring-offset-black"
+              onClick={(e) => toggleTheme(e)}
+              className="ml-1 inline-flex h-9 w-9 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center cursor-pointer justify-center rounded-full border border-border bg-background/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
               {mounted && (
                 <AnimatePresence mode="wait" initial={false}>
@@ -245,7 +247,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                     </Link>
                     <Link
                       href="/signup"
-                      className="rounded-md bg-indigo-600 px-3 py-2 text-center font-medium text-white hover:bg-indigo-500"
+                      className="bg-brand-gradient rounded-md px-3 py-2 text-center font-medium text-white hover:brightness-110"
                       onClick={() => setMobileOpen(false)}
                     >
                       Sign Up

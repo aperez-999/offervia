@@ -10,7 +10,7 @@ export default function Loading() {
       </div>
 
       {/* Progress */}
-      <div className="rounded-full border border-border bg-card/60 p-1 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-full border border-border bg-card p-1 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
         <Skeleton className="h-2 w-full rounded-full" />
       </div>
 
@@ -34,7 +34,7 @@ export default function Loading() {
         {/* Main panel */}
         <main className="flex-1 space-y-6">
           {/* Step card (title + description + drop area / textarea shape) */}
-          <div className="rounded-2xl border border-border bg-card/60 p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <Skeleton className="h-5 w-40" />
             <Skeleton className="mt-2 h-4 w-64" />
             {/* Dropzone / textarea placeholder */}
@@ -65,7 +65,7 @@ export default function Loading() {
             {[0, 1].map((col) => (
               <div
                 key={col}
-                className="rounded-xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="rounded-xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
               >
                 <Skeleton className="h-4 w-40" />
                 <div className="mt-2 space-y-2">

@@ -10,7 +10,7 @@ export default function ProtectedLoading() {
 
       <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <div className="hidden lg:block">
-          <div className="rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <div className="rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
             <Skeleton className="h-3 w-24" />
             <div className="mt-4 space-y-2">
               {Array.from({ length: 6 }).map((_, index) => (
@@ -20,7 +20,7 @@ export default function ProtectedLoading() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="mt-3 h-4 w-80" />
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPageMetadata } from "@/lib/metadata";
+import { PageContainer } from "@/components/layout/Page";
 
 const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), {
   loading: () => (
@@ -17,16 +18,16 @@ const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), 
 });
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Job Scanner",
-  description: "Scan job descriptions for requirements, gaps, and stronger application angles before you tailor.",
+  title: "ATS Keyword Scanner",
+  description: "Compare your resume against a job description to see matched keywords, gaps, and ATS optimization tips before you apply.",
   path: "/scanner",
   index: false,
 });
 
 export default function ScannerPage() {
   return (
-    <div className="p-4 sm:p-6">
+    <PageContainer>
       <ScannerPanel />
-    </div>
+    </PageContainer>
   );
 }

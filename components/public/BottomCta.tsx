@@ -2,45 +2,38 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 export default function BottomCta() {
   return (
-    // Light: white; Dark: true black (no light band left over)
-    <section className="bg-white dark:bg-black">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
+    <section className="bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className={[
-            "rounded-2xl border border-border shadow-sm backdrop-blur-sm ring-2",
-            // Glass base
-            "bg-white/70 dark:bg-neutral-900/40",
-            // Subtle indigo tint & ring (consistent with other sections)
-            "ring-indigo-500/20",
-            "p-6 text-center",
-          ].join(" ")}
+          className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-xl shadow-primary/10 ring-1 ring-primary/20 sm:p-12"
         >
-          <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Ready to land more offers?
-          </h3>
-          <p className="mt-2 text-sm text-gray-700 dark:text-white">
-            Start for free — no credit card required.
-          </p>
+          <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "-22px", ["--float-y" as string]: "18px" }} />
+          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-brand/15 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "20px", ["--float-y" as string]: "-16px", animationDelay: "-6s" }} />
+          <div className="relative">
+            <h3 className="text-2xl font-semibold tracking-tight text-foreground text-balance sm:text-3xl">
+              Ready to land more offers?
+            </h3>
+            <p className="mx-auto mt-3 max-w-lg text-sm text-foreground/70 sm:text-base">
+              Start for free — no credit card required. Scan, tailor, and track your search in one place.
+            </p>
 
-          <div className="mt-6">
-            <Link
-              href="/signup"
-              className={[
-                "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium",
-                "bg-indigo-600 text-white hover:bg-indigo-500",
-                "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
-                "dark:focus:ring-offset-black",
-              ].join(" ")}
-            >
-              Get Started Now
-            </Link>
+            <div className="mt-8">
+              <Link
+                href="/signup"
+                className="group bg-brand-gradient inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 hover:shadow-md hover:shadow-primary/40 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              >
+                Get started — free
+                <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>

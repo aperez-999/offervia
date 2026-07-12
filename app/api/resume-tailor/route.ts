@@ -4,9 +4,10 @@ import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
 import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
 import { checkFeatureGate } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
-import mammoth from "mammoth";
 import { fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
+import { saveDocument } from "@/lib/documents/save";
+import { extractResumeFile } from "@/lib/files/extract";
 
 const resumeTailorJsonSchema = z
   .object({
@@ -79,27 +80,6 @@ function sanitizeOutput(s: string, companyName: string) {
 }
 
 /* ---------------- File extractors (serverless-safe: text-only, no canvas/DOMMatrix) ---------------- */
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB for Vercel/serverless
-
-async function extractFromDocx(buffer: Buffer): Promise<string> {
-  const { value } = await mammoth.extractRawText({ buffer });
-  return value || "";
-}
-
-/**
- * Extract text from PDF using pdf-parse (v1). Safe for Vercel serverless — no rendering, no canvas.
- * Load via wrapper so pdf-parse is never the top-level module (avoids its built-in test that reads ./test/data/*.pdf).
- */
-async function extractPdfText(buffer: Buffer): Promise<string> {
-  const pdfParse = (await import("@/lib/pdf-parse-server.cjs")).default;
-  const parsed = await pdfParse(buffer);
-  const text = (parsed?.text ?? "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-  return text;
-}
-
 /* ---------------- Route ---------------- */
 export async function POST(req: Request) {
   // ---- Rate limit (resume-tailor) ----
@@ -177,45 +157,15 @@ export async function POST(req: Request) {
       } else {
         const file = form.get("file") as File | null;
         if (file && file.size > 0) {
-          if (file.size > MAX_FILE_BYTES) {
+          const extracted = await extractResumeFile(file, "api/resume-tailor");
+          if (!extracted.ok) {
             return fail(
-              "INVALID_INPUT",
-              `File too large. Maximum size is ${MAX_FILE_BYTES / (1024 * 1024)}MB.`,
-              400
+              extracted.status === 500 ? "SERVER_ERROR" : "INVALID_INPUT",
+              extracted.message,
+              extracted.status,
             );
           }
-          const name = (file.name || "").toLowerCase();
-          const isPdf = name.endsWith(".pdf") || file.type === "application/pdf";
-          const isDocx = name.endsWith(".docx") || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-          if (!isPdf && !isDocx) {
-            return fail("INVALID_INPUT", "Resume file must be PDF or DOCX.", 400);
-          }
-          const buf = Buffer.from(await file.arrayBuffer());
-          if (isDocx) {
-            resumeText = await extractFromDocx(buf);
-          } else {
-            try {
-              resumeText = await extractPdfText(buf);
-            } catch (err) {
-              captureServerException(err, {
-                route: "api/resume-tailor",
-                extras: { stage: "pdf-parse" },
-              });
-              console.error("PDF parsing failed", err);
-              return fail(
-                "SERVER_ERROR",
-                "Failed to extract text from PDF. Try re-saving the file or use a DOCX.",
-                500
-              );
-            }
-          }
-          if (!resumeText || resumeText.trim().length < 50) {
-            return fail(
-              "INVALID_INPUT",
-              "Could not extract enough text from the resume. Ensure the file is a valid PDF or DOCX.",
-              400
-            );
-          }
+          resumeText = extracted.text;
         } else {
           resumeText = (form.get("resumeText") as string) || "";
         }
@@ -310,7 +260,19 @@ export async function POST(req: Request) {
     }
 
     await incrementUsage(userId, "resume_tailor");
-    return NextResponse.json({ content: normalizeText(cleaned) });
+
+    const tailored = normalizeText(cleaned);
+    const docTitle =
+      [roleTitle, companyName].filter(Boolean).join(" · ") || "Tailored resume";
+    await saveDocument({
+      userId,
+      kind: "resume",
+      title: docTitle,
+      content: tailored,
+      meta: { company: companyName, role: roleTitle },
+    });
+
+    return NextResponse.json({ content: tailored });
   } catch (err: unknown) {
     captureServerException(err, { route: "api/resume-tailor" });
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";

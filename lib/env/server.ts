@@ -29,9 +29,6 @@ const serverEnvSchema = z.object({
   CONTACT_FROM: z.string().optional(),
   CONTACT_FROM_NAME: z.string().optional(),
   CONTACT_FROM_EMAIL: z.string().optional(),
-
-  // Cron/job auth
-  CRON_SECRET: z.string().optional(),
 });
 
 let cached: (z.infer<typeof serverEnvSchema> & typeof publicEnv) | null = null;
@@ -58,7 +55,6 @@ export function getServerEnv() {
     CONTACT_FROM: process.env.CONTACT_FROM,
     CONTACT_FROM_NAME: process.env.CONTACT_FROM_NAME,
     CONTACT_FROM_EMAIL: process.env.CONTACT_FROM_EMAIL,
-    CRON_SECRET: process.env.CRON_SECRET,
   };
   const parsed = serverEnvSchema.safeParse(raw);
   if (!parsed.success) {

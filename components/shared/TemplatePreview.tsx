@@ -43,7 +43,7 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl rounded-2xl border border-border bg-card/90 shadow-xl backdrop-blur">
+      <DialogContent className="max-w-2xl rounded-2xl border border-border bg-card shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-foreground">{title}</DialogTitle>
           {/* Add a visually-hidden description to satisfy aria-describedby */}
@@ -78,7 +78,7 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
             )}
           </Button>
           <a href={gmailHref} target="_blank" rel="noreferrer">
-            <Button className="bg-indigo-600 text-white hover:bg-indigo-500">
+            <Button className="bg-primary-button text-white hover:bg-primary-button/90">
               <ExternalLink className="mr-2 h-4 w-4" />
               Open in Gmail
             </Button>

@@ -1,35 +1,33 @@
 import * as React from "react";
-import { JSX } from "react";
-
-type Tone = "slate" | "indigo" | "blue" | "neutral";
-
-const toneBg: Record<Tone, string> = {
-  slate:
-    "bg-gradient-to-b from-slate-500/[0.06] to-slate-900/[0.08] dark:from-slate-400/[0.06] dark:to-slate-900/[0.10]",
-  indigo:
-    "bg-gradient-to-b from-indigo-500/[0.06] to-indigo-900/[0.08] dark:from-indigo-400/[0.06] dark:to-indigo-900/[0.10]",
-  blue:
-    "bg-gradient-to-b from-blue-500/[0.06] to-blue-900/[0.08] dark:from-blue-400/[0.06] dark:to-blue-900/[0.10]",
-  neutral:
-    "bg-gradient-to-b from-neutral-500/[0.06] to-neutral-900/[0.08] dark:from-neutral-400/[0.06] dark:to-neutral-900/[0.10]",
-};
+import type { LucideIcon } from "lucide-react";
 
 type Props = {
   children: React.ReactNode;
   className?: string;
-  tone?: Tone;
-  as?: keyof JSX.IntrinsicElements;
+  style?: React.CSSProperties;
   id?: string;
   title?: string;
+  icon?: LucideIcon;
 };
 
-export function SectionCard({ children, className, tone = "slate", as = "div", id, title }: Props) {
-  const Comp = as as React.ElementType;
-  const base = [
-    "rounded-xl border border-white/10 shadow-sm ring-1 ring-white/5",
-    "backdrop-blur-sm",
-    "p-5",
-    toneBg[tone],
-  ].join(" ");
-  return <Comp id={id} title={title} className={[base, className || ""].join(" ")}>{children}</Comp>;
+export function SectionCard({ children, className, style, id, title, icon: Icon }: Props) {
+  const base =
+    "rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10";
+  return (
+    <section id={id} style={style} className={[base, className || ""].join(" ")}>
+      {title ? (
+        <div className="flex items-center gap-3">
+          {Icon ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Icon className="h-5 w-5" />
+            </div>
+          ) : null}
+          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        </div>
+      ) : null}
+      <div className="mt-3 space-y-2 text-sm leading-relaxed text-foreground/80">
+        {children}
+      </div>
+    </section>
+  );
 }

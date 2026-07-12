@@ -6,13 +6,14 @@ export type ScanAnalytics = {
   bestScore: number;
   improvement: number | null;
   scanHistory: { score: number; created_at: string }[];
+  skillGaps: { skill: string; count: number }[];
 };
 
 export async function buildScanAnalytics(userId: string): Promise<ScanAnalytics | null> {
   const supabase = getServiceSupabase();
   const { data: scans } = await supabase
     .from("job_scans")
-    .select("match_score, created_at")
+    .select("match_score, missing_skills, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
@@ -42,11 +43,28 @@ export async function buildScanAnalytics(userId: string): Promise<ScanAnalytics 
       typeof s.created_at === "string" ? s.created_at : new Date(s.created_at).toISOString(),
   }));
 
+  const skillCounts = new Map<string, { skill: string; count: number }>();
+  for (const s of list) {
+    const skills = Array.isArray(s.missing_skills) ? s.missing_skills : [];
+    for (const raw of skills) {
+      const skill = String(raw).trim();
+      if (!skill) continue;
+      const key = skill.toLowerCase();
+      const existing = skillCounts.get(key);
+      if (existing) existing.count += 1;
+      else skillCounts.set(key, { skill, count: 1 });
+    }
+  }
+  const skillGaps = [...skillCounts.values()]
+    .sort((a, b) => b.count - a.count || a.skill.localeCompare(b.skill))
+    .slice(0, 8);
+
   return {
     totalScans,
     averageScore,
     bestScore,
     improvement,
     scanHistory,
+    skillGaps,
   };
 }

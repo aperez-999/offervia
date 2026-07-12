@@ -15,7 +15,7 @@ Offervia is an AI-assisted job search app for job seekers, students, and early-c
 - `Supabase` for auth, Postgres, RLS, storage, and service-role admin tasks
 - `Groq` for AI generation
 - `Stripe` for subscriptions
-- `Nodemailer` for contact mail and weekly digest emails
+- `Nodemailer` for contact mail
 
 ## Project Structure
 - `app/`: App Router pages, layouts, and API routes
@@ -40,6 +40,16 @@ For an existing project that predates persisted onboarding fields:
 db/onboarding.sql
 ```
 
+For existing projects, apply these additive feature migrations (safe to re-run):
+
+```bash
+db/interview_sessions.sql      # interview_session_count usage column
+db/cover_letter_usage.sql      # cover_letter_count usage column
+db/career_profile.sql          # career profile fields
+db/daily_reminders_pref.sql    # daily follow-up reminder opt-in
+db/documents.sql               # saved cover letters & resumes history
+```
+
 Before release, also review:
 
 ```bash
@@ -56,6 +66,7 @@ db/audit/rls-verification.sql
 
 ## API Routes
 - `POST /api/resume-tailor`
+- `POST /api/cover-letter`
 - `POST /api/job-scan`
 - `POST /api/coach`
 - `GET|POST|PATCH|DELETE /api/tracker`
@@ -63,7 +74,6 @@ db/audit/rls-verification.sql
 - `POST /api/create-portal-session`
 - `POST /api/stripe-webhook`
 - `POST /api/contact`
-- `POST /api/cron/weekly-digest`
 
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -83,7 +93,6 @@ db/audit/rls-verification.sql
 - `CONTACT_TO`
 - `CONTACT_FROM_NAME`
 - `CONTACT_FROM_EMAIL`
-- `CRON_SECRET`
 - `NEXT_PUBLIC_SENTRY_DSN`
 - `SENTRY_ORG`
 - `SENTRY_PROJECT`
@@ -173,7 +182,6 @@ Server-only env vars:
 - `CONTACT_TO`
 - `CONTACT_FROM_NAME`
 - `CONTACT_FROM_EMAIL`
-- `CRON_SECRET`
 - `SENTRY_ORG`
 - `SENTRY_PROJECT`
 - `SENTRY_AUTH_TOKEN` when source maps are enabled

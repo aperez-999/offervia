@@ -33,18 +33,8 @@ const QA_ITEMS: QA[] = [
   },
 ];
 
-// Subtle per-item accent tints (light & dark), matching your other sections
-const ACCENTS = [
-  { lightBg: "bg-indigo-50", darkBg: "dark:bg-indigo-500/5", ring: "ring-indigo-500/20" },
-  { lightBg: "bg-sky-50",    darkBg: "dark:bg-sky-500/5",    ring: "ring-sky-500/20" },
-  { lightBg: "bg-violet-50", darkBg: "dark:bg-violet-500/5", ring: "ring-violet-500/20" },
-  { lightBg: "bg-fuchsia-50",darkBg: "dark:bg-fuchsia-500/5",ring: "ring-fuchsia-500/20" },
-  { lightBg: "bg-teal-50",   darkBg: "dark:bg-teal-500/5",   ring: "ring-teal-500/20" },
-];
-
 function Item({ q, a, idx }: QA & { idx: number }) {
   const [open, setOpen] = useState(false);
-  const acc = ACCENTS[idx % ACCENTS.length];
 
   return (
     <motion.div
@@ -52,27 +42,17 @@ function Item({ q, a, idx }: QA & { idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.35, delay: idx * 0.03 }}
-      className={[
-        "rounded-xl border border-border shadow-sm backdrop-blur-sm ring-2",
-        // base glass
-        "bg-white/70 dark:bg-neutral-900/40",
-        // subtle tinted overlay
-        acc.lightBg,
-        acc.darkBg,
-        acc.ring,
-      ].join(" ")}
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
     >
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between px-4 py-3 text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span className="text-sm font-medium text-gray-900 dark:text-white">
-          {q}
-        </span>
+        <span className="text-sm font-medium text-foreground">{q}</span>
         <ChevronDown
-          className={`h-4 w-4 transition-transform text-gray-500 dark:text-white ${open ? "rotate-180" : "rotate-0"}`}
+          className={`h-4 w-4 shrink-0 text-foreground/50 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
         />
       </button>
 
@@ -85,9 +65,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className="px-4 pb-4 text-sm text-gray-700 dark:text-white">
-              {a}
-            </div>
+            <div className="px-5 pb-4 text-sm leading-relaxed text-foreground/70">{a}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -98,19 +76,22 @@ function Item({ q, a, idx }: QA & { idx: number }) {
 export default function Faq() {
   return (
     <section id="faq" className="relative bg-background scroll-mt-20">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
-        <motion.h2
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-px h-px bg-border" />
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-2xl font-semibold text-foreground dark:text-white"
+          className="mx-auto max-w-2xl text-center"
         >
-          Frequently Asked Questions
-        </motion.h2>
+          <p className="text-xs font-semibold text-primary">FAQ</p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
+            Frequently asked questions
+          </h2>
+        </motion.div>
 
-        <div className="mx-auto mt-8 grid max-w-3xl gap-3">
+        <div className="mx-auto mt-12 grid max-w-3xl gap-3">
           {QA_ITEMS.map((qa, i) => (
             <Item key={qa.q} idx={i} {...qa} />
           ))}

@@ -8,25 +8,19 @@ const items = [
     title: "Fast iteration",
     desc: "Scan → tailor → apply in minutes.",
     icon: Zap,
-    tone: "text-amber-600 dark:text-amber-300",
-    ring: "ring-amber-500/20",
-    bg: "bg-amber-50 dark:bg-amber-500/5",
+    chip: "bg-warning/10 text-warning",
   },
   {
     title: "Handled with care",
-    desc: "Your inputs are processed through Offervia's server-side AI flow to generate results.",
+    desc: "Processed securely through Offervia's server-side AI.",
     icon: ShieldCheck,
-    tone: "text-emerald-600 dark:text-emerald-400",
-    ring: "ring-emerald-500/20",
-    bg: "bg-emerald-50 dark:bg-emerald-500/5",
+    chip: "bg-success/10 text-success",
   },
   {
     title: "Built for momentum",
     desc: "A workflow, not a one-off tool.",
     icon: Sparkles,
-    tone: "text-indigo-600 dark:text-indigo-400",
-    ring: "ring-indigo-500/20",
-    bg: "bg-indigo-50 dark:bg-indigo-500/5",
+    chip: "bg-primary/10 text-primary",
   },
 ];
 
@@ -44,20 +38,12 @@ export default function ProofBar() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.4, delay: idx * 0.04 }}
-                className={[
-                  "rounded-2xl border border-border bg-card/60 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10",
-                  "backdrop-blur",
-                ].join(" ")}
+                whileHover={{ y: -3 }}
+                className="group rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 hover-glow dark:ring-black/10"
               >
                 <div className="flex items-start gap-3">
-                  <div
-                    className={[
-                      "flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-2",
-                      it.ring,
-                      it.bg,
-                    ].join(" ")}
-                  >
-                    <Icon className={`h-5 w-5 ${it.tone}`} />
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${it.chip}`}>
+                    <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-foreground">{it.title}</div>

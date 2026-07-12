@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { switchTheme } from "@/lib/theme-transition";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import {
   CommandDialog,
@@ -19,11 +20,14 @@ import {
   Search,
   LayoutDashboard,
   FileText,
+  PenLine,
   Search as SearchIcon,
   MessageSquare,
   ClipboardList,
   BookOpen,
+  Library,
   GraduationCap,
+  MicVocal,
   Settings,
   UserRound,
   LogOut,
@@ -40,12 +44,16 @@ export const NAV_ITEMS: Nav[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Job Packet", href: "/job-packet", icon: Briefcase },
   { label: "Resume", href: "/resume", icon: FileText },
+  { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
   { label: "Coach", href: "/coach", icon: MessageSquare },
+  { label: "Interview", href: "/interview", icon: MicVocal },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
-  { label: "Templates", href: "/templates", icon: Mail },
-  { label: "Resources", href: "/resources", icon: BookOpen },
-  { label: "Student Exclusives", href: "/students", icon: GraduationCap },
+  { label: "Documents", href: "/documents", icon: Library },
+  { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
+  { label: "Templates", href: "/student-hub?tab=templates", icon: Mail },
+  { label: "Learning Resources", href: "/student-hub?tab=resources", icon: BookOpen },
+  { label: "Student Deals", href: "/student-hub?tab=deals", icon: GraduationCap },
   { label: "Contact", href: "/contact", icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Profile", href: "/profile", icon: UserRound },
@@ -88,11 +96,12 @@ export default function GlobalCommandMenu() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 text-sm hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+        className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
         aria-label="Open command palette"
       >
         <Search className="h-4 w-4" />
-        <span className="hidden sm:inline text-xs opacity-80">⌘K</span>
+        <span className="hidden sm:inline text-xs">Search</span>
+        <kbd className="hidden sm:inline rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -124,6 +133,11 @@ export default function GlobalCommandMenu() {
               Tailor Resume
               <CommandShortcut>R</CommandShortcut>
             </CommandItem>
+            <CommandItem onSelect={() => go("/cover-letter")}>
+              <PenLine className="mr-2 h-4 w-4" />
+              Write Cover Letter
+              <CommandShortcut>L</CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={() => go("/scanner")}>
               <SearchIcon className="mr-2 h-4 w-4" />
               Scan Job Description
@@ -140,17 +154,17 @@ export default function GlobalCommandMenu() {
 
           {/* Theme Switching */}
           <CommandGroup heading="Theme">
-            <CommandItem onSelect={() => setTheme("light")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("light"))}>
               <Sun className="mr-2 h-4 w-4" />
               Light
               {resolvedTheme === "light" && <CommandShortcut>✓</CommandShortcut>}
             </CommandItem>
-            <CommandItem onSelect={() => setTheme("dark")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("dark"))}>
               <Moon className="mr-2 h-4 w-4" />
               Dark
               {resolvedTheme === "dark" && <CommandShortcut>✓</CommandShortcut>}
             </CommandItem>
-            <CommandItem onSelect={() => setTheme("system")}>
+            <CommandItem onSelect={() => switchTheme(() => setTheme("system"))}>
               <Monitor className="mr-2 h-4 w-4" />
               System
               {resolvedTheme === "system" && <CommandShortcut>✓</CommandShortcut>}

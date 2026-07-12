@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
 
       {status === "invalid" && (
         <div className="space-y-3">
-          <div className="rounded-md border border-rose-200 dark:border-rose-800/30 bg-rose-50 dark:bg-rose-950/20 p-3 text-sm text-rose-700 dark:text-rose-300">
+          <div className="rounded-md border border-destructive/30  bg-destructive/10  p-3 text-sm text-destructive">
             Invalid or expired reset link.
           </div>
           <a
@@ -121,7 +121,7 @@ export default function ResetPasswordPage() {
               <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
               <input
                 type={showPw ? "text" : "password"}
-                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
                 required
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
               <Lock className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
               <input
                 type={showPw2 ? "text" : "password"}
-                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+                className="w-full rounded border border-border bg-background/80 text-foreground p-2 pl-8 pr-16 placeholder:text-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 value={pw2}
                 onChange={(e) => setPw2(e.target.value)}
                 required
@@ -158,13 +158,13 @@ export default function ResetPasswordPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={status === "updating"}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 p-2 text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-primary-button p-2 text-white hover:bg-primary-button/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {status === "updating" && (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

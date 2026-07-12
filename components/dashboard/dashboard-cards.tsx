@@ -8,27 +8,15 @@ export type DashboardApplicationStatus = "Applied" | "Interviewing" | "Offer" | 
 
 export function StatusBadge({ status }: { status: DashboardApplicationStatus }) {
   if (status === "Interviewing") {
-    return (
-      <Badge className="border border-indigo-500/20 bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/10 dark:text-indigo-300">
-        {status}
-      </Badge>
-    );
+    return <Badge variant="interviewing">{status}</Badge>;
   }
   if (status === "Offer") {
-    return (
-      <Badge className="border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300">
-        {status}
-      </Badge>
-    );
+    return <Badge variant="offer">{status}</Badge>;
   }
   if (status === "Rejected") {
-    return <Badge variant="destructive">{status}</Badge>;
+    return <Badge variant="rejected">{status}</Badge>;
   }
-  return (
-    <Badge className="border border-foreground/10 bg-foreground/[0.06] text-foreground/80 hover:bg-foreground/[0.08]">
-      {status}
-    </Badge>
-  );
+  return <Badge variant="applied">{status}</Badge>;
 }
 
 export function Kpi({
@@ -42,17 +30,17 @@ export function Kpi({
 }) {
   const toneClass =
     tone === "indigo"
-      ? "bg-indigo-500/10"
+      ? "bg-primary"
       : tone === "blue"
-      ? "bg-sky-500/10"
+      ? "bg-[var(--status-applied)]"
       : tone === "emerald"
-      ? "bg-emerald-500/10"
-      : "bg-foreground/[0.06]";
+      ? "bg-[var(--status-offer)]"
+      : "bg-muted-foreground/40";
 
   return (
-    <Card className="rounded-2xl border border-border bg-card/60 p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-4">
+    <Card className="card-hover rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-4">
       <div className="flex items-center justify-between gap-2">
-        <div className="truncate text-xs font-medium uppercase tracking-wide text-foreground/60">
+        <div className="truncate text-xs font-medium text-foreground/60">
           {title}
         </div>
         <div className={`h-2.5 w-2.5 rounded-full ${toneClass}`} aria-hidden />
@@ -72,7 +60,7 @@ export function ActionCard({
   children: ReactNode;
 }) {
   return (
-    <Card className="h-full rounded-xl border border-border bg-background/60 p-4 shadow-sm transition-all hover:shadow-md">
+    <Card className="card-hover h-full rounded-xl border border-border bg-background/60 p-4 shadow-sm">
       <div className="text-sm font-medium text-foreground">{title}</div>
       <div className="mt-1 text-xs text-foreground/70">{children}</div>
     </Card>

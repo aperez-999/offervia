@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster, ToastProvider } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
@@ -9,8 +9,10 @@ import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_SHARE_IMAGE_ALT,
+  SITE_KEYWORDS,
   getSiteUrl,
 } from "@/lib/site";
+import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +22,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -30,14 +40,32 @@ export const metadata: Metadata = {
     template: "%s | Offervia",
   },
   description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: SITE_NAME, url: getSiteUrl() }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  formatDetection: { telephone: false, address: false, email: false },
   alternates: {
     canonical: getSiteUrl(),
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   openGraph: {
     title: SITE_DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
     url: getSiteUrl(),
     siteName: SITE_NAME,
+    locale: "en_US",
     images: [{ url: "/og-image.png", width: 1774, height: 887, alt: SITE_SHARE_IMAGE_ALT }],
     type: "website",
   },
@@ -54,10 +82,11 @@ export const metadata: Metadata = {
       { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
       { url: "/icon-64.png", type: "image/png", sizes: "64x64" },
       { url: "/icon-256.png", type: "image/png", sizes: "256x256" },
-      { url: "/offervia-icon-square.png", type: "image/png", sizes: "1024x1024" },
+      { url: "/offervia-icon-square.png", type: "image/png", sizes: "694x694" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" }],
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -67,7 +96,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}>
+        <OrganizationJsonLd />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ToastProvider>
             {children}

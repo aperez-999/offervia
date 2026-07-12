@@ -19,11 +19,11 @@ export default function PerformanceInsights({
 }) {
   return (
     <section
-      className="rounded-xl border border-border bg-card/60 px-6 py-5"
+      className="rounded-xl border border-border bg-card px-6 py-5"
       aria-label="Performance Insights"
     >
       <div className="mb-4">
-        <div className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+        <div className="text-xs font-semibold text-foreground/60">
           Pro insights
         </div>
         <h3 className="mt-1 text-lg font-semibold text-foreground">Performance insights</h3>
@@ -33,7 +33,7 @@ export default function PerformanceInsights({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Average Match Score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -41,7 +41,7 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Best Score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -49,7 +49,7 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Total Scans
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
@@ -57,16 +57,16 @@ export default function PerformanceInsights({
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-foreground/60">
+          <div className="text-xs font-medium text-foreground/60">
             Improvement
           </div>
           <div className="mt-1 text-2xl font-semibold">
             {analytics.improvement === null ? (
               <span className="text-muted-foreground">Not enough data</span>
             ) : analytics.improvement > 0 ? (
-              <span className="text-green-400">+{analytics.improvement}%</span>
+              <span className="text-success">+{analytics.improvement}%</span>
             ) : analytics.improvement < 0 ? (
-              <span className="text-red-400">{analytics.improvement}%</span>
+              <span className="text-destructive">{analytics.improvement}%</span>
             ) : (
               <span className="text-muted-foreground">0%</span>
             )}
@@ -104,14 +104,16 @@ export default function PerformanceInsights({
                   contentStyle={{
                     borderRadius: "8px",
                     border: "1px solid var(--border)",
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
+                    color: "var(--foreground)",
                   }}
-                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                  labelStyle={{ color: "var(--foreground)" }}
+                  itemStyle={{ color: "var(--foreground)" }}
                 />
                 <Line
                   type="monotone"
                   dataKey="score"
-                  stroke="#6366f1"
+                  stroke="var(--brand)"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   activeDot={{ r: 5 }}
@@ -120,6 +122,31 @@ export default function PerformanceInsights({
             </ResponsiveContainer>
           </div>
         </>
+      )}
+
+      {analytics.skillGaps.length > 0 && (
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="text-sm font-medium text-foreground">
+            Recurring skill gaps
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Skills flagged as missing most often across your scans — prioritize
+            these on your resume.
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {analytics.skillGaps.map((gap) => (
+              <li
+                key={gap.skill}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-sm text-amber-700 dark:text-amber-400"
+              >
+                <span className="font-medium">{gap.skill}</span>
+                <span className="rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold tabular-nums">
+                  {gap.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

@@ -65,6 +65,13 @@ export async function POST(req: Request) {
   } catch (err) {
     captureServerException(err, { route: "api/create-portal-session" });
     console.error("[billing-session]", err);
-    return fail("SERVER_ERROR", "Unable to start billing session.", 500);
+    // Stripe's Customer Portal must be activated once per mode (test/live) in
+    // the dashboard. Until then Stripe throws a config error — surface a clear
+    // message instead of a generic 500 so the cause is obvious.
+    const message =
+      err instanceof Error && /configuration|portal/i.test(err.message)
+        ? "Billing portal isn't set up yet. Activate the Customer Portal in your Stripe dashboard, then try again."
+        : "Unable to start billing session. Please try again.";
+    return fail("SERVER_ERROR", message, 500);
   }
 }

@@ -10,6 +10,10 @@ export function getGroqClient() {
 
   return new Groq({
     apiKey,
+    // Fail fast instead of hanging if Groq is slow/unreachable; retry transient
+    // errors (429/5xx) automatically. Applies to every LLM route centrally.
+    timeout: 30_000,
+    maxRetries: 2,
   });
 }
 
