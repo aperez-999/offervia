@@ -1,23 +1,38 @@
 # Offervia
 
-Offervia is an AI-assisted job search app for job seekers, students, and early-career professionals. It helps users scan job descriptions, tailor resumes, chat with an interview coach, track applications, and manage usage and billing in one place.
+Live demo: [offervia.vercel.app](https://offervia.vercel.app)
 
-## Core Features
-- `Resume Tailor`: Submit resume content plus a target job description and generate a tailored rewrite.
-- `Job Scanner`: Analyze a JD for strengths, missing skills, and a match score.
-- `AI Coach`: Persisted chat modes for interview, resume, cover letter, and career guidance.
-- `Job Tracker`: CRUD interface for applications with filters, exports, and follow-up tracking.
-- `Account & Billing`: Supabase auth, profile/settings, Stripe checkout, and portal access.
+Offervia is a job search helper for students, new grads, and anyone applying to roles. Paste a posting and it checks that posting against your resume, rewrites the resume, drafts a cover letter, lets you practice interview answers, and keeps a tracker of where you applied. Student Hub is a short list of templates, links, and student discounts.
 
-## Tech Stack
-- `Next.js 15` App Router + `React 19` + `TypeScript`
-- `Tailwind CSS` + `shadcn/ui` primitives
-- `Supabase` for auth, Postgres, RLS, storage, and service-role admin tasks
-- `Groq` for AI generation
-- `Stripe` for subscriptions
-- `Nodemailer` for contact mail
+![Offervia](public/og-image.png)
 
-## Project Structure
+## What I built
+
+- Authenticated Next.js app with email and OAuth sign-in, protected routes, and row-level security in Postgres
+- Server routes that send a resume and a job description to an LLM and return a rewritten resume, a cover letter, a keyword match, or interview feedback
+- Monthly usage limits, with Stripe Checkout and a billing portal for the higher tier
+- An application tracker with follow-up dates and CSV export
+- File upload that reads PDF and DOCX resumes on the server
+
+## Stack
+
+- Next.js 15 (App Router), React 19, TypeScript
+- Tailwind CSS
+- Supabase (auth, Postgres, storage)
+- Groq for generation
+- Stripe for subscriptions
+- Deployed on Vercel
+
+## Features
+
+- Resume Tailor: resume plus a job description, rewritten for that role
+- Job scanner: keywords the posting asks for, and which ones the resume is missing
+- Interview coach and mock interview: practice answers with notes
+- Cover letters: a draft from the same posting and resume
+- Job tracker: status, follow-ups, and CSV export
+- Account, profile, and billing
+
+## Project structure
 - `app/`: App Router pages, layouts, and API routes
 - `components/`: Feature components and shared UI
 - `lib/`: Environment, API helpers, Supabase clients, plans, usage, and service integrations
@@ -64,7 +79,8 @@ db/policies.sql
 db/audit/rls-verification.sql
 ```
 
-## API Routes
+## API routes
+
 - `POST /api/resume-tailor`
 - `POST /api/cover-letter`
 - `POST /api/job-scan`
@@ -75,37 +91,15 @@ db/audit/rls-verification.sql
 - `POST /api/stripe-webhook`
 - `POST /api/contact`
 
-## Environment Variables
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `GROQ_API_KEY`
-- `GROQ_MODEL`
-- `NEXT_PUBLIC_APP_NAME`
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_STRIPE_PRICE_ID`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_USER`
-- `SMTP_PASS`
-- `CONTACT_TO`
-- `CONTACT_FROM_NAME`
-- `CONTACT_FROM_EMAIL`
-- `NEXT_PUBLIC_SENTRY_DSN`
-- `SENTRY_ORG`
-- `SENTRY_PROJECT`
-- `SENTRY_AUTH_TOKEN` (optional when uploading source maps)
+## Run it locally
 
-## Local Development
 ```bash
 npm install
 cp .env.example .env.local
 npm run dev
 ```
 
-Quality checks:
+Fill in `.env.local` from `.env.example`. The names there are the full list, including Supabase, Groq, Stripe, email, and Sentry. Sentry can stay blank in local development.
 
 ```bash
 npm run lint
@@ -113,75 +107,16 @@ npm run build
 npm run test
 ```
 
-## Testing
-- `npm run test:unit`: runs Vitest unit/component tests
-- `npm run test:e2e`: runs Playwright smoke tests
-- `npm run test`: runs both
+`npm run test:unit` runs Vitest. `npm run test:e2e` runs Playwright. Authenticated Playwright tests need `E2E_EMAIL` and `E2E_PASSWORD`. If `E2E_BASE_URL` is set, Playwright uses that URL and expects the app to already be running. If it is omitted, Playwright starts a local server.
 
-Playwright loads `.env.local` automatically through the Next env loader.
+## Secrets
 
-Authenticated Playwright coverage is enabled by setting:
-- `E2E_EMAIL`
-- `E2E_PASSWORD`
-- `E2E_BASE_URL` (optional; keep `http://localhost:3000` for local runs)
+Do not commit `.env`, `.env.local`, or any other env file. `.env.example` is the only one that belongs in git, and it has empty values.
 
-Recommended local flow when `E2E_BASE_URL` is set:
+Anything that can read or change other people's data stays on the server: `SUPABASE_SERVICE_ROLE_KEY`, `GROQ_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, SMTP passwords, and `SENTRY_AUTH_TOKEN`. The anon Supabase key and the Stripe price id are safe to expose in the browser. They are still not hardcoded in the repo.
 
-```bash
-npx playwright install
-npm run dev
-npm run test:e2e
-```
+Resume text, job descriptions, and chat messages are sent from the server to Groq to produce a draft. The app stores the account, tracker rows, coach messages, scans, and monthly usage so those screens still work the next time you sign in.
 
-If `E2E_BASE_URL` is omitted, Playwright will start a local dev server automatically. If `E2E_BASE_URL` is present, Playwright will target that URL and expect the app to already be running there.
+## Deploy
 
-## Release Flow
-For the current solo workflow:
-
-1. Run `npm run lint`
-2. Run `npm run build`
-3. Run `npm run test`
-4. Deploy to Vercel
-5. Confirm the production build succeeds
-6. Run the post-deploy checks in [docs/release-checklist.md](docs/release-checklist.md)
-7. Run the security checks in [docs/security-checklist.md](docs/security-checklist.md)
-
-## Notes on Data Handling
-User-submitted resume text, job descriptions, and chat prompts are sent through Offervia’s server-side routes to configured AI providers so the app can generate outputs. The app also stores feature history such as tracker entries, chat messages, usage counters, and job scans where needed to provide the user experience.
-
-## Sentry Setup
-Sentry is optional in local development and recommended in production.
-
-Environment variables:
-- `NEXT_PUBLIC_SENTRY_DSN`
-- `SENTRY_ORG`
-- `SENTRY_PROJECT`
-- `SENTRY_AUTH_TOKEN` (optional; recommended when uploading source maps)
-
-Set these in `.env.local` for local testing and in Vercel project settings for production and preview deployments.
-
-## Vercel Production Setup
-Public env vars:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_APP_NAME`
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_STRIPE_PRICE_ID`
-- `NEXT_PUBLIC_SENTRY_DSN`
-
-Server-only env vars:
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `GROQ_API_KEY`
-- `GROQ_MODEL`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_USER`
-- `SMTP_PASS`
-- `CONTACT_TO`
-- `CONTACT_FROM_NAME`
-- `CONTACT_FROM_EMAIL`
-- `SENTRY_ORG`
-- `SENTRY_PROJECT`
-- `SENTRY_AUTH_TOKEN` when source maps are enabled
+The live site is on Vercel. Set the same variables there, with `NEXT_PUBLIC_SITE_URL` set to the public URL. Before a release, run lint, the production build, and tests, then walk through [docs/release-checklist.md](docs/release-checklist.md) and [docs/security-checklist.md](docs/security-checklist.md).

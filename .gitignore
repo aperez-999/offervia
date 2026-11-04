@@ -34,8 +34,7 @@ yarn-error.log*
 
 # env files (ignore secrets, but allow sharing a template)
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
 
 # vercel

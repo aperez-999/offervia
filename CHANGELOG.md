@@ -11,11 +11,10 @@ Feature release. Non-breaking; all database changes are additive.
 
 ### Added
 
-- **Interview Prep** — interactive, role-aware text mock interviews powered by
-  Groq. Questions adapt to the target role (not hard-coded), with per-plan usage
-  metering and an interview history view.
-- **Cover Letter Studio** — generate tailored cover letters from a pasted resume
-  or an uploaded PDF/DOCX, with company/role targeting and usage metering.
+- **Interview Prep.** Text mock interviews. Questions follow the role you enter.
+  Each plan has a monthly cap, and past sessions are saved.
+- **Cover Letter Studio.** Drafts a letter from a pasted resume or an uploaded
+  PDF or DOCX, using the company and role when you provide them.
 - **Saved Documents** — cover letters and tailored resumes are saved to a history
   you can revisit, copy, and export.
 - **In-app PDF export** — dependency-free print-to-PDF for generated documents.
@@ -25,8 +24,8 @@ Feature release. Non-breaking; all database changes are additive.
   letter, and scanner tools with role/company prefilled.
 - **Student Hub** — templates, resources, and student deals consolidated into one
   organized section with a proper loading state.
-- **Career profile personalization** — target role, seniority, skills, and
-  locations feed into the AI coach, resume, and cover-letter prompts.
+- **Career profile.** Target role, seniority, skills, and locations are included
+  when the coach, resume, and cover letter drafts are generated.
 - **Skill-gap insights** — recurring missing skills surfaced on the dashboard.
 - **Daily follow-up reminders** — opt-in in-app panel plus reminder cron, built on
   existing application dates and the digest infrastructure.
@@ -47,8 +46,8 @@ Feature release. Non-breaking; all database changes are additive.
 
 ### Security
 
-- AI coach now filters out non-user/assistant roles from client-supplied message
-  history, closing a prompt-injection vector via injected `system` messages.
+- The coach drops any client message that is not from the user or the assistant,
+  so a request cannot sneak in a system instruction.
 - Removed dead/unused Supabase client helper.
 - Verified row-level security across all live tables (anonymous reads return no
   rows while service-role reads succeed).

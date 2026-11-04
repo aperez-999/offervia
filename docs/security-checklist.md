@@ -1,25 +1,24 @@
-# Offervia Security Release Checklist
+# Security checklist
 
-## Auth and session
-- Middleware uses verified user checks, not `getSession()` for protected-route enforcement.
-- OAuth callback is server-side and only redirects to sanitized internal paths.
-- Password login, signup, and forgot-password flows are rate-limited.
-- Client auth screens never display raw provider or backend error text.
+Use this before a production deploy, and again before making the repo public.
 
-## Supabase and data access
-- `db/policy_cleanup.sql` applied if the project previously accumulated duplicate legacy policies.
-- `db/policies.sql` applied in production.
-- `db/storage_policies.sql` applied for the `avatars` bucket.
-- `db/audit/rls-verification.sql` reviewed against live production/preview data.
-- No public environment variable contains `SUPABASE_SERVICE_ROLE_KEY` or other server-only secrets.
+## Secrets
 
-## Billing and integrations
-- Stripe webhook signature verification tested with an invalid signature.
-- Billing portal and checkout routes require authenticated users and rate-limit correctly.
-- Sentry receives one production test event after deploy.
+- `.env.local` is not staged. `git status` should not list it.
+- No key, webhook secret, or service-role JWT is hardcoded in the repo or in git history.
+- `SUPABASE_SERVICE_ROLE_KEY` is only set as a server variable. It is not prefixed with `NEXT_PUBLIC_`.
+- Vercel only has the variables this app actually reads.
 
-## Security hygiene
-- Repo secret scan completed.
-- Vercel environment variables reviewed and trimmed to required values only.
-- `npm audit --omit=dev` run with network access and findings triaged.
-- No temporary dev-only test surfaces remain exposed before launch.
+## Auth and data
+
+- Protected routes call `getUser()`, not `getSession()`.
+- The OAuth callback only redirects to a path inside this site.
+- Login, signup, and password reset are rate limited.
+- Auth screens show a short message, not the raw provider error.
+- `db/policies.sql` and `db/storage_policies.sql` match what is applied in Supabase.
+- `db/audit/rls-verification.sql` has been run against the live database.
+
+## Billing
+
+- The Stripe webhook rejects a request with a bad signature.
+- Checkout and the billing portal require a signed-in user.

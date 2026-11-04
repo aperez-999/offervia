@@ -1,44 +1,33 @@
-# Supabase Database Reference
+# Database
 
-Offervia uses Supabase for **Auth + Postgres + Row Level Security (RLS)**.
+Supabase holds auth, Postgres, and row level security. The SQL in this folder is what the app expects.
 
-## Source of truth
-- **Schema**: `db/schema.sql`
-- **RLS policies**: `db/policies.sql`
-- **Legacy policy cleanup**: `db/policy_cleanup.sql`
-- **Storage policies**: `db/storage_policies.sql`
-- **RLS audit pack**: `db/audit/rls-verification.sql`
+## Files
 
-These files are intended to be **kept in the repo** (they’re your reproducible “database as code” baseline).
+- `schema.sql`: tables
+- `policies.sql`: row level security
+- `policy_cleanup.sql`: drops older duplicate policies before you reapply `policies.sql`
+- `storage_policies.sql`: avatar bucket
+- `audit/rls-verification.sql`: queries to check the live policies
+- `onboarding.sql`, `interview_sessions.sql`, `cover_letter_usage.sql`, `career_profile.sql`, `daily_reminders_pref.sql`, `documents.sql`: later columns, safe to run more than once
 
-## How to apply (new Supabase project)
-1. Open **Supabase Dashboard → SQL Editor**.
-2. Run `db/schema.sql`
-3. Run `db/policies.sql`
-4. Run `db/storage_policies.sql`
+## New project
 
-## How to apply (existing Supabase project)
-1. Run `db/onboarding.sql` if your existing `user_prefs` table does not already include onboarding state columns.
-2. Run `db/policy_cleanup.sql` if your existing project shows legacy duplicate policies in `pg_policies`.
-3. Re-run `db/policies.sql` to refresh the checked-in policy set and clean up any legacy duplicate policies from older iterations.
-4. Apply `db/storage_policies.sql` if avatar bucket policies are not already present.
-5. Use `db/audit/rls-verification.sql` as the live verification checklist before release.
+In the Supabase SQL editor, run `schema.sql`, then `policies.sql`, then `storage_policies.sql`.
 
-## Tables used by this repo
-- **`applications`**: job application tracker items (per-user)
-- **`messages`**: AI coach chat history (per-user)
-- **`profiles`**: profile fields mirrored from auth metadata (per-user)
-- **`user_prefs`**: settings (default coach mode, weekly goal, email digest, onboarding state)
-- **`job_scans`**: job scan results history (optional analytics)
-- **`usage_snapshots`**: monthly usage counters (for plan limits)
-- **`subscriptions`**: Stripe subscription state (plan/status/period end)
-- **`request_events`**: rate limiting events (server/service only)
+## Existing project
 
-## RLS policy intent (high level)
-- **User-owned tables** (`applications`, `messages`, `profiles`, `user_prefs`):
-  - Users can **select/insert/update/delete only their own rows** via `auth.uid()`.
-- **Read-only-to-user tables** (`subscriptions`, `usage_snapshots`, `job_scans`):
-  - Users can **select only their own rows**.
-  - Inserts/updates are performed by backend code (service role) and/or webhooks.
-- **Server-only table** (`request_events`):
-  - **No user policies** by design; rate limiting uses service role.
+Run any migration file you have not applied yet. If `pg_policies` shows duplicate policies from older versions, run `policy_cleanup.sql`, then `policies.sql`, then `audit/rls-verification.sql`.
+
+## What the tables are for
+
+- `applications`: tracker rows, one user each
+- `messages`: coach chat history
+- `profiles`: name and avatar, copied from auth
+- `user_prefs`: weekly goal, coach mode, reminder opt-in
+- `job_scans`: saved scans
+- `usage_snapshots`: monthly counts for the free and Pro limits
+- `subscriptions`: Stripe plan state
+- `request_events`: rate limit log, server only
+
+Users can read and write their own rows on `applications`, `messages`, `profiles`, and `user_prefs`. They can read their own rows on `subscriptions`, `usage_snapshots`, and `job_scans`. Writes to those three, and all access to `request_events`, go through the service role on the server.
