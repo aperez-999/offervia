@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Hero from "@/components/public/Hero";
-import ProofBar from "@/components/public/ProofBar";
 import Features from "@/components/public/Features";
-import Why from "@/components/public/Why";
-import Testimonials from "@/components/public/Testimonials";
 import Faq from "@/components/public/Faq";
 import HowItWorks from "@/components/public/HowItWorks";
 import BottomCta from "@/components/public/BottomCta";
@@ -15,7 +12,7 @@ import { createPageMetadata } from "@/lib/metadata";
 export const metadata: Metadata = createPageMetadata({
   title: "Offervia",
   description:
-    "Offervia helps job seekers move from job description to tailored resume, interview prep, and application tracking with one focused AI workflow.",
+    "Paste a job posting and Offervia shows what your resume is missing, rewrites it for that job, drafts a cover letter, helps you practice interviews, and tracks your applications.",
   path: "/",
 });
 
@@ -43,12 +40,9 @@ export default async function HomePage({
     <div className="relative">
       <SoftwareApplicationJsonLd />
       <Hero />
-      <ProofBar />
       <Features />
-      <Why />
-      <Testimonials />
-      <Faq />
       <HowItWorks />
+      <Faq />
       <BottomCta />
       <Footer />
     </div>

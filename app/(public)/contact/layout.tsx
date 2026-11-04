@@ -3,7 +3,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Contact",
-  description: "Reach the Offervia team with questions about the product, support, or your account.",
+  description: "Send Offervia a question, bug report, or account request.",
   path: "/contact",
 });
 

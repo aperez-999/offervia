@@ -19,13 +19,13 @@ export default function TermsPage() {
 
   const sections = [
     { id: "agreement", title: "Agreement", icon: Handshake },
-    { id: "use-of-service", title: "Use of Service", icon: BookOpenCheck },
-    { id: "acceptable-use", title: "Acceptable Use", icon: ShieldAlert },
-    { id: "service-limitations", title: "Service Limitations", icon: Wrench },
-    { id: "intellectual-property", title: "Intellectual Property", icon: Copyright },
-    { id: "limitation-of-liability", title: "Limitation of Liability", icon: Gavel },
+    { id: "use-of-service", title: "Use of service", icon: BookOpenCheck },
+    { id: "acceptable-use", title: "Acceptable use", icon: ShieldAlert },
+    { id: "service-limitations", title: "Service limitations", icon: Wrench },
+    { id: "intellectual-property", title: "Intellectual property", icon: Copyright },
+    { id: "limitation-of-liability", title: "Limitation of liability", icon: Gavel },
     { id: "termination", title: "Termination", icon: LogOut },
-    { id: "changes", title: "Changes to the Service & Terms", icon: RefreshCw },
+    { id: "changes", title: "Changes to the service and terms", icon: RefreshCw },
     { id: "contact", title: "Contact", icon: Mail },
   ];
 
@@ -43,13 +43,13 @@ export default function TermsPage() {
             <Scale className="h-6 w-6" />
           </div>
           <p className="mt-4 text-xs font-semibold text-primary">
-            The ground rules
+            Legal
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
             Terms of Service
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-foreground/70">
-            Please read these terms carefully before using Offervia. They keep the platform fair, safe, and reliable for everyone.
+            Please read these terms carefully before using Offervia.
           </p>
           <div className="mx-auto mt-4 w-fit rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/70">
             Last updated: {lastUpdated}
@@ -59,7 +59,7 @@ export default function TermsPage() {
         <div className="mt-12 grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
           {/* Sticky TOC (desktop) */}
           <aside className="sticky top-24 hidden h-fit self-start lg:block animate-in fade-in-0 slide-in-from-left-3 duration-700">
-            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm">
               <p className="px-3 py-2 text-xs font-semibold text-foreground/50">
                 On this page
               </p>
@@ -98,7 +98,7 @@ export default function TermsPage() {
               },
               {
                 id: "use-of-service",
-                title: "Use of Service",
+                title: "Use of service",
                 icon: BookOpenCheck,
                 body: (
                   <p>
@@ -109,7 +109,7 @@ export default function TermsPage() {
               },
               {
                 id: "acceptable-use",
-                title: "Acceptable Use",
+                title: "Acceptable use",
                 icon: ShieldAlert,
                 body: (
                   <ul className="list-disc space-y-1 pl-5">
@@ -121,19 +121,19 @@ export default function TermsPage() {
               },
               {
                 id: "service-limitations",
-                title: "Service Limitations",
+                title: "Service limitations",
                 icon: Wrench,
                 body: (
                   <p>
-                    The service is provided on an “as is” and “as available” basis. Features may evolve,
-                    and occasional downtime or defects may occur. AI-generated suggestions can be incomplete
-                    or inaccurate, so you are responsible for reviewing outputs before relying on them.
+                    The service is provided as is and as available. Features can change, and
+                    the site can go down. Drafts can be wrong or incomplete. Read them before
+                    you send anything to an employer.
                   </p>
                 ),
               },
               {
                 id: "intellectual-property",
-                title: "Intellectual Property",
+                title: "Intellectual property",
                 icon: Copyright,
                 body: (
                   <p>
@@ -145,7 +145,7 @@ export default function TermsPage() {
               },
               {
                 id: "limitation-of-liability",
-                title: "Limitation of Liability",
+                title: "Limitation of liability",
                 icon: Gavel,
                 body: (
                   <p>
@@ -168,7 +168,7 @@ export default function TermsPage() {
               },
               {
                 id: "changes",
-                title: "Changes to the Service & Terms",
+                title: "Changes to the service and terms",
                 icon: RefreshCw,
                 body: (
                   <p>

@@ -9,8 +9,8 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-sm text-foreground/80">
-            © {YEAR} <span className="text-foreground font-semibold">Offervia</span> — A{" "}
-            <span className="text-foreground/70 font-medium">PerezDev</span> Property
+            © {YEAR} <span className="text-foreground font-semibold">Offervia</span>. Built by{" "}
+            <span className="text-foreground/70 font-medium">PerezDev</span>.
           </div>
 
           <nav aria-label="Footer" className="flex items-center gap-6 text-sm">
@@ -18,13 +18,13 @@ export default function Footer() {
               href="/privacy"
               className="text-foreground/70 hover:text-foreground transition-colors"
             >
-              Privacy Policy
+              Privacy
             </Link>
             <Link
               href="/terms"
               className="text-foreground/70 hover:text-foreground transition-colors"
             >
-              Terms of Service
+              Terms
             </Link>
             <Link
               href="/contact"
@@ -55,8 +55,8 @@ export default function Footer() {
             <Twitter className="h-4 w-4" />
           </a>
           <a
-            href="https://github.com/aperez-999"
-            aria-label="GitHub"
+            href="https://github.com/aperez-999/offervia"
+            aria-label="Source code on GitHub"
             target="_blank"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-border bg-background text-foreground hover:bg-primary/10 hover:text-primary hover:ring-primary/40 active:scale-95 transition-all motion-safe:hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             rel="noopener noreferrer"
@@ -73,16 +73,6 @@ export default function Footer() {
             <MessageCircleIcon className="h-4 w-4" />
           </a>
         </div>
-
-        <p className="mt-4 text-center text-xs text-foreground/60">
-          Secure • Private • Built for job seekers
-        </p>
-
-        <p className="mt-2 text-center text-[11px] text-foreground/50">
-          Independently developed and maintained by{" "}
-          <span className="font-medium text-foreground/70">PerezDev</span>.  
-          All rights reserved.
-        </p>
       </div>
     </footer>
   );

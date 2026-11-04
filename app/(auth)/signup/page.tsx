@@ -35,7 +35,7 @@ export default function SignupPage() {
     <AuthLayout aside={<SignupAside />}>
       <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">Create your Offervia account</h1>
-        <p className="mt-1 text-sm text-foreground/70">Land more interviews — free to start, upgrade anytime.</p>
+        <p className="mt-1 text-sm text-foreground/70">Free to start. No credit card needed.</p>
       </div>
 
       <SignupForm />

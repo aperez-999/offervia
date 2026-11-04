@@ -13,28 +13,24 @@ export default function BottomCta() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-xl shadow-primary/10 ring-1 ring-primary/20 sm:p-12"
+          className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-8 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-10"
         >
-          <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "-22px", ["--float-y" as string]: "18px" }} />
-          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-brand/15 blur-3xl motion-safe:animate-float-slow" style={{ ["--float-x" as string]: "20px", ["--float-y" as string]: "-16px", animationDelay: "-6s" }} />
-          <div className="relative">
-            <h3 className="text-2xl font-semibold tracking-tight text-foreground text-balance sm:text-3xl">
-              Ready to land more offers?
-            </h3>
-            <p className="mx-auto mt-3 max-w-lg text-sm text-foreground/70 sm:text-base">
-              Start for free — no credit card required. Scan, tailor, and track your search in one place.
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground text-balance">
+              Try it on the next job you apply to.
+            </h2>
+            <p className="mt-2 max-w-lg text-sm text-foreground/70 text-pretty sm:text-base">
+              Free to start. No credit card needed.
             </p>
-
-            <div className="mt-8">
-              <Link
-                href="/signup"
-                className="group bg-brand-gradient inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 hover:shadow-md hover:shadow-primary/40 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              >
-                Get started — free
-                <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
-              </Link>
-            </div>
           </div>
+
+          <Link
+            href="/signup"
+            className="group bg-brand-gradient inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+          >
+            Create a free account
+            <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
+          </Link>
         </motion.div>
       </div>
     </section>

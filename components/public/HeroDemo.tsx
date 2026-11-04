@@ -4,21 +4,19 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FileText,
-  Sparkles,
+  PenLine,
   Mail,
   MessageSquare,
   CheckCircle2,
   ArrowRight,
-  ShieldCheck,
   Bot,
   Check,
 } from "lucide-react";
 
 /**
- * Interactive product demo — a hand-built, token-driven mock of the Offervia
- * workflow. A self-driving cursor clicks through five real features:
- * Scanner → Resume Tailor → Cover Letter → Interview Coach → Tracker.
- * No video: real DOM. Dark/light compatible, reduced-motion safe.
+ * Fake product walkthrough on the homepage. A cursor clicks Scan, Tailor,
+ * Cover, Coach, and Track. It is real DOM, not a video, and it pauses
+ * when reduced motion is on.
  */
 
 type Step = {
@@ -30,7 +28,7 @@ type Step = {
 
 const STEPS: Step[] = [
   { key: "scan", label: "Scan", url: "scanner", icon: FileText },
-  { key: "tailor", label: "Tailor", url: "resume", icon: Sparkles },
+  { key: "tailor", label: "Tailor", url: "resume", icon: PenLine },
   { key: "cover", label: "Cover", url: "cover-letter", icon: Mail },
   { key: "coach", label: "Coach", url: "coach", icon: MessageSquare },
   { key: "track", label: "Track", url: "tracker", icon: CheckCircle2 },
@@ -46,11 +44,11 @@ const KEYWORDS = ["React", "TypeScript", "REST APIs", "CI/CD", "Agile"];
 const BULLETS = [
   {
     before: "Worked on the frontend for a web app.",
-    after: "Shipped 10+ React + TypeScript features, cutting load time 20%.",
+    after: "Built 14 React and TypeScript features for the checkout flow; page load dropped from 3.1s to 2.4s.",
   },
   {
     before: "Helped with the team's projects.",
-    after: "Led REST API integration across 3 services in Agile sprints.",
+    after: "Moved billing, auth, and search onto one REST API during two-week sprints.",
   },
 ];
 
@@ -169,16 +167,10 @@ export default function HeroDemo() {
         </div>
         <div className="mx-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          offervia.app/{STEPS[step].url}
+          offervia.vercel.app/{STEPS[step].url}
         </div>
-        <span className="hidden items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary sm:inline-flex">
-          <span className="relative flex h-1.5 w-1.5">
-            {!reduce && (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-            )}
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-          </span>
-          Live demo
+        <span className="hidden rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+          Sample data
         </span>
       </div>
 
@@ -280,14 +272,14 @@ function PaneHead({
 }
 
 function ScanPane({ reduce }: { reduce: boolean }) {
-  const [score, setScore] = useState(reduce ? 92 : 0);
+  const [score, setScore] = useState(reduce ? 87 : 0);
   useEffect(() => {
     if (reduce) return;
     const start = performance.now();
     let raf = 0;
     const tick = (t: number) => {
       const p = Math.min((t - start) / 1100, 1);
-      setScore(Math.round(92 * (1 - Math.pow(1 - p, 3))));
+      setScore(Math.round(87 * (1 - Math.pow(1 - p, 3))));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -298,8 +290,8 @@ function ScanPane({ reduce }: { reduce: boolean }) {
     <div>
       <PaneHead
         icon={FileText}
-        title="Job Description Scanner"
-        sub="Extract requirements and score your fit"
+        title="Job scanner"
+        sub="Checks the posting's requirements against your resume"
       />
       <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
         <div className="rounded-xl border border-border bg-muted/30 p-4">
@@ -334,7 +326,7 @@ function ScanPane({ reduce }: { reduce: boolean }) {
               {score}%
             </span>
           </div>
-          <p className="text-xs font-medium text-success sm:text-center">Strong match</p>
+          <p className="text-xs font-medium text-success sm:text-center">Good match</p>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -359,13 +351,13 @@ function TailorPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
       <PaneHead
-        icon={Sparkles}
+        icon={PenLine}
         title="Resume Tailor"
-        sub="Rewrite bullets to match the role"
+        sub="Rewrites vague bullets using the posting's terms"
         badge={
           <span className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2 py-1 text-[11px] font-medium text-success">
-            <ShieldCheck className="h-3 w-3" />
-            ATS-ready · 94
+            <Check className="h-3 w-3" />
+            9 of 11 keywords
           </span>
         }
       />
@@ -396,19 +388,18 @@ function TailorPane({ reduce }: { reduce: boolean }) {
 function CoverPane({ reduce }: { reduce: boolean }) {
   const lines = [
     "Dear Hiring Manager,",
-    "I'm excited to apply for the Senior Frontend Engineer role at Northwind Labs.",
-    "My work shipping React + TypeScript features maps directly to your team's goals.",
+    "Your posting says the checkout rebuild is the team's first project this year.",
+    "I spent the last two years on the same problem at Fieldline, where we cut checkout load time by a fifth.",
   ];
   return (
     <div>
       <PaneHead
         icon={Mail}
-        title="Cover Letter"
-        sub="Personalized to the company and role"
+        title="Cover letter"
+        sub="Drafted from the posting and your resume"
         badge={
-          <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
-            <Sparkles className="h-3 w-3" />
-            Tailored
+          <span className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
+            Draft
           </span>
         }
       />
@@ -452,8 +443,8 @@ function CoachPane({ reduce }: { reduce: boolean }) {
     <div>
       <PaneHead
         icon={MessageSquare}
-        title="AI Interview Coach"
-        sub="Practice answers with instant feedback"
+        title="Interview coach"
+        sub="Practice answers and get notes on them"
         badge={
           <span className="inline-flex items-center gap-1 rounded-full border border-info/30 bg-info/10 px-2 py-1 text-[11px] font-medium text-info">
             STAR method
@@ -476,10 +467,10 @@ function CoachPane({ reduce }: { reduce: boolean }) {
             transition={{ delay: reduce ? 0 : 0.6, duration: 0.4 }}
             className="max-w-[80%] rounded-2xl rounded-bl-sm border border-border bg-card px-3.5 py-2.5 text-sm text-foreground/90"
           >
-            Start with the <span className="font-medium text-foreground">Situation</span>, name the{" "}
-            <span className="font-medium text-foreground">Task</span>, then walk through your{" "}
-            <span className="font-medium text-foreground">Action</span> and the measurable{" "}
-            <span className="font-medium text-foreground">Result</span>.
+            Pick one real problem. Spend a sentence on the{" "}
+            <span className="font-medium text-foreground">situation</span>, most of your time on what{" "}
+            <span className="font-medium text-foreground">you did</span>, and end with what{" "}
+            <span className="font-medium text-foreground">changed</span> because of it.
           </motion.div>
         </div>
       </div>
@@ -497,8 +488,8 @@ function TrackPane({ reduce }: { reduce: boolean }) {
     <div>
       <PaneHead
         icon={CheckCircle2}
-        title="Application Tracker"
-        sub="Every application and follow-up in one board"
+        title="Application tracker"
+        sub="Where each application stands"
         badge={
           <span className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
             13 active

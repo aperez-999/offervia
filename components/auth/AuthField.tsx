@@ -18,11 +18,7 @@ type AuthFieldProps = {
   rightSlot?: ReactNode;
 };
 
-/**
- * Shared auth input field — icon-leading, token-driven, with a focus ring and
- * error state that match the rest of the app. Keeps login/signup/reset forms
- * visually consistent.
- */
+/** Auth input used by login, signup, and password reset. */
 export default function AuthField({
   id,
   label,

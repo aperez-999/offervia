@@ -74,7 +74,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
           <Link
             href="/"
             className="group flex items-center"
-            aria-label="Offervia — Home"
+            aria-label="Offervia home"
           >
             <BrandLogo
               width={132}
@@ -149,18 +149,27 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               Contact
             </Link>
 
+            <a
+              href="https://github.com/aperez-999/offervia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
+            >
+              GitHub
+            </a>
+
             <Link
               href="/login"
               className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
             >
-              Sign In
+              Sign in
             </Link>
 
             <Link
               href="/signup"
               className="bg-brand-gradient hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
-              Sign Up
+              Sign up
             </Link>
 
             {/* Theme toggle with animated icon swap */}
@@ -237,20 +246,29 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                   >
                     Contact
                   </Link>
+                  <a
+                    href="https://github.com/aperez-999/offervia"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md px-3 py-2 text-foreground/90 hover:bg-foreground/5"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    GitHub
+                  </a>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <Link
                       href="/login"
                       className="rounded-md border border-border px-3 py-2 text-center text-foreground hover:bg-foreground/5"
                       onClick={() => setMobileOpen(false)}
                     >
-                      Sign In
+                      Sign in
                     </Link>
                     <Link
                       href="/signup"
                       className="bg-brand-gradient rounded-md px-3 py-2 text-center font-medium text-white hover:brightness-110"
                       onClick={() => setMobileOpen(false)}
                     >
-                      Sign Up
+                      Sign up
                     </Link>
                   </div>
                 </div>

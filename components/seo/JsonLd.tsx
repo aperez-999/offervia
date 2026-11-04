@@ -64,13 +64,13 @@ export function SoftwareApplicationJsonLd() {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-      description: "Free to start — upgrade to Pro when you're ready.",
+      description: "Free plan with monthly limits. Pro raises the limits.",
     },
     featureList: [
       "Job description scanner",
-      "AI resume tailoring",
-      "Cover letter generator",
-      "AI interview coach",
+      "Resume tailoring",
+      "Cover letter drafts",
+      "Interview practice",
       "Application tracker",
     ],
   };

@@ -54,7 +54,7 @@ export default function SignupForm() {
 
     // Success: show verification toast immediately
     toast({ variant: "success",
-      title: "Account created successfully — check your email to confirm your account.",
+      title: "Account created. Check your email for a confirmation link.",
       description: result.data.data.message,
     });
     setTimeout(() => {
@@ -115,20 +115,13 @@ export default function SignupForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:opacity-70 disabled:cursor-not-allowed"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
         )}
-        <span>{isSubmitting ? "Creating..." : "Create Account"}</span>
+        <span>{isSubmitting ? "Creating account…" : "Create account"}</span>
       </button>
-
-      <p className="mt-2 text-center text-xs text-muted-foreground">
-        Secure • Private • No spam
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground text-center">
-        Get started free — no credit card required
-      </p>
     </form>
   );
 }

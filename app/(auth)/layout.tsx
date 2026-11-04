@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "Account Access",
+    default: "Account",
     template: "%s | Offervia",
   },
   robots: {

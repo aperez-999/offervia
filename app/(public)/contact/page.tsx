@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Sparkles,
+  HelpCircle,
   Github,
 } from "lucide-react";
 import { InputField, TextareaField } from "@/components/ui/FormFields";
@@ -79,13 +79,13 @@ export default function ContactPage() {
             <MessageSquareText className="h-6 w-6" />
           </div>
           <p className="mt-4 text-xs font-semibold text-primary">
-            We&apos;re listening
+            Contact
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
             Get in touch
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm text-foreground/70 sm:text-base">
-            Questions about Offervia, a feature idea, or a bug to report? Send a note — we usually reply within 24 hours.
+            Send a question, a bug report, or a feature request. We usually reply within 24 hours on business days.
           </p>
         </motion.div>
 
@@ -97,11 +97,11 @@ export default function ContactPage() {
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="lg:col-span-2"
           >
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-black/5 ring-1 ring-white/5 dark:ring-black/10 dark:shadow-black/40 sm:p-8">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-foreground">Send us a message</h2>
+                <h2 className="text-xl font-semibold text-foreground">Send a message</h2>
                 <p className="mt-1 text-sm text-foreground/60">
-                  We&apos;ll get back to you within 24 hours.
+                  All fields are required.
                 </p>
               </div>
 
@@ -113,7 +113,7 @@ export default function ContactPage() {
                 >
                   <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
                   <p className="text-sm font-medium text-success">
-                    Message sent! We&apos;ll get back to you soon.
+                    Message sent. We&apos;ll reply to the email you gave.
                   </p>
                 </motion.div>
               )}
@@ -126,7 +126,7 @@ export default function ContactPage() {
                 >
                   <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
                   <p className="text-sm font-medium text-destructive">
-                    Failed to send message. Please try again.
+                    Your message didn&apos;t send. Try again, or check your connection.
                   </p>
                 </motion.div>
               )}
@@ -134,7 +134,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <InputField
-                    label="Full Name"
+                    label="Name"
                     name="name"
                     type="text"
                     value={formData.name}
@@ -143,7 +143,7 @@ export default function ContactPage() {
                     icon={User}
                   />
                   <InputField
-                    label="Email Address"
+                    label="Email"
                     name="email"
                     type="email"
                     value={formData.email}
@@ -164,21 +164,20 @@ export default function ContactPage() {
                 />
 
                 <TextareaField
-                  label="Your Message"
+                  label="Message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   required
                   rows={7}
-                  placeholder="Tell us how we can help with your job search..."
+                  placeholder="What do you need help with?"
                 />
 
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="bg-brand-gradient flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
+                  className="bg-brand-gradient flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? (
                     <>
@@ -203,23 +202,23 @@ export default function ContactPage() {
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
             className="space-y-6"
           >
-            {/* Why contact us — premium gradient panel */}
-            <div className="bg-brand-gradient relative overflow-hidden rounded-2xl p-6 text-white shadow-lg shadow-primary/30">
+            {/* What to contact us about */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-                  <Sparkles className="h-5 w-5" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <HelpCircle className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-semibold">Why reach out?</h3>
+                <h3 className="text-lg font-semibold text-foreground">What you can ask about</h3>
               </div>
               <ul className="mt-4 space-y-2.5">
                 {[
-                  "Resume & ATS compatibility help",
-                  "Report bugs or suggest features",
-                  "Questions about the AI tools",
-                  "Share feedback & ideas",
+                  "Problems with your resume or a scan",
+                  "Bugs and feature requests",
+                  "How resume and cover letter drafts work",
+                  "Billing and account questions",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-white/90">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -227,7 +226,7 @@ export default function ContactPage() {
             </div>
 
             {/* Response time */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
                   <Clock className="h-5 w-5" />
@@ -235,31 +234,27 @@ export default function ContactPage() {
                 <h3 className="text-lg font-semibold text-foreground">Response time</h3>
               </div>
               <p className="mt-3 text-sm text-foreground/70">
-                We typically respond within 24 hours on business days.
+                Usually within 24 hours on business days.
               </p>
               <div className="mt-4 space-y-2 text-xs text-foreground/70">
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  Mon–Fri: 9 AM – 6 PM EST
+                  Mon to Fri, 9 AM to 6 PM EST
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-                  Weekends: delayed responses
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                  Urgent issues: prioritized
+                  Weekend replies take longer
                 </div>
               </div>
             </div>
 
             {/* Connect */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10 text-info">
                   <Github className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Connect with us</h3>
+                <h3 className="text-lg font-semibold text-foreground">Elsewhere</h3>
               </div>
               <div className="mt-4 space-y-2">
                 <a
@@ -273,7 +268,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-foreground">GitHub</span>
-                    <p className="text-xs text-foreground/60">View our code &amp; contribute</p>
+                    <p className="text-xs text-foreground/60">Code and issues</p>
                   </div>
                 </a>
                 <a
@@ -289,7 +284,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-foreground">Twitter / X</span>
-                    <p className="text-xs text-foreground/60">Follow for updates</p>
+                    <p className="text-xs text-foreground/60">Product updates</p>
                   </div>
                 </a>
               </div>

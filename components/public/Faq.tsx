@@ -8,28 +8,28 @@ type QA = { q: string; a: string };
 
 const QA_ITEMS: QA[] = [
   {
-    q: "Is Offervia free to use?",
-    a: "Yes. Offervia has a generous free tier with monthly limits to keep the platform fast and fair for everyone.",
+    q: "Is Offervia free?",
+    a: "Yes. Each month the free plan includes 10 job scans, 5 tailored resumes, 3 cover letters, 5 interview sessions, and 25 coach messages. The tracker has no monthly cap.",
   },
   {
-    q: "How does the AI improve my resume?",
-    a: "Our AI tailors your resume to match job descriptions, optimizes keywords, formats for ATS, and highlights impact using real hiring criteria.",
+    q: "What does Resume Tailor actually change?",
+    a: "It rewrites your summary and bullets so they use the skills and terms the posting asks for, and keeps the formatting simple enough for applicant tracking systems to read. It works from what's already on your resume, so read the draft and fix anything that isn't true before you send it.",
   },
   {
     q: "What do I get with Pro?",
-    a: "Pro is recommended if you’re applying consistently. It unlocks much higher monthly limits so you can scan and tailor without interruptions.",
+    a: "Much higher monthly limits on everything. It's worth it if you're applying to several jobs a week and keep hitting the free caps.",
   },
   {
     q: "Do you store my resume or personal data?",
-    a: "Offervia stores the account data and feature history needed to run the app, such as tracker entries, coach messages, and saved job scans. Resume text, job descriptions, and chat prompts are processed through Offervia’s server-side AI flow to generate results, and browser-only drafts stay on the device where you created them.",
+    a: "We store what the app needs to work: your account, tracker entries, coach messages, and saved job scans. Resume text, job descriptions, and chat messages are sent from our server to an AI model to generate results. Drafts you keep only in your browser stay on that device.",
   },
   {
-    q: "Can I upload PDF or DOCX files?",
-    a: "Yes — you can upload either format. DOCX provides cleaner text extraction, but both are supported.",
+    q: "Can I upload a PDF or DOCX?",
+    a: "Yes, either one works. DOCX files usually give cleaner text, so use one if you have it.",
   },
   {
-    q: "What makes Offervia different from other resume tools?",
-    a: "Offervia is built specifically for job seekers — not employers — with real interview prep, JD scanning, and tailored resume outputs in one place.",
+    q: "How is this different from a resume builder?",
+    a: "A resume builder gives you one document. Offervia is organized around the job: the posting, the version of your resume you sent, the cover letter, your interview prep, and where the application stands.",
   },
 ];
 
@@ -42,7 +42,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.35, delay: idx * 0.03 }}
-      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
     >
       <button
         type="button"
@@ -83,15 +83,14 @@ export default function Faq() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          className="mx-auto max-w-2xl text-center"
+          className="max-w-2xl"
         >
-          <p className="text-xs font-semibold text-primary">FAQ</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance">
-            Frequently asked questions
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground text-balance">
+            Questions people ask
           </h2>
         </motion.div>
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-3">
+        <div className="mt-10 grid max-w-3xl gap-3">
           {QA_ITEMS.map((qa, i) => (
             <Item key={qa.q} idx={i} {...qa} />
           ))}

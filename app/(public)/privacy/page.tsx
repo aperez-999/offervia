@@ -7,12 +7,12 @@ export default function PrivacyPage() {
 
   const sections = [
     { id: "introduction", title: "Introduction", icon: ShieldCheck },
-    { id: "data-we-collect", title: "Data We Collect", icon: Database },
-    { id: "how-data-is-used", title: "How Data Is Used", icon: Workflow },
-    { id: "ai-and-security", title: "AI & Security", icon: Lock },
-    { id: "user-rights", title: "Your Rights", icon: UserCheck },
+    { id: "data-we-collect", title: "Data we collect", icon: Database },
+    { id: "how-data-is-used", title: "How data is used", icon: Workflow },
+    { id: "ai-and-security", title: "Drafts and security", icon: Lock },
+    { id: "user-rights", title: "Your rights", icon: UserCheck },
     { id: "cookies", title: "Cookies", icon: Cookie },
-    { id: "changes", title: "Changes to this Policy", icon: RefreshCw },
+    { id: "changes", title: "Changes to this policy", icon: RefreshCw },
     { id: "contact", title: "Contact", icon: Mail },
   ];
 
@@ -30,13 +30,13 @@ export default function PrivacyPage() {
             <ShieldCheck className="h-6 w-6" />
           </div>
           <p className="mt-4 text-xs font-semibold text-primary">
-            Your privacy, respected
+            Legal
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
             Privacy Policy
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-foreground/70">
-            Offervia is built for job seekers. We handle your information with care and transparency — and we never sell your data.
+            What Offervia collects, how it&apos;s used, and the choices you have. We never sell your data.
           </p>
           <div className="mx-auto mt-4 w-fit rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/70">
             Last updated: {lastUpdated}
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
         <div className="mt-12 grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
           {/* Sticky TOC (desktop) */}
           <aside className="sticky top-24 hidden h-fit self-start lg:block animate-in fade-in-0 slide-in-from-left-3 duration-700">
-            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm">
               <p className="px-3 py-2 text-xs font-semibold text-foreground/50">
                 On this page
               </p>
@@ -77,15 +77,15 @@ export default function PrivacyPage() {
                 <h2 className="text-base font-semibold text-foreground">Introduction</h2>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                Offervia is an AI career suite built for job seekers. This policy explains what we
-                collect, how we use it, and the choices available to you. We do not sell your data.
+                Offervia is a job search helper. This policy explains what we collect,
+                how we use it, and the choices you have. We do not sell your data.
               </p>
             </section>
 
             {[
               {
                 id: "data-we-collect",
-                title: "Data We Collect",
+                title: "Data we collect",
                 icon: Database,
                 body: (
                   <>
@@ -101,32 +101,32 @@ export default function PrivacyPage() {
               },
               {
                 id: "how-data-is-used",
-                title: "How Data Is Used",
+                title: "How data is used",
                 icon: Workflow,
                 body: (
                   <p>
-                    Your data powers features like resume tailoring, interview coaching, job description
-                    scanning, and application tracking. User-submitted content is processed by Offervia’s
-                    server-side integrations to generate AI outputs, and we may review aggregated product
-                    metrics to improve reliability and user experience.
+                    We use your data to run the tools you ask for: resume rewrites, interview
+                    practice, job scans, and the application tracker. Text you submit is sent
+                    from our server to a model provider to produce those drafts. We also look
+                    at overall usage so we can tell when something is broken.
                   </p>
                 ),
               },
               {
                 id: "ai-and-security",
-                title: "AI & Security",
+                title: "Drafts and security",
                 icon: Lock,
                 body: (
                   <p>
-                    Resumes, job descriptions, and chat prompts are transmitted through Offervia’s backend to
-                    configured third-party AI services so we can generate tailored content and guidance. We employ
-                    reasonable safeguards to protect data in transit and at rest, but no system is perfectly secure.
+                    Resumes, job descriptions, and chat messages go through Offervia's server
+                    to a third-party model so it can write a draft or give feedback. Traffic
+                    is encrypted. Stored data is access-controlled. No setup is perfectly secure.
                   </p>
                 ),
               },
               {
                 id: "user-rights",
-                title: "Your Rights",
+                title: "Your rights",
                 icon: UserCheck,
                 body: (
                   <p>
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
               },
               {
                 id: "changes",
-                title: "Changes to this Policy",
+                title: "Changes to this policy",
                 icon: RefreshCw,
                 body: (
                   <p>
@@ -180,7 +180,7 @@ export default function PrivacyPage() {
                 >
                   Contact us
                 </Link>
-                . We’re here to help.
+                .
               </p>
             </SectionCard>
 

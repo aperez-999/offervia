@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (searchParams.get("reset") === "1") {
-      toast({ variant: "success", title: "Password reset successful — please sign in." });
+      toast({ variant: "success", title: "Password updated. Sign in with your new password." });
       router.replace("/login");
     }
     if (searchParams.get("auth_error") === "oauth_callback_failed") {
@@ -62,7 +62,7 @@ export default function LoginPage() {
     <AuthLayout aside={<LoginAside />}>
       <div className="mb-5 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-500">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">Welcome back</h1>
-        <p className="mt-1 text-sm text-foreground/70">Let’s help you land your next offer.</p>
+        <p className="mt-1 text-sm text-foreground/70">Sign in to your Offervia account.</p>
       </div>
 
       <LoginForm />
@@ -111,10 +111,6 @@ export default function LoginPage() {
           Create an account
         </Link>
       </div>
-
-      <p className="mt-2 text-center text-xs text-foreground/60">
-        Secure • Private • Built for job seekers
-      </p>
     </AuthLayout>
   );
 }

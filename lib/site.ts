@@ -2,22 +2,22 @@ import { publicEnv } from "@/lib/env/public";
 
 export const SITE_NAME = "Offervia";
 export const SITE_DEFAULT_TITLE =
-  "Offervia — AI Resume Tailor, Job Scanner & Interview Coach";
+  "Offervia | Resume tailoring, job scanning, and interview practice";
 export const SITE_DESCRIPTION =
-  "Offervia turns any job description into a tailored, ATS-ready resume, cover letter, interview prep, and tracked application — one focused AI workflow for job seekers.";
+  "A job search helper for students, new grads, and anyone applying. Check a posting against your resume, rewrite it, draft a cover letter, practice interviews, and track applications.";
 export const SITE_SHARE_IMAGE = "/og-image.png";
 export const SITE_SHARE_IMAGE_ALT =
-  "Offervia — turn any job description into a tailored resume, cover letter, and tracked application";
+  "Offervia: turn a job posting into a matching resume, cover letter, and tracked application";
 
 /** Primary SEO keywords (used across metadata). */
 export const SITE_KEYWORDS = [
-  "AI resume builder",
   "resume tailoring",
   "ATS resume checker",
   "job description scanner",
-  "cover letter generator",
-  "AI interview coach",
+  "cover letter draft",
+  "interview practice",
   "job application tracker",
+  "student job search",
   "resume optimizer",
   "job search tools",
   "career tools for job seekers",
