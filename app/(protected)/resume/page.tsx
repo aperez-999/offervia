@@ -23,7 +23,7 @@ const ResumeWizard = dynamic(() => import("@/components/resume/ResumeWizard"), {
 
 export const metadata: Metadata = createPageMetadata({
   title: "Resume Tailor",
-  description: "Tailor your resume to each role with clearer inputs, stronger drafts, and faster iteration.",
+  description: "Rewrite your resume for a specific job description.",
   path: "/resume",
   index: false,
 });

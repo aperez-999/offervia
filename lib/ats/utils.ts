@@ -158,28 +158,28 @@ function buildTips(
   if (missingMust.length) {
     const list = missingMust.slice(0, 6).join(", ");
     tips.push(
-      `Add the required keywords the resume is missing where you genuinely have them: ${list}.`,
+      `Required keywords your resume is missing: ${list}. Add the ones you actually have experience with.`,
     );
   } else if (missing.length) {
     const list = missing.slice(0, 6).join(", ");
     tips.push(
-      `Work in these preferred keywords where they apply to your experience: ${list}.`,
+      `Preferred keywords your resume is missing: ${list}. Add them where they fit your experience.`,
     );
   } else {
-    tips.push("Strong keyword coverage — your resume mirrors this job's language well.");
+    tips.push("Your resume already uses most of this job's keywords.");
   }
 
   if (score < 60) {
     tips.push(
-      "Mirror the job's exact phrasing (e.g. use \"CI/CD\" if the JD does) — ATS matching is literal.",
+      "Use the job's exact wording (for example, \"CI/CD\" if the posting says CI/CD). ATS matching is literal.",
     );
   }
 
   tips.push(
-    "Put key skills in a plain-text \"Skills\" section; avoid tables, columns, and images that ATS parsers drop.",
+    "List key skills in a plain-text \"Skills\" section. ATS parsers often drop tables, columns, and images.",
   );
   tips.push(
-    "Spell out acronyms once with the full term (e.g. \"Search Engine Optimization (SEO)\") so both forms match.",
+    "Write out each acronym once with the full term, like \"Search Engine Optimization (SEO)\", so both forms match.",
   );
 
   return tips;

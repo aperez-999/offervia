@@ -30,7 +30,7 @@ export function getDashboardNextAction(input: {
       return {
         title: "Continue your Job Packet",
         desc:
-          "Your job description is already saved. Run the scan and carry that context through the rest of the flow.",
+          "Your job description is saved. Run the scan next.",
         href: "/job-packet",
         cta: "Continue packet",
       };
@@ -40,15 +40,15 @@ export function getDashboardNextAction(input: {
       return {
         title: "Finish tailoring this Job Packet",
         desc:
-          "Your scan is ready. Open Resume Tailor with the saved company, role, and JD context.",
+          "Your scan is done. Next, tailor your resume using the same job description.",
         href: "/job-packet",
         cta: "Continue packet",
       };
     }
 
     return {
-      title: "Send this Job Packet to the tracker",
-      desc: "Your tailored draft is ready. Finish the workflow with a prefilled tracker entry.",
+      title: "Add this Job Packet to your tracker",
+      desc: "Your tailored resume is ready. Add the application to your tracker to finish.",
       href: "/job-packet",
       cta: "Finish packet",
     };
@@ -58,7 +58,7 @@ export function getDashboardNextAction(input: {
     return {
       title: "Start a Job Packet",
       desc:
-        "Paste a job description once, tailor with the same context, and log the application without extra setup.",
+        "Paste a job description. Offervia scans it, helps you tailor your resume, and adds the job to your tracker.",
       href: "/job-packet",
       cta: "Start packet",
     };
@@ -66,8 +66,8 @@ export function getDashboardNextAction(input: {
 
   if (recentChatsCount === 0) {
     return {
-      title: "Ask the coach a quick question",
-      desc: "Practice a mock interview or tighten a resume bullet in minutes.",
+      title: "Ask the coach a question",
+      desc: "Run a practice interview or get feedback on a resume bullet.",
       href: "/coach",
       cta: "Open Coach",
     };
@@ -75,7 +75,7 @@ export function getDashboardNextAction(input: {
 
   return {
     title: "Run a Job Packet",
-    desc: "Scan a job description, tailor, then track your application.",
+    desc: "Scan a job description, tailor your resume, then track the application.",
     href: "/job-packet",
     cta: "Start packet",
   };
@@ -104,7 +104,7 @@ export function getDashboardUsageItems(input: {
   return [
     {
       key: "resume",
-      label: "Resume Tailors",
+      label: "Resume tailors",
       used: usage.resumeTailor,
       limit: limits.resume_tailor_per_month,
       pct: usagePct(usage.resumeTailor, limits.resume_tailor_per_month),
@@ -112,7 +112,7 @@ export function getDashboardUsageItems(input: {
     },
     {
       key: "coach",
-      label: "AI Coach",
+      label: "Coach messages",
       used: usage.coachMessages,
       limit: limits.coach_messages_per_month,
       pct: usagePct(usage.coachMessages, limits.coach_messages_per_month),
@@ -120,7 +120,7 @@ export function getDashboardUsageItems(input: {
     },
     {
       key: "scan",
-      label: "Job Scans",
+      label: "Job scans",
       used: usage.jobScans,
       limit: limits.job_scans_per_month,
       pct: usagePct(usage.jobScans, limits.job_scans_per_month),
@@ -128,7 +128,7 @@ export function getDashboardUsageItems(input: {
     },
     {
       key: "interview",
-      label: "Mock Interviews",
+      label: "Mock interviews",
       used: usage.interviewSessions,
       limit: limits.interview_sessions_per_month,
       pct: interviewUnlimited
@@ -141,7 +141,7 @@ export function getDashboardUsageItems(input: {
     },
     {
       key: "cover_letter",
-      label: "Cover Letters",
+      label: "Cover letters",
       used: usage.coverLetters,
       limit: limits.cover_letters_per_month,
       pct: usagePct(usage.coverLetters, limits.cover_letters_per_month),

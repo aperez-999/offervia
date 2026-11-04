@@ -18,8 +18,8 @@ export default function ProtectedError({
     console.error(error);
     Sentry.captureException(error);
     toast({
-      title: "Something went wrong",
-      description: "Please try again.",
+      title: "This page didn't load",
+      description: "Try again in a moment.",
       variant: "destructive",
     });
   }, [error, toast]);
@@ -31,8 +31,8 @@ export default function ProtectedError({
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <ErrorView
-        title="We hit a snag"
-        description="This page failed to load. Try again. If it keeps happening, please contact us."
+        title="This page didn't load"
+        description="Try again. If it keeps happening, contact support and include the details below."
         onRetry={reset}
         supportHref="/contact"
         errorMessage={details}

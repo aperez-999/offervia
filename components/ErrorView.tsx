@@ -15,7 +15,7 @@ type Props = {
 
 export default function ErrorView({
   title = "Something went wrong",
-  description = "An unexpected error occurred. You can try again. If the issue persists, contact support.",
+  description = "Try again. If it keeps happening, contact support.",
   onRetry,
   supportHref = "/contact",
   errorMessage,
@@ -33,7 +33,7 @@ export default function ErrorView({
   }
 
   return (
-    <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
         <div className="flex items-start gap-3">
           <div className="rounded-md bg-foreground/5 p-2">
@@ -51,7 +51,7 @@ export default function ErrorView({
         {errorMessage ? (
           <details className="group">
             <summary className="cursor-pointer text-sm text-foreground/70 hover:text-foreground">
-              Technical details
+              Error details
             </summary>
             <pre className="mt-2 max-h-48 overflow-auto rounded-md border border-border bg-background/60 p-3 text-xs text-foreground/80">
 {errorMessage}
@@ -76,7 +76,7 @@ export default function ErrorView({
             className="border-border text-foreground hover:bg-foreground/[0.06]"
           >
             <ClipboardList className="mr-2 h-4 w-4" />
-            {copied ? "Copied" : "Copy details"}
+            {copied ? "Copied" : "Copy error details"}
           </Button>
           <a
             href={supportHref}

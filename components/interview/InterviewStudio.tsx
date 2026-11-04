@@ -9,8 +9,8 @@ import {
   Lightbulb,
   Loader2,
   MessageSquare,
+  Play,
   RotateCcw,
-  Sparkles,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -26,6 +26,7 @@ import {
   FOCUS_OPTIONS,
   difficultyLabel,
   focusLabel,
+  QUESTION_COUNT,
   scoreBand,
   type AnswerFeedback,
   type InterviewDifficulty,
@@ -150,13 +151,13 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
                 <li key={i} className="text-sm text-foreground/80">• {s}</li>
               ))
             ) : (
-              <li className="text-sm text-foreground/50">—</li>
+              <li className="text-sm text-foreground/50">None noted</li>
             )}
           </ul>
         </div>
         <div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/60">
-            <TrendingUp className="size-3.5 text-amber-500" /> Improve
+            <TrendingUp className="size-3.5 text-amber-500" /> To improve
           </div>
           <ul className="mt-2 space-y-1.5">
             {feedback.improvements.length ? (
@@ -164,7 +165,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
                 <li key={i} className="text-sm text-foreground/80">• {s}</li>
               ))
             ) : (
-              <li className="text-sm text-foreground/50">—</li>
+              <li className="text-sm text-foreground/50">None noted</li>
             )}
           </ul>
         </div>
@@ -223,7 +224,7 @@ export default function InterviewStudio({
 
   async function handleStart() {
     if (roleTitle.trim().length < 2) {
-      toast({ title: "Add a target role", description: "Tell us the role you're interviewing for.", variant: "destructive" });
+      toast({ title: "Add a target role", description: "Enter the role you're interviewing for.", variant: "destructive" });
       return;
     }
     setStarting(true);
@@ -235,7 +236,7 @@ export default function InterviewStudio({
         return;
       }
       if (!res.ok) {
-        toast({ title: "Couldn't start", description: String(data.message || "Please try again."), variant: "destructive" });
+        toast({ title: "Couldn't start", description: String(data.message || "Try again in a moment."), variant: "destructive" });
         return;
       }
       const qs = (data.questions as string[]) || [];
@@ -263,7 +264,7 @@ export default function InterviewStudio({
         answer: answer.trim(),
       });
       if (!res.ok) {
-        toast({ title: "Couldn't score", description: String(data.message || "Please try again."), variant: "destructive" });
+        toast({ title: "Couldn't score", description: String(data.message || "Try again in a moment."), variant: "destructive" });
         return;
       }
       const feedback = data.feedback as TranscriptEntry;
@@ -292,7 +293,7 @@ export default function InterviewStudio({
     try {
       const { res, data } = await postInterview({ action: "finish", sessionId });
       if (!res.ok) {
-        toast({ title: "Couldn't finish", description: String(data.message || "Please try again."), variant: "destructive" });
+        toast({ title: "Couldn't finish", description: String(data.message || "Try again in a moment."), variant: "destructive" });
         return;
       }
       setOverallScore(Number(data.overallScore) || 0);
@@ -329,7 +330,7 @@ export default function InterviewStudio({
               </span>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Set up your mock interview</h2>
-                <p className="text-sm text-foreground/70">Answer 5 tailored questions and get scored, specific feedback.</p>
+                <p className="text-sm text-foreground/70">You&apos;ll get {QUESTION_COUNT} questions for this role. Each answer is scored out of 100.</p>
               </div>
             </div>
           </div>
@@ -340,7 +341,7 @@ export default function InterviewStudio({
                 <p className="text-sm font-medium text-foreground">
                   You&apos;ve used all {limit} mock interviews this month.
                 </p>
-                <p className="mt-0.5 text-sm text-foreground/70">Upgrade to Pro for effectively unlimited practice.</p>
+                <p className="mt-0.5 text-sm text-foreground/70">Pro has no monthly cap on mock interviews.</p>
                 <Button asChild size="sm" className="mt-3">
                   <Link href="/upgrade">Upgrade to Pro</Link>
                 </Button>
@@ -376,11 +377,11 @@ export default function InterviewStudio({
               <Button onClick={handleStart} disabled={starting} size="lg" className="sm:min-w-44">
                 {starting ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Preparing questions…
+                    <Loader2 className="size-4 animate-spin" /> Writing your questions…
                   </>
                 ) : (
                   <>
-                    <Sparkles className="size-4" /> Start interview
+                    <Play className="size-4" /> Start interview
                   </>
                 )}
               </Button>
@@ -435,14 +436,14 @@ export default function InterviewStudio({
               <Textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Speak your answer out loud, then type the key points here…"
+                placeholder="Say your answer out loud first, then type the main points here…"
                 rows={7}
                 maxLength={4000}
                 disabled={scoring || Boolean(currentFeedback)}
                 className="resize-none"
               />
               <div className="flex items-center justify-between text-xs text-foreground/50">
-                <span>{currentFeedback ? "Answer submitted" : "Aim for a structured, specific answer (STAR works well)."}</span>
+                <span>{currentFeedback ? "Answer submitted" : "Give a specific example. Situation, task, action, result works well."}</span>
                 <span>{answer.length}/4000</span>
               </div>
             </div>
@@ -452,7 +453,7 @@ export default function InterviewStudio({
                 <Button onClick={handleSubmitAnswer} disabled={scoring || answer.trim().length < 1}>
                   {scoring ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" /> Scoring…
+                      <Loader2 className="size-4 animate-spin" /> Scoring your answer…
                     </>
                   ) : (
                     <>Submit answer</>
@@ -477,7 +478,7 @@ export default function InterviewStudio({
                   <Button onClick={handleFinish} disabled={finishing} size="lg">
                     {finishing ? (
                       <>
-                        <Loader2 className="size-4 animate-spin" /> Building summary…
+                        <Loader2 className="size-4 animate-spin" /> Writing your summary…
                       </>
                     ) : (
                       <>See results <ArrowRight className="size-4" /></>
@@ -505,7 +506,7 @@ export default function InterviewStudio({
           <div className="flex flex-col items-center gap-4 border-b border-border px-6 py-8 text-center sm:px-8">
             <ScoreRing score={overallScore} />
             <div>
-              <h2 className="text-xl font-semibold text-foreground">{roleTitle || "Mock interview"} · complete</h2>
+              <h2 className="text-xl font-semibold text-foreground">{roleTitle || "Mock interview"}: finished</h2>
               <p className="mt-1 text-sm text-foreground/70">
                 {answeredCount} of {questions.length} answered · {focusLabel(focus)} · {difficultyLabel(difficulty)}
               </p>
@@ -516,7 +517,7 @@ export default function InterviewStudio({
           </div>
 
           <div className="space-y-3 px-6 py-6 sm:px-8">
-            <div className="text-xs font-semibold text-foreground/60">Per-question breakdown</div>
+            <div className="text-xs font-semibold text-foreground/60">Scores by question</div>
             {answered.map((t, i) => {
               const band = scoreBand(t.score);
               const tone = toneToClasses[band.tone];
@@ -547,7 +548,7 @@ export default function InterviewStudio({
         </Button>
         <Button asChild size="lg">
           <Link href="/coach">
-            <MessageSquare className="size-4" /> Keep practicing with Coach
+            <MessageSquare className="size-4" /> Practice more with Coach
           </Link>
         </Button>
       </div>

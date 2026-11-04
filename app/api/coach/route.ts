@@ -119,8 +119,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(
       rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
       msg,
@@ -138,7 +138,7 @@ export async function POST(req: Request) {
     if (!gate.allowed) {
       return fail(
         "PLAN_LIMIT_REACHED",
-        "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+        "You've used this month's coach messages. Upgrade to Pro for more.",
         403
       );
     }
@@ -147,23 +147,23 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const parsed = coachBodySchema.safeParse(body);
     if (!parsed.success) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const { mode, responseMode, messages } = parsed.data;
 
     if (!(mode in SYSTEM_PROMPTS)) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const userInput = messages[messages.length - 1];
     if (!userInput || userInput.role !== "user") {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const userMessage = await insertMessage({
@@ -215,7 +215,7 @@ export async function POST(req: Request) {
       return Response.json(
         {
           error: "SERVER_ERROR",
-          message: "Coach failed to respond.",
+          message: "The coach didn't respond. Try again in a minute.",
           userMessage,
         },
         { status: 500 }
@@ -223,20 +223,20 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     captureServerException(error, { route: "api/coach" });
-    return fail("SERVER_ERROR", "Coach failed to respond.", 500);
+    return fail("SERVER_ERROR", "The coach didn't respond. Try again in a minute.", 500);
   }
 }
 
 export async function DELETE(req: Request) {
   const userId = await getAuthenticatedUserId(req);
   if (!userId) {
-    return fail("UNAUTHORIZED", "Authentication required.", 401);
+    return fail("UNAUTHORIZED", "Sign in to continue.", 401);
   }
 
   const mode = new URL(req.url).searchParams.get("mode");
   const parsedMode = coachModeSchema.safeParse(mode);
   if (!parsedMode.success) {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const supabase = getServiceSupabase();
@@ -251,7 +251,7 @@ export async function DELETE(req: Request) {
       route: "api/coach",
       extras: { stage: "delete-history", mode: parsedMode.data },
     });
-    return fail("SERVER_ERROR", "Failed to clear conversation.", 500);
+    return fail("SERVER_ERROR", "Couldn't clear the chat. Try again.", 500);
   }
 
   return Response.json({ success: true });

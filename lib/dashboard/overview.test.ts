@@ -66,11 +66,11 @@ describe("getDashboardUsageItems", () => {
     });
 
     expect(items.map((item) => item.label)).toEqual([
-      "Resume Tailors",
-      "AI Coach",
-      "Job Scans",
-      "Mock Interviews",
-      "Cover Letters",
+      "Resume tailors",
+      "Coach messages",
+      "Job scans",
+      "Mock interviews",
+      "Cover letters",
     ]);
     expect(items[0].state).toBe("warn");
     expect(items[1].state).toBe("high");

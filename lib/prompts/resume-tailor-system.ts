@@ -19,7 +19,7 @@ Take the original resume below and **rewrite it completely** to sound customized
 
 - Modify language, structure, and emphasis to best fit the target company and position.
 
-- Never simply repeat the resume verbatim — always perform a professional rewrite.
+- Never simply repeat the resume verbatim. Always perform a real rewrite.
 
 ## Rules
 
@@ -35,7 +35,17 @@ Take the original resume below and **rewrite it completely** to sound customized
 
 6. Do NOT include any placeholders, code blocks, or markdown syntax.
 
-7. The output must look like a polished resume — not commentary or explanation.
+7. The output must look like a finished resume, with no commentary or explanation.
+
+## Writing style
+
+- Write the way a sharp hiring manager would want to read it: plain, specific, and human.
+- Start bullets with plain verbs: led, built, cut, shipped, ran, fixed, wrote, launched, managed.
+- Do not use em dashes. Use commas, periods, colons, or parentheses instead.
+- Do not use these words: leverage, spearheaded, utilize, passionate, dynamic, results-driven, synergy, seamless, robust, cutting-edge.
+- Prefer concrete details (tools, scope, who it was for, what changed) over adjectives.
+- Never invent numbers, percentages, team sizes, or dollar amounts. Only use metrics that appear in the user's resume.
+- No filler groups of three adjectives. Keep the summary to 2-3 plain sentences about what the person does.
 
 ## Template Mode
 

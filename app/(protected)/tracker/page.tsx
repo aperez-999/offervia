@@ -135,7 +135,7 @@ export default function TrackerPage() {
 
     if (!res.ok) {
       if (res.status !== 401) {
-        toast({ title: "Failed to load tracker", description: "Check your connection and refresh the page.", variant: "destructive" });
+        toast({ title: "Couldn't load your applications", description: "Check your connection and refresh the page.", variant: "destructive" });
       }
       setApps([]);
       setLoading(false);
@@ -250,7 +250,7 @@ export default function TrackerPage() {
     if (!res.ok) {
       toast({
         title: "Couldn't save this application",
-        description: "Check your connection and try again — your changes weren't lost.",
+        description: "Check your connection and try again. Your edits are still in the form.",
         variant: "destructive",
       });
       setSubmitting(false);
@@ -284,8 +284,8 @@ export default function TrackerPage() {
       title: saved && openedFromPacket ? "Application saved from Job Packet" : "Application saved",
       description:
         saved && openedFromPacket
-          ? "Your packet is complete and the tracker now has the latest details."
-          : "Your tracker is up to date.",
+          ? "Your Job Packet is complete."
+          : undefined,
     });
     setOpen(false);
     resetForm();
@@ -304,14 +304,14 @@ export default function TrackerPage() {
     if (!res.ok) {
       toast({
         title: "Couldn't delete this application",
-        description: "Something went wrong. Please try again.",
+        description: "Check your connection and try again.",
         variant: "destructive",
       });
       return;
     }
 
     setApps((current) => current.filter((app) => app.id !== pendingDeleteId));
-    toast({ variant: "success", title: "Application removed" });
+    toast({ variant: "success", title: "Application deleted" });
     setConfirmOpen(false);
     setPendingDeleteId(null);
   }
@@ -328,7 +328,7 @@ export default function TrackerPage() {
     });
 
     if (!res.ok) {
-      toast({ title: "Could not add job", description: "Your entry wasn't saved. Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't add this application", description: "It wasn't saved. Check your connection and try again.", variant: "destructive" });
       setQuickSaving(false);
       return;
     }
@@ -339,7 +339,6 @@ export default function TrackerPage() {
     }
     toast({ variant: "success",
       title: "Application added",
-      description: "Your tracker has a new entry ready for follow-up.",
     });
     setQuickCompany("");
     setQuickPosition("");
@@ -362,7 +361,7 @@ export default function TrackerPage() {
       setApps((current) =>
         current.map((entry) => (entry.id === app.id ? { ...entry, status: app.status } : entry))
       );
-      toast({ title: "Failed to update status", description: "We reverted the change. Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't update status", description: "The status was changed back. Try again.", variant: "destructive" });
     }
 
     setUpdatingId(null);
@@ -384,7 +383,7 @@ export default function TrackerPage() {
       setApps((current) =>
         current.map((entry) => (entry.id === app.id ? { ...entry, status: previous } : entry))
       );
-      toast({ title: "Failed to update status", description: "We reverted the change. Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't update status", description: "The status was changed back. Try again.", variant: "destructive" });
     } else {
       toast({ variant: "success", title: `Moved to ${next}` });
     }
@@ -508,11 +507,11 @@ export default function TrackerPage() {
 
   return (
     <div className="space-y-8 py-6 sm:py-8">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
           <p className="mt-1 text-sm text-foreground/70">
-            Keep every application, status change, and next step in one place.
+            Every job you&apos;ve applied to and where it stands.
           </p>
         </div>
 
@@ -522,7 +521,7 @@ export default function TrackerPage() {
             <Input
               value={q}
               onChange={(event) => setQ(event.target.value)}
-              placeholder="Search…"
+              placeholder="Search company or position…"
               className="border-border bg-background/80 pl-8 text-foreground"
             />
           </div>
@@ -571,7 +570,7 @@ export default function TrackerPage() {
           >
             <DialogTrigger asChild>
               <Button onClick={openCreate} className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90">
-                Add Job
+                Add application
               </Button>
             </DialogTrigger>
 
@@ -581,7 +580,7 @@ export default function TrackerPage() {
                   {editingId ? "Edit application" : "Add application"}
                 </DialogTitle>
                 <DialogDescription className="text-foreground/70">
-                  Save the essentials now so future follow-ups stay easier to manage.
+                  Add the company, role, status, and date you applied.
                 </DialogDescription>
               </DialogHeader>
 
@@ -599,7 +598,7 @@ export default function TrackerPage() {
                 <div className="grid gap-1">
                   <label className="text-sm font-medium text-foreground">Position</label>
                   <Input
-                    placeholder="Job title / role"
+                    placeholder="Job title"
                     value={position}
                     onChange={(event) => setPosition(event.target.value)}
                     className="border-border bg-background/80 text-foreground placeholder:text-foreground/40"
@@ -623,7 +622,7 @@ export default function TrackerPage() {
                 </div>
 
                 <div className="grid gap-1">
-                  <label className="text-sm font-medium text-foreground">Applied On</label>
+                  <label className="text-sm font-medium text-foreground">Applied on</label>
                   <Input
                     type="date"
                     placeholder="YYYY-MM-DD"
@@ -651,7 +650,7 @@ export default function TrackerPage() {
                   disabled={!isValid || submitting}
                   className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  {submitting ? "Saving..." : editingId ? "Save Changes" : "Save"}
+                  {submitting ? "Saving…" : editingId ? "Save changes" : "Save application"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -666,10 +665,10 @@ export default function TrackerPage() {
         <Kpi title="Offers" value={kpis.offer} />
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-1 text-sm font-medium text-foreground">Quick add</div>
         <p className="mb-3 text-xs text-foreground/60">
-          Add a role in a few seconds, then come back later for edits and follow-up planning.
+          Enter the company, position, and date. You can add details later.
         </p>
         <div className="grid gap-2 sm:grid-cols-5">
           <Input
@@ -702,7 +701,7 @@ export default function TrackerPage() {
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm">
         <span className="text-sm font-medium text-foreground/70">Filter:</span>
         <Select
           value={statusFilter}
@@ -783,7 +782,7 @@ export default function TrackerPage() {
                   setDraggingId(null);
                   if (dragged) void moveToStatus(dragged, column.status);
                 }}
-                className={`flex flex-col rounded-2xl border bg-card shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10 ${
+                className={`flex flex-col rounded-2xl border bg-card shadow-sm transition-colors dark:ring-black/10 ${
                   dragOverStatus === column.status
                     ? "border-primary/60 bg-primary/[0.04]"
                     : "border-border"
@@ -811,7 +810,7 @@ export default function TrackerPage() {
                     </div>
                   ) : items.length === 0 ? (
                     <p className="px-1 py-6 text-center text-xs text-foreground/50">
-                      No applications
+                      Nothing here yet
                     </p>
                   ) : (
                     items.map((app) => (
@@ -840,14 +839,14 @@ export default function TrackerPage() {
                           </div>
                           <button
                             onClick={() => void cycleStatus(app)}
-                            title="Click to advance status, or drag the card to any stage"
+                            title="Click to move to the next status, or drag the card to another column"
                             className="shrink-0 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             <StatusBadge value={app.status} busy={updatingId === app.id} />
                           </button>
                         </div>
                         {app.applied_on && (
-                          <div className="mt-2 text-[11px] text-foreground/50">
+                          <div className="mt-2 text-xs text-foreground/50">
                             Applied {app.applied_on}
                           </div>
                         )}
@@ -886,7 +885,7 @@ export default function TrackerPage() {
           })}
         </div>
       ) : (
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -913,7 +912,7 @@ export default function TrackerPage() {
                   className="hidden cursor-pointer whitespace-nowrap text-foreground/70 sm:table-cell"
                   onClick={() => toggleSort("applied_on")}
                 >
-                  Applied On <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  Applied on <ArrowUpDown className="ml-1 inline h-3 w-3" />
                 </TableHead>
                 <TableHead className="whitespace-nowrap text-right text-foreground/70">Actions</TableHead>
               </TableRow>
@@ -933,9 +932,9 @@ export default function TrackerPage() {
                 <TableRow>
                   <TableCell colSpan={5}>
                     <div className="py-16 text-center">
-                      <p className="mb-3 text-sm text-foreground/70">No matching applications yet.</p>
+                      <p className="mb-3 text-sm text-foreground/70">No applications match.</p>
                       <p className="mb-4 text-xs text-foreground/60">
-                        Start with Job Packet for a guided flow, or add an application manually here.
+                        Start a Job Packet from a job description, or add an application yourself.
                       </p>
                       <div className="flex flex-wrap items-center justify-center gap-2">
                         <Button
@@ -967,7 +966,7 @@ export default function TrackerPage() {
                     <TableCell>
                       <button
                         onClick={() => void cycleStatus(app)}
-                        title="Click to cycle status"
+                        title="Click to move to the next status"
                         className="cursor-pointer"
                       >
                         <StatusBadge value={app.status} busy={updatingId === app.id} />
@@ -1014,7 +1013,7 @@ export default function TrackerPage() {
       {viewMode === "table" && (
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="text-center text-xs text-foreground/60 sm:text-left">
-          Page {page} of {totalPages} • {view.length} result{view.length === 1 ? "" : "s"}
+          Page {page} of {totalPages}, {view.length} result{view.length === 1 ? "" : "s"}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -1024,7 +1023,7 @@ export default function TrackerPage() {
             onClick={() => setPage((current) => Math.max(1, current - 1))}
             disabled={page <= 1}
           >
-            Prev
+            Previous
           </Button>
           <Button
             variant="outline"
@@ -1042,9 +1041,9 @@ export default function TrackerPage() {
       <ConfirmDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <ConfirmContent className="rounded-2xl border border-border bg-card text-foreground shadow-lg">
           <ConfirmHeader>
-            <ConfirmTitle className="text-foreground">Remove this application?</ConfirmTitle>
+            <ConfirmTitle className="text-foreground">Delete this application?</ConfirmTitle>
             <ConfirmDescription className="text-foreground/70">
-              This permanently removes the tracker entry and its current status. This action cannot be undone.
+              This deletes the application and its status from your tracker. You can&apos;t undo this.
             </ConfirmDescription>
           </ConfirmHeader>
           <ConfirmFooter>
@@ -1067,7 +1066,7 @@ export default function TrackerPage() {
 
 function Kpi({ title, value }: { title: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="text-xs font-medium text-foreground/60">{title}</div>
       <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
     </div>

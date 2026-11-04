@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user?.id) {
-      return fail("UNAUTHORIZED", "Authentication required.", 401);
+      return fail("UNAUTHORIZED", "Sign in to continue.", 401);
     }
 
     const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
@@ -38,14 +38,14 @@ export async function POST(req: Request) {
       perDay: 50,
     });
     if (!rl.ok) {
-      return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429);
+      return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429);
     }
 
     const priceId = serverEnv.NEXT_PUBLIC_STRIPE_PRICE_ID;
     const siteUrl = serverEnv.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
 
     if (!priceId || !siteUrl) {
-      return fail("SERVER_ERROR", "Unable to start billing session.", 500);
+      return fail("SERVER_ERROR", "Couldn't open checkout. Try again in a moment.", 500);
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -70,6 +70,6 @@ export async function POST(req: Request) {
   } catch (err) {
     captureServerException(err, { route: "api/create-checkout-session" });
     console.error("[billing-session]", err);
-    return fail("SERVER_ERROR", "Unable to start billing session.", 500);
+    return fail("SERVER_ERROR", "Couldn't open checkout. Try again in a moment.", 500);
   }
 }

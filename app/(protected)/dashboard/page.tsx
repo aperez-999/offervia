@@ -9,7 +9,7 @@ import { getCurrentUser, getCurrentUserSubscription } from "@/lib/auth/session";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Dashboard",
-  description: "Pick up where you left off, review progress, and keep your job search organized in one calm workspace.",
+  description: "See your applications, weekly goal, usage, and next step.",
   path: "/dashboard",
   index: false,
 });

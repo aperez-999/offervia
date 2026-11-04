@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     { ms: 3_600_000, limit: 50 },
   ]);
   if (!rl.ok) {
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(rl.retryAfterSeconds ?? 60) },
     });
   }
@@ -31,12 +31,12 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const parsed = oauthStartSchema.safeParse(body);
   if (!parsed.success) {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const safeNext = sanitizeRedirectPath(parsed.data.next, "/dashboard");
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (error || !data.url) {
-      return fail("BAD_REQUEST", "We couldn't continue the sign-in flow. Please try again.", 400);
+      return fail("BAD_REQUEST", "We couldn't finish signing you in. Try again.", 400);
     }
 
     const response = applyCookies(
@@ -78,6 +78,6 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error) {
     captureServerException(error, { route: "api/auth/oauth/start" });
-    return fail("SERVER_ERROR", "We couldn't continue the sign-in flow. Please try again.", 500);
+    return fail("SERVER_ERROR", "We couldn't finish signing you in. Try again.", 500);
   }
 }

@@ -11,7 +11,7 @@ export default function DocumentsPage() {
       <PageHeader
         eyebrow="Library"
         title="Documents"
-        description="Every cover letter and tailored resume you generate is saved here — copy, download, export to PDF, or clean up old drafts."
+        description="Cover letters and tailored resumes you generate are saved here. Copy them, download them, or save them as PDFs."
       />
       <DocumentsClient />
     </PageContainer>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check, Rocket, X } from "lucide-react";
+import { ArrowRight, Check, ListChecks, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type QuickStartItem = {
@@ -49,21 +49,21 @@ export default function QuickStart({
       animate={{ opacity: 1, y: 0 }}
       exit={reduce ? undefined : { opacity: 0, y: -8, height: 0, marginTop: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      aria-label="Quick start"
+      aria-label="Getting started"
     >
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-6">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card p-5 shadow-sm sm:p-6">
 
         <div className="relative flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
-              <Rocket className="h-4.5 w-4.5" />
+              <ListChecks className="h-4.5 w-4.5" />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Quick start</h2>
+              <h2 className="text-base font-semibold text-foreground">Getting started</h2>
               <p className="text-xs text-foreground/60">
                 {done === total
-                  ? "You're all set — nice work."
-                  : `${done} of ${total} done · pick up where you left off`}
+                  ? "All steps done."
+                  : `${done} of ${total} done`}
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function QuickStart({
             size="sm"
             className="h-8 w-8 shrink-0 rounded-full p-0 text-foreground/60 hover:bg-foreground/[0.06] hover:text-foreground"
             onClick={onDismiss}
-            aria-label="Dismiss quick start"
+            aria-label="Hide getting started"
           >
             <X className="h-4 w-4" />
           </Button>

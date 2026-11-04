@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Copy, Download, FileText, Loader2, Sparkles, Printer, X } from "lucide-react";
+import { Copy, Download, FileText, Loader2, PenLine, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,10 +49,10 @@ export default function CoverLetterStudio({
 
   function handleLimitReached() {
     const msg =
-      "You've reached your monthly cover letter limit. Upgrade to Pro to continue.";
+      "You've used this month's cover letters. Upgrade to Pro for more.";
     setError(msg);
     toast({
-      title: "Limit reached",
+      title: "Monthly limit reached",
       description: msg,
       variant: "upgrade",
       duration: 8000,
@@ -102,18 +102,18 @@ export default function CoverLetterStudio({
           resp.error ||
           (resp.status === 429
             ? "Too many requests. Try again in a moment."
-            : "AI might be busy, or your input is too large. Please try again.");
+            : "Couldn't write the letter. Wait a moment and try again, or shorten your inputs.");
         setError(msg);
-        toast({ title: "Failed to generate", description: msg, variant: "destructive" });
+        toast({ title: "Letter not generated", description: msg, variant: "destructive" });
         return;
       }
 
       setLetter(String(resp.data?.content || ""));
       toast({ variant: "success", title: "Cover letter ready" });
     } catch {
-      const msg = "Something went wrong. Please try again.";
+      const msg = "Couldn't reach the server. Check your connection and try again.";
       setError(msg);
-      toast({ title: "Failed to generate", description: msg, variant: "destructive" });
+      toast({ title: "Letter not generated", description: msg, variant: "destructive" });
     } finally {
       setGenerating(false);
     }
@@ -121,7 +121,7 @@ export default function CoverLetterStudio({
 
   function copy() {
     navigator.clipboard.writeText(letter).then(
-      () => toast({ variant: "success", title: "Copied to clipboard" }),
+      () => toast({ variant: "success", title: "Copied" }),
       () => toast({ title: "Copy failed", variant: "destructive" }),
     );
   }
@@ -185,7 +185,7 @@ export default function CoverLetterStudio({
                 htmlFor="cl-resume"
                 className="block text-sm font-medium text-foreground"
               >
-                Your resume / experience
+                Your resume or experience
               </label>
               <div
                 className="inline-flex rounded-lg border border-border bg-background/50 p-0.5"
@@ -226,7 +226,7 @@ export default function CoverLetterStudio({
                 <p className="mt-1 text-xs text-foreground/50">
                   {resumeText.trim().length < 100
                     ? `Add at least ${100 - resumeText.trim().length} more characters.`
-                    : "Looks good."}
+                    : "Enough to work with."}
                 </p>
               </>
             ) : resumeFile ? (
@@ -299,11 +299,11 @@ export default function CoverLetterStudio({
           >
             {generating ? (
               <>
-                <Loader2 className="size-4 animate-spin" /> Writing…
+                <Loader2 className="size-4 animate-spin" /> Writing your letter…
               </>
             ) : (
               <>
-                <Sparkles className="size-4" /> Generate cover letter
+                <PenLine className="size-4" /> Generate cover letter
               </>
             )}
           </Button>
@@ -381,14 +381,19 @@ export default function CoverLetterStudio({
             ) : (
               <div className="flex h-[360px] flex-col items-center justify-center gap-2 text-center text-sm text-foreground/50">
                 <FileText className="size-8 text-foreground/25" />
-                <p>Your tailored cover letter will appear here.</p>
+                <p>Your letter will show up here.</p>
                 <p className="text-xs text-foreground/40">
-                  Fill in your resume and the job description, pick a tone, then generate.
+                  Add your resume and the job description, pick a tone, then generate.
                 </p>
               </div>
             )}
           </AnimatePresence>
         </div>
+        {letter && !generating ? (
+          <p className="mt-3 text-xs text-foreground/50">
+            AI wrote this draft. Check facts and numbers before you send it.
+          </p>
+        ) : null}
       </Reveal>
     </div>
   );

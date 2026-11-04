@@ -13,26 +13,26 @@ type Item = {
 const ITEMS: Item[] = [
   {
     key: "interview",
-    label: "Interview Coach",
-    desc: "Prep, practice, concise answers.",
+    label: "Interview practice",
+    desc: "Practice questions and answers.",
     icon: MessageSquare,
   },
   {
     key: "resume",
-    label: "Resume Feedback",
-    desc: "Bullets, structure, STAR impact.",
+    label: "Resume feedback",
+    desc: "Bullets, structure, results.",
     icon: FileText,
   },
   {
     key: "cover_letter",
-    label: "Cover Letter Help",
-    desc: "Intros, proof points, tone.",
+    label: "Cover letter help",
+    desc: "Openings, examples, tone.",
     icon: Mail,
   },
   {
     key: "career",
-    label: "Career Advice",
-    desc: "Decisions, growth, negotiation.",
+    label: "Career advice",
+    desc: "Offers, promotions, pay.",
     icon: Compass,
   },
 ];
@@ -46,9 +46,9 @@ export default function CoachSidebar({
 }) {
   return (
     <aside className="w-full lg:w-[280px] shrink-0">
-      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
         <div className="mb-2 text-xs font-semibold text-foreground/60">
-          Modules
+          Topics
         </div>
 
         <nav className="flex flex-col lg:flex-col">

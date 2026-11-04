@@ -9,7 +9,7 @@ export default function StudentHubPage() {
       <PageHeader
         eyebrow="Student Hub"
         title="Student Hub"
-        description="Templates, learning resources, and student-only deals — everything around your search, in one organized place."
+        description="Message templates, free learning resources, and student discounts."
       />
       <Suspense fallback={<StudentHubSkeleton />}>
         <StudentHubClient />

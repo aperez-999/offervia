@@ -86,7 +86,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         .order("created_at", { ascending: true });
 
       if (error) {
-        toast({ title: "Failed to load chat", variant: "destructive" });
+        toast({ title: "Couldn't load this chat", description: "Refresh the page to try again.", variant: "destructive" });
       } else {
         setMessages((data || []) as MsgRow[]);
       }
@@ -194,8 +194,8 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         const mins = retry ? Math.ceil(Number(retry) / 60) : null;
         setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         toast({
-          title: data?.error || "Rate limit reached",
-          description: mins ? `Try again in ~${mins} min.` : "Please try again later.",
+          title: data?.message || "Too many messages",
+          description: mins ? `Try again in about ${mins} min.` : "Wait a few minutes and try again.",
           variant: "destructive",
         });
         setController(null);
@@ -209,8 +209,8 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         if (data?.error === "PLAN_LIMIT_REACHED") {
           toast({
-            title: "Limit reached",
-            description: data?.message ?? "You've reached your monthly AI coaching limit. Upgrade to Pro to continue.",
+            title: "Monthly limit reached",
+            description: data?.message ?? "You've used this month's coach messages. Upgrade to Pro for more.",
             variant: "upgrade",
             duration: 8000,
             action: (
@@ -225,7 +225,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
           });
         } else {
           toast({
-            title: data?.message ?? data?.error ?? "Access denied",
+            title: data?.message ?? data?.error ?? "You don't have access to this.",
             variant: "destructive",
           });
         }
@@ -236,7 +236,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        const message = data?.message ?? data?.error ?? `Request failed (${res.status})`;
+        const message = data?.message ?? data?.error ?? `Message not sent (error ${res.status}). Try again.`;
         if (data?.userMessage?.id) {
           setMessages((prev) =>
             prev.map((m) =>
@@ -253,7 +253,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         }
         if (res.status >= 500) {
           toast({
-            title: "AI is temporarily unavailable. Try again soon.",
+            title: "The coach didn't respond. Try again in a minute.",
             variant: "destructive",
           });
         } else {
@@ -275,12 +275,12 @@ function InnerChat({ mode }: { mode: CoachMode }) {
       });
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") {
-        toast({ title: "Generation stopped" });
+        toast({ title: "Reply stopped" });
         await loadMessages(userId, mode);
       } else {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         toast({
-          title: "AI is temporarily unavailable. Try again soon.",
+          title: "The coach didn't respond. Try again in a minute.",
           variant: "destructive",
         });
       }
@@ -307,7 +307,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   const ModeIcon = meta.icon;
 
   return (
-    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 sm:h-[72vh] dark:ring-black/10">
+    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:h-[72vh] dark:ring-black/10">
       <CardHeader className="border-b border-border/60 pb-3">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -319,7 +319,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 {MODE_LABELS[mode]}
               </CardTitle>
               <p className="truncate text-xs text-foreground/60 sm:text-sm">
-                {SYSTEM_PROMPTS[mode].split(".")[0] + "."}
+                {meta.subtitle}
               </p>
             </div>
           </div>
@@ -364,7 +364,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         )}
 
         {loading ? (
-          <div className="grid h-full place-items-center text-sm text-foreground/70">Loading…</div>
+          <div className="grid h-full place-items-center text-sm text-foreground/70">Loading messages…</div>
         ) : messages.length === 0 ? (
           <div className="grid h-full place-items-center text-center text-sm text-foreground/70">
             <ChatStarterPrompts
@@ -404,15 +404,15 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                       </span>
                       <div className={`flex min-w-0 max-w-[85%] flex-col ${isUser ? "items-end" : "items-start"}`}>
                         <MessageBubble role={m.role} content={m.content} />
-                        <div className="mt-1 flex items-center gap-2 text-[11px] text-foreground/45">
+                        <div className="mt-1 flex items-center gap-2 text-xs text-foreground/45">
                           <span>{formatTime(m.created_at)}</span>
                           {isLastAssistant && lastUserMessage && (
                             <button
                               onClick={regenerate}
-                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                              title="Regenerate reply"
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                              title="Get a new reply"
                             >
-                              <RotateCcw className="h-3 w-3" /> Regenerate
+                              <RotateCcw className="h-3 w-3" /> Try again
                             </button>
                           )}
                         </div>
@@ -492,11 +492,11 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                 toast({ variant: "success", title: "Chat cleared" });
                 setMessages([]);
               } else {
-                toast({ title: "Failed to clear chat", variant: "destructive" });
+                toast({ title: "Couldn't clear the chat", description: "Try again in a moment.", variant: "destructive" });
               }
             }}
           />
-          <span className="hidden text-[11px] text-foreground/40 sm:block">
+          <span className="hidden text-xs text-foreground/40 sm:block">
             Enter to send · Shift+Enter for a new line
           </span>
         </div>

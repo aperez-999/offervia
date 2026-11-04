@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Application Tracker",
-  description: "Track applications, follow-ups, and status changes in one organized view.",
+  title: "Job Tracker",
+  description: "Log the jobs you apply to and update each status as you hear back.",
   path: "/tracker",
   index: false,
 });

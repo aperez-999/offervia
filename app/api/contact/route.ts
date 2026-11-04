@@ -55,19 +55,19 @@ export async function POST(req: Request) {
 
     const toEmail = serverEnv.CONTACT_TO;
     if (!toEmail) {
-      return fail("SERVER_ERROR", "Something went wrong.", 500);
+      return fail("SERVER_ERROR", "Couldn't send your message. Try again later.", 500);
     }
 
     let body: unknown;
     try {
       body = await req.json();
     } catch {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const parsed = contactSchema.safeParse(body);
     if (!parsed.success) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const { name, email, message, subject, website } = parsed.data;
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
       { ms: 86_400_000, limit: 20 },
     ]);
     if (!rl.ok) {
-      return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+      return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
         headers: { "Retry-After": String(rl.retryAfterSeconds ?? 60) },
       });
     }
@@ -103,6 +103,6 @@ export async function POST(req: Request) {
 
     return Response.json({ ok: true });
   } catch {
-    return fail("SERVER_ERROR", "Failed to send your message. Please try again.", 500);
+    return fail("SERVER_ERROR", "Couldn't send your message. Try again in a moment.", 500);
   }
 }

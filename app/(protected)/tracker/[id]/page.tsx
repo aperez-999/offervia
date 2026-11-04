@@ -11,7 +11,7 @@ import ApplicationWorkspace, {
 
 export const metadata: Metadata = createPageMetadata({
   title: "Application",
-  description: "Manage a single job application, its documents, and match insights.",
+  description: "Edit this application and see the documents and scans that match it.",
   path: "/tracker",
   index: false,
 });
@@ -119,7 +119,7 @@ export default async function ApplicationWorkspacePage({
       <PageHeader
         eyebrow="Application"
         title={company || "Application"}
-        description={position ? position : "Manage this application end to end."}
+        description={position ? position : undefined}
       />
       <ApplicationWorkspace
         app={{

@@ -63,8 +63,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(
       rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
       msg,
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     if (!gate.allowed) {
       return fail(
         "PLAN_LIMIT_REACHED",
-        "You've reached your monthly cover letter limit. Upgrade to Pro to continue.",
+        "You've used this month's cover letters. Upgrade to Pro for more.",
         403,
       );
     }
@@ -120,12 +120,12 @@ export async function POST(req: Request) {
       try {
         body = await req.json();
       } catch {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
 
       const parsed = coverLetterSchema.safeParse(body);
       if (!parsed.success) {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
       resumeTextRaw = parsed.data.resumeText;
       jobDescriptionRaw = parsed.data.jobDescription;
@@ -140,10 +140,10 @@ export async function POST(req: Request) {
     const roleTitle = normalizeText(roleTitleRaw);
 
     if (resumeText.length < 100) {
-      return fail("INVALID_INPUT", "Add more resume detail to generate a strong letter.", 400);
+      return fail("INVALID_INPUT", "Add more of your resume so the letter has real details to draw on.", 400);
     }
     if (jobDescription.length < 20) {
-      return fail("INVALID_INPUT", "Add a job description to tailor the letter.", 400);
+      return fail("INVALID_INPUT", "Add the job description so the letter can address the role.", 400);
     }
 
     // Keep payload within free-tier context/TPM limits.
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     const cleaned = sanitizeOutput(raw);
 
     if (cleaned.length < 100) {
-      return fail("SERVER_ERROR", "Something went wrong. Try again.", 500);
+      return fail("SERVER_ERROR", "Couldn't write the letter. Try again in a moment.", 500);
     }
 
     await incrementUsage(userId, "cover_letter");
@@ -205,10 +205,10 @@ export async function POST(req: Request) {
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
       return fail(
         "INVALID_INPUT",
-        "Your resume and job description are too long for a single pass. Try shortening them.",
+        "Your resume and job description are too long to process together. Shorten one of them and try again.",
         413,
       );
     }
-    return fail("SERVER_ERROR", "Something went wrong.", 500);
+    return fail("SERVER_ERROR", "Couldn't write the letter. Try again in a moment.", 500);
   }
 }

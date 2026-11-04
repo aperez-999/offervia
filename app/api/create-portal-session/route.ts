@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user?.id) {
-      return fail("UNAUTHORIZED", "Authentication required.", 401);
+      return fail("UNAUTHORIZED", "Sign in to continue.", 401);
     }
 
     const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       perDay: 50,
     });
     if (!rl.ok) {
-      return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429);
+      return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429);
     }
     const { data: sub } = await serviceSupabase
       .from("subscriptions")
@@ -48,12 +48,12 @@ export async function POST(req: Request) {
 
     const stripeCustomerId = sub?.stripe_customer_id;
     if (!stripeCustomerId || typeof stripeCustomerId !== "string") {
-      return fail("BAD_REQUEST", "No active subscription found.", 400);
+      return fail("BAD_REQUEST", "You don't have an active subscription to manage.", 400);
     }
 
     const siteUrl = serverEnv.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
     if (!siteUrl) {
-      return fail("SERVER_ERROR", "Unable to start billing session.", 500);
+      return fail("SERVER_ERROR", "Couldn't open billing. Try again in a moment.", 500);
     }
 
     const session = await stripe.billingPortal.sessions.create({
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     const message =
       err instanceof Error && /configuration|portal/i.test(err.message)
         ? "Billing portal isn't set up yet. Activate the Customer Portal in your Stripe dashboard, then try again."
-        : "Unable to start billing session. Please try again.";
+        : "Couldn't open billing. Try again in a moment.";
     return fail("SERVER_ERROR", message, 500);
   }
 }

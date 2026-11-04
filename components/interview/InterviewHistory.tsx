@@ -203,7 +203,7 @@ export default function InterviewHistory({
                                         ))
                                       ) : (
                                         <li className="text-sm text-foreground/40">
-                                          —
+                                          None noted
                                         </li>
                                       )}
                                     </ul>
@@ -211,7 +211,7 @@ export default function InterviewHistory({
                                   <div>
                                     <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/55">
                                       <TrendingUp className="size-3.5 text-amber-500" />{" "}
-                                      Improve
+                                      To improve
                                     </div>
                                     <ul className="mt-1.5 space-y-1">
                                       {t.improvements?.length ? (
@@ -225,7 +225,7 @@ export default function InterviewHistory({
                                         ))
                                       ) : (
                                         <li className="text-sm text-foreground/40">
-                                          —
+                                          None noted
                                         </li>
                                       )}
                                     </ul>

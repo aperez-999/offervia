@@ -11,7 +11,7 @@ import CoverLetterStudio from "@/components/cover-letter/CoverLetterStudio";
 export const metadata: Metadata = createPageMetadata({
   title: "Cover Letter",
   description:
-    "Generate a tailored, human-sounding cover letter from your resume and a job description in seconds.",
+    "Write a cover letter draft from your resume and a job description.",
   path: "/cover-letter",
   index: false,
 });
@@ -45,8 +45,8 @@ export default async function CoverLetterPage({
     <PageContainer>
       <PageHeader
         eyebrow="Cover Letter"
-        title="Cover letter generator"
-        description="Turn your resume and a job description into a tailored, human-sounding cover letter — pick a tone and make it yours."
+        title="Cover letter"
+        description="Paste your resume and the job description, pick a tone, and get a draft you can edit."
       />
       <CoverLetterStudio
         plan={subscription.plan}

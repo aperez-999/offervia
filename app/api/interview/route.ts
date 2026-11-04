@@ -107,8 +107,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(
       rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
       msg,
@@ -123,12 +123,12 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const supabase = getServiceSupabase();
@@ -142,7 +142,7 @@ export async function POST(req: Request) {
       if (!gate.allowed) {
         return fail(
           "PLAN_LIMIT_REACHED",
-          "You've reached your monthly mock interview limit. Upgrade to Pro for more.",
+          "You've used this month's mock interviews. Upgrade to Pro for more.",
           403
         );
       }
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
       }
 
       if (questions.length === 0) {
-        return fail("SERVER_ERROR", "Could not generate interview questions. Try again.", 502);
+        return fail("SERVER_ERROR", "Couldn't write questions for that role. Try again.", 502);
       }
 
       const { data, error } = await supabase
@@ -206,7 +206,7 @@ export async function POST(req: Request) {
 
     if (loadError) throw loadError;
     if (!sessionData) {
-      return fail("BAD_REQUEST", "Interview session not found.", 404);
+      return fail("BAD_REQUEST", "That interview session wasn't found. Start a new one.", 404);
     }
 
     const session = sessionData as InterviewSessionRow;
@@ -218,7 +218,7 @@ export async function POST(req: Request) {
       const { questionIndex, answer } = parsed.data;
       const question = session.questions[questionIndex];
       if (!question) {
-        return fail("INVALID_INPUT", "Invalid question.", 400);
+        return fail("INVALID_INPUT", "That question isn't part of this session. Refresh and try again.", 400);
       }
 
       let feedback: AnswerFeedback;
@@ -246,7 +246,7 @@ export async function POST(req: Request) {
           route: "api/interview",
           extras: { stage: "score-answer" },
         });
-        return fail("SERVER_ERROR", "Could not score that answer. Try again.", 502);
+        return fail("SERVER_ERROR", "Couldn't score that answer. Try submitting it again.", 502);
       }
 
       const entry: TranscriptEntry = { question, answer, ...feedback };
@@ -313,6 +313,6 @@ export async function POST(req: Request) {
     return Response.json({ overallScore, summary, transcript: answered });
   } catch (error) {
     captureServerException(error, { route: "api/interview" });
-    return fail("SERVER_ERROR", "Interview request failed.", 500);
+    return fail("SERVER_ERROR", "Something went wrong with the interview. Try again.", 500);
   }
 }

@@ -210,7 +210,7 @@ async function updateApplication(
 
 export async function GET(req: NextRequest) {
   const userId = await getAuthedUserId(req);
-  if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
+  if (!userId) return errResponse("UNAUTHORIZED", "Sign in to continue.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
   const { getServiceSupabase } = await import("@/lib/supabase/service");
@@ -218,7 +218,7 @@ export async function GET(req: NextRequest) {
   const rl = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_get", RATE_LIMIT_GET);
   if (!rl.ok) {
     const retry = rl.retryAfterSeconds ?? 60;
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(retry) },
     });
   }
@@ -233,7 +233,7 @@ export async function GET(req: NextRequest) {
   if (error) {
     captureServerException(error, { route: "api/tracker", extras: { method: "GET" } });
     console.error("[tracker] GET fetch applications", error.message);
-    return errResponse("SERVER_ERROR", "Something went wrong.", 500);
+    return errResponse("SERVER_ERROR", "Couldn't load your applications. Refresh to try again.", 500);
   }
   return Response.json({
     success: true,
@@ -243,7 +243,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const userId = await getAuthedUserId(req);
-  if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
+  if (!userId) return errResponse("UNAUTHORIZED", "Sign in to continue.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
   const { getServiceSupabase } = await import("@/lib/supabase/service");
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
   const rlPost = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPost.ok) {
     const retry = rlPost.retryAfterSeconds ?? 60;
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(retry) },
     });
   }
@@ -260,13 +260,13 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return errResponse("INVALID_INPUT", "Invalid request.", 400);
+    return errResponse("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {
     console.error("[tracker] POST validation", parsed.error.flatten());
-    return errResponse("INVALID_INPUT", "Invalid request.", 400);
+    return errResponse("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const supabase = getAuthedSupabase(req);
@@ -275,7 +275,7 @@ export async function POST(req: NextRequest) {
   if (error) {
     captureServerException(error, { route: "api/tracker", extras: { method: "POST" } });
     console.error("[tracker] POST insert", error.message);
-    return errResponse("SERVER_ERROR", "Something went wrong.", 500);
+    return errResponse("SERVER_ERROR", "Couldn't add that application. Try again.", 500);
   }
   return Response.json({
     success: true,
@@ -285,7 +285,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   const userId = await getAuthedUserId(req);
-  if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
+  if (!userId) return errResponse("UNAUTHORIZED", "Sign in to continue.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
   const { getServiceSupabase } = await import("@/lib/supabase/service");
@@ -293,7 +293,7 @@ export async function PATCH(req: NextRequest) {
   const rlPatch = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlPatch.ok) {
     const retry = rlPatch.retryAfterSeconds ?? 60;
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(retry) },
     });
   }
@@ -313,13 +313,13 @@ export async function PATCH(req: NextRequest) {
   const parsedId = idSchema.safeParse({ id: idValue });
   if (!parsedId.success) {
     console.error("[tracker] PATCH invalid id", parsedId.error.flatten());
-    return errResponse("INVALID_INPUT", "Invalid request.", 400);
+    return errResponse("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const updateParsed = updateSchema.safeParse(body);
   if (!updateParsed.success) {
     console.error("[tracker] PATCH validation", updateParsed.error.flatten());
-    return errResponse("INVALID_INPUT", "Invalid request.", 400);
+    return errResponse("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const normalizedPayload = normalizeTrackerPayload(updateParsed.data);
@@ -330,7 +330,7 @@ export async function PATCH(req: NextRequest) {
   if (error) {
     captureServerException(error, { route: "api/tracker", extras: { method: "PATCH", id } });
     console.error("[tracker] PATCH update", error.message);
-    return errResponse("SERVER_ERROR", "Something went wrong.", 500);
+    return errResponse("SERVER_ERROR", "Couldn't save your changes. Try again.", 500);
   }
   return Response.json({
     success: true,
@@ -340,7 +340,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const userId = await getAuthedUserId(req);
-  if (!userId) return errResponse("UNAUTHORIZED", "Authentication required.", 401);
+  if (!userId) return errResponse("UNAUTHORIZED", "Sign in to continue.", 401);
 
   const { checkRateLimitWithUserId } = await import("@/lib/rate-limit");
   const { getServiceSupabase } = await import("@/lib/supabase/service");
@@ -348,7 +348,7 @@ export async function DELETE(req: NextRequest) {
   const rlDel = await checkRateLimitWithUserId(serviceSupabase, userId, "tracker_write", RATE_LIMIT_WRITE);
   if (!rlDel.ok) {
     const retry = rlDel.retryAfterSeconds ?? 60;
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(retry) },
     });
   }
@@ -358,7 +358,7 @@ export async function DELETE(req: NextRequest) {
   const parsedId = idSchema.safeParse({ id });
   if (!parsedId.success) {
     console.error("[tracker] DELETE invalid id", parsedId.error.flatten());
-    return errResponse("INVALID_INPUT", "Invalid request.", 400);
+    return errResponse("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const supabase = getAuthedSupabase(req);
@@ -373,7 +373,7 @@ export async function DELETE(req: NextRequest) {
       extras: { method: "DELETE", id: parsedId.data.id },
     });
     console.error("[tracker] DELETE", error.message);
-    return errResponse("SERVER_ERROR", "Something went wrong.", 500);
+    return errResponse("SERVER_ERROR", "Couldn't delete that application. Try again.", 500);
   }
   return Response.json({ success: true });
 }

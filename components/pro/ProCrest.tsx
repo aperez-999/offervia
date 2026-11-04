@@ -19,13 +19,13 @@ export default function ProCrest({
   const sizes =
     size === "md"
       ? "gap-1.5 px-2.5 py-1 text-xs"
-      : "gap-1 px-2 py-0.5 text-[10px]";
+      : "gap-1 px-2 py-0.5 text-xs";
   const icon = size === "md" ? "h-3.5 w-3.5" : "h-3 w-3";
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-reward/40 bg-reward/15 font-semibold text-reward shadow-sm shadow-reward/10",
+        "inline-flex items-center rounded-full border border-reward/40 bg-reward/15 font-semibold text-reward",
         sizes,
         className
       )}

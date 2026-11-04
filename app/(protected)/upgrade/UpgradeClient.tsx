@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Crown, Sparkles, ShieldCheck, Zap, CreditCard } from "lucide-react";
+import { BarChart3, Check, Crown, FileText, Mic, ScanSearch, ShieldCheck, CreditCard } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/plans";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,7 +17,7 @@ const COMPARISON = [
     pro: `${PLAN_LIMITS.pro.resume_tailor_per_month} / month`,
   },
   {
-    label: "AI coach messages",
+    label: "Coach messages",
     free: `${PLAN_LIMITS.free.coach_messages_per_month} / month`,
     pro: `${PLAN_LIMITS.pro.coach_messages_per_month} / month`,
   },
@@ -26,14 +26,35 @@ const COMPARISON = [
     free: `${PLAN_LIMITS.free.job_scans_per_month} / month`,
     pro: `${PLAN_LIMITS.pro.job_scans_per_month} / month`,
   },
-  { label: "Interview sessions", free: `${PLAN_LIMITS.free.interview_sessions_per_month} / month`, pro: "Unlimited" },
+  {
+    label: "Cover letters",
+    free: `${PLAN_LIMITS.free.cover_letters_per_month} / month`,
+    pro: `${PLAN_LIMITS.pro.cover_letters_per_month} / month`,
+  },
+  { label: "Mock interviews", free: `${PLAN_LIMITS.free.interview_sessions_per_month} / month`, pro: "Unlimited" },
 ];
 
 const PRO_PERKS = [
-  { icon: Zap, title: "Faster iteration", body: "Generate more resume versions without slowing your workflow." },
-  { icon: Sparkles, title: "Better targeting", body: "Scan more JDs and close keyword gaps before you apply." },
-  { icon: Crown, title: "Interview readiness", body: "More coaching reps and unlimited interview sessions." },
-  { icon: ShieldCheck, title: "Stay in control", body: "Same workflow across more roles. Cancel anytime." },
+  {
+    icon: FileText,
+    title: "More tailored resumes",
+    body: `Tailor up to ${PLAN_LIMITS.pro.resume_tailor_per_month} resumes a month instead of ${PLAN_LIMITS.free.resume_tailor_per_month}.`,
+  },
+  {
+    icon: ScanSearch,
+    title: "More job scans",
+    body: `Scan up to ${PLAN_LIMITS.pro.job_scans_per_month} job descriptions a month instead of ${PLAN_LIMITS.free.job_scans_per_month}.`,
+  },
+  {
+    icon: Mic,
+    title: "Unlimited mock interviews",
+    body: `Practice as often as you want, with up to ${PLAN_LIMITS.pro.coach_messages_per_month.toLocaleString()} coach messages a month.`,
+  },
+  {
+    icon: BarChart3,
+    title: "Dashboard insights",
+    body: "See your response, interview, and offer rates, plus your scan scores over time.",
+  },
 ];
 
 export default function UpgradeClient({ plan }: { plan: PlanType }) {
@@ -56,13 +77,13 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         return;
       }
       toast({
-        title: data?.message || "Couldn't start checkout. Please try again.",
+        title: data?.message || "Couldn't start checkout. Try again.",
         variant: "destructive",
       });
       setLoading(false);
     } catch {
       toast({
-        title: "Couldn't start checkout. Please try again.",
+        title: "Couldn't start checkout. Try again.",
         variant: "destructive",
       });
       setLoading(false);
@@ -83,13 +104,13 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         return;
       }
       toast({
-        title: data?.message || "Billing portal unavailable. Try again.",
+        title: data?.message || "Couldn't open the billing portal. Try again.",
         variant: "destructive",
       });
       setBillingLoading(false);
     } catch {
       toast({
-        title: "Billing portal unavailable. Try again.",
+        title: "Couldn't open the billing portal. Try again.",
         variant: "destructive",
       });
       setBillingLoading(false);
@@ -110,29 +131,29 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
           {isPro ? "You're on Pro" : "Upgrade to Pro"}
         </div>
         <h1 className="mx-auto mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Keep your job search moving without hitting the brakes.
+          {isPro ? "Your plan" : "Get higher limits with Pro"}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm text-foreground/75 sm:text-base">
-          Pro raises your monthly limits so you can keep scanning, tailoring, and coaching when the search gets busy.
+          Pro is $10 a month. It raises your monthly limits for scans, resume tailoring, cover letters, and coaching.
         </p>
       </section>
 
       {/* Pricing cards */}
       <section className="grid items-stretch gap-6 lg:grid-cols-2">
         {/* Free */}
-        <Card className="flex flex-col rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="flex flex-col rounded-2xl border border-border bg-card shadow-sm">
           <CardContent className="flex flex-1 flex-col p-6 sm:p-8">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Free</h2>
               <span className="rounded-full bg-foreground/[0.06] px-2.5 py-0.5 text-xs font-medium text-foreground/70">
-                Current starter
+                $0
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-1">
               <span className="text-4xl font-semibold tracking-tight text-foreground">$0</span>
               <span className="text-sm text-foreground/60">/month</span>
             </div>
-            <p className="mt-2 text-sm text-foreground/70">Everything you need to get started.</p>
+            <p className="mt-2 text-sm text-foreground/70">Every tool, with lower monthly limits.</p>
             <ul className="mt-6 space-y-3 text-sm">
               {COMPARISON.map((f) => (
                 <li key={f.label} className="flex items-center justify-between gap-3 border-b border-border/60 pb-2.5 last:border-0">
@@ -154,15 +175,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
         </Card>
 
         {/* Pro */}
-        <Card className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card shadow-xl shadow-primary/10 ring-2 ring-primary/25">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"
-          />
-          <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            Most popular
-          </span>
+        <Card className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card shadow-sm ring-2 ring-primary/25">
           <CardContent className="relative flex flex-1 flex-col p-6 sm:p-8">
             <div className="flex items-center gap-2">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">
@@ -174,7 +187,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
               <span className="text-4xl font-semibold tracking-tight text-foreground">$10</span>
               <span className="text-sm text-foreground/60">/month</span>
             </div>
-            <p className="mt-2 text-sm text-foreground/75">For heavier search weeks and broad applications.</p>
+            <p className="mt-2 text-sm text-foreground/75">For when you&apos;re applying to a lot of jobs.</p>
             <ul className="mt-6 space-y-3 text-sm">
               {COMPARISON.map((f) => (
                 <li key={f.label} className="flex items-center justify-between gap-3 border-b border-primary/10 pb-2.5 last:border-0">
@@ -206,7 +219,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 </Button>
               )}
               <p className="mt-2 text-center text-xs text-foreground/55">
-                {isPro ? "Update payment method or cancel anytime." : "Secure checkout via Stripe · cancel anytime."}
+                {isPro ? "Update your card or cancel in the billing portal." : "Checkout runs through Stripe. Cancel anytime."}
               </p>
             </div>
           </CardContent>
@@ -216,7 +229,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* Perks */}
       <section>
         <h2 className="mb-4 text-xs font-semibold text-foreground/60">
-          What Pro unlocks
+          What you get with Pro
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {PRO_PERKS.map((p, i) => {
@@ -228,7 +241,7 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 }}
-                className="card-hover flex gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="flex gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
               >
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -246,13 +259,10 @@ export default function UpgradeClient({ plan }: { plan: PlanType }) {
       {/* Trust row */}
       <section className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-foreground/60">
         <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-success" /> Secure Stripe checkout
+          <ShieldCheck className="h-4 w-4 text-success" /> Payments handled by Stripe
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Check className="h-4 w-4 text-success" /> Cancel anytime
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <Zap className="h-4 w-4 text-success" /> Instant access
         </span>
       </section>
     </motion.div>

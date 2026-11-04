@@ -76,7 +76,7 @@ export default function FollowUpsDue({ apps }: { apps: FollowUpApp[] }) {
                 <CardTitle className="text-base">Follow-ups due</CardTitle>
                 <CardDescription>
                   {overdueCount > 0
-                    ? `${overdueCount} overdue • ${due.length - overdueCount} due today`
+                    ? `${overdueCount} overdue, ${due.length - overdueCount} due today`
                     : `${due.length} due today`}
                 </CardDescription>
               </div>
@@ -85,7 +85,7 @@ export default function FollowUpsDue({ apps }: { apps: FollowUpApp[] }) {
               href="/tracker"
               className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              Tracker <ArrowRight className="size-3.5" />
+              Open tracker <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </CardHeader>

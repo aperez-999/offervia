@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Job Packet",
-  description: "Move from a pasted job description to scan insights, a tailored resume, and a tracked application in one guided flow.",
+  description: "Paste a job description, scan it, tailor your resume, and add the job to your tracker.",
   path: "/job-packet",
   index: false,
 });

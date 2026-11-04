@@ -7,7 +7,8 @@ import {
   ClipboardCopy,
   Download,
   Trash2,
-  Sparkles,
+  Loader2,
+  PenLine,
   Building2,
   Briefcase,
   MapPin,
@@ -129,10 +130,10 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     if (from === "job-packet") {
       const bits = [packetDraft.companyName, packetDraft.roleTitle].filter(Boolean).join(" · ");
       toast({ variant: "info",
-        title: "Job context loaded from your packet",
+        title: "Job details loaded from your packet",
         description: bits
-          ? `${bits} and the job description carried over. Upload your resume to continue.`
-          : "Your job description carried over. Upload your resume to continue.",
+          ? `${bits} and the job description are filled in. Upload your resume next.`
+          : "The job description is filled in. Upload your resume next.",
       });
     }
     // Run once on arrival for the current URL params.
@@ -150,8 +151,8 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     const from = search.get("from") || "";
     if (from === "scanner" || from.startsWith("scanner")) {
       toast({ variant: "info",
-        title: "Job description ready",
-        description: "Your job description was carried over from the Scanner.",
+        title: "Job description loaded",
+        description: "We copied it over from the Scanner.",
       });
     }
     // intentionally run only when URL params change
@@ -215,11 +216,11 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     setAttempted(true);
     setError(null);
     if (step === 1 && !step1Valid) {
-      setError("Please upload a resume before continuing.");
+      setError("Upload a resume to continue.");
       return;
     }
     if (step === 3 && !step3Valid) {
-      setError("Job description must be at least 20 characters.");
+      setError("The job description needs at least 20 characters.");
       return;
     }
     setStep((s) => Math.min(s + 1, resumeWizardSteps.length));
@@ -237,7 +238,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     if (!(RESUME_ACCEPTED_TYPES as readonly string[]).includes(ext)) {
       toast({
         title: "Unsupported file type",
-        description: "Please upload a PDF, DOC, or DOCX.",
+        description: "Upload a PDF or DOCX file.",
         variant: "destructive",
       });
       return;
@@ -245,7 +246,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     if (file.size > RESUME_MAX_SIZE_MB * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: `Max size is ${RESUME_MAX_SIZE_MB}MB.`,
+        description: `Files can be up to ${RESUME_MAX_SIZE_MB} MB.`,
         variant: "destructive",
       });
       return;
@@ -283,11 +284,11 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       title: "Resume added",
       description: packetContext
         ? autoAdvanced
-          ? `${file.name} saved with your job context. Jumping to Tailor & Review.`
-          : `${file.name} saved with your job context.`
+          ? `${file.name} added with your job details. Skipping ahead to review.`
+          : `${file.name} added with your job details.`
         : autoAdvanced
-        ? `${file.name} uploaded. Jumping to Tailor & Review.`
-        : `${file.name} is ready to tailor.`,
+        ? `${file.name} uploaded. Skipping ahead to review.`
+        : `${file.name} uploaded.`,
     });
 
     // Try to store text for simple text files; PDFs/DOCX will be handled server-side
@@ -350,10 +351,10 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       // --- Rate-limit, plan limit & other friendly errors ---
       if (!resp.ok) {
         if (resp.status === 429) {
-          const msg = resp.error || "You've hit today's free limit for tailoring.";
+          const msg = resp.error || "You've used today's free tailoring runs. Try again tomorrow.";
           setError(msg);
           toast({
-            title: "Rate limit reached",
+            title: "Daily limit reached",
             description: msg,
             variant: "destructive",
           });
@@ -361,10 +362,10 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
         }
         if (resp.status === 403 && resp.error === "PLAN_LIMIT_REACHED") {
           const msg =
-            "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.";
+            "You've used this month's resume tailoring runs. Upgrade to Pro for more.";
           setError(msg);
           toast({
-            title: "Limit reached",
+            title: "Monthly limit reached",
             description: msg,
             variant: "upgrade",
             duration: 8000,
@@ -381,16 +382,16 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
           return;
         }
         if (resp.status === 413) {
-          const msg = "Your file is too large. Try a shorter resume or DOCX/text.";
+          const msg = "That file is too large to process. Try a shorter resume or a DOCX.";
           setError(msg);
           toast({ title: "File too large", description: msg, variant: "destructive" });
           return;
         }
         const generic =
           resp.error ||
-          "AI might be busy, or your input is too large. Please try again.";
+          "Couldn't generate a draft. Wait a moment and try again, or shorten the job description.";
         setError(generic);
-        toast({ title: "Failed to generate", description: generic, variant: "destructive" });
+        toast({ title: "Draft not generated", description: generic, variant: "destructive" });
         return;
       }
 
@@ -410,13 +411,13 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
           trackerDraft: buildTrackerDraftFromPacket({ companyName, roleTitle }),
         });
       }
-      toast({ variant: "success", title: "Tailored draft generated" });
+      toast({ variant: "success", title: "Draft ready", description: "Check facts and numbers before you send it." });
     } catch (e: unknown) {
       const msg = e instanceof Error && e.name === "AbortError"
-        ? "The request timed out. Please try again."
-        : "AI might be busy, or your input is too large. Please try again.";
+        ? "The request timed out. Try again in a moment."
+        : "Couldn't generate a draft. Wait a moment and try again, or shorten the job description.";
       setError(msg);
-      toast({ title: "Failed to generate", description: msg, variant: "destructive" });
+      toast({ title: "Draft not generated", description: msg, variant: "destructive" });
     } finally {
       setGenerating(false);
     }
@@ -428,7 +429,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     if (!company || !position) {
       toast({
         title: "Missing details",
-        description: "Add a company name and role title before sending to the tracker.",
+        description: "Add a company name and role title first.",
         variant: "destructive",
       });
       return;
@@ -518,7 +519,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
         <p className="text-xs font-medium text-primary">Step 2 · Tailor</p>
         <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Move through the steps to tailor one resume draft to one role with cleaner, more consistent context.
+          Upload your resume, add the job description, and get a version rewritten for that one role.
         </p>
       </section>
 
@@ -539,7 +540,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <StepContainer title="Upload Resume" description="Upload a PDF or DOCX file.">
+                <StepContainer title="Upload resume" description="PDF or DOCX.">
               <div className="space-y-3">
                 {(() => {
                   const from = search.get("from") || "";
@@ -549,14 +550,14 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
                     <div className="font-medium">Job description loaded</div>
                     <div className="mt-0.5 text-xs text-success/80">
-                      Upload your resume to keep the Job Packet moving.
+                      Upload your resume to continue your Job Packet.
                     </div>
                   </div>
                 )}
                 {packetContext && !resumeFileName && (
                   <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
                     <div className="flex items-center gap-1.5 font-medium text-primary">
-                      <Sparkles className="h-3.5 w-3.5" /> Job context loaded from your packet
+                      <FileText className="h-3.5 w-3.5" /> Job details loaded from your packet
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {companyName && (
@@ -576,7 +577,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       )}
                     </div>
                     <div className="mt-2 text-xs text-foreground/60">
-                      Upload your resume and we&apos;ll jump you straight to Tailor &amp; Review.
+                      Upload your resume and we&apos;ll skip ahead to the review step.
                     </div>
                   </div>
                 )}
@@ -630,8 +631,8 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
               <StepContainer
-              title="Company Targeting"
-              description="Optional, but highly recommended. This helps the AI tailor language to a specific company, team, and location."
+              title="Company and role"
+              description="Optional. Adding these lets the draft use the company's name and the role's wording."
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1 sm:col-span-2">
@@ -646,7 +647,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     className="border-border bg-background/80 text-foreground placeholder:text-foreground/40"
                   />
                   <p className="text-xs text-foreground/60">
-                    If left empty, AI will tailor based on the job description only.
+                    Leave blank to tailor from the job description alone.
                   </p>
                 </div>
 
@@ -703,8 +704,8 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
               <StepContainer
-              title="Paste Job Description"
-              description="Paste the full job posting text below."
+              title="Job description"
+              description="Paste the full posting, including requirements."
             >
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/60">
@@ -719,7 +720,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 <Textarea
                   value={jd}
                   onChange={(e) => setJd(e.target.value)}
-                  placeholder="Paste the full job description here..."
+                  placeholder="Paste the full job description here…"
                   className="min-h-[220px] bg-background/80 text-foreground placeholder:text-foreground/40 border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 />
 
@@ -748,7 +749,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
 
                 {error && step === 3 && (
                   <Alert variant="destructive">
-                    <AlertTitle>Missing or too short job description</AlertTitle>
+                    <AlertTitle>Job description too short</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
@@ -767,15 +768,15 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
               <StepContainer
-              title="Tailor & Review"
-              description="Preview your resume on the left and generate an AI-tailored version on the right."
+              title="Tailor and review"
+              description="Your original is on the left. Generate the tailored version on the right, then edit it."
             >
               {/* Preview and AI output side-by-side on wide screens */}
               <div className="grid items-start gap-8 xl:grid-cols-2">
                 {/* Top: File preview */}
                 <div className="lg:row-span-1">
                   <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div className="text-sm font-medium text-foreground">Resume Preview</div>
+                    <div className="text-sm font-medium text-foreground">Your resume</div>
                     <div className="flex items-center gap-2">
                       {isPdf && (
                         <>
@@ -833,7 +834,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     </div>
                   </div>
 
-                  <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-neutral-200/70 shadow-sm ring-1 ring-white/5 dark:bg-neutral-800/60 dark:ring-black/10">
+                  <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-neutral-200/70 shadow-sm dark:bg-neutral-800/60 dark:ring-black/10">
                     {resumeFile ? (
                       isPdf && previewUrl ? (
                         <iframe
@@ -849,7 +850,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                           <p className="text-sm text-foreground/80">{resumeFileName}</p>
                           <p className="text-xs text-foreground/60">{bytesToStr(resumeSize)}</p>
                           <p className="mt-3 text-xs text-foreground/60">
-                            Live preview isn’t supported for DOC/DOCX. Use “Open in new tab” to view or download.
+                            DOCX files can&apos;t be previewed here. Use &ldquo;Open in new tab&rdquo; to view the file.
                           </p>
                         </div>
                       )
@@ -866,13 +867,13 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                   <div className="flex flex-col gap-3 mb-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-lg font-semibold text-foreground">AI Tailored Resume</h2>
+                        <h2 className="text-lg font-semibold text-foreground">Tailored resume</h2>
                         <button
                           type="button"
                           role="switch"
                           aria-checked={templateMode}
                           onClick={() => setTemplateMode((v) => !v)}
-                          title="When on, the AI returns a clean, sectioned resume template. When off, it keeps your original structure."
+                          title="On: the draft uses a standard sectioned layout. Off: it keeps your original structure."
                           className="group inline-flex items-center gap-2 rounded-full border border-border bg-background/60 py-1 pl-1 pr-2.5 text-xs font-medium text-foreground/80 transition-colors hover:bg-foreground/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                           <span
@@ -889,7 +890,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                           Template format
                         </button>
                         {aiText && generatedWithTemplate !== null && generatedWithTemplate !== templateMode && (
-                          <span className="hidden items-center rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning sm:inline-flex">
+                          <span className="hidden items-center rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning sm:inline-flex">
                             Regenerate to apply
                           </span>
                         )}
@@ -947,7 +948,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         variant="outline"
                         disabled={!aiText}
                         className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
-                        onClick={() => aiText && copy(aiText, "Copied tailored draft")}
+                        onClick={() => aiText && copy(aiText, "Copied draft")}
                       >
                         <ClipboardCopy className="mr-1 h-4 w-4" />
                         Copy
@@ -968,7 +969,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
 
                   {aiText ? (
                     outputView === "preview" && isLikelyStructuredResume(aiText) ? (
-                      <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-muted/40 p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+                      <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-muted/40 p-4 shadow-sm">
                         <ResumeDocument text={aiText} />
                       </div>
                     ) : (
@@ -982,11 +983,11 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                   ) : (
                     <div className="flex h-[68vh] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <Sparkles className="h-6 w-6 text-primary" />
+                        <FileText className="h-6 w-6 text-primary" />
                       </div>
-                      <p className="mt-4 text-sm font-medium text-foreground">No tailored draft yet</p>
+                      <p className="mt-4 text-sm font-medium text-foreground">No draft yet</p>
                       <p className="mt-1 max-w-xs text-sm text-foreground/60">
-                        Generate an AI-tailored version once your resume and job description are ready.
+                        Once your resume and job description are in, generate a draft.
                       </p>
                       <div className="mt-4 flex flex-col gap-1.5 text-xs">
                         <span className={`inline-flex items-center gap-1.5 ${resumeFile ? "text-success" : "text-foreground/50"}`}>
@@ -997,6 +998,12 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         </span>
                       </div>
                     </div>
+                  )}
+
+                  {aiText && (
+                    <p className="text-xs text-foreground/60">
+                      AI wrote this draft. Check facts and numbers before you send it.
+                    </p>
                   )}
 
                   <div className="flex items-center justify-between text-xs text-foreground/60">
@@ -1012,12 +1019,12 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     >
                       {generating ? (
                         <>
-                          <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                          Generating…
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Rewriting your resume…
                         </>
                       ) : (
                         <>
-                          <Sparkles className="mr-2 h-4 w-4" />
+                          <PenLine className="mr-2 h-4 w-4" />
                           Generate tailored draft
                         </>
                       )}
@@ -1030,7 +1037,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       onClick={addToTracker}
                       title="Create a tracker entry prefilled from this job"
                     >
-                      Send to Tracker
+                      Add to tracker
                     </Button>
                   </div>
                 </div>
@@ -1082,7 +1089,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                   onClick={() => setStep(1)}
                   className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  Start Over
+                  Start over
                 </Button>
               )}
             </div>
@@ -1094,7 +1101,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
         <div className="relative flex w-full max-w-4xl max-h-[92vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
           <div className="flex items-center justify-between border-b border-border px-5 py-3">
-            <h3 className="text-sm font-semibold text-foreground">AI Tailored Resume</h3>
+            <h3 className="text-sm font-semibold text-foreground">Tailored resume</h3>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"

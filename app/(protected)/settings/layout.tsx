@@ -3,7 +3,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Settings",
-  description: "Manage preferences, exports, notifications, and account details for your Offervia workspace.",
+  description: "Change your name, theme, weekly goal, plan, and data settings.",
   path: "/settings",
   index: false,
 });

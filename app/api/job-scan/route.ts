@@ -29,8 +29,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
       headers: { "Retry-After": String(retry) },
     });
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     if (!gate.allowed) {
       return fail(
         "PLAN_LIMIT_REACHED",
-        "You've reached your monthly job scan limit. Upgrade to Pro to continue.",
+        "You've used this month's job scans. Upgrade to Pro for more.",
         403
       );
     }
@@ -52,12 +52,12 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const parsed = jobScanBodySchema.safeParse(body);
     if (!parsed.success) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     const { jd } = parsed.data;
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       aiParsed = JSON.parse(stripped) as typeof aiParsed;
     } catch {
-      return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
+      return fail("SERVER_ERROR", "The job scan didn't finish. Try again.", 500);
     }
 
     if (
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       !Array.isArray(aiParsed.missing_skills) ||
       typeof aiParsed.summary !== "string"
     ) {
-      return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
+      return fail("SERVER_ERROR", "The job scan didn't finish. Try again.", 500);
     }
 
     const score = Number(aiParsed.match_score);
@@ -120,6 +120,6 @@ export async function POST(req: Request) {
     return Response.json({ content });
   } catch (error) {
     captureServerException(error, { route: "api/job-scan" });
-    return fail("SERVER_ERROR", "Job scan failed. Try again.", 500);
+    return fail("SERVER_ERROR", "The job scan didn't finish. Try again.", 500);
   }
 }

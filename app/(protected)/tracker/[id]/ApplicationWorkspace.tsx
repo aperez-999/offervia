@@ -11,7 +11,6 @@ import {
   PenLine,
   Printer,
   Save,
-  Sparkles,
   Target,
   Trash2,
 } from "lucide-react";
@@ -114,13 +113,13 @@ export default function ApplicationWorkspace({
     setSaving(false);
     if (!res.ok) {
       toast({
-        title: "Could not save",
-        description: res.error || "Try again.",
+        title: "Couldn't save changes",
+        description: res.error || "Check your connection and try again.",
         variant: "destructive",
       });
       return;
     }
-    toast({ variant: "success", title: "Saved" });
+    toast({ variant: "success", title: "Changes saved" });
     router.refresh();
   }, [app.id, company, position, status, appliedOn, followUp, notes, toast, router]);
 
@@ -130,7 +129,7 @@ export default function ApplicationWorkspace({
     if (!res.ok) {
       setDeleting(false);
       setConfirmOpen(false);
-      toast({ title: "Could not delete", variant: "destructive" });
+      toast({ title: "Couldn't delete this application", description: "Check your connection and try again.", variant: "destructive" });
       return;
     }
     toast({ variant: "success", title: "Application deleted" });
@@ -141,7 +140,7 @@ export default function ApplicationWorkspace({
     (content: string) => {
       navigator.clipboard.writeText(content).then(
         () => toast({ variant: "success", title: "Copied to clipboard" }),
-        () => toast({ title: "Copy failed", variant: "destructive" }),
+        () => toast({ title: "Couldn't copy. Select the text and copy it manually.", variant: "destructive" }),
       );
     },
     [toast],
@@ -263,7 +262,7 @@ export default function ApplicationWorkspace({
                 id="ws-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Recruiter name, interview stages, links, anything worth remembering…"
+                placeholder="Recruiter name, interview dates, links…"
                 className="min-h-[120px] resize-y"
               />
             </div>
@@ -289,7 +288,7 @@ export default function ApplicationWorkspace({
             </div>
             {documents.length === 0 ? (
               <p className="text-sm text-foreground/55">
-                No documents matched this role yet. Generate one below and it will show up here.
+                Resumes and cover letters that mention this company or role will show up here.
               </p>
             ) : (
               <ul className="space-y-2">
@@ -316,16 +315,17 @@ export default function ApplicationWorkspace({
                         {doc.title}
                       </span>
                       <span className="block text-xs text-foreground/50">
-                        {doc.kind === "cover_letter" ? "Cover Letter" : "Resume"}
+                        {doc.kind === "cover_letter" ? "Cover letter" : "Resume"}
                       </span>
                     </span>
-                    <Button variant="ghost" size="sm" onClick={() => copyDoc(doc.content)}>
+                    <Button variant="ghost" size="sm" onClick={() => copyDoc(doc.content)} aria-label={`Copy ${doc.title}`}>
                       <Copy className="size-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => printAsPdf(doc.title, doc.content)}
+                      aria-label={`Print or save ${doc.title} as PDF`}
                     >
                       <Printer className="size-3.5" />
                     </Button>
@@ -339,7 +339,7 @@ export default function ApplicationWorkspace({
         {/* Right: insights + actions */}
         <div className="space-y-6">
           <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">Generate for this role</h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Use this job</h2>
             <div className="flex flex-col gap-2">
               <Button asChild variant="outline" className="justify-start">
                 <Link href={`/resume${roleQuery}`}>
@@ -353,7 +353,7 @@ export default function ApplicationWorkspace({
               </Button>
               <Button asChild variant="outline" className="justify-start">
                 <Link href={`/scanner${roleQuery}`}>
-                  <Target className="size-4" /> Scan against the job
+                  <Target className="size-4" /> Scan the job description
                 </Link>
               </Button>
             </div>
@@ -361,10 +361,7 @@ export default function ApplicationWorkspace({
 
           {bestScan ? (
             <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <div className="mb-3 flex items-center gap-2">
-                <Sparkles className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Latest scan match</h2>
-              </div>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">Latest scan</h2>
               {typeof bestScan.match_score === "number" ? (
                 <div className="mb-3 flex items-baseline gap-1.5">
                   <span className="text-3xl font-bold text-foreground">{bestScan.match_score}</span>
@@ -373,7 +370,7 @@ export default function ApplicationWorkspace({
               ) : null}
               {bestScan.missing_skills && bestScan.missing_skills.length > 0 ? (
                 <div className="mt-3">
-                  <p className="mb-1.5 text-xs font-medium text-foreground/70">Skills to add</p>
+                  <p className="mb-1.5 text-xs font-medium text-foreground/70">Missing from your resume</p>
                   <div className="flex flex-wrap gap-1.5">
                     {bestScan.missing_skills.slice(0, 8).map((skill) => (
                       <span

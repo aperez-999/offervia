@@ -35,7 +35,7 @@ export const FOCUS_OPTIONS: {
 }[] = [
   { value: "behavioral", label: "Behavioral", hint: "Stories, teamwork, conflict, ownership" },
   { value: "technical", label: "Technical", hint: "Role-specific problems and depth" },
-  { value: "mixed", label: "Mixed", hint: "A realistic blend of both" },
+  { value: "mixed", label: "Mixed", hint: "Some of each" },
 ];
 
 export const DIFFICULTY_OPTIONS: {
@@ -43,7 +43,7 @@ export const DIFFICULTY_OPTIONS: {
   label: string;
   hint: string;
 }[] = [
-  { value: "intro", label: "Intro", hint: "Early-career / new grad" },
+  { value: "intro", label: "Intro", hint: "Early career or new grad" },
   { value: "standard", label: "Standard", hint: "Mid-level expectations" },
   { value: "senior", label: "Senior", hint: "Depth, leadership, trade-offs" },
 ];

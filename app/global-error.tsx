@@ -25,8 +25,8 @@ export default function GlobalError({
       <body className="bg-background text-foreground">
         <div className="mx-auto max-w-3xl px-4 py-10">
           <ErrorView
-            title="We hit a snag"
-            description="The app ran into an unexpected problem. Try again. If it keeps happening, contact support."
+            title="Offervia hit an error"
+            description="Try again. If it keeps happening, contact support and include the details below."
             onRetry={reset}
             supportHref="/contact"
             errorMessage={details}

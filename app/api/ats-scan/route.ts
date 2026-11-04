@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(
       rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED",
       msg,
@@ -62,11 +62,11 @@ export async function POST(req: Request) {
       try {
         body = await req.json();
       } catch {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
       const parsed = jsonSchema.safeParse(body);
       if (!parsed.success) {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
       resumeText = parsed.data.resumeText;
       jd = parsed.data.jd;
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     if (resumeText.length < 50) {
       return fail(
         "INVALID_INPUT",
-        "Add your resume (at least 50 characters) so we can compare it.",
+        "Add at least 50 characters of your resume to compare.",
         400,
       );
     }
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
         .trim();
       aiParsed = JSON.parse(stripped);
     } catch {
-      return fail("SERVER_ERROR", "Scan failed. Try again.", 500);
+      return fail("SERVER_ERROR", "The scan didn't finish. Try again.", 500);
     }
 
     const keywords = coerceKeywords(aiParsed.keywords);
@@ -127,6 +127,6 @@ export async function POST(req: Request) {
     return Response.json({ content });
   } catch (error) {
     captureServerException(error, { route: "api/ats-scan" });
-    return fail("SERVER_ERROR", "Scan failed. Try again.", 500);
+    return fail("SERVER_ERROR", "The scan didn't finish. Try again.", 500);
   }
 }

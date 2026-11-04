@@ -109,7 +109,7 @@ export default function SettingsPage() {
 
         if (prefsErr) {
           // Non-fatal; show toast but keep page usable
-          toast({ title: "Could not load preferences", description: "Some settings may show defaults. Refresh to try again.", variant: "destructive" });
+          toast({ title: "Couldn't load your preferences", description: "Some fields may show defaults. Refresh to try again.", variant: "destructive" });
         }
 
         if (prefs) {
@@ -128,7 +128,7 @@ export default function SettingsPage() {
           setPeriodEnd((sub.current_period_end as string | null) ?? null);
         }
       } catch {
-        toast({ title: "Failed to load settings", description: "Check your connection and refresh the page.", variant: "destructive" });
+        toast({ title: "Couldn't load settings", description: "Check your connection and refresh the page.", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -161,7 +161,7 @@ export default function SettingsPage() {
 
       toast({ variant: "success", title: "Settings saved" });
     } catch {
-      toast({ title: "Could not save settings", description: "Your changes weren't saved. Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't save settings", description: "Your changes weren't saved. Check your connection and try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -173,7 +173,7 @@ export default function SettingsPage() {
       await supabase.auth.signOut();
       window.location.href = "/login";
     } catch {
-      toast({ title: "Sign out failed", variant: "destructive" });
+      toast({ title: "Couldn't sign out. Try again.", variant: "destructive" });
     } finally {
       setWorking(false);
     }
@@ -189,9 +189,9 @@ export default function SettingsPage() {
         window.location.href = data.url;
         return;
       }
-      toast({ title: data?.message || "Billing portal unavailable. Try again.", variant: "destructive" });
+      toast({ title: data?.message || "Couldn't open the billing portal. Try again.", variant: "destructive" });
     } catch {
-      toast({ title: "Billing portal unavailable. Try again.", variant: "destructive" });
+      toast({ title: "Couldn't open the billing portal. Try again.", variant: "destructive" });
     } finally {
       setBillingLoading(false);
     }
@@ -259,9 +259,9 @@ export default function SettingsPage() {
       a.click();
       URL.revokeObjectURL(url);
 
-      toast({ variant: "success", title: "Export ready" });
+      toast({ variant: "success", title: "Export downloaded" });
     } catch {
-      toast({ title: "Export failed", description: "We couldn't prepare your data. Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't export your data", description: "Try again. If it keeps failing, contact support.", variant: "destructive" });
     } finally {
       setWorking(false);
     }
@@ -283,7 +283,7 @@ export default function SettingsPage() {
         localStorage.removeItem(k);
       } catch {}
     }
-    toast({ variant: "success", title: "Local data cleared" });
+    toast({ variant: "success", title: "Browser data cleared" });
   }
 
   if (loading) {
@@ -292,13 +292,13 @@ export default function SettingsPage() {
 
   return (
     <PageContainer>
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
         <p className="text-xs font-medium text-primary">Account</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
             <p className="mt-1 text-sm text-foreground/70">
-              Personalize your experience, manage your plan, and control your data.
+              Your account, appearance, preferences, plan, and data.
             </p>
           </div>
           {plan === "pro" ? (
@@ -314,7 +314,7 @@ export default function SettingsPage() {
       <div className="grid items-start gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
         {/* Section nav */}
         <aside className="xl:sticky xl:top-24">
-          <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
               <a
                 key={id}
@@ -331,11 +331,11 @@ export default function SettingsPage() {
         {/* Sections */}
         <div className="space-y-6">
           {/* Profile */}
-          <Card id="profile" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="profile" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Profile</CardTitle>
               <CardDescription className="text-foreground/70">
-                Basic account information
+                Your name and email
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -422,7 +422,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Appearance */}
-          <Card id="appearance" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="appearance" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Appearance</CardTitle>
               <CardDescription className="text-foreground/70">
@@ -459,11 +459,11 @@ export default function SettingsPage() {
           </Card>
 
           {/* Preferences */}
-          <Card id="preferences" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="preferences" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Preferences</CardTitle>
               <CardDescription className="text-foreground/70">
-                Customize your Offervia experience
+                Coach default and weekly goal
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -478,10 +478,10 @@ export default function SettingsPage() {
                     <SelectValue placeholder="Select a mode" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="interview">Interview Coach</SelectItem>
-                    <SelectItem value="resume">Resume Feedback</SelectItem>
-                    <SelectItem value="cover_letter">Cover Letter Help</SelectItem>
-                    <SelectItem value="career">Career Advice</SelectItem>
+                    <SelectItem value="interview">Interview practice</SelectItem>
+                    <SelectItem value="resume">Resume feedback</SelectItem>
+                    <SelectItem value="cover_letter">Cover letter help</SelectItem>
+                    <SelectItem value="career">Career advice</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                   disabled={loading}
                 />
                 <div className="text-xs text-foreground/60">
-                  Used on the dashboard for progress nudges.
+                  Your dashboard tracks progress toward this number each week.
                 </div>
               </div>
 
@@ -516,11 +516,11 @@ export default function SettingsPage() {
           </Card>
 
           {/* Plan & billing */}
-          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Plan &amp; billing</CardTitle>
               <CardDescription className="text-foreground/70">
-                Manage your subscription and billing details.
+                Your current plan and payment details.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -538,7 +538,7 @@ export default function SettingsPage() {
                         ? periodEnd
                           ? `Renews ${new Date(periodEnd).toLocaleDateString()}`
                           : "Active subscription"
-                        : "Upgrade to unlock unlimited tailoring and Pro tools."}
+                        : "Upgrade to Pro for higher monthly limits."}
                     </div>
                   </div>
                 </div>
@@ -559,18 +559,18 @@ export default function SettingsPage() {
               </div>
               {plan === "pro" ? (
                 <p className="text-xs text-foreground/60">
-                  Update your payment method, download invoices, or cancel and switch back to Free at any time through the billing portal. Pro access continues until the end of your current period.
+                  Use the billing portal to update your card, download invoices, or cancel. If you cancel, Pro stays active until the end of the current billing period.
                 </p>
               ) : null}
             </CardContent>
           </Card>
 
           {/* Data & Privacy */}
-          <Card id="data" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card id="data" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Data &amp; privacy</CardTitle>
               <CardDescription className="text-foreground/70">
-                Export server-stored account data plus any browser-only drafts found on this device.
+                Download a copy of your data, or clear drafts saved in this browser.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -588,7 +588,7 @@ export default function SettingsPage() {
                   onClick={clearLocalData}
                   className="border-border text-foreground hover:bg-foreground/[0.06]"
                 >
-                  Clear local data
+                  Clear browser data
                 </Button>
               </div>
 
@@ -596,29 +596,26 @@ export default function SettingsPage() {
 
               <div className="space-y-1 text-xs text-foreground/60">
                 <p>
-                  <strong className="text-foreground/80">Export data</strong> includes your profile details,
-                  preferences, server-stored coach history, and browser-saved drafts or local history found on
-                  this device.
+                  <strong className="text-foreground/80">Export data</strong> downloads your profile details,
+                  preferences, coach chat history, and any drafts saved in this browser.
                 </p>
                 <p>
-                  <strong className="text-foreground/80">Clear local data</strong> only removes browser-saved
-                  drafts and local history from this device. It does not delete your Offervia account or
-                  server-stored data.
+                  <strong className="text-foreground/80">Clear browser data</strong> removes drafts and scan
+                  history saved in this browser. Your account and everything saved to it stay as they are.
                 </p>
               </div>
 
               <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-                <div className="text-sm font-medium text-foreground">Danger zone</div>
+                <div className="text-sm font-medium text-foreground">Delete account</div>
                 <p className="text-xs text-foreground/60">
-                  Need your account removed? Contact support and we&apos;ll help with deletion requests
-                  and data removal steps.
+                  To delete your account and its data, contact support.
                 </p>
                 <Button
                   variant="outline"
                   asChild
                   className="border-destructive/30 text-destructive hover:bg-destructive/10"
                 >
-                  <Link href="/contact">Contact support about account deletion</Link>
+                  <Link href="/contact">Contact support</Link>
                 </Button>
               </div>
             </CardContent>

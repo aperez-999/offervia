@@ -15,7 +15,7 @@ export default function ClearChatButton({ onConfirm, disabled }: { onConfirm: ()
         <DialogHeader>
           <DialogTitle>Clear this chat?</DialogTitle>
           <DialogDescription>
-            This removes the saved messages for this coach mode on your account. This action cannot be undone.
+            This removes the saved messages for this coach mode on your account. You can&apos;t undo this.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

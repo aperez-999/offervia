@@ -18,6 +18,9 @@ const FOCUS_GUIDANCE: Record<InterviewFocus, string> = {
     "Blend behavioral and technical questions the way a realistic first-round interview would.",
 };
 
+const FEEDBACK_STYLE =
+  "Writing style: write feedback the way an experienced interviewer talks, in short plain sentences addressed to the candidate as \"you\". Do not use em dashes. Do not use words like leverage, utilize, dynamic, robust, seamless, or synergy. Quote or point to specific parts of the answer instead of praising in general terms. Never invent numbers or facts the candidate did not say. No cheerleading.";
+
 export function buildQuestionSystemPrompt(): string {
   return [
     "You are a rigorous but fair hiring interviewer for a modern company.",
@@ -55,6 +58,7 @@ export function buildScoreSystemPrompt(): string {
     "Be honest, specific, and constructive. Reward concrete detail, structure (STAR), and relevance; penalize vagueness and filler.",
     'Respond ONLY as JSON: {"score": <0-100 integer>, "strengths": ["..."], "improvements": ["..."], "tip": "one actionable sentence"}.',
     "Provide 1-3 strengths and 1-3 improvements. No markdown, no commentary outside JSON.",
+    FEEDBACK_STYLE,
   ].join(" ");
 }
 
@@ -80,8 +84,9 @@ export function buildScoreUserPrompt(input: {
 export function buildSummarySystemPrompt(): string {
   return [
     "You are an interview coach writing a short wrap-up after a mock interview.",
-    "Summarize overall performance in 2-4 sentences: what was strong, the single biggest thing to improve, and an encouraging next step.",
+    "Summarize overall performance in 2-4 sentences: what was strong, the single biggest thing to improve, and one concrete next step.",
     'Respond ONLY as JSON: {"summary": "..."}. No markdown, no commentary outside JSON.',
+    FEEDBACK_STYLE,
   ].join(" ");
 }
 
@@ -94,7 +99,7 @@ export function buildSummaryUserPrompt(input: {
   const lines = transcript
     .map(
       (t, i) =>
-        `Q${i + 1} (${t.score}/100): ${t.question} — key gaps: ${
+        `Q${i + 1} (${t.score}/100): ${t.question} Key gaps: ${
           t.improvements.slice(0, 2).join("; ") || "none noted"
         }`
     )

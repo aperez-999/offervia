@@ -18,7 +18,7 @@ export default function Loading() {
       </div>
 
       {/* Table shell */}
-      <div className="rounded-2xl border border-border bg-card p-0 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="rounded-2xl border border-border bg-card p-0 shadow-sm">
         {/* Header row */}
         <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] gap-4 border-b border-border p-4 text-sm">
           <Skeleton className="h-4 w-24" />

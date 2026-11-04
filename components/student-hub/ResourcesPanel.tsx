@@ -24,7 +24,7 @@ const CATALOG: Resource[] = [
   {
     id: "coursera",
     title: "Coursera",
-    desc: "University-level courses in everything from data science to art history, business, and medicine.",
+    desc: "University courses in data science, business, medicine, art history, and more.",
     url: "https://www.coursera.org/",
     category: "Learning",
     tags: ["online courses", "certificates", "university"],
@@ -44,7 +44,7 @@ const CATALOG: Resource[] = [
   {
     id: "khan-academy",
     title: "Khan Academy",
-    desc: "Free, world-class education for anyone, covering math, science, and humanities.",
+    desc: "Free lessons and practice in math, science, and the humanities.",
     url: "https://www.khanacademy.org/",
     category: "Learning",
     tags: ["math", "science", "foundations"],
@@ -54,7 +54,7 @@ const CATALOG: Resource[] = [
   {
     id: "nursing-org",
     title: "Nursing.org Study Guides",
-    desc: "Comprehensive resources for nursing students — NCLEX prep, scholarships, and guides.",
+    desc: "Resources for nursing students: NCLEX prep, scholarships, and study guides.",
     url: "https://www.nursing.org/resources/",
     category: "Learning",
     tags: ["healthcare", "nursing", "guides"],
@@ -63,7 +63,7 @@ const CATALOG: Resource[] = [
   {
     id: "mitocw",
     title: "MIT OpenCourseWare",
-    desc: "Free access to MIT's entire curriculum — engineering, science, economics, and more.",
+    desc: "Free course materials from MIT in engineering, science, economics, and more.",
     url: "https://ocw.mit.edu/",
     category: "Learning",
     tags: ["engineering", "science", "economics"],
@@ -72,7 +72,7 @@ const CATALOG: Resource[] = [
   {
     id: "artstation-learning",
     title: "ArtStation Learning",
-    desc: "Creative video tutorials for artists and designers—animation, concept art, and 3D modeling.",
+    desc: "Video tutorials for artists and designers: animation, concept art, and 3D modeling.",
     url: "https://www.artstation.com/learning",
     category: "Learning",
     tags: ["art", "design", "animation"],
@@ -92,7 +92,7 @@ const CATALOG: Resource[] = [
   {
     id: "notion-ai-writing",
     title: "Notion AI Writing Assistant",
-    desc: "AI-powered writing help for essays, resumes, and reports—perfect for all majors.",
+    desc: "Writing help for essays, resumes, and reports inside Notion.",
     url: "https://www.notion.so/product/ai",
     category: "Tools",
     tags: ["ai", "writing", "productivity"],
@@ -111,7 +111,7 @@ const CATALOG: Resource[] = [
   {
     id: "magoosh",
     title: "Magoosh Test Prep",
-    desc: "GRE, MCAT, LSAT, and GMAT prep courses trusted by students worldwide.",
+    desc: "Prep courses for the GRE, MCAT, LSAT, and GMAT.",
     url: "https://magoosh.com/",
     category: "Practice",
     tags: ["test prep", "graduate school"],
@@ -131,7 +131,7 @@ const CATALOG: Resource[] = [
   {
     id: "grammarly",
     title: "Grammarly",
-    desc: "Free grammar, clarity, and tone checker—great for academic or business writing.",
+    desc: "Free grammar, clarity, and tone checker for school or work writing.",
     url: "https://www.grammarly.com/",
     category: "Tools",
     tags: ["writing", "english", "proofreading"],
@@ -140,7 +140,7 @@ const CATALOG: Resource[] = [
   {
     id: "figma",
     title: "Figma",
-    desc: "Collaborative design tool for UI/UX, architecture diagrams, or project visuals.",
+    desc: "Shared design tool for UI/UX work, diagrams, and project visuals.",
     url: "https://www.figma.com/",
     category: "Tools",
     tags: ["design", "ux", "prototyping"],
@@ -158,7 +158,7 @@ const CATALOG: Resource[] = [
   {
     id: "zotero",
     title: "Zotero",
-    desc: "Free reference manager for research papers and projects—essential for any major.",
+    desc: "Free reference manager for research papers and projects.",
     url: "https://www.zotero.org/",
     category: "Tools",
     tags: ["citations", "research", "academic"],
@@ -188,7 +188,7 @@ const CATALOG: Resource[] = [
   {
     id: "resumeworded",
     title: "Resume Worded",
-    desc: "AI resume and LinkedIn feedback to improve your job chances instantly.",
+    desc: "Automated feedback on your resume and LinkedIn profile.",
     url: "https://resumeworded.com/",
     category: "Career",
     tags: ["resume", "linkedin", "ai"],
@@ -262,27 +262,27 @@ export default function ResourcesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs font-medium text-primary">Curated library</p>
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+        <p className="text-xs font-medium text-primary">Learning resources</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Student Resources</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Student resources</h1>
             <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Learning, practice, and career resources that strengthen your inputs for scanning, tailoring, and interviews.
+              Courses, practice tools, and career sites. Save the ones you want to come back to.
             </p>
           </div>
           <div className="flex gap-2 text-center">
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{CATALOG.length}</div>
-              <div className="text-[11px] text-foreground/60">Resources</div>
+              <div className="text-xs text-foreground/60">Resources</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-success">{CATALOG.filter((r) => r.free).length}</div>
-              <div className="text-[11px] text-foreground/60">Free</div>
+              <div className="text-xs text-foreground/60">Free</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{savedCount}</div>
-              <div className="text-[11px] text-foreground/60">Saved</div>
+              <div className="text-xs text-foreground/60">Saved</div>
             </div>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function ResourcesPanel() {
       <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
         {/* Filter rail */}
         <aside className="space-y-6 xl:sticky xl:top-24">
-          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <div className="font-medium text-foreground">Filters</div>
               {hasFilters && (
@@ -332,7 +332,7 @@ export default function ResourcesPanel() {
             </label>
           </section>
 
-          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 text-xs font-medium text-foreground/50">Tags</div>
             <div className="flex flex-wrap gap-2">
               {allTags.map((t) => {
@@ -364,7 +364,7 @@ export default function ResourcesPanel() {
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Input
-              placeholder="Search curated resources..."
+              placeholder="Search resources…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="w-full sm:max-w-sm bg-background/80 text-foreground border-border"
@@ -378,23 +378,23 @@ export default function ResourcesPanel() {
             {filtered.length === 0 ? (
               <Card className="rounded-xl border border-dashed border-border bg-card shadow-sm sm:col-span-2 2xl:col-span-3">
                 <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
-                  <p className="text-sm font-medium text-foreground">No resources match this search yet.</p>
-                  <p className="mt-2 max-w-md text-sm text-foreground/70">
-                    Try a broader keyword, remove a tag, or switch categories to keep exploring the curated library.
-                  </p>
+                  <p className="text-sm font-medium text-foreground">No resources match those filters.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
                 </CardContent>
               </Card>
             ) : filtered.map((r) => (
               <Card
                 key={r.id}
-                className="card-hover rounded-xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="rounded-xl border border-border bg-card shadow-sm"
               >
                 <CardHeader className="pb-2">
                   <CardTitle className="text-foreground">{r.title}</CardTitle>
                   <CardDescription className="text-foreground/70">
                     {r.category}
                     {r.verified && (
-                      <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-success">
+                      <span className="ml-2 inline-flex items-center gap-1 text-xs text-success">
                         <CheckCircle2 className="h-3 w-3" />
                         Verified
                       </span>
@@ -437,6 +437,8 @@ export default function ResourcesPanel() {
                       onClick={() =>
                         setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))
                       }
+                      aria-label={saved[r.id] ? `Remove ${r.title} from saved` : `Save ${r.title}`}
+                      aria-pressed={!!saved[r.id]}
                     >
                       <Bookmark
                         className={`h-4 w-4 ${

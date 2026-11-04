@@ -28,25 +28,25 @@ export function getAuthErrorMessage(error: unknown, context: AuthErrorContext) {
     ) {
       return "We couldn't sign you in with those credentials.";
     }
-    return "We couldn't sign you in. Please try again.";
+    return "We couldn't sign you in. Try again.";
   }
 
   if (context === "signup") {
     if (message.includes("already registered") || message.includes("user already registered")) {
       return "An account with that email already exists.";
     }
-    return "We couldn't create your account. Please try again.";
+    return "We couldn't create your account. Try again.";
   }
 
   if (context === "forgot-password") {
-    return "We couldn't send a reset email right now. Please try again.";
+    return "We couldn't send a reset email. Try again in a few minutes.";
   }
 
   if (context === "reset-password") {
-    return "We couldn't update your password. Please try again.";
+    return "We couldn't update your password. Try again.";
   }
 
-  return "We couldn't continue the sign-in flow. Please try again.";
+  return "We couldn't finish signing you in. Try again.";
 }
 
 export function isObfuscatedExistingSignupResponse(data: SignUpResponseLike | null | undefined) {

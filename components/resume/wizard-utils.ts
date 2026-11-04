@@ -1,14 +1,14 @@
 "use client";
 
 export const resumeWizardSteps = [
-  { id: 1, title: "Upload Resume" },
-  { id: 2, title: "Company Targeting" },
-  { id: 3, title: "Job Description" },
-  { id: 4, title: "Tailor & Review" },
+  { id: 1, title: "Upload resume" },
+  { id: 2, title: "Company and role" },
+  { id: 3, title: "Job description" },
+  { id: 4, title: "Tailor and review" },
 ] as const;
 
-export const RESUME_ACCEPTED_TYPES = [".pdf", ".doc", ".docx"] as const;
-export const RESUME_MAX_SIZE_MB = 8;
+export const RESUME_ACCEPTED_TYPES = [".pdf", ".docx"] as const;
+export const RESUME_MAX_SIZE_MB = 5;
 
 export const RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
 export const RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";

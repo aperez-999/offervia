@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "AI Coach",
-  description: "Practice interviews, refine messaging, and get focused job-search guidance without leaving your workflow.",
+  description: "Chat about interview answers, outreach messages, and job-search questions.",
   path: "/coach",
   index: false,
 });

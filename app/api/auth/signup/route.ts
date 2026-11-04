@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     { ms: 3_600_000, limit: 30 },
   ]);
   if (!rl.ok) {
-    return fail("RATE_LIMITED", "Too many requests. Try again soon.", 429, {
+    return fail("RATE_LIMITED", "Too many requests. Wait a minute and try again.", 429, {
       headers: { "Retry-After": String(rl.retryAfterSeconds ?? 60) },
     });
   }
@@ -32,12 +32,12 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const parsed = signupSchema.safeParse(body);
   if (!parsed.success) {
-    return fail("INVALID_INPUT", "Invalid request.", 400);
+    return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
   }
 
   const safeNext = sanitizeRedirectPath(parsed.data.next, "/dashboard");
@@ -75,6 +75,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     captureServerException(error, { route: "api/auth/signup" });
-    return fail("SERVER_ERROR", "We couldn't create your account. Please try again.", 500);
+    return fail("SERVER_ERROR", "We couldn't create your account. Try again.", 500);
   }
 }

@@ -40,7 +40,7 @@ export async function extractResumeFile(
   if (file.size > MAX_FILE_BYTES) {
     return {
       ok: false,
-      message: `File too large. Maximum size is ${MAX_FILE_BYTES / (1024 * 1024)}MB.`,
+      message: `That file is too large. Upload a PDF or DOCX under ${MAX_FILE_BYTES / (1024 * 1024)} MB.`,
       status: 400,
     };
   }
@@ -53,7 +53,7 @@ export async function extractResumeFile(
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
   if (!isPdf && !isDocx) {
-    return { ok: false, message: "Resume file must be PDF or DOCX.", status: 400 };
+    return { ok: false, message: "Upload your resume as a PDF or DOCX.", status: 400 };
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
@@ -70,7 +70,7 @@ export async function extractResumeFile(
       return {
         ok: false,
         message:
-          "Failed to extract text from PDF. Try re-saving the file or use a DOCX.",
+          "Couldn't read text from that PDF. Export it again and retry, or upload a DOCX.",
         status: 500,
       };
     }
@@ -80,7 +80,7 @@ export async function extractResumeFile(
     return {
       ok: false,
       message:
-        "Could not extract enough text from the resume. Ensure the file is a valid PDF or DOCX.",
+        "Couldn't find enough text in that file. If it's a scanned image, upload a text-based PDF or a DOCX.",
       status: 400,
     };
   }

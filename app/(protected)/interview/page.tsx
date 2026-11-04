@@ -18,7 +18,7 @@ import type {
 export const metadata: Metadata = createPageMetadata({
   title: "Interview Prep",
   description:
-    "Run a tailored mock interview, answer role-specific questions, and get scored, specific feedback on every answer.",
+    "Practice interview questions for a specific role and get a score and written feedback on each answer.",
   path: "/interview",
   index: false,
 });
@@ -48,8 +48,8 @@ export default async function InterviewPage() {
     <PageContainer>
       <PageHeader
         eyebrow="Interview Prep"
-        title="Mock interview studio"
-        description="Practice with role-specific questions and get instant, scored feedback — then keep sharpening with the coach."
+        title="Mock interview"
+        description="Answer questions for the role you're targeting. Each answer gets a score and notes on what to fix."
       />
       <InterviewStudio plan={subscription.plan} defaultRole={career.targetRole} />
       <InterviewHistory sessions={pastSessions} />

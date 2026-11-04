@@ -3,7 +3,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Profile",
-  description: "Update your name, avatar, and profile details used across your Offervia workspace.",
+  description: "Update your name, avatar, and career details.",
   path: "/profile",
   index: false,
 });

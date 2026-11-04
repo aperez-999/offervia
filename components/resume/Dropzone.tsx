@@ -12,7 +12,7 @@ type DropzoneProps = {
 export default function Dropzone({
   onFile,
   fileName,
-  accept = ".pdf,.doc,.docx",
+  accept = ".pdf,.docx",
   maxSizeMb = 8,
 }: DropzoneProps) {
   return (
@@ -29,10 +29,9 @@ export default function Dropzone({
       <div className="mx-auto flex max-w-md flex-col items-center">
         <Upload className="mb-2 h-6 w-6 text-foreground/60" />
         <p className="text-sm text-foreground">
-          {fileName ? `Selected: ${fileName}` : "Drag and drop your resume here"}
+          {fileName ? `Selected: ${fileName}` : "Click to choose your resume"}
         </p>
-        <p className="mt-1 text-xs text-foreground/60">PDF, DOC, or DOCX (max {maxSizeMb}MB)</p>
-        <p className="mt-2 text-xs text-foreground/60">or click to choose a file</p>
+        <p className="mt-1 text-xs text-foreground/60">PDF or DOCX, up to {maxSizeMb} MB</p>
       </div>
     </label>
   );

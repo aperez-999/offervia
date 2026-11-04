@@ -15,9 +15,9 @@ const TABS: {
   hint: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { key: "templates", label: "Message Templates", hint: "Outreach & follow-ups", icon: Mail },
-  { key: "resources", label: "Learning Resources", hint: "Courses & practice", icon: BookOpen },
-  { key: "deals", label: "Student Deals", hint: "Discounts & credits", icon: GraduationCap },
+  { key: "templates", label: "Message templates", hint: "Outreach and follow-ups", icon: Mail },
+  { key: "resources", label: "Learning resources", hint: "Courses and practice", icon: BookOpen },
+  { key: "deals", label: "Student deals", hint: "Discounts and credits", icon: GraduationCap },
 ];
 
 function isTabKey(value: string | null): value is TabKey {
@@ -56,7 +56,7 @@ export default function StudentHubClient() {
       <div
         role="tablist"
         aria-label="Student Hub sections"
-        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm ring-1 ring-white/5 sm:grid-cols-3 dark:ring-black/10"
+        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm sm:grid-cols-3 dark:ring-black/10"
       >
         {TABS.map((tab) => {
           const selected = tab.key === active;

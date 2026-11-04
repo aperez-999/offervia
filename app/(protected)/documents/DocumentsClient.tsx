@@ -37,12 +37,12 @@ type DocRow = {
 
 const FILTERS: { key: "all" | DocKind; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "cover_letter", label: "Cover Letters" },
+  { key: "cover_letter", label: "Cover letters" },
   { key: "resume", label: "Resumes" },
 ];
 
 function kindLabel(kind: DocKind) {
-  return kind === "cover_letter" ? "Cover Letter" : "Resume";
+  return kind === "cover_letter" ? "Cover letter" : "Resume";
 }
 
 function fileSlug(title: string) {
@@ -122,7 +122,7 @@ export default function DocumentsClient() {
     (content: string) => {
       navigator.clipboard.writeText(content).then(
         () => toast({ variant: "success", title: "Copied to clipboard" }),
-        () => toast({ title: "Copy failed", variant: "destructive" }),
+        () => toast({ title: "Couldn't copy. Select the text and copy it manually.", variant: "destructive" }),
       );
     },
     [toast],
@@ -154,11 +154,11 @@ export default function DocumentsClient() {
       const { error } = await supabase.from("documents").delete().eq("id", id);
       setDeletingId(null);
       if (error) {
-        toast({ title: "Could not delete", variant: "destructive" });
+        toast({ title: "Couldn't delete this document", description: "Check your connection and try again.", variant: "destructive" });
         return;
       }
       setDocs((prev) => prev.filter((d) => d.id !== id));
-      toast({ variant: "success", title: "Deleted" });
+      toast({ variant: "success", title: "Document deleted" });
     },
     [supabase, toast],
   );
@@ -182,9 +182,9 @@ export default function DocumentsClient() {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
         <FileText className="size-8 text-foreground/30" />
-        <p className="text-sm font-medium text-foreground">No saved documents yet</p>
+        <p className="text-sm font-medium text-foreground">No documents yet</p>
         <p className="max-w-sm text-sm text-foreground/60">
-          Cover letters and tailored resumes you generate are saved here automatically.
+          Cover letters and tailored resumes you generate will show up here.
         </p>
         <div className="mt-2 flex flex-wrap justify-center gap-2">
           <Button asChild size="sm" variant="outline">
@@ -296,14 +296,14 @@ export default function DocumentsClient() {
                           <Copy className="size-3.5" /> Copy
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => download(doc)}>
-                          <Download className="size-3.5" /> .txt
+                          <Download className="size-3.5" /> Download .txt
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => exportPdf(doc)}
                         >
-                          <Printer className="size-3.5" /> PDF
+                          <Printer className="size-3.5" /> Save as PDF
                         </Button>
                         <Button
                           size="sm"
@@ -331,7 +331,7 @@ export default function DocumentsClient() {
 
       {filtered.length === 0 ? (
         <p className="py-8 text-center text-sm text-foreground/50">
-          No {filter === "cover_letter" ? "cover letters" : "resumes"} saved yet.
+          No {filter === "cover_letter" ? "cover letters" : "resumes"} yet.
         </p>
       ) : null}
     </div>

@@ -12,8 +12,9 @@ import {
   ClipboardCopy,
   Info,
   Link as LinkIcon,
+  Loader2,
   MapPin,
-  Sparkles,
+  ScanSearch,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,26 +49,26 @@ const STEP_CONFIG = [
   {
     id: "details",
     number: 1,
-    title: "Paste the job once",
-    desc: "Add the role details and full job description that will power the whole packet.",
+    title: "Paste the job",
+    desc: "Add the company, role, and full job description. Later steps reuse them.",
   },
   {
     id: "scan",
     number: 2,
     title: "Run the scan",
-    desc: "Read what the role rewards and the common gaps to cover before you tailor anything.",
+    desc: "See what the role asks for and which skills candidates often lack.",
   },
   {
     id: "resume",
     number: 3,
     title: "Tailor the resume",
-    desc: "Carry the same context into Resume Tailor so the upload step is the only thing left.",
+    desc: "Resume Tailor opens with this job loaded. You upload your resume.",
   },
   {
     id: "tracker",
     number: 4,
     title: "Track the application",
-    desc: "Finish with a prefilled tracker entry and keep your next follow-up visible.",
+    desc: "Add the job to your tracker with the details already filled in.",
   },
 ] as const;
 
@@ -135,7 +136,7 @@ export default function JobPacketClient() {
   function copy(text: string, label = "Copied") {
     navigator.clipboard.writeText(text).then(
       () => toast({ variant: "success", title: label }),
-      () => toast({ title: "Copy failed", variant: "destructive" })
+      () => toast({ title: "Couldn't copy. Select the text and copy it manually.", variant: "destructive" })
     );
   }
 
@@ -154,7 +155,7 @@ export default function JobPacketClient() {
           ? res.error || "You've hit today's free limit for scans."
           : res.status === 403 && res.error === "PLAN_LIMIT_REACHED"
           ? "You've reached your monthly job scan limit. Upgrade to Pro to continue."
-          : res.error || "Scan failed. Try again in a moment.";
+          : res.error || "The scan didn't finish. Try again in a minute.";
       setError(message);
       toast({ title: "Scan failed", description: message, variant: "destructive" });
       return;
@@ -162,7 +163,7 @@ export default function JobPacketClient() {
 
     const content = res.data?.content;
     if (!content) {
-      const message = "Scan returned an unexpected response.";
+      const message = "The scan came back empty. Try again.";
       setError(message);
       toast({ title: "Scan failed", description: message, variant: "destructive" });
       return;
@@ -175,7 +176,7 @@ export default function JobPacketClient() {
     });
     toast({ variant: "success",
       title: "Scan complete",
-      description: "Role themes are ready. Continue into Resume Tailor to tailor your resume and get a personalized match.",
+      description: "Next, open Resume Tailor to tailor your resume and see how well it matches.",
     });
   }
 
@@ -183,7 +184,7 @@ export default function JobPacketClient() {
     if (!draft.jobDescription.trim()) {
       toast({
         title: "Add a job description first",
-        description: "The packet needs a JD before it can continue into tailoring.",
+        description: "Paste the job description before you tailor your resume.",
         variant: "destructive",
       });
       return;
@@ -206,8 +207,8 @@ export default function JobPacketClient() {
   function continueToTracker() {
     if (!trackerDraft.company || !trackerDraft.position) {
       toast({
-        title: "Add company and role details",
-        description: "The tracker entry needs both a company and a role title.",
+        title: "Add the company and role",
+        description: "The tracker needs both a company name and a role title.",
         variant: "destructive",
       });
       return;
@@ -241,19 +242,18 @@ export default function JobPacketClient() {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="space-y-8 py-6 sm:py-8"
     >
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:p-5">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
-              Flagship workflow
+            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              4 steps
             </div>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
               Job Packet
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Paste one job description once, scan it, carry the same context into Resume Tailor,
-              then finish with a prefilled tracker entry and a clear next step.
+              Paste a job description and scan it. Then tailor your resume for that job and add it
+              to your tracker. Your progress saves in this browser.
             </p>
           </div>
 
@@ -282,8 +282,8 @@ export default function JobPacketClient() {
 
         {draft.completedAt && (
           <div className="mt-4 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm text-foreground">
-            This packet already made it into your tracker. Reopen Resume Tailor if you want another pass,
-            or start a fresh packet for the next role.
+            This job is in your tracker. Open Resume Tailor to revise the resume, or clear the packet
+            to start the next job.
           </div>
         )}
       </div>
@@ -297,7 +297,7 @@ export default function JobPacketClient() {
             <Card
               key={step.id}
               className={cn(
-                "rounded-2xl border bg-card shadow-sm ring-1 ring-white/5 transition-colors dark:ring-black/10",
+                "rounded-2xl border bg-card shadow-sm transition-colors dark:ring-black/10",
                 active
                   ? "border-primary/50 ring-primary/20 dark:ring-primary/20"
                   : done
@@ -323,12 +323,12 @@ export default function JobPacketClient() {
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-sm text-foreground">{step.title}</CardTitle>
                       {active && (
-                        <Badge className="border-primary/30 bg-primary/10 text-[10px] font-medium text-primary">
+                        <Badge className="border-primary/30 bg-primary/10 text-xs font-medium text-primary">
                           Now
                         </Badge>
                       )}
                       {done && (
-                        <Badge className="border-success/30 bg-success/10 text-[10px] font-medium text-success">
+                        <Badge className="border-success/30 bg-success/10 text-xs font-medium text-success">
                           Done
                         </Badge>
                       )}
@@ -343,11 +343,11 @@ export default function JobPacketClient() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.85fr)]">
-        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-foreground">1. Job context</CardTitle>
             <CardDescription className="text-foreground/70">
-              The packet stores these details once and reuses them through the rest of the flow.
+              Resume Tailor and the tracker reuse these details.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -415,7 +415,7 @@ export default function JobPacketClient() {
                     currentStep: event.target.value.trim() ? "scan" : "details",
                   })
                 }
-                placeholder="Paste the full job description here..."
+                placeholder="Paste the full job description"
                 className="min-h-[260px] border-border bg-background/80 text-foreground placeholder:text-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
               />
               <div className="text-xs text-foreground/60">
@@ -431,12 +431,12 @@ export default function JobPacketClient() {
               >
                 {loadingScan ? (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                    Running scan…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Scanning…
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <ScanSearch className="mr-2 h-4 w-4" />
                     Run scan
                   </>
                 )}
@@ -454,18 +454,17 @@ export default function JobPacketClient() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">2. Job description scan</CardTitle>
               <CardDescription className="text-foreground/70">
-                A read on the role itself — what it rewards and the gaps to cover. Your resume is
-                scored later, in Resume Tailor.
+                This looks at the job description only. Your resume gets scored in Resume Tailor.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
                 <Alert variant="destructive">
-                  <AlertTitle>Scan unavailable</AlertTitle>
+                  <AlertTitle>Scan failed</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
@@ -512,14 +511,14 @@ export default function JobPacketClient() {
                     </div>
                     <p className="mt-3 flex items-start gap-1.5 text-xs text-foreground/55">
                       <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                      Based on the job description only — how attainable this role is for a strong
-                      candidate. Upload your resume in Resume Tailor for a personalized match score.
+                      Based on the job description only: how reachable this role is for a strong
+                      candidate. Upload your resume in Resume Tailor to see your own match score.
                     </p>
                   </div>
 
                   <div>
                     <div className="text-xs font-medium text-foreground/60">
-                      What this role rewards
+                      What the role asks for
                     </div>
                     <ul className="mt-2 space-y-1.5 text-sm text-foreground">
                       {draft.scanResult.strengths.map((item) => (
@@ -533,7 +532,7 @@ export default function JobPacketClient() {
 
                   <div>
                     <div className="text-xs font-medium text-foreground/60">
-                      Common gaps to cover
+                      Skills candidates often lack
                     </div>
                     <ul className="mt-2 space-y-1.5 text-sm text-foreground">
                       {draft.scanResult.missing_skills.map((item) => (
@@ -552,24 +551,23 @@ export default function JobPacketClient() {
                     <p className="mt-2 text-sm text-foreground/80">{draft.scanResult.summary}</p>
                   </div>
                   <div className="rounded-xl border border-success/30 bg-success/10 p-3 text-sm text-foreground">
-                    Next step: open Resume Tailor to weave these themes into your resume and get your
-                    personalized match.
+                    Next: open Resume Tailor to work these points into your resume and see your match
+                    score.
                   </div>
                 </>
               ) : (
                 <div className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-foreground/60">
-                  Run the scan to read what this role rewards, the common gaps to cover, and the
-                  themes your tailored resume should emphasize next.
+                  Run the scan to see what this role asks for and which skills to cover on your resume.
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-foreground">3. Resume + tracker handoff</CardTitle>
+              <CardTitle className="text-foreground">3. Resume and tracker</CardTitle>
               <CardDescription className="text-foreground/70">
-                The packet carries company, role, location, and JD context into the next tools.
+                The company, role, location, and job description carry over to Resume Tailor and the tracker.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -578,15 +576,15 @@ export default function JobPacketClient() {
                   {draft.companyName || "Company not added yet"}
                 </div>
                 <div className="mt-1 text-xs text-foreground/60">
-                  {draft.roleTitle || "Role title pending"}
-                  {draft.location ? ` • ${draft.location}` : ""}
+                  {draft.roleTitle || "Role title not added yet"}
+                  {draft.location ? `, ${draft.location}` : ""}
                 </div>
               </div>
 
               {draft.tailoredResume ? (
                 <div className="space-y-3 rounded-xl border border-success/30 bg-success/10 p-3">
                   <div className="text-sm font-medium text-foreground">
-                    Tailored resume ready
+                    Tailored resume
                   </div>
                   <p className="line-clamp-5 whitespace-pre-wrap text-xs text-foreground/70">
                     {draft.tailoredResume}
@@ -599,21 +597,21 @@ export default function JobPacketClient() {
                       className="border-border text-foreground hover:bg-foreground/[0.06]"
                     >
                       <ClipboardCopy className="mr-2 h-4 w-4" />
-                      Copy draft
+                      Copy resume
                     </Button>
                     <Button
                       size="sm"
                       onClick={continueToTracker}
                       className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                     >
-                      Send to tracker
+                      Add to tracker
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-foreground/60">
-                  Resume Tailor will open with this job context already loaded. Upload your resume,
-                  generate a draft, then come back here or jump straight into the tracker.
+                  Resume Tailor opens with this job already loaded. Upload your resume and generate a
+                  draft, then come back here to add the job to your tracker.
                 </div>
               )}
 
@@ -622,7 +620,7 @@ export default function JobPacketClient() {
                   onClick={continueToResumeTailor}
                   className="bg-primary-button text-white hover:bg-primary-button/90"
                 >
-                  {draft.tailoredResume ? "Refine in Resume Tailor" : "Open Resume Tailor"}
+                  {draft.tailoredResume ? "Edit in Resume Tailor" : "Open Resume Tailor"}
                 </Button>
                 <Button
                   variant="outline"
@@ -630,7 +628,7 @@ export default function JobPacketClient() {
                   disabled={!trackerDraft.company || !trackerDraft.position}
                   className="border-border text-foreground hover:bg-foreground/[0.06]"
                 >
-                  Open Tracker
+                  Open tracker
                 </Button>
               </div>
             </CardContent>

@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Flame, Sparkles, X } from "lucide-react";
+import { ArrowRight, Flame, Target, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/motion/Reveal";
 import QuickStart from "@/components/dashboard/QuickStart";
@@ -79,10 +79,10 @@ type OnboardingPrefs = {
 };
 
 const MODE_LABELS: Record<MsgRow["mode"], string> = {
-  interview: "Interview Coach",
-  resume: "Resume Feedback",
-  cover_letter: "Cover Letter Help",
-  career: "Career Advice",
+  interview: "Interview practice",
+  resume: "Resume feedback",
+  cover_letter: "Cover letter help",
+  career: "Career advice",
 };
 
 type PlanType = "free" | "pro";
@@ -411,7 +411,7 @@ export default function DashboardClient({
       <div className="space-y-8">
         <ErrorView
           title="Couldn't load your dashboard"
-          description="We couldn't reach your workspace data. Check your connection and try again."
+          description="Your applications didn't load. Check your connection and try again."
           onRetry={loadDashboard}
         />
       </div>
@@ -424,7 +424,7 @@ export default function DashboardClient({
       {upgrade === "success" && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-success">
           <p className="text-sm font-medium">
-            🎉 Welcome to Pro! Your limits have been unlocked.
+            You&apos;re on Pro now. Your higher monthly limits are active.
           </p>
           <Button
             variant="ghost"
@@ -440,7 +440,7 @@ export default function DashboardClient({
       {upgrade === "cancel" && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 text-muted-foreground">
           <p className="text-sm">
-            Upgrade was canceled. You can try again anytime.
+            Checkout was canceled. Your plan hasn&apos;t changed.
           </p>
           <Button
             variant="ghost"
@@ -458,13 +458,8 @@ export default function DashboardClient({
         <Card className={
           plan === "pro"
             ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-card shadow-md ring-1 ring-reward/10"
-            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm"
         }>
-          <div className={
-            plan === "pro"
-              ? "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-reward/15 blur-3xl"
-              : "pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl"
-          } />
           <CardContent className="relative p-5 sm:p-6">
             <div className="max-w-3xl">
               {plan === "pro" ? (
@@ -478,7 +473,7 @@ export default function DashboardClient({
                 </div>
               ) : (
                 <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
-                  Continue your search
+                  Dashboard
                 </Badge>
               )}
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -487,12 +482,12 @@ export default function DashboardClient({
               </h1>
               <p className="mt-2 text-sm text-foreground/75 sm:text-base">
                 {plan === "pro"
-                  ? "Your Pro workspace is running at full power — higher limits, performance insights, and priority tools are all unlocked."
-                  : "One clear next step beats a crowded dashboard. Keep the workflow moving with the action that matters most right now."}
+                  ? "Here's where your applications stand, plus scan insights and your Pro usage."
+                  : "Here's where your applications stand and what to do next."}
               </p>
             </div>
 
-            {/* Recommended next step — full-width band, CTA inline */}
+            {/* Recommended next step: full-width band, CTA inline */}
             <div className={
               plan === "pro"
                 ? "mt-5 flex flex-col gap-4 rounded-2xl border border-reward/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
@@ -504,15 +499,15 @@ export default function DashboardClient({
                     ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-reward/10 text-reward ring-1 ring-reward/20"
                     : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20"
                 }>
-                  <Sparkles className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
                   <div className={
                     plan === "pro"
-                      ? "text-[11px] font-semibold text-reward/80"
-                      : "text-[11px] font-semibold text-primary/80"
+                      ? "text-xs font-semibold text-reward/80"
+                      : "text-xs font-semibold text-primary/80"
                   }>
-                    Recommended next step
+                    Next step
                   </div>
                   <div className="mt-0.5 text-sm font-medium text-foreground">{nextAction.title}</div>
                   <div className="mt-0.5 text-sm text-foreground/70">{nextAction.desc}</div>
@@ -547,11 +542,11 @@ export default function DashboardClient({
           <div className="text-xs font-semibold text-foreground/60">
             Overview
           </div>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">At a glance</h2>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Your applications</h2>
         </div>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <Reveal index={0}><Kpi title="Applications (total)" value={total} tone="slate" /></Reveal>
-          <Reveal index={1}><Kpi title="Applications (this week)" value={appsThisWeek} tone="indigo" /></Reveal>
+          <Reveal index={0}><Kpi title="Total applications" value={total} tone="slate" /></Reveal>
+          <Reveal index={1}><Kpi title="Sent this week" value={appsThisWeek} tone="indigo" /></Reveal>
           <Reveal index={2}><Kpi title="Interviewing" value={interviewing} tone="blue" /></Reveal>
           <Reveal index={3}><Kpi title="Offers" value={offers} tone="emerald" /></Reveal>
         </div>
@@ -566,13 +561,13 @@ export default function DashboardClient({
               <div className="text-xs font-semibold text-reward/80">
                 Pipeline health
               </div>
-              <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are converting</h2>
+              <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are doing</h2>
             </div>
           </div>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-            <ProHealthStat label="Response rate" value={proHealth.responseRate} hint="Apps that got any employer response" />
-            <ProHealthStat label="Interview rate" value={proHealth.interviewRate} hint="Apps that reached an interview" />
-            <ProHealthStat label="Offer rate" value={proHealth.offerRate} hint="Apps that turned into an offer" />
+            <ProHealthStat label="Response rate" value={proHealth.responseRate} hint="Applications that got any reply, including rejections" />
+            <ProHealthStat label="Interview rate" value={proHealth.interviewRate} hint="Applications now in the interview stage" />
+            <ProHealthStat label="Offer rate" value={proHealth.offerRate} hint="Applications that became an offer" />
           </div>
         </section>
       ) : null}
@@ -583,14 +578,14 @@ export default function DashboardClient({
           <div className="text-xs font-semibold text-foreground/60">
             Progress
           </div>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">Keep the search on track</h2>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">This week</h2>
         </div>
         <div className="grid items-start gap-4 lg:grid-cols-3">
-          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium text-foreground/60">
-                  Weekly Goal
+                  Weekly goal
                 </div>
                 <div className="mt-1 flex items-baseline gap-1.5">
                   <span className="text-xl font-semibold tabular-nums text-foreground sm:text-2xl">
@@ -600,13 +595,13 @@ export default function DashboardClient({
                 </div>
               </div>
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                <Sparkles className="h-4.5 w-4.5" />
+                <Target className="h-4.5 w-4.5" />
               </span>
             </div>
             <Progress value={weeklyGoalPct} className="mt-3 h-2" />
             <div className="mt-2 text-xs text-foreground/60">
               {weeklyGoalTarget > 0 && appsThisWeek >= weeklyGoalTarget ? (
-                <span>Weekly goal reached — nice work.</span>
+                <span>You hit your goal for this week.</span>
               ) : (
                 <span>
                   {Math.max(0, weeklyGoalTarget - appsThisWeek)} to go this week.{" "}
@@ -619,7 +614,7 @@ export default function DashboardClient({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-medium text-foreground/60">
@@ -629,7 +624,7 @@ export default function DashboardClient({
                   {streak} day{streak === 1 ? "" : "s"}
                 </div>
                 <p className="mt-1 text-xs text-foreground/60">
-                  Keep up the momentum with one small action today.
+                  Days in a row with at least one application logged.
                 </p>
               </div>
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/15">
@@ -638,14 +633,14 @@ export default function DashboardClient({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-xs font-medium text-foreground/60">
-                  Usage This Month
+                  Usage this month
                 </div>
                 <p className="mt-1 text-sm text-foreground/70">
-                  A quick read on how much room you have left in the current cycle.
+                  What you&apos;ve used so far this billing cycle.
                 </p>
               </div>
               {nearingLimit && plan === "free" ? (
@@ -692,7 +687,7 @@ export default function DashboardClient({
             {nearingLimit && plan === "free" ? (
               <div className="mt-4 flex flex-col gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-foreground/80">
-                  You&apos;re getting close to a monthly limit. Upgrade if you want to keep the workflow moving without interruption.
+                  You&apos;re close to a monthly limit. Upgrade to Pro for higher limits.
                 </p>
                 <Button
                   size="sm"
@@ -721,10 +716,10 @@ export default function DashboardClient({
           <div className="text-xs font-semibold text-foreground/60">
             Recent activity
           </div>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">What changed most recently</h2>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Latest applications and chats</h2>
         </div>
         <div className="grid items-start gap-4 grid-cols-1 2xl:grid-cols-2">
-        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -732,7 +727,7 @@ export default function DashboardClient({
                   Recent applications
                 </CardTitle>
                 <CardDescription className="text-foreground/70">
-                  Your latest 5 entries
+                  Your 5 most recent
                 </CardDescription>
               </div>
               <Link href="/tracker">
@@ -750,7 +745,7 @@ export default function DashboardClient({
               <SkeletonList rows={5} />
             ) : apps.length === 0 ? (
               <EmptyState
-                text="No applications yet. Start by adding your first job."
+                text="Applications you add will show up here."
                 cta={
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href="/job-packet">
@@ -800,7 +795,7 @@ export default function DashboardClient({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -808,7 +803,7 @@ export default function DashboardClient({
                   Recent coach chats
                 </CardTitle>
                 <CardDescription className="text-foreground/70">
-                  Last few messages across modes
+                  Your latest messages
                 </CardDescription>
               </div>
               <Link href="/coach">
@@ -826,7 +821,7 @@ export default function DashboardClient({
               <SkeletonList rows={5} />
             ) : recentChats.length === 0 ? (
               <EmptyState
-                text="No chats yet. Ask the coach for quick practice or resume help."
+                text="Your coach conversations will show up here."
                 cta={
                   <Link href="/coach">
                     <Button className="cursor-pointer">Open coach</Button>
@@ -842,7 +837,7 @@ export default function DashboardClient({
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-foreground">
-                        {MODE_LABELS[m.mode]} • {m.role === "user" ? "You" : "Coach"}
+                        {MODE_LABELS[m.mode]}: {m.role === "user" ? "You" : "Coach"}
                       </div>
                       <div className="truncate text-xs text-foreground/70">
                         {m.content}
@@ -869,38 +864,35 @@ export default function DashboardClient({
         <div className="space-y-6">
       {/* Quick actions */}
       <section>
-        <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <Card className="rounded-2xl border border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-foreground">Quick Actions</CardTitle>
-            <CardDescription className="text-foreground/70">
-              Other ways to move through the product when you need a different route.
-            </CardDescription>
+            <CardTitle className="text-foreground">Tools</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <Link href="/job-packet" className="block">
-                <ActionCard title="Run Job Packet">
-                  Move from JD to tailored draft to tracked application in one guided flow.
+                <ActionCard title="Start Job Packet">
+                  Scan a job description, tailor your resume, and log the application in one flow.
                 </ActionCard>
               </Link>
               <Link href="/resume" className="block">
-                <ActionCard title="Tailor Resume">
-                  Customize your resume for a specific role.
+                <ActionCard title="Tailor resume">
+                  Rewrite your resume for a specific job.
                 </ActionCard>
               </Link>
               <Link href="/scanner" className="block">
-                <ActionCard title="Scan Job Description">
-                  Extract keywords and gaps from a job posting.
+                <ActionCard title="Scan a job description">
+                  See which keywords the posting wants and which ones your resume is missing.
                 </ActionCard>
               </Link>
               <Link href="/interview" className="block">
-                <ActionCard title="Practice Interview">
-                  Run a scored mock interview tailored to your target role.
+                <ActionCard title="Practice interview">
+                  Answer mock interview questions for your target role and get a score.
                 </ActionCard>
               </Link>
               <Link href="/tracker" className="block">
-                <ActionCard title="Track Applications">
-                  Keep tabs on every application you send.
+                <ActionCard title="Open tracker">
+                  See every application you&apos;ve sent and its status.
                 </ActionCard>
               </Link>
             </div>

@@ -12,7 +12,7 @@ export default function Loading() {
 
       {/* Setup card */}
       <div className="mx-auto w-full max-w-3xl">
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="border-b border-border px-6 py-6 sm:px-8">
             <div className="flex items-center gap-3">
               <Skeleton className="size-11 rounded-xl" />

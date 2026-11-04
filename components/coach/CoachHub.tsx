@@ -1,14 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Sparkles } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Chat = dynamic(() => import("./Chat"), {
   loading: () => (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
       <aside className="w-full shrink-0 lg:w-[280px]">
-        <div className="rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+        <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
           <Skeleton className="h-3 w-24" />
           <div className="my-2 h-px bg-border" />
           <div className="space-y-2">
@@ -21,7 +21,7 @@ const Chat = dynamic(() => import("./Chat"), {
           </div>
         </div>
       </aside>
-      <div className="flex h-[70vh] min-h-[400px] flex-1 flex-col rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+      <div className="flex h-[70vh] min-h-[400px] flex-1 flex-col rounded-2xl border border-border bg-card shadow-sm">
         <div className="border-b border-border p-5">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="mt-2 h-4 w-72" />
@@ -57,13 +57,13 @@ export default function CoachHub() {
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
           <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
-            <Sparkles className="size-5" />
+            <MessageSquare className="size-5" />
           </span>
-          AI Coach
+          AI coach
         </h1>
         <p className="max-w-2xl text-sm text-foreground/60">
-          Pick a module, paste your context, and get concise, actionable coaching
-          for interviews, resumes, cover letters, and career moves.
+          Pick a topic and paste what you&apos;re working on: an interview answer, a resume
+          bullet, a cover letter paragraph, or a career decision.
         </p>
       </header>
 

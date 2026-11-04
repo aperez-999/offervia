@@ -93,8 +93,8 @@ export async function POST(req: Request) {
     const retry = rl.retryAfterSeconds || 60;
     const msg =
       rl.reason === "unauthorized"
-        ? "Authentication required."
-        : "Too many requests. Try again soon.";
+        ? "Sign in to continue."
+        : "Too many requests. Wait a minute and try again.";
     return fail(rl.reason === "unauthorized" ? "UNAUTHORIZED" : "RATE_LIMITED", msg, rl.reason === "unauthorized" ? 401 : 429, {
       headers: { "Retry-After": String(retry) },
     });
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
     if (!gate.allowed) {
       return fail(
         "PLAN_LIMIT_REACHED",
-        "You've reached your monthly resume tailoring limit. Upgrade to Pro to continue.",
+        "You've used this month's resume tailoring runs. Upgrade to Pro for more.",
         403
       );
     }
@@ -129,11 +129,11 @@ export async function POST(req: Request) {
       try {
         body = await req.json();
       } catch {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
       const parsed = resumeTailorJsonSchema.safeParse(body);
       if (!parsed.success) {
-        return fail("INVALID_INPUT", "Invalid request.", 400);
+        return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
       }
       resumeText = (parsed.data.resumeContent || parsed.data.resumeText || "").toString();
       jobDescription = parsed.data.jobDescription.toString();
@@ -181,14 +181,14 @@ export async function POST(req: Request) {
     companyUrl = normalizeText(companyUrl);
 
     if (!resumeText || resumeText.trim().length < 100) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     // Strip obvious sample placeholders but preserve user content
     resumeText = stripSamplePlaceholders(resumeText);
 
     if (!jobDescription || jobDescription.trim().length < 20) {
-      return fail("INVALID_INPUT", "Invalid request.", 400);
+      return fail("INVALID_INPUT", "That request wasn't valid. Refresh the page and try again.", 400);
     }
 
     // Size budgets (keep payload within free-tier context/TPM limits)
@@ -256,7 +256,7 @@ export async function POST(req: Request) {
     const cleaned = sanitizeOutput(aiText, companyName);
 
     if (cleaned.length < 100) {
-      return fail("SERVER_ERROR", "Something went wrong. Try again.", 500);
+      return fail("SERVER_ERROR", "Couldn't generate a draft. Try again in a moment.", 500);
     }
 
     await incrementUsage(userId, "resume_tailor");
@@ -280,10 +280,10 @@ export async function POST(req: Request) {
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
       return fail(
         "INVALID_INPUT",
-        "Your resume and job description are too long for a single pass. Try shortening them and retry.",
+        "Your resume and job description are too long to process together. Shorten one of them and try again.",
         413
       );
     }
-    return fail("SERVER_ERROR", "Something went wrong.", 500);
+    return fail("SERVER_ERROR", "Couldn't generate a draft. Try again in a moment.", 500);
   }
 }

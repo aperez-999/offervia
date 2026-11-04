@@ -36,7 +36,7 @@ const DEALS: Deal[] = [
     id: "notion-student",
     vendor: "Notion",
     title: "Notion Education Plan",
-    desc: "Personal Pro for students—great for class notes and project planning.",
+    desc: "Personal Pro plan for students. Useful for class notes and project planning.",
     url: "https://www.notion.so/students",
     category: "Productivity",
     requiresEdu: true,
@@ -55,7 +55,7 @@ const DEALS: Deal[] = [
     id: "figma-edu",
     vendor: "Figma",
     title: "Figma Education",
-    desc: "Professional plan for students & educators—design, prototype, and collaborate.",
+    desc: "Figma's Professional plan for students and educators.",
     url: "https://www.figma.com/education/",
     category: "Design",
     requiresEdu: true,
@@ -92,7 +92,7 @@ const DEALS: Deal[] = [
     id: "canva-edu",
     vendor: "Canva",
     title: "Canva for Education",
-    desc: "Free Pro features for teachers and students to create stunning visuals easily.",
+    desc: "Canva Pro features, free for teachers and students.",
     url: "https://www.canva.com/education/",
     category: "Design",
     requiresEdu: true,
@@ -101,7 +101,7 @@ const DEALS: Deal[] = [
     id: "wolfram-alpha",
     vendor: "Wolfram Alpha",
     title: "Wolfram Alpha Pro for Students",
-    desc: "Get advanced problem-solving tools and step-by-step explanations with discounts.",
+    desc: "Step-by-step explanations and advanced problem-solving tools, discounted for students.",
     url: "https://www.wolframalpha.com/pro/",
     category: "STEM Tools",
     requiresEdu: false,
@@ -119,7 +119,7 @@ const DEALS: Deal[] = [
     id: "notion-ai-trial",
     vendor: "AI Tools",
     title: "Notion AI (Free Trial)",
-    desc: "Try Notion AI to summarize, brainstorm, and write faster directly in your notes.",
+    desc: "Try Notion AI for summarizing and drafting inside your notes.",
     url: "https://www.notion.so/product/ai",
     category: "AI",
     requiresEdu: false,
@@ -128,7 +128,7 @@ const DEALS: Deal[] = [
     id: "replit-edu",
     vendor: "Replit",
     title: "Replit Hacker Plan for Students",
-    desc: "Get Replit’s premium plan free through the GitHub Student Pack for online coding.",
+    desc: "Replit's premium plan, free through the GitHub Student Pack.",
     url: "https://replit.com/site/github-students",
     category: "Coding",
     requiresEdu: true,
@@ -137,19 +137,10 @@ const DEALS: Deal[] = [
     id: "coursera-edu",
     vendor: "Coursera",
     title: "Coursera for Students",
-    desc: "Free access to online courses, certificates, and career-ready learning paths.",
+    desc: "Free access to online courses and certificates.",
     url: "https://www.coursera.org/career-academy/programs/learning-program-students-ig5jd",
     category: "Learning",
     requiresEdu: true,
-  },
-  {
-    id: "edu-ai-tools",
-    vendor: "Red Hat",
-    title: "Popular EDU-Friendly AI Tools",
-    desc: "A curated list of AI study and writing tools that universities often allow.",
-    url: "https://www.redhat.com/en/engage/implement-mlops-processes-help-teams-collaborate-checklist?sc_cid=RHCTN0250000436781&gad_source=1&gad_campaignid=22134705836&gbraid=0AAAAADsbVMTbUScRwCNjnA72kfnHI0VH2&gclid=CjwKCAjwpOfHBhAxEiwAm1SwEgGSLAAolOmC0TbUrC65twxtldo-skM9mOtKUFTGEF9nyFnVmKZAhRoC05UQAvD_BwE",
-    category: "AI",
-    requiresEdu: false,
   },
   {
     id: "slack-student",
@@ -219,30 +210,30 @@ export default function DealsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-        <p className="text-xs font-medium text-primary">Student-only perks</p>
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+        <p className="text-xs font-medium text-primary">Student deals</p>
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-primary" />
-              Student Exclusives
+              Student discounts
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Verified discounts, credits, and student-only perks that lower the cost of building skills and running your search.
+              Free plans, discounts, and cloud credits for students. Most need a school email to sign up.
             </p>
           </div>
           <div className="flex gap-2 text-center">
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{DEALS.length}</div>
-              <div className="text-[11px] text-foreground/60">Perks</div>
+              <div className="text-xs text-foreground/60">Perks</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-success">{freeCount}</div>
-              <div className="text-[11px] text-foreground/60">Free</div>
+              <div className="text-xs text-foreground/60">Free</div>
             </div>
             <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
               <div className="text-lg font-semibold text-foreground">{eduCount}</div>
-              <div className="text-[11px] text-foreground/60">.edu</div>
+              <div className="text-xs text-foreground/60">.edu</div>
             </div>
           </div>
         </div>
@@ -251,7 +242,7 @@ export default function DealsPanel() {
       <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
         {/* Filter rail */}
         <aside className="space-y-6 xl:sticky xl:top-24">
-          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <div className="font-medium text-foreground">Filters</div>
               {hasFilters && (
@@ -290,13 +281,13 @@ export default function DealsPanel() {
             </div>
           </section>
 
-          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm">
             <CardContent className="flex items-start gap-3 p-4">
               <GraduationCap className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
               <div>
-                <div className="text-sm font-medium text-foreground">Pro tip</div>
+                <div className="text-sm font-medium text-foreground">How verification works</div>
                 <div className="text-sm text-foreground/70">
-                  Many vendors verify via a .edu email or SheerID. If you’ve graduated, check alumni options—some schools keep email forwarding active.
+                  Most vendors check a .edu email or use SheerID. If you&apos;ve graduated, ask your school about alumni email. Some keep forwarding active.
                 </div>
               </div>
             </CardContent>
@@ -307,7 +298,7 @@ export default function DealsPanel() {
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Input
-              placeholder="Search verified student perks..."
+              placeholder="Search deals…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="w-full sm:max-w-sm bg-background/80 text-foreground border-border"
@@ -321,16 +312,16 @@ export default function DealsPanel() {
             {filtered.length === 0 ? (
               <Card className="rounded-xl border border-dashed border-border bg-card shadow-sm sm:col-span-2 2xl:col-span-3">
                 <CardContent className="flex min-h-[180px] flex-col items-center justify-center text-center">
-                  <p className="text-sm font-medium text-foreground">No student perks match that filter.</p>
-                  <p className="mt-2 max-w-md text-sm text-foreground/70">
-                    Try a different category or search term to find another verified offer.
-                  </p>
+                  <p className="text-sm font-medium text-foreground">No deals match those filters.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
                 </CardContent>
               </Card>
             ) : filtered.map((d) => (
               <Card
                 key={d.id}
-                className="card-hover rounded-xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10"
+                className="rounded-xl border border-border bg-card shadow-sm"
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between gap-2">

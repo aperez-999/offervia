@@ -7,10 +7,11 @@ import {
   Check,
   ClipboardCopy,
   FileText,
-  Sparkles,
+  Lightbulb,
+  Loader2,
+  PenLine,
   Star,
   Target,
-  Wand2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ Requirements: JavaScript, TypeScript, React, HTML, CSS, REST APIs, unit testing 
 Nice to have: Next.js, Tailwind CSS, accessibility (a11y), CI/CD, performance profiling.`;
 
 function scoreLabel(score: number): { label: string; tone: string } {
-  if (score >= 80) return { label: "Excellent match", tone: "text-success" };
+  if (score >= 80) return { label: "Strong match", tone: "text-success" };
   if (score >= 60) return { label: "Good match", tone: "text-primary" };
   if (score >= 40) return { label: "Fair match", tone: "text-warning" };
   return { label: "Needs work", tone: "text-destructive" };
@@ -123,7 +124,7 @@ export default function ScannerPanel() {
           resp.error ||
           (resp.status === 429
             ? "Too many scans. Try again in a moment."
-            : "Scan failed. Please try again.");
+            : "The scan didn't finish. Try again in a moment.");
         setError(msg);
         toast({ title: "Scan failed", description: msg, variant: "destructive" });
         return;
@@ -131,7 +132,7 @@ export default function ScannerPanel() {
 
       const content = resp.data?.content;
       if (!content) {
-        const msg = "Scan failed. Please try again.";
+        const msg = "The scan came back empty. Try again in a moment.";
         setError(msg);
         toast({ title: "Scan failed", description: msg, variant: "destructive" });
         return;
@@ -144,7 +145,7 @@ export default function ScannerPanel() {
         description: `${content.matched_count} of ${content.total} keywords found in your resume.`,
       });
     } catch {
-      const msg = "Something went wrong. Please try again.";
+      const msg = "Couldn't reach the server. Check your connection and try again.";
       setError(msg);
       toast({ title: "Scan failed", description: msg, variant: "destructive" });
     } finally {
@@ -176,12 +177,11 @@ export default function ScannerPanel() {
     <div className="space-y-6">
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
-          <Target className="size-6 text-primary" /> ATS Keyword Scanner
+          <Target className="size-6 text-primary" /> ATS keyword scanner
         </h1>
         <p className="max-w-2xl text-sm text-foreground/60">
-          Paste your resume and a job description to see the exact keywords an
-          applicant tracking system scans for — what you already match, what
-          you&apos;re missing, and how to fix it before you apply.
+          Paste your resume and a job description. You&apos;ll see which keywords
+          from the posting your resume already has and which ones are missing.
         </p>
       </header>
 
@@ -236,7 +236,7 @@ export default function ScannerPanel() {
                   <p className="mt-1 text-xs text-foreground/50">
                     {resumeText.trim().length < 50
                       ? `Add at least ${50 - resumeText.trim().length} more characters.`
-                      : "Looks good."}
+                      : "Enough to scan."}
                   </p>
                 </>
               ) : resumeFile ? (
@@ -292,7 +292,7 @@ export default function ScannerPanel() {
             >
               {loading ? (
                 <>
-                  <Sparkles className="size-4 animate-spin" /> Scanning…
+                  <Loader2 className="size-4 animate-spin" /> Comparing keywords…
                 </>
               ) : (
                 <>
@@ -473,7 +473,7 @@ export default function ScannerPanel() {
                 {result.tips.length > 0 && (
                   <div className="rounded-xl border border-border bg-background/50 p-3.5">
                     <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
-                      <Sparkles className="size-4 text-primary" /> How to improve
+                      <Lightbulb className="size-4 text-primary" /> How to improve
                     </p>
                     <ul className="space-y-1.5">
                       {result.tips.map((tip, i) => (
@@ -492,7 +492,7 @@ export default function ScannerPanel() {
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 border-t border-border pt-4">
                   <Button onClick={tailorResume} className="flex-1">
-                    <Wand2 className="size-4" /> Tailor my resume
+                    <PenLine className="size-4" /> Tailor my resume
                   </Button>
                   <Button
                     variant="outline"
@@ -508,10 +508,9 @@ export default function ScannerPanel() {
             ) : (
               <div className="flex min-h-[360px] flex-col items-center justify-center gap-2 text-center text-sm text-foreground/50">
                 <Target className="size-9 text-foreground/25" />
-                <p>Your keyword match report will appear here.</p>
+                <p>Your results will show up here.</p>
                 <p className="max-w-xs text-xs text-foreground/40">
-                  Add your resume and a job description, then scan to see matched
-                  keywords, gaps, and ATS tips.
+                  Add your resume and a job description, then scan.
                 </p>
               </div>
             )}

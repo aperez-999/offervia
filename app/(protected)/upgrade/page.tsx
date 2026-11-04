@@ -8,7 +8,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Upgrade",
-  description: "Unlock higher monthly limits and uninterrupted iteration when you need more room to run your search.",
+  description: "Compare the Free and Pro plans. Pro costs $10 a month and raises your monthly limits.",
   path: "/upgrade",
   index: false,
 });

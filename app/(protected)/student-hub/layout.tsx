@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/metadata";
 export const metadata: Metadata = createPageMetadata({
   title: "Student Hub",
   description:
-    "Message templates, curated learning resources, and verified student-only deals — organized in one place.",
+    "Message templates for outreach and follow-ups, learning resources, and student discounts.",
   path: "/student-hub",
   index: false,
 });

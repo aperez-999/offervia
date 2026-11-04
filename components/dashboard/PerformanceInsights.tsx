@@ -20,21 +20,21 @@ export default function PerformanceInsights({
   return (
     <section
       className="rounded-xl border border-border bg-card px-6 py-5"
-      aria-label="Performance Insights"
+      aria-label="Scan insights"
     >
       <div className="mb-4">
         <div className="text-xs font-semibold text-foreground/60">
-          Pro insights
+          Pro
         </div>
-        <h3 className="mt-1 text-lg font-semibold text-foreground">Performance insights</h3>
+        <h3 className="mt-1 text-lg font-semibold text-foreground">Scan insights</h3>
         <p className="mt-1 text-sm text-foreground/70">
-          A deeper view of scan quality and progress over time, kept below the main workflow so it stays secondary.
+          How well your resume matches the jobs you scan, over time.
         </p>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div>
           <div className="text-xs font-medium text-foreground/60">
-            Average Match Score
+            Average match score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
             {analytics.averageScore}%
@@ -42,7 +42,7 @@ export default function PerformanceInsights({
         </div>
         <div>
           <div className="text-xs font-medium text-foreground/60">
-            Best Score
+            Best score
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
             {analytics.bestScore}%
@@ -50,7 +50,7 @@ export default function PerformanceInsights({
         </div>
         <div>
           <div className="text-xs font-medium text-foreground/60">
-            Total Scans
+            Total scans
           </div>
           <div className="mt-1 text-2xl font-semibold text-foreground">
             {analytics.totalScans}
@@ -58,7 +58,7 @@ export default function PerformanceInsights({
         </div>
         <div>
           <div className="text-xs font-medium text-foreground/60">
-            Improvement
+            Score change
           </div>
           <div className="mt-1 text-2xl font-semibold">
             {analytics.improvement === null ? (
@@ -130,8 +130,8 @@ export default function PerformanceInsights({
             Recurring skill gaps
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Skills flagged as missing most often across your scans — prioritize
-            these on your resume.
+            Skills your scans flag as missing most often. Add these to your resume
+            if you have them.
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {analytics.skillGaps.map((gap) => (

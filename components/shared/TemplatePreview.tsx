@@ -58,7 +58,7 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
 
         <DialogFooter className="flex items-center justify-between gap-2 sm:justify-end">
           <div className="mr-auto text-xs text-foreground/60">
-            Tip: Edit “Quick fill” fields to auto-update this preview.
+            Change the Quick fill fields to update this text.
           </div>
           <Button
             variant="outline"

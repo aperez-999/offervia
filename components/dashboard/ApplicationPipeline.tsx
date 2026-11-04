@@ -85,7 +85,7 @@ export default function ApplicationPipeline({ apps }: { apps: PipelineApp[] }) {
 
   return (
     <section
-      className="rounded-xl border border-border bg-card px-4 py-4 shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:px-6 sm:py-5"
+      className="rounded-xl border border-border bg-card px-4 py-4 shadow-sm sm:px-6 sm:py-5"
       aria-label="Application pipeline"
     >
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -93,7 +93,7 @@ export default function ApplicationPipeline({ apps }: { apps: PipelineApp[] }) {
           <div className="text-xs font-semibold text-foreground/60">
             Pipeline
           </div>
-          <h3 className="mt-1 text-lg font-semibold text-foreground">Your application funnel</h3>
+          <h3 className="mt-1 text-lg font-semibold text-foreground">How far your applications get</h3>
         </div>
         <div className="flex gap-4 text-right">
           <div>
@@ -136,14 +136,14 @@ export default function ApplicationPipeline({ apps }: { apps: PipelineApp[] }) {
             );
           })}
           <p className="pt-1 text-xs text-foreground/50">
-            Stages are inferred from current status — applicants in &ldquo;Offer&rdquo; are counted as
-            having reached the interview stage.
+            Based on each application&apos;s current status. Offers count as having reached the
+            interview stage.
           </p>
         </div>
 
         {/* Applications over time */}
         <div>
-          <p className="mb-2 text-sm text-foreground/70">Applications · last 8 weeks</p>
+          <p className="mb-2 text-sm text-foreground/70">Applications per week, last 8 weeks</p>
           <div className="h-[180px] w-full">
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={trend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>

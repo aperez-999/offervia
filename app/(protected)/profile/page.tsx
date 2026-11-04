@@ -136,7 +136,7 @@ export default function ProfilePage() {
       await syncProfile({ full_name: name || null });
       toast({ variant: "success", title: "Profile updated" });
     } catch {
-      toast({ title: "Could not update profile", variant: "destructive" });
+      toast({ title: "Couldn't save your name. Try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -164,11 +164,11 @@ export default function ProfilePage() {
         { onConflict: "id" }
       );
       if (error) throw error;
-      toast({ variant: "success", title: "Career details saved", description: "Your AI tools will now personalize to this." });
+      toast({ variant: "success", title: "Career details saved" });
     } catch {
       toast({
-        title: "Could not save career details",
-        description: "If this persists, the profile migration may not be applied yet.",
+        title: "Couldn't save career details",
+        description: "Check your connection and try again. If it keeps failing, contact support.",
         variant: "destructive",
       });
     } finally {
@@ -178,11 +178,11 @@ export default function ProfilePage() {
 
   async function onPick(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      toast({ title: "Unsupported file type", description: "Use PNG, JPG, or WEBP.", variant: "destructive" });
+      toast({ title: "That file type isn't supported", description: "Use a PNG, JPG, WEBP, or GIF image.", variant: "destructive" });
       return;
     }
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast({ title: "File too large", description: `Max ${MAX_SIZE_MB}MB`, variant: "destructive" });
+      toast({ title: "That image is too large", description: `Use an image under ${MAX_SIZE_MB}MB.`, variant: "destructive" });
       return;
     }
 
@@ -220,8 +220,8 @@ export default function ProfilePage() {
       console.error(errorMessage);
       captureClientException(e, { scope: "profile.avatar-upload" });
       toast({
-        title: "Upload failed",
-        description: "Check the 'avatars' bucket and Storage policies.",
+        title: "Couldn't upload your avatar",
+        description: "Try again, or try a different image.",
         variant: "destructive",
       });
     } finally {
@@ -240,7 +240,7 @@ export default function ProfilePage() {
       setAvatarUrl("");
       toast({ variant: "success", title: "Avatar removed" });
     } catch {
-      toast({ title: "Could not remove avatar", variant: "destructive" });
+      toast({ title: "Couldn't remove your avatar. Try again.", variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -252,15 +252,15 @@ export default function ProfilePage() {
 
   return (
       <PageContainer>
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-          <p className="text-xs font-medium text-primary">Your identity</p>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+          <p className="text-xs font-medium text-primary">Account</p>
           <h1 className="mt-1 text-2xl font-semibold text-foreground">Profile</h1>
-          <p className="mt-1 text-sm text-foreground/70">Manage your avatar and public details.</p>
+          <p className="mt-1 text-sm text-foreground/70">Your avatar, name, and career details.</p>
         </div>
 
         <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
           {/* Identity card */}
-          <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="h-20 bg-primary/10" />
             <CardContent className="-mt-12 flex flex-col items-center text-center">
               <button
@@ -277,13 +277,12 @@ export default function ProfilePage() {
                 {/* Hover overlay */}
                 <span className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-foreground/45 text-white opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100">
                   <Camera className="h-5 w-5" />
-                  <span className="text-[11px] font-medium">Change</span>
+                  <span className="text-xs font-medium">Change</span>
                 </span>
                 {/* Uploading state */}
                 {uploading && (
                   <span className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    <span className="absolute inset-0 rounded-full ring-2 ring-primary/50 motion-safe:animate-ping" />
                   </span>
                 )}
               </button>
@@ -320,16 +319,15 @@ export default function ProfilePage() {
                 </Button>
               </div>
               <p className="mt-3 text-xs text-foreground/50">
-                Square images work best (PNG, JPG, WEBP · max {MAX_SIZE_MB}MB).
+                Square images work best. PNG, JPG, WEBP, or GIF, up to {MAX_SIZE_MB}MB.
               </p>
             </CardContent>
           </Card>
 
           {/* Public info */}
-          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+          <Card className="rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-foreground">Public info</CardTitle>
-              <CardDescription className="text-foreground/70">What others may see in shared artifacts</CardDescription>
+              <CardTitle className="text-foreground">Name and email</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-1">
@@ -345,7 +343,7 @@ export default function ProfilePage() {
               <div className="grid gap-1">
                 <label className="text-sm text-foreground/80">Email</label>
                 <Input value={email} disabled className="bg-background/60 text-foreground/70 border-border" />
-                <p className="text-xs text-foreground/50">Email is managed by your sign-in provider.</p>
+                <p className="text-xs text-foreground/50">Your email comes from how you sign in and can&apos;t be changed here.</p>
               </div>
               <div className="pt-1 sm:col-span-2">
                 <Button
@@ -359,12 +357,12 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Career details — powers AI personalization */}
-          <Card className="rounded-2xl border border-border bg-card shadow-sm ring-1 ring-white/5 dark:ring-black/10 sm:col-span-full xl:col-start-2">
+          {/* Career details: used by coach, interview, and cover letter prompts */}
+          <Card className="rounded-2xl border border-border bg-card shadow-sm sm:col-span-full xl:col-start-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-foreground">Career details</CardTitle>
               <CardDescription className="text-foreground/70">
-                Set this once. Scanner, Resume, Interview, and Coach personalize to it — no more re-typing your role.
+                The coach, mock interviews, and cover letters use these details, so you don&apos;t have to retype your role each time.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -375,7 +373,7 @@ export default function ProfilePage() {
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                   className="bg-background/80 text-foreground border-border"
-                  placeholder="e.g. Frontend engineer focused on React & design systems"
+                  placeholder="e.g. Frontend engineer, React and design systems"
                   disabled={loading}
                 />
               </div>
@@ -443,7 +441,7 @@ export default function ProfilePage() {
                   value={keySkills}
                   onChange={(e) => setKeySkills(e.target.value)}
                   className="bg-background/80 text-foreground border-border"
-                  placeholder="Comma-separated, e.g. React, TypeScript, Figma, user research"
+                  placeholder="e.g. React, TypeScript, Figma, user research"
                   disabled={loading}
                 />
                 <p className="text-xs text-foreground/50">Separate skills with commas.</p>
