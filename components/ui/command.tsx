@@ -54,7 +54,7 @@ function CommandDialog({
       >
         <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-14 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-14 [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2.5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
-          <div className="flex items-center justify-between gap-4 border-t border-border/70 bg-muted/30 px-4 py-2.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-between gap-4 border-t border-border/70 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1">
                 <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-sans">↑</kbd>

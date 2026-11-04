@@ -40,13 +40,7 @@ export function PageHeader({
     >
       <div className="min-w-0 space-y-1.5">
         {eyebrow ? (
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-            <span
-              aria-hidden
-              className="h-3.5 w-1 rounded-full bg-primary/70"
-            />
-            {eyebrow}
-          </div>
+          <div className="text-xs font-medium text-muted-foreground">{eyebrow}</div>
         ) : null}
         <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance sm:text-3xl">
           {title}
@@ -87,13 +81,7 @@ export function PageSection({
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div className="space-y-1">
             {eyebrow ? (
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-                <span
-                  aria-hidden
-                  className="h-3.5 w-1 rounded-full bg-primary/70"
-                />
-                {eyebrow}
-              </div>
+              <div className="text-xs font-medium text-muted-foreground">{eyebrow}</div>
             ) : null}
             {title ? (
               <h2 className="text-lg font-semibold text-foreground">{title}</h2>

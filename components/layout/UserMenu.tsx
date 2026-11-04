@@ -47,12 +47,12 @@ export default function UserMenu({
         return;
       }
       toast({
-        title: data?.message || "Billing portal unavailable. Try again.",
+        title: data?.message || "Couldn't open the billing portal. Try again.",
         variant: "destructive",
       });
     } catch {
       toast({
-        title: "Billing portal unavailable. Try again.",
+        title: "Couldn't open the billing portal. Try again.",
         variant: "destructive",
       });
     } finally {
@@ -87,12 +87,12 @@ export default function UserMenu({
     <DropdownMenu>
       <div className="flex items-center gap-2">
         <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${
             plan === "pro"
-              ? "border border-reward/40 bg-reward/15 text-reward shadow-sm shadow-reward/10"
+              ? "border border-reward/40 bg-reward/15 text-reward"
               : "bg-muted text-muted-foreground"
           }`}
-          aria-label={`Plan: ${plan}`}
+          aria-label={plan === "pro" ? "Plan: Pro" : "Plan: Free"}
         >
           {plan === "pro" && <Crown className="h-3 w-3" />}
           {plan === "pro" ? "Pro" : "Free"}
@@ -102,7 +102,7 @@ export default function UserMenu({
             variant="outline"
             size="sm"
             asChild
-            className="h-7 rounded-md border-border px-2 text-[10px] font-medium text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
+            className="h-7 rounded-md border-border px-2 text-xs font-medium text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
           >
             <Link href="/upgrade">Upgrade</Link>
           </Button>
@@ -113,7 +113,7 @@ export default function UserMenu({
             aria-label="Open user menu"
           >
             <Avatar className="h-7 w-7">
-              <AvatarImage src={avatarUrl ?? ""} alt={name ?? "Avatar"} />
+              <AvatarImage src={avatarUrl ?? ""} alt={name ?? "Your avatar"} />
               <AvatarFallback className="text-xs font-semibold">
                 {initials}
               </AvatarFallback>

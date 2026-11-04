@@ -52,8 +52,8 @@ export const NAV_ITEMS: Nav[] = [
   { label: "Documents", href: "/documents", icon: Library },
   { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
   { label: "Templates", href: "/student-hub?tab=templates", icon: Mail },
-  { label: "Learning Resources", href: "/student-hub?tab=resources", icon: BookOpen },
-  { label: "Student Deals", href: "/student-hub?tab=deals", icon: GraduationCap },
+  { label: "Learning resources", href: "/student-hub?tab=resources", icon: BookOpen },
+  { label: "Student deals", href: "/student-hub?tab=deals", icon: GraduationCap },
   { label: "Contact", href: "/contact", icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Profile", href: "/profile", icon: UserRound },
@@ -101,13 +101,13 @@ export default function GlobalCommandMenu() {
       >
         <Search className="h-4 w-4" />
         <span className="hidden sm:inline text-xs">Search</span>
-        <kbd className="hidden sm:inline rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
+        <kbd className="hidden sm:inline rounded border border-border bg-muted px-1.5 py-0.5 text-xs font-medium">⌘K</kbd>
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Search pages and actions…" />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>No matching pages or actions.</CommandEmpty>
 
           {/* Navigation */}
           <CommandGroup heading="Navigate">
@@ -126,27 +126,22 @@ export default function GlobalCommandMenu() {
             <CommandItem onSelect={() => go("/job-packet")}>
               <Briefcase className="mr-2 h-4 w-4" />
               Start Job Packet
-              <CommandShortcut>J</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => go("/resume")}>
               <FileText className="mr-2 h-4 w-4" />
-              Tailor Resume
-              <CommandShortcut>R</CommandShortcut>
+              Tailor resume
             </CommandItem>
             <CommandItem onSelect={() => go("/cover-letter")}>
               <PenLine className="mr-2 h-4 w-4" />
-              Write Cover Letter
-              <CommandShortcut>L</CommandShortcut>
+              Write cover letter
             </CommandItem>
             <CommandItem onSelect={() => go("/scanner")}>
               <SearchIcon className="mr-2 h-4 w-4" />
-              Scan Job Description
-              <CommandShortcut>S</CommandShortcut>
+              Scan job description
             </CommandItem>
             <CommandItem onSelect={() => go("/tracker?new=1")}>
               <ClipboardList className="mr-2 h-4 w-4" />
-              New Application
-              <CommandShortcut>N</CommandShortcut>
+              Add application
             </CommandItem>
           </CommandGroup>
 

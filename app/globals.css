@@ -205,10 +205,16 @@
   body {
     @apply bg-background text-foreground;
   }
-  /* Space Grotesk for display headings — tightened tracking, premium feel */
   h1, h2, h3 {
     font-family: var(--font-space-grotesk), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p, li {
+    text-wrap: pretty;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -242,26 +248,9 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in oklab, var(--brand) 30%, var(--border));
-    box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--brand) 22%, transparent);
-  }
-  /* Brand glow on hover — pairs with framer y-lift on cards that already move.
-     Adds a soft pine halo + border warm-up without owning the transform. */
-  .hover-glow {
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  }
-  .hover-glow:hover {
-    border-color: color-mix(in oklab, var(--brand) 38%, var(--border));
-    box-shadow: 0 12px 34px -12px color-mix(in oklab, var(--brand) 30%, transparent);
-  }
-  /* Slow ambient float for decorative blobs (reduced-motion disables it below). */
-  @keyframes float-slow {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(var(--float-x, 16px), var(--float-y, -14px)); }
-  }
-  .animate-float-slow {
-    animation: float-slow 14s ease-in-out infinite;
+    transform: translateY(-1px);
+    border-color: color-mix(in oklab, var(--foreground) 18%, var(--border));
+    box-shadow: 0 6px 16px -10px color-mix(in oklab, var(--foreground) 25%, transparent);
   }
   @keyframes shimmer {
     100% { transform: translateX(100%); }
@@ -284,18 +273,6 @@
   .typing-dot {
     animation: typing-dot 1.2s ease-in-out infinite;
   }
-  /* Continuous marquee (testimonials). Track duplicates its content, so a
-     -50% translate loops seamlessly. Paused on hover via arbitrary variant. */
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  .animate-marquee {
-    animation: marquee var(--marquee-duration, 46s) linear infinite;
-  }
-  .animate-marquee-reverse {
-    animation: marquee var(--marquee-duration, 46s) linear infinite reverse;
-  }
 }
 
 /* View Transitions: smooth dissolve on theme switch.
@@ -314,9 +291,7 @@
   z-index: 2147483646;
 }
 
-/* Premium global touches: token-driven text selection + scrollbars.
-   Subtle brand-tinted selection and thin themed scrollbars for a polished,
-   consistent feel across the whole app in both light and dark modes. */
+/* Selection color and thin scrollbars, in both themes. */
 ::selection {
   background-color: color-mix(in oklab, var(--primary) 22%, transparent);
   color: var(--foreground);

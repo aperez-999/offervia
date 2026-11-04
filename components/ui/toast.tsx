@@ -39,7 +39,7 @@ export type ToastProps = {
 }
 
 const toastVariants = cva(
-  "pointer-events-auto relative flex w-full gap-3 overflow-hidden rounded-xl border p-4 pr-9 shadow-lg ring-1 ring-black/5 backdrop-blur-sm transition-colors dark:ring-white/5",
+  "pointer-events-auto relative flex w-full gap-3 overflow-hidden rounded-xl border p-4 pr-9 shadow-lg backdrop-blur-sm transition-colors dark:ring-white/5",
   {
     variants: {
       variant: {

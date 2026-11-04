@@ -8,7 +8,7 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
-  Sparkles,
+  Layers,
   FileText,
   PenLine,
   Search,
@@ -41,18 +41,83 @@ const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalComman
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Job Packet", href: "/job-packet", icon: Sparkles },
-  { label: "Resume", href: "/resume", icon: FileText },
-  { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
-  { label: "ATS Scanner", href: "/scanner", icon: Search },
-  { label: "Coach", href: "/coach", icon: MessageSquare },
-  { label: "Interview", href: "/interview", icon: MicVocal },
-  { label: "Tracker", href: "/tracker", icon: ClipboardList },
-  { label: "Documents", href: "/documents", icon: Library },
-  { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
+const navGroups: { label?: string; items: NavItem[] }[] = [
+  { items: [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
+  {
+    label: "Apply",
+    items: [
+      { label: "Job Packet", href: "/job-packet", icon: Layers },
+      { label: "Resume", href: "/resume", icon: FileText },
+      { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
+      { label: "ATS Scanner", href: "/scanner", icon: Search },
+    ],
+  },
+  {
+    label: "Prepare",
+    items: [
+      { label: "Coach", href: "/coach", icon: MessageSquare },
+      { label: "Interview", href: "/interview", icon: MicVocal },
+    ],
+  },
+  {
+    label: "Organize",
+    items: [
+      { label: "Tracker", href: "/tracker", icon: ClipboardList },
+      { label: "Documents", href: "/documents", icon: Library },
+      { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
+    ],
+  },
 ];
+
+function isActive(pathname: string | null, href: string) {
+  if (!pathname) return false;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavList({
+  pathname,
+  onNavigate,
+  dense = false,
+}: {
+  pathname: string | null;
+  onNavigate?: () => void;
+  dense?: boolean;
+}) {
+  return (
+    <nav className="space-y-4 text-sm">
+      {navGroups.map((group, gi) => (
+        <div key={group.label ?? gi} className="space-y-0.5">
+          {group.label ? (
+            <div className="px-2 pb-1 text-xs font-medium text-muted-foreground">{group.label}</div>
+          ) : null}
+          {group.items.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={[
+                  "flex items-center gap-2.5 rounded-md px-2 transition-colors",
+                  dense ? "py-1.5" : "py-2.5",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  active
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
+                ].join(" ")}
+              >
+                <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
 
 type PlanType = "free" | "pro";
 
@@ -66,16 +131,13 @@ function PlanCard({
   if (plan === "pro") {
     return (
       <div className="rounded-xl border border-reward/30 bg-reward/10 p-3 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <ProCrest size="sm" />
-          <Sparkles className="h-3.5 w-3.5 text-reward/70" aria-hidden />
-        </div>
+        <ProCrest size="sm" />
         <p className="mt-2 text-[13px] font-medium text-foreground">Offervia Pro</p>
         <p className="mt-0.5 text-xs text-foreground/60">
-          Higher limits and Pro insights are unlocked.
+          Higher monthly limits and dashboard insights.
         </p>
         <Link
-          href="/settings#billing"
+          href="/settings#plan"
           onClick={onNavigate}
           className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-reward hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded"
         >
@@ -90,7 +152,7 @@ function PlanCard({
     <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3 shadow-sm">
       <p className="text-[13px] font-medium text-foreground">Free plan</p>
       <p className="mt-0.5 text-xs text-foreground/60">
-        Unlock higher limits and Pro insights.
+        Pro raises your monthly limits and adds dashboard insights.
       </p>
       <Button
         asChild
@@ -122,8 +184,7 @@ export default function AppLayout({
       if (sessionStorage.getItem("offervia:flash") === "login") {
         sessionStorage.removeItem("offervia:flash");
         toast({
-          title: "Signed in — welcome back!",
-          description: "You're now signed in to Offervia.",
+          title: "Signed in",
           variant: "default",
         });
       }
@@ -149,8 +210,7 @@ export default function AppLayout({
     await supabase.auth.signOut();
 
     toast({
-      title: "Signed out successfully",
-      description: "Hope to see you again soon!",
+      title: "Signed out",
       variant: "default",
     });
 
@@ -160,11 +220,6 @@ export default function AppLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Subtle app backdrop */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="brand-glow absolute inset-x-0 -top-24 h-72" />
-      </div>
-
       {/* Header */}
       <header className="sticky top-0 z-40">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-background/80 backdrop-blur" />
@@ -180,12 +235,12 @@ export default function AppLayout({
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Open sidebar</span>
+              <span className="sr-only">Open menu</span>
             </Button>
             <Link
               href="/dashboard"
               className="flex items-center transition-opacity hover:opacity-90"
-              aria-label="Offervia"
+              aria-label="Offervia dashboard"
             >
               <BrandLogo width={132} height={32} priority className="h-7 sm:h-8" />
             </Link>
@@ -205,36 +260,10 @@ export default function AppLayout({
         <div className="flex gap-8 py-6 sm:py-8">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-60 shrink-0">
-            <div className="sticky top-20 rounded-2xl border border-border bg-card p-3 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
-              <div className="mb-2 text-[11px] font-semibold text-foreground/60">
-                Navigation
-              </div>
-              <div className="mb-2 h-px bg-border" />
-              <nav className="space-y-1 text-sm">
-                {navItems.map((item) => {
-                  const active = pathname === item.href;
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      className={[
-                        "group flex items-center gap-2 rounded-md px-2 py-1.5 border transition-all duration-200",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                        active
-                          ? "border-primary/20 bg-primary/10 text-primary font-medium"
-                          : "border-transparent hover:bg-accent hover:text-accent-foreground motion-safe:hover:translate-x-0.5",
-                      ].join(" ")}
-                    >
-                      <Icon className="h-5 w-5 stroke-[1.5] transition-transform duration-200 motion-safe:group-hover:scale-110" />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
+            <div className="sticky top-20 rounded-2xl border border-border bg-card p-3 shadow-xs">
+              <NavList pathname={pathname} dense />
 
-              <div className="mt-3 border-t border-border pt-3">
+              <div className="mt-4 border-t border-border pt-3">
                 <PlanCard plan={plan} />
               </div>
             </div>
@@ -262,42 +291,19 @@ export default function AppLayout({
                   className="fixed left-0 top-0 z-50 h-full w-72 bg-background border-r border-border lg:hidden"
                 >
                   <div className="flex h-14 items-center justify-between px-4 border-b border-border">
-                    <span className="text-lg font-semibold tracking-tight">Navigation</span>
+                    <span className="text-base font-semibold">Menu</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSidebarOpen(false)}
                     >
                       <X className="h-5 w-5" />
-                      <span className="sr-only">Close sidebar</span>
+                      <span className="sr-only">Close menu</span>
                     </Button>
                   </div>
                   
-                  <div className="p-4">
-                    <nav className="space-y-1 text-sm">
-                      {navItems.map((item) => {
-                        const active = pathname === item.href;
-                        const Icon = item.icon;
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setSidebarOpen(false)}
-                            aria-current={active ? "page" : undefined}
-                            className={[
-                              "flex items-center gap-3 rounded-md px-3 py-2.5 border transition-colors",
-                              "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
-                              active
-                                ? "border-border bg-foreground/[0.06] font-medium"
-                                : "border-transparent hover:bg-foreground/[0.04]",
-                            ].join(" ")}
-                          >
-                            <Icon className="h-5 w-5 stroke-[1.5]" />
-                            <span className="truncate">{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </nav>
+                  <div className="overflow-y-auto p-4" style={{ maxHeight: "calc(100dvh - 3.5rem)" }}>
+                    <NavList pathname={pathname} onNavigate={() => setSidebarOpen(false)} />
 
                     <div className="mt-4 border-t border-border pt-4">
                       <PlanCard plan={plan} onNavigate={() => setSidebarOpen(false)} />
@@ -310,7 +316,7 @@ export default function AppLayout({
 
           {/* Page content */}
           <main className="min-w-0 flex-1 w-full">
-            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm ring-1 ring-white/5 dark:ring-black/10">
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-xs">
               <PageTransition>{children}</PageTransition>
             </div>
           </main>
