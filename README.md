@@ -1,122 +1,101 @@
 # Offervia
 
-Live demo: [offervia.vercel.app](https://offervia.vercel.app)
+A free job search tool for students, new grads, and anyone applying for jobs. Paste a job posting, see what your resume is missing, and fix it before you apply.
 
-Offervia is a job search helper for students, new grads, and anyone applying to roles. Paste a posting and it checks that posting against your resume, rewrites the resume, drafts a cover letter, lets you practice interview answers, and keeps a tracker of where you applied. Student Hub is a short list of templates, links, and student discounts.
+**Try it:** [offervia.vercel.app](https://offervia.vercel.app)
 
 ![Offervia](public/og-image.png)
 
-## What I built
+## What you can do
 
-- Authenticated Next.js app with email and OAuth sign-in, protected routes, and row-level security in Postgres
-- Server routes that send a resume and a job description to an LLM and return a rewritten resume, a cover letter, a keyword match, or interview feedback
-- Monthly usage limits, with Stripe Checkout and a billing portal for the higher tier
-- An application tracker with follow-up dates and CSV export
-- File upload that reads PDF and DOCX resumes on the server
+- **Start a new application.** Paste a posting, check it against your resume, update your resume for that job, and add it to your tracker.
+- **Work on your resume and letters.** Tailor your resume to a job, scan a posting for keywords, tighten your bullet points, and write cover letters.
+- **Prepare for interviews.** Run a mock interview with a score and notes on each answer, or ask the coach a quick question.
+- **Keep track.** See every application, when to follow up, and compare offers side by side.
+- **Use the Student Hub.** Email templates, student discounts, and free places to learn.
 
-## Stack
+Save your resume once on your profile and every tool starts from it.
 
-- Next.js 15 (App Router), React 19, TypeScript
-- Tailwind CSS
-- Supabase (auth, Postgres, storage)
-- Groq for generation
-- Stripe for subscriptions
-- Deployed on Vercel
+## Run it yourself
 
-## Features
+You'll need Node 20 or newer, a free [Supabase](https://supabase.com) project, and a free [Groq](https://console.groq.com/keys) API key.
 
-- Resume Tailor: resume plus a job description, rewritten for that role
-- Job scanner: keywords the posting asks for, and which ones the resume is missing
-- Interview coach and mock interview: practice answers with notes
-- Cover letters: a draft from the same posting and resume
-- Job tracker: status, follow-ups, and CSV export
-- Account, profile, and billing
+1. Install and copy the example settings:
 
-## Project structure
-- `app/`: App Router pages, layouts, and API routes
-- `components/`: Feature components and shared UI
-- `lib/`: Environment, API helpers, Supabase clients, plans, usage, and service integrations
-- `db/`: Checked-in SQL schema, policies, and incremental migration scripts
-- `public/`: Static assets
+   ```bash
+   npm install
+   cp .env.example .env.local
+   ```
 
-## Database Setup
-For a new Supabase project:
+2. Fill in the four required values at the top of `.env.local`. Everything else is optional.
 
-```bash
-# Run these in the Supabase SQL editor
-db/schema.sql
-db/policies.sql
-db/storage_policies.sql
-```
+3. Set up the database. In the Supabase SQL editor, run `db/schema.sql`, `db/policies.sql`, `db/storage_policies.sql`, then each file in `db/migrations/` in number order. [db/README.md](db/README.md) has the details.
 
-For an existing project that predates persisted onboarding fields:
+4. Start the app:
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [localhost:3000](http://localhost:3000) and make an account.
+
+## Checks
 
 ```bash
-db/onboarding.sql
+npm run lint          # code style
+npm run test:unit     # unit tests (Vitest)
+npm run test:e2e      # browser tests (Playwright)
+npm run build         # production build
+npm run check:links   # checks every Student Hub link
 ```
 
-For existing projects, apply these additive feature migrations (safe to re-run):
+The signed-in browser tests use a real account. Put its email and password in `E2E_EMAIL` and `E2E_PASSWORD`.
 
-```bash
-db/interview_sessions.sql      # interview_session_count usage column
-db/cover_letter_usage.sql      # cover_letter_count usage column
-db/career_profile.sql          # career profile fields
-db/daily_reminders_pref.sql    # daily follow-up reminder opt-in
-db/documents.sql               # saved cover letters & resumes history
-```
+## How it's built
 
-Before release, also review:
+Next.js 15 and React 19 with TypeScript, styled with Tailwind CSS 4. Supabase handles sign-in, the database, and file storage. Groq writes the resume, cover letter, interview, and coach responses. The site runs on Vercel.
 
-```bash
-db/audit/rls-verification.sql
-```
+| Folder | What's in it |
+|---|---|
+| `app/` | Pages and API routes |
+| `components/` | UI, grouped by feature |
+| `lib/` | Shared logic: database clients, usage limits, the bullet checker, and offer math |
+| `content/student-hub/` | Templates, deals, and resources shown in the Student Hub |
+| `db/` | Database setup and migrations |
+| `e2e/` | Browser tests |
 
-If your project has older duplicate policies from previous iterations, run this upgrade sequence before release:
+`DESIGN.md` describes the colors, type, and components. `PRODUCT.md` covers who the app is for and the principles behind it.
 
-```bash
-db/policy_cleanup.sql
-db/policies.sql
-db/audit/rls-verification.sql
-```
+## Daily limits
 
-## API routes
+Every tool that calls Groq has a per-person limit that resets on a rolling 24 hours, so one person can't use up a shared key. Requests that fail don't count. Change the numbers in [`lib/usage/limits.ts`](lib/usage/limits.ts).
 
-- `POST /api/resume-tailor`
-- `POST /api/cover-letter`
-- `POST /api/job-scan`
-- `POST /api/coach`
-- `GET|POST|PATCH|DELETE /api/tracker`
-- `POST /api/create-checkout-session`
-- `POST /api/create-portal-session`
-- `POST /api/stripe-webhook`
-- `POST /api/contact`
+| Tool | Per day |
+|---|---|
+| Job scans | 25 |
+| Resume tailoring | 8 |
+| Cover letters | 8 |
+| Mock interviews | 5 |
+| Coach messages | 40 |
 
-## Run it locally
+## Your data
 
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
+The app stores your account and what you save so it's there next time. Resume text, job descriptions, and messages are sent to Groq to write responses. The bullet checker and offer comparison run entirely in your browser. Anyone can export or delete their own data from Settings. The [privacy page](https://offervia.vercel.app/privacy) has the details.
 
-Fill in `.env.local` from `.env.example`. The names there are the full list, including Supabase, Groq, Stripe, email, and Sentry. Sentry can stay blank in local development.
+Keep `SUPABASE_SERVICE_ROLE_KEY`, `GROQ_API_KEY`, and `SENTRY_AUTH_TOKEN` on the server, and never commit `.env.local`.
 
-```bash
-npm run lint
-npm run build
-npm run test
-```
+## Contributing
 
-`npm run test:unit` runs Vitest. `npm run test:e2e` runs Playwright. Authenticated Playwright tests need `E2E_EMAIL` and `E2E_PASSWORD`. If `E2E_BASE_URL` is set, Playwright uses that URL and expects the app to already be running. If it is omitted, Playwright starts a local server.
+Questions and ideas go in [Discussions](https://github.com/aperez-999/offervia/discussions). Bugs go in [Issues](https://github.com/aperez-999/offervia/issues).
 
-## Secrets
+The easiest way to help is to suggest a resource or student deal. Use the link at the bottom of the Student Hub, or edit the files in `content/student-hub/` and open a pull request. Link to the official page, not an affiliate link, and run `npm run check:links` first.
 
-Do not commit `.env`, `.env.local`, or any other env file. `.env.example` is the only one that belongs in git, and it has empty values.
+For code changes, run `npm run lint`, `npm run test:unit`, and `npm run build` before you open a pull request.
 
-Anything that can read or change other people's data stays on the server: `SUPABASE_SERVICE_ROLE_KEY`, `GROQ_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, SMTP passwords, and `SENTRY_AUTH_TOKEN`. The anon Supabase key and the Stripe price id are safe to expose in the browser. They are still not hardcoded in the repo.
+## Deploying
 
-Resume text, job descriptions, and chat messages are sent from the server to Groq to produce a draft. The app stores the account, tracker rows, coach messages, scans, and monthly usage so those screens still work the next time you sign in.
+The live site runs on Vercel. Add the same variables from `.env.local` in your Vercel project settings, and set `NEXT_PUBLIC_SITE_URL` to your public URL. [docs/release-checklist.md](docs/release-checklist.md) lists what to check before and after a release.
 
-## Deploy
+## License
 
-The live site is on Vercel. Set the same variables there, with `NEXT_PUBLIC_SITE_URL` set to the public URL. Before a release, run lint, the production build, and tests, then walk through [docs/release-checklist.md](docs/release-checklist.md) and [docs/security-checklist.md](docs/security-checklist.md).
+[MIT](LICENSE). You can use, copy, and change the code, as long as you keep the copyright notice.
