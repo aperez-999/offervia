@@ -99,7 +99,7 @@ export default function PerformanceInsights({
                   className="text-foreground/60"
                 />
                 <Tooltip
-                  formatter={(value: number | undefined) => (value != null ? `${value}%` : "")}
+                  formatter={(value) => (typeof value === "number" ? `${value}%` : "")}
                   labelFormatter={(label) => `Scan #${label}`}
                   contentStyle={{
                     borderRadius: "8px",

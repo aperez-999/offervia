@@ -118,7 +118,7 @@ export default function PrivacyPage() {
                 icon: Lock,
                 body: (
                   <p>
-                    Resumes, job descriptions, and chat messages go through Offervia's server
+                    Resumes, job descriptions, and chat messages go through Offervia&apos;s server
                     to a third-party model so it can write a draft or give feedback. Traffic
                     is encrypted. Stored data is access-controlled. No setup is perfectly secure.
                   </p>
