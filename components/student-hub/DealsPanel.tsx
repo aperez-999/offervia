@@ -5,177 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GraduationCap, ExternalLink, ShieldCheck } from "lucide-react";
+import { ArrowSquareOut, GraduationCap, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
+import { CATS, DEALS } from "@/content/student-hub/deals";
 
 
-type Deal = {
-  id: string;
-  vendor: string;
-  title: string;
-  desc: string;
-  url: string;
-  category:
-    | "AI"
-    | "Dev Tools"
-    | "Productivity"
-    | "Cloud"
-    | "Design"
-    | "Learning"
-    | "Engineering"
-    | "Collaboration"
-    | "STEM Tools"
-    | "Career"
-    | "Coding";
-  requiresEdu?: boolean;
-  percentOff?: number;
-  notes?: string;
-};
-
-const DEALS: Deal[] = [
-  {
-    id: "notion-student",
-    vendor: "Notion",
-    title: "Notion Education Plan",
-    desc: "Personal Pro plan for students. Useful for class notes and project planning.",
-    url: "https://www.notion.so/students",
-    category: "Productivity",
-    requiresEdu: true,
-    percentOff: 100,
-  },
-  {
-    id: "github-student-pack",
-    vendor: "GitHub",
-    title: "Student Developer Pack",
-    desc: "Free access to popular dev tools, cloud credits, and learning resources.",
-    url: "https://education.github.com/pack",
-    category: "Dev Tools",
-    requiresEdu: true,
-  },
-  {
-    id: "figma-edu",
-    vendor: "Figma",
-    title: "Figma Education",
-    desc: "Figma's Professional plan for students and educators.",
-    url: "https://www.figma.com/education/",
-    category: "Design",
-    requiresEdu: true,
-    percentOff: 100,
-  },
-  {
-    id: "jetbrains-edu",
-    vendor: "JetBrains",
-    title: "IDEs for Students",
-    desc: "Professional JetBrains IDEs (like IntelliJ, PyCharm, WebStorm) free for students.",
-    url: "https://www.jetbrains.com/community/education/#students",
-    category: "Dev Tools",
-    requiresEdu: true,
-  },
-  {
-    id: "google-cloud-student",
-    vendor: "Google Cloud",
-    title: "Google Cloud for Students",
-    desc: "Get $50–$100 in cloud credits and access to Google Cloud training paths.",
-    url: "https://cloud.google.com/edu/students",
-    category: "Cloud",
-    requiresEdu: true,
-  },
-  {
-    id: "microsoft-azure-student",
-    vendor: "Microsoft Azure",
-    title: "Azure for Students",
-    desc: "Free $100 credit and 25+ Azure services for students, no credit card required.",
-    url: "https://azure.microsoft.com/en-us/free/students/",
-    category: "Cloud",
-    requiresEdu: true,
-  },
-  {
-    id: "canva-edu",
-    vendor: "Canva",
-    title: "Canva for Education",
-    desc: "Canva Pro features, free for teachers and students.",
-    url: "https://www.canva.com/education/",
-    category: "Design",
-    requiresEdu: true,
-  },
-  {
-    id: "wolfram-alpha",
-    vendor: "Wolfram Alpha",
-    title: "Wolfram Alpha Pro for Students",
-    desc: "Step-by-step explanations and advanced problem-solving tools, discounted for students.",
-    url: "https://www.wolframalpha.com/pro/",
-    category: "STEM Tools",
-    requiresEdu: false,
-  },
-  {
-    id: "autodesk-edu",
-    vendor: "Autodesk",
-    title: "Autodesk Education Access",
-    desc: "Free access to AutoCAD, Fusion 360, Revit, Maya, and more design tools.",
-    url: "https://www.autodesk.com/education/edu-software/overview",
-    category: "Engineering",
-    requiresEdu: true,
-  },
-  {
-    id: "notion-ai-trial",
-    vendor: "AI Tools",
-    title: "Notion AI (Free Trial)",
-    desc: "Try Notion AI for summarizing and drafting inside your notes.",
-    url: "https://www.notion.so/product/ai",
-    category: "AI",
-    requiresEdu: false,
-  },
-  {
-    id: "replit-edu",
-    vendor: "Replit",
-    title: "Replit Hacker Plan for Students",
-    desc: "Replit's premium plan, free through the GitHub Student Pack.",
-    url: "https://replit.com/site/github-students",
-    category: "Coding",
-    requiresEdu: true,
-  },
-  {
-    id: "coursera-edu",
-    vendor: "Coursera",
-    title: "Coursera for Students",
-    desc: "Free access to online courses and certificates.",
-    url: "https://www.coursera.org/career-academy/programs/learning-program-students-ig5jd",
-    category: "Learning",
-    requiresEdu: true,
-  },
-  {
-    id: "slack-student",
-    vendor: "Slack",
-    title: "Slack for Student Teams",
-    desc: "Free workspace upgrades for student groups collaborating on projects.",
-    url: "https://slack.com/education",
-    category: "Collaboration",
-    requiresEdu: true,
-  },
-  {
-    id: "todoist-edu",
-    vendor: "Todoist",
-    title: "Todoist Premium for Students",
-    desc: "Free upgrade to organize assignments, projects, and personal tasks.",
-    url: "https://www.todoist.com/pricing",
-    category: "Productivity",
-    requiresEdu: true,
-  },
-];
-
-const CATS = [
-  "All",
-  "AI",
-  "Dev Tools",
-  "Productivity",
-  "Cloud",
-  "Design",
-  "Learning",
-  "Engineering",
-  "Collaboration",
-  "STEM Tools",
-  "Career",
-  "Coding",
-] as const;
 
 export default function DealsPanel() {
   const [q, setQ] = useState("");
@@ -198,8 +31,6 @@ export default function DealsPanel() {
     });
   }, [q, cat, eduOnly, freeOnly]);
 
-  const freeCount = useMemo(() => DEALS.filter((d) => d.percentOff === 100).length, []);
-  const eduCount = useMemo(() => DEALS.filter((d) => d.requiresEdu).length, []);
   const hasFilters = cat !== "All" || q.trim() !== "" || eduOnly || freeOnly;
   const clearFilters = () => {
     setCat("All");
@@ -210,34 +41,7 @@ export default function DealsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
-        <p className="text-xs font-medium text-primary">Student deals</p>
-        <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              Student discounts
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Free plans, discounts, and cloud credits for students. Most need a school email to sign up.
-            </p>
-          </div>
-          <div className="flex gap-2 text-center">
-            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
-              <div className="text-lg font-semibold text-foreground">{DEALS.length}</div>
-              <div className="text-xs text-foreground/60">Perks</div>
-            </div>
-            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
-              <div className="text-lg font-semibold text-success">{freeCount}</div>
-              <div className="text-xs text-foreground/60">Free</div>
-            </div>
-            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
-              <div className="text-lg font-semibold text-foreground">{eduCount}</div>
-              <div className="text-xs text-foreground/60">.edu</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="max-w-2xl text-sm text-foreground/75">Free plans and discounts for students. Most need a school email to sign up.</p>
 
       <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
         {/* Filter rail */}
@@ -347,10 +151,10 @@ export default function DealsPanel() {
                     </div>
                     <Button
                       asChild
-                      className="bg-primary-button text-white hover:bg-primary-button/90"
+                      className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                     >
                       <a href={d.url} target="_blank" rel="noopener noreferrer">
-                        View <ExternalLink className="ml-1 h-4 w-4" />
+                        View <ArrowSquareOut className="ml-1 h-4 w-4" />
                       </a>
                     </Button>
                   </div>

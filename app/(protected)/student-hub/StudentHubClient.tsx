@@ -2,7 +2,9 @@
 
 import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, GraduationCap, Mail } from "lucide-react";
+import { ArrowSquareOut, BookOpen, EnvelopeSimple, GraduationCap } from "@phosphor-icons/react/dist/ssr";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
+import { suggestResourceUrl } from "@/lib/github";
 import TemplatesPanel from "@/components/student-hub/TemplatesPanel";
 import ResourcesPanel from "@/components/student-hub/ResourcesPanel";
 import DealsPanel from "@/components/student-hub/DealsPanel";
@@ -13,9 +15,9 @@ const TABS: {
   key: TabKey;
   label: string;
   hint: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: PhosphorIcon;
 }[] = [
-  { key: "templates", label: "Message templates", hint: "Outreach and follow-ups", icon: Mail },
+  { key: "templates", label: "Message templates", hint: "Outreach and follow-ups", icon: EnvelopeSimple },
   { key: "resources", label: "Learning resources", hint: "Courses and practice", icon: BookOpen },
   { key: "deals", label: "Student deals", hint: "Discounts and credits", icon: GraduationCap },
 ];
@@ -56,7 +58,7 @@ export default function StudentHubClient() {
       <div
         role="tablist"
         aria-label="Student Hub sections"
-        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm sm:grid-cols-3 dark:ring-black/10"
+        className="grid grid-cols-1 gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm sm:grid-cols-3"
       >
         {TABS.map((tab) => {
           const selected = tab.key === active;
@@ -84,7 +86,7 @@ export default function StudentHubClient() {
                     : "border-border bg-background/60 text-foreground/70 group-hover:text-foreground")
                 }
               >
-                <Icon className="h-[1.15rem] w-[1.15rem]" />
+                <Icon className="size-[1.15rem]" weight={selected ? "fill" : "duotone"} aria-hidden />
               </span>
               <span className="min-w-0">
                 <span
@@ -95,7 +97,7 @@ export default function StudentHubClient() {
                 >
                   {tab.label}
                 </span>
-                <span className="block truncate text-xs text-foreground/55">{tab.hint}</span>
+                <span className="block truncate text-xs text-muted-foreground">{tab.hint}</span>
               </span>
             </button>
           );
@@ -104,6 +106,19 @@ export default function StudentHubClient() {
 
       {/* Active panel */}
       <div role="tabpanel">{panel}</div>
+
+      <p className="text-sm text-muted-foreground">
+        Know a free resource or student deal that belongs here?{" "}
+        <a
+          href={suggestResourceUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 rounded font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Suggest it on GitHub
+          <ArrowSquareOut className="size-3.5" aria-hidden />
+        </a>
+      </p>
     </div>
   );
 }

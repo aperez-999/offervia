@@ -1,20 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { renderTemplate } from "@/content/student-hub/templates";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,   // <-- add this
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Check, Clipboard, ExternalLink } from "lucide-react";
-
-function renderTemplate(raw: string, vars: Record<string, string | undefined>) {
-  return raw.replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k]?.trim() ?? ""));
-}
+import { ArrowSquareOut, Check, Clipboard } from "@phosphor-icons/react/dist/ssr";
 
 type Props = {
   open: boolean;
@@ -78,8 +75,8 @@ export default function TemplatePreview({ open, onOpenChange, title, raw, vars }
             )}
           </Button>
           <a href={gmailHref} target="_blank" rel="noreferrer">
-            <Button className="bg-primary-button text-white hover:bg-primary-button/90">
-              <ExternalLink className="mr-2 h-4 w-4" />
+            <Button className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90">
+              <ArrowSquareOut className="mr-2 h-4 w-4" />
               Open in Gmail
             </Button>
           </a>

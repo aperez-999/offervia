@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Bookmark } from "lucide-react";
+import { BookmarkSimple } from "@phosphor-icons/react/dist/ssr";
 
 type Props = {
   /** Stable id for the thing being saved */
@@ -77,7 +77,7 @@ export default function BookmarkButton({
         .filter(Boolean)
         .join(" ")}
     >
-      <Bookmark
+      <BookmarkSimple
         className={`h-4 w-4 ${saved ? "fill-current text-primary " : "text-foreground/70"}`}
       />
     </Button>

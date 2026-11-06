@@ -4,169 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search as SearchIcon, Copy as CopyIcon, Check as CheckIcon } from "lucide-react";
+import { Check as CheckIcon, Copy as CopyIcon, MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr";
 import TemplatePreview from "@/components/shared/TemplatePreview";
 import BookmarkButton from "@/components/shared/BookmarkButton";
 import { useToast } from "@/hooks/use-toast";
+import { TEMPLATES, renderTemplate, type TemplateCategory, type TemplateItem } from "@/content/student-hub/templates";
 
-/** --------------------
- * Template data
- * Supports variables: {{name}}, {{role}}, {{company}}, {{contact}}, {{portfolio}}
- * -------------------- */
-type Category =
-  | "Outreach"
-  | "Follow-up"
-  | "Thank you"
-  | "Referral"
-  | "Negotiation"
-  | "Ghosting"
-  | "Recruiter";
-
-type TemplateItem = {
-  key: string;
-  title: string;
-  category: Category;
-  tags: string[];
-  body: string;
-};
-
-const TEMPLATES: TemplateItem[] = [
-  {
-    key: "outreach_cold_manager",
-    title: "Cold outreach to hiring manager",
-    category: "Outreach",
-    tags: ["linkedin", "intro", "short"],
-    body: `Hi {{contact}},
-
-I'm {{name}}, a {{role}}. I'm reaching out because [one specific thing about your team's work at {{company}}]. I'd like to learn more about the team and where someone with my background could help. My portfolio: {{portfolio}}.
-
-Would you have 15 minutes for a call this week or next?
-
-Best,
-{{name}}`,
-  },
-  {
-    key: "follow_up_1wk",
-    title: "Application follow-up (1 week)",
-    category: "Follow-up",
-    tags: ["status", "polite"],
-    body: `Hi {{contact}},
-
-I applied for the {{role}} role at {{company}} last week and wanted to check where things stand. I'm still interested, and I'm happy to send anything else that would help.
-
-Thanks,
-{{name}}`,
-  },
-  {
-    key: "thanks_after_interview",
-    title: "Thank-you after interview",
-    category: "Thank you",
-    tags: ["gratitude", "brief"],
-    body: `Hi {{contact}},
-
-Thanks for talking with me about the {{role}} role. I enjoyed hearing about [something specific they mentioned], and it made me more interested in the work at {{company}}.
-
-Let me know if you need anything else from me.
-
-Best,
-{{name}}`,
-  },
-  {
-    key: "referral_warm",
-    title: "Referral request (warm)",
-    category: "Referral",
-    tags: ["network", "linkedin"],
-    body: `Hi {{contact}},
-
-Hope you've been well. I'm applying for a {{role}} role at {{company}} and saw that you work there. Would you be comfortable referring me? My portfolio is here: {{portfolio}}, and I can send my resume.
-
-No worries if not. Thanks either way.
-
-{{name}}`,
-  },
-  {
-    key: "negotiation_opener",
-    title: "Negotiation opener",
-    category: "Negotiation",
-    tags: ["comp", "offer"],
-    body: `Hi {{contact}},
-
-Thank you for the offer for the {{role}} role at {{company}}. I want to make this work. Based on the scope of the role and what I'm seeing for similar positions, is there room on the base salary or a signing bonus?
-
-Thanks for considering it,
-{{name}}`,
-  },
-  {
-    key: "ghosting_nudge",
-    title: "Polite nudge after silence",
-    category: "Ghosting",
-    tags: ["nudge", "status"],
-    body: `Hi {{contact}},
-
-I'm following up on the {{role}} process at {{company}}. Is there any update you can share on timing? I'm still interested in the role.
-
-Thanks,
-{{name}}`,
-  },
-  {
-    key: "recruiter_reply_inbound",
-    title: "Reply to inbound recruiter",
-    category: "Recruiter",
-    tags: ["inbound", "screen"],
-    body: `Hi {{contact}},
-
-Thanks for reaching out. I'd like to hear more about the {{role}} role at {{company}}. My portfolio is here: {{portfolio}}, and I can send a resume too.
-
-Do you have time for a short call this week?
-
-Best,
-{{name}}`,
-  },
-
-  /** NEW #1 — Follow-up after onsite */
-  {
-    key: "follow_up_onsite_48h",
-    title: "Follow-up after onsite (24–48h)",
-    category: "Follow-up",
-    tags: ["onsite", "thanks", "timeline"],
-    body: `Hi {{contact}},
-
-Thanks for setting up my onsite for the {{role}} role at {{company}}. I enjoyed meeting the team and hearing about [a problem they're working on].
-
-When you have a moment, could you share the timeline for next steps? I'm happy to send anything else you need.
-
-Thanks,
-{{name}}`,
-  },
-
-  /** NEW #2 — Reschedule interview */
-  {
-    key: "reschedule_interview_conflict",
-    title: "Reschedule interview (conflict)",
-    category: "Recruiter",
-    tags: ["scheduling", "polite", "conflict"],
-    body: `Hi {{contact}},
-
-I'm looking forward to the {{role}} interview with {{company}}, but a conflict has come up at the scheduled time. Could we move it?
-
-These times work for me:
-• [Option 1]
-• [Option 2]
-• [Option 3]
-
-Sorry for the change, and thanks for working with me on it.
-
-Best,
-{{name}}`,
-  },
-];
 
 /** --------------------
  * UI state
  * -------------------- */
 const VARS_KEY = "offervia:templateVars_v1";
 const SAVES_KEY = "offervia:saves:templates";
-const TABS: Array<"All" | "Saved" | Category> = [
+const TABS: Array<"All" | "Saved" | TemplateCategory> = [
   "All",
   "Saved",
   "Outreach",
@@ -179,10 +29,6 @@ const TABS: Array<"All" | "Saved" | Category> = [
 ];
 
 /** Render a template with variables */
-function renderTemplate(raw: string, vars: Record<string, string | undefined>) {
-  return raw.replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k]?.trim() ?? ""));
-}
-
 export default function TemplatesPanel() {
   const { toast } = useToast();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -279,27 +125,7 @@ export default function TemplatesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
-        <p className="text-xs font-medium text-primary">Outreach and follow-ups</p>
-        <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Message templates</h1>
-            <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Emails for outreach, follow-ups, referrals, and offers. Fill in your details once, then edit each message before you send it.
-            </p>
-          </div>
-          <div className="flex gap-2 text-center">
-            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
-              <div className="text-lg font-semibold text-foreground">{TEMPLATES.length}</div>
-              <div className="text-xs text-foreground/60">Templates</div>
-            </div>
-            <div className="rounded-xl border border-border bg-background/60 px-4 py-2">
-              <div className="text-lg font-semibold text-foreground">{savedIds.size}</div>
-              <div className="text-xs text-foreground/60">Saved</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="max-w-2xl text-sm text-foreground/75">Emails for outreach, follow-ups, referrals, and offers. Fill in your details once, then edit each one before you send it.</p>
 
       <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
         {/* Rail: quick fill + categories */}
@@ -354,7 +180,7 @@ export default function TemplatesPanel() {
                   onClick={() => setActiveTab(t)}
                   className={
                     activeTab === t
-                      ? "bg-primary-button text-white hover:bg-primary-button/90"
+                      ? "bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                       : "border-border text-foreground hover:bg-foreground/[0.06]"
                   }
                 >
@@ -432,7 +258,7 @@ export default function TemplatesPanel() {
                   <Button
                     size="sm"
                     onClick={() => setOpenKey(t.key)}
-                    className="bg-primary-button text-white hover:bg-primary-button/90"
+                    className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                   >
                     Preview
                   </Button>

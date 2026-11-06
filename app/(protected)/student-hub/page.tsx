@@ -7,7 +7,6 @@ export default function StudentHubPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Student Hub"
         title="Student Hub"
         description="Message templates, free learning resources, and student discounts."
       />
