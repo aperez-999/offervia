@@ -1,7 +1,5 @@
--- Career profile enrichment
--- Adds structured career fields to profiles so every AI feature (scanner,
--- resume, interview, coach) can personalize output without re-asking the user.
--- Additive and safe: existing rows keep NULLs, existing features are unaffected.
+-- Career details on the profile (target role, skills, and so on), used to
+-- personalize the tools. Safe to run more than once.
 
 alter table public.profiles
   add column if not exists headline text,

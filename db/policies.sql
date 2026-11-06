@@ -1,5 +1,5 @@
 -- Offervia / Supabase Row Level Security policies
--- Apply after schema.sql. Service-role operations (webhooks, metering, etc.) bypass RLS.
+-- Apply after schema.sql. Server-side code that uses the service role bypasses RLS.
 
 -- Helper note:
 -- - For client access, we only enable the minimum policies required.
@@ -134,19 +134,6 @@ on public.user_prefs
 for update
 using (user_id = (select auth.uid()))
 with check (user_id = (select auth.uid()));
-
--- -------------------------------
--- subscriptions (read-only for end users)
--- -------------------------------
-alter table public.subscriptions enable row level security;
-
-drop policy if exists "subscriptions_select_own" on public.subscriptions;
-create policy "subscriptions_select_own"
-on public.subscriptions
-for select
-using (user_id = (select auth.uid()));
-
--- Intentionally no insert/update/delete policies for end users.
 
 -- -------------------------------
 -- usage_snapshots (read-only for end users)

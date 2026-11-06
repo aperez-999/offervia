@@ -41,22 +41,6 @@ create index if not exists messages_user_id_mode_created_at_idx
   on public.messages (user_id, mode, created_at asc);
 
 -- -------------------------------
--- Plans / Billing
--- -------------------------------
-create table if not exists public.subscriptions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
-  stripe_customer_id text,
-  stripe_subscription_id text unique,
-  plan text not null default 'free', -- free|pro
-  status text not null default 'inactive',
-  current_period_end timestamptz,
-  updated_at timestamptz not null default now()
-);
-
-create index if not exists subscriptions_user_id_idx on public.subscriptions (user_id);
-
--- -------------------------------
 -- Usage metering (monthly)
 -- -------------------------------
 create table if not exists public.usage_snapshots (

@@ -1,5 +1,5 @@
--- Allow users to delete their own job scan history (idempotent)
--- This enables “Delete cloud history” in the UI while keeping access scoped to auth.uid().
+-- Lets people delete their own scan history.
+-- Safe to run more than once.
 
 alter table public.job_scans enable row level security;
 

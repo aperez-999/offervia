@@ -1,33 +1,36 @@
 # Database
 
-Supabase holds auth, Postgres, and row level security. The SQL in this folder is what the app expects.
+Offervia uses Supabase for sign-in, Postgres, and file storage. Everything the app expects is in this folder. Every file is safe to run more than once.
 
-## Files
+## Setting up a new project
 
-- `schema.sql`: tables
-- `policies.sql`: row level security
-- `policy_cleanup.sql`: drops older duplicate policies before you reapply `policies.sql`
-- `storage_policies.sql`: avatar bucket
-- `audit/rls-verification.sql`: queries to check the live policies
-- `onboarding.sql`, `interview_sessions.sql`, `cover_letter_usage.sql`, `career_profile.sql`, `daily_reminders_pref.sql`, `documents.sql`: later columns, safe to run more than once
+In the Supabase SQL editor, run these in order:
 
-## New project
+1. `schema.sql` creates the tables.
+2. `policies.sql` adds row level security, so people can only see their own data.
+3. `storage_policies.sql` creates the `avatars` bucket for profile photos.
+4. Every file in `migrations/`, in number order.
 
-In the Supabase SQL editor, run `schema.sql`, then `policies.sql`, then `storage_policies.sql`.
+## Updating an existing project
 
-## Existing project
+Run any file in `migrations/` you haven't run yet. Running one twice does no harm.
 
-Run any migration file you have not applied yet. If `pg_policies` shows duplicate policies from older versions, run `policy_cleanup.sql`, then `policies.sql`, then `audit/rls-verification.sql`.
+To check your security rules afterwards, run the queries in `audit/rls-verification.sql`.
 
-## What the tables are for
+## What each table holds
 
-- `applications`: tracker rows, one user each
-- `messages`: coach chat history
-- `profiles`: name and avatar, copied from auth
-- `user_prefs`: weekly goal, coach mode, reminder opt-in
-- `job_scans`: saved scans
-- `usage_snapshots`: monthly counts for the free and Pro limits
-- `subscriptions`: Stripe plan state
-- `request_events`: rate limit log, server only
+| Table | What's in it | Who can write it |
+|---|---|---|
+| `profiles` | Name, photo, career details, and My resume | The user |
+| `user_prefs` | Weekly goal, coach mode, checklist progress | The user |
+| `applications` | Tracker rows | The user |
+| `messages` | Coach chat history | The user |
+| `job_scans` | Saved keyword scans | Server only (users can read and delete) |
+| `documents` | Saved resumes and cover letters | The user (add, read, delete) |
+| `interview_sessions` | Mock interviews and their feedback | The user |
+| `usage_snapshots` | Monthly usage counts shown as stats | Server only (users can read) |
+| `request_events` | Rate limit log and daily usage limits | Server only |
 
-Users can read and write their own rows on `applications`, `messages`, `profiles`, and `user_prefs`. They can read their own rows on `subscriptions`, `usage_snapshots`, and `job_scans`. Writes to those three, and all access to `request_events`, go through the service role on the server.
+"Server only" means the app writes it through the service role key, which never reaches the browser. Every table is tied to the user's account and is removed automatically when the account is deleted. The one exception is `request_events`, which the delete account route clears itself.
+
+Older databases may also have a `subscriptions` table. The app doesn't use it, so you can drop it.

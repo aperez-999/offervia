@@ -1,6 +1,5 @@
--- Saved documents history
--- Stores generated cover letters and tailored resumes so users can revisit,
--- copy, download, or delete them. Additive; safe to run multiple times.
+-- Saved resumes and cover letters.
+-- Safe to run more than once.
 
 create table if not exists public.documents (
   id uuid primary key default gen_random_uuid(),

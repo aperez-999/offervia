@@ -1,6 +1,5 @@
--- Phase 4: Persisted onboarding state (optional)
--- Apply to your existing Supabase project if you want onboarding checklist state
--- to follow the user across devices/browsers.
+-- Saves the getting-started checklist state so it follows you across devices.
+-- Safe to run more than once.
 
 alter table public.user_prefs
   add column if not exists onboarding_dismissed boolean not null default false;

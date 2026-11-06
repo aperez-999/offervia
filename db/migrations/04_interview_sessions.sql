@@ -1,12 +1,10 @@
--- Interview Prep MVP
--- Additive migration. Safe to run against existing data.
--- Apply in Supabase SQL editor (matches the db/*.sql workflow).
+-- Mock interview sessions and their monthly usage count.
+-- Safe to run more than once.
 
--- 1) Usage counter for the already-gated interview_sessions plan limit.
 alter table public.usage_snapshots
   add column if not exists interview_session_count integer not null default 0;
 
--- 2) Structured mock-interview sessions.
+-- Interview sessions.
 create table if not exists public.interview_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -25,7 +23,7 @@ create table if not exists public.interview_sessions (
 create index if not exists interview_sessions_user_created_idx
   on public.interview_sessions (user_id, created_at desc);
 
--- 3) Row level security (defense in depth; the API uses the service role).
+-- Row level security. The API uses the service role, so this is a second line of defense.
 alter table public.interview_sessions enable row level security;
 
 drop policy if exists "interview_sessions_select_own" on public.interview_sessions;
