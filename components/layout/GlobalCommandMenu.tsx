@@ -36,6 +36,8 @@ import {
   Monitor,
   Mail,
   Briefcase,
+  ListChecks,
+  Scale,
 } from "lucide-react";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
@@ -48,6 +50,8 @@ export const NAV_ITEMS: Nav[] = [
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
   { label: "Coach", href: "/coach", icon: MessageSquare },
   { label: "Interview", href: "/interview", icon: MicVocal },
+  { label: "Bullet check", href: "/bullet-check", icon: ListChecks },
+  { label: "Compare offers", href: "/offers", icon: Scale },
   { label: "Tracker", href: "/tracker", icon: ClipboardList },
   { label: "Documents", href: "/documents", icon: Library },
   { label: "Student Hub", href: "/student-hub", icon: GraduationCap },

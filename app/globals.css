@@ -219,6 +219,16 @@
 }
 
 @layer utilities {
+  /* Highlighter mark for results worth calling out (strong bullets, the
+     better offer). Fixed colors so it reads in both themes. */
+  .hl {
+    color: oklch(0.27 0.05 125);
+    background-color: oklch(0.91 0.18 119);
+    border-radius: 0.2em 0.35em 0.25em 0.4em;
+    padding-inline: 0.18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
   /* Brand fill — restrained pine, solid (no gradient). Uses the button token so
      the fill stays the same deep green in light and dark (white text sits on it),
      rather than lightening in dark mode like the --brand accent used for text. */

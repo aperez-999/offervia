@@ -23,6 +23,8 @@ export default function robots(): MetadataRoute.Robots {
           "/settings/",
           "/profile/",
           "/student-hub/",
+          "/bullet-check/",
+          "/offers/",
           "/tracker/",
           "/documents/",
           "/upgrade/",

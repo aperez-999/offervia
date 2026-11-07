@@ -20,6 +20,8 @@ import {
   Menu,
   X,
   ArrowRight,
+  ListChecks,
+  Scale,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +59,8 @@ const navGroups: { label?: string; items: NavItem[] }[] = [
     items: [
       { label: "Coach", href: "/coach", icon: MessageSquare },
       { label: "Interview", href: "/interview", icon: MicVocal },
+      { label: "Bullet Check", href: "/bullet-check", icon: ListChecks },
+      { label: "Compare Offers", href: "/offers", icon: Scale },
     ],
   },
   {
