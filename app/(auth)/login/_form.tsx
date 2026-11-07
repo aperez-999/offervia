@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,10 +34,6 @@ export default function LoginForm() {
     () => sanitizeRedirectPath(search.get("next"), "/dashboard"),
     [search]
   );
-
-  useEffect(() => {
-    router.prefetch(safeNext);
-  }, [router, safeNext]);
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
