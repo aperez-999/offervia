@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
 import { ATS_KEYWORDS_SYSTEM_PROMPT } from "@/lib/ats/prompts";
 import { coerceKeywords, scoreAts } from "@/lib/ats/utils";
 import { extractResumeFile } from "@/lib/files/extract";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
+import { incrementUsage } from "@/lib/usage/increment";
 
 const jsonSchema = z
   .object({
@@ -34,7 +36,12 @@ export async function POST(req: Request) {
     );
   }
 
+  const userId = rl.userId as string;
+
   try {
+    const gate = await checkFeatureGate(userId, "job_scan");
+    if (!gate.allowed) return dailyLimitResponse("job_scan", gate.resetsAt);
+
     let resumeText = "";
     let jd = "";
 
@@ -85,10 +92,7 @@ export async function POST(req: Request) {
     if (jd.length < 20) {
       return fail("INVALID_INPUT", "Add a job description to scan against.", 400);
     }
-
-    const groq = getGroqClient();
-    const result = await groq.chat.completions.create({
-      model: DEFAULT_GROQ_MODEL,
+    const result = await createChatCompletion({
       messages: [
         { role: "system", content: ATS_KEYWORDS_SYSTEM_PROMPT },
         { role: "user", content: jd.slice(0, 20000) },
@@ -124,8 +128,11 @@ export async function POST(req: Request) {
       typeof aiParsed.role_title === "string" ? aiParsed.role_title.trim() : "";
 
     const content = scoreAts(resumeText, keywords, roleTitle);
+    await incrementUsage(userId, "job_scan");
+    await recordDailyUse(userId, "job_scan");
     return Response.json({ content });
   } catch (error) {
+    if (isGroqBusy(error)) return busy();
     captureServerException(error, { route: "api/ats-scan" });
     return fail("SERVER_ERROR", "The scan didn't finish. Try again.", 500);
   }

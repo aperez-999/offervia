@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
 import { resumeTailorSystemPrompt } from "@/lib/prompts/resume-tailor-system";
-import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { saveDocument } from "@/lib/documents/save";
 import { extractResumeFile } from "@/lib/files/extract";
@@ -104,13 +104,7 @@ export async function POST(req: Request) {
 
   try {
     const gate = await checkFeatureGate(userId, "resume_tailor");
-    if (!gate.allowed) {
-      return fail(
-        "PLAN_LIMIT_REACHED",
-        "You've used this month's resume tailoring runs. Upgrade to Pro for more.",
-        403
-      );
-    }
+    if (!gate.allowed) return dailyLimitResponse("resume_tailor", gate.resetsAt);
 
     const contentType = req.headers.get("content-type") || "";
 
@@ -215,7 +209,6 @@ export async function POST(req: Request) {
       const remaining = Math.max(1000, MAX_COMBINED_CHARS - jobDescription.length);
       resumeText = resumeText.slice(0, remaining);
     }
-    const groq = getGroqClient();
 
     const systemMessage = resumeTailorSystemPrompt(
       companyName,
@@ -227,8 +220,7 @@ export async function POST(req: Request) {
       useTemplate
     );
 
-    const completion = await groq.chat.completions.create({
-      model: DEFAULT_GROQ_MODEL,
+    const completion = await createChatCompletion({
       temperature: 0.6,
       max_tokens: 2000,
       messages: [
@@ -261,6 +253,8 @@ export async function POST(req: Request) {
 
     await incrementUsage(userId, "resume_tailor");
 
+    await recordDailyUse(userId, "resume_tailor");
+
     const tailored = normalizeText(cleaned);
     const docTitle =
       [roleTitle, companyName].filter(Boolean).join(" · ") || "Tailored resume";
@@ -274,6 +268,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ content: tailored });
   } catch (err: unknown) {
+    if (isGroqBusy(err)) return busy();
     captureServerException(err, { route: "api/resume-tailor" });
     const msg = err instanceof Error ? err.message : "Resume tailoring failed";
     // Surface friendlier error when model context is exceeded

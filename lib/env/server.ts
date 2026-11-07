@@ -10,6 +10,7 @@ const serverEnvSchema = z.object({
   // Groq (server-only)
   GROQ_API_KEY: nonEmpty.optional(),
   GROQ_MODEL: z.string().optional(),
+  GROQ_FALLBACK_MODEL: z.string().optional(),
 
   // Stripe (server-only)
   STRIPE_SECRET_KEY: nonEmpty.optional(),
@@ -42,6 +43,7 @@ export function getServerEnv() {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     GROQ_MODEL: process.env.GROQ_MODEL,
+    GROQ_FALLBACK_MODEL: process.env.GROQ_FALLBACK_MODEL,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     SENTRY_ORG: process.env.SENTRY_ORG,

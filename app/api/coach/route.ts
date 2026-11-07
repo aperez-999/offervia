@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
+import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 import { SYSTEM_PROMPTS } from "@/components/coach/system-prompts";
-import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { captureServerException } from "@/lib/monitoring/sentry";
@@ -135,13 +136,7 @@ export async function POST(req: Request) {
 
   try {
     const gate = await checkFeatureGate(userId, "coach");
-    if (!gate.allowed) {
-      return fail(
-        "PLAN_LIMIT_REACHED",
-        "You've used this month's coach messages. Upgrade to Pro for more.",
-        403
-      );
-    }
+    if (!gate.allowed) return dailyLimitResponse("coach", gate.resetsAt);
 
     let body: unknown;
     try {
@@ -184,13 +179,9 @@ export async function POST(req: Request) {
           .slice(1)
           .filter((m) => m.role === "user" || m.role === "assistant"),
       ];
-
-      const groq = getGroqClient();
       const isBrief = responseMode === "brief";
-      const result = await groq.chat.completions.create({
-        model: DEFAULT_GROQ_MODEL,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Groq SDK type mismatch, ChatMessage[] is runtime compatible
-        messages: modifiedMessages as any,
+      const result = await createChatCompletion({
+        messages: modifiedMessages as ChatCompletionMessageParam[],
         temperature: 0.2,
         max_tokens: isBrief ? 300 : 800,
       });
@@ -206,8 +197,10 @@ export async function POST(req: Request) {
       });
 
       await incrementUsage(userId, "coach");
+      await recordDailyUse(userId, "coach");
       return Response.json({ content, userMessage, assistantMessage });
     } catch (error) {
+      if (isGroqBusy(error)) return busy({ userMessage });
       captureServerException(error, {
         route: "api/coach",
         extras: { stage: "assistant-response" },
@@ -222,6 +215,7 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
+    if (isGroqBusy(error)) return busy();
     captureServerException(error, { route: "api/coach" });
     return fail("SERVER_ERROR", "The coach didn't respond. Try again in a minute.", 500);
   }

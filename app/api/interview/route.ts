@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
-import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { QUESTION_COUNT } from "@/lib/interview/config";
@@ -67,9 +67,7 @@ function parseJsonObject<T>(raw: string): T {
 }
 
 async function groqJson(system: string, user: string, maxTokens: number): Promise<string> {
-  const groq = getGroqClient();
-  const result = await groq.chat.completions.create({
-    model: DEFAULT_GROQ_MODEL,
+  const result = await createChatCompletion({
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -139,13 +137,7 @@ export async function POST(req: Request) {
   try {
     if (parsed.data.action === "start") {
       const gate = await checkFeatureGate(userId, "interview_session");
-      if (!gate.allowed) {
-        return fail(
-          "PLAN_LIMIT_REACHED",
-          "You've used this month's mock interviews. Upgrade to Pro for more.",
-          403
-        );
-      }
+      if (!gate.allowed) return dailyLimitResponse("interview_session", gate.resetsAt);
 
       const { roleTitle, focus, difficulty } = parsed.data;
       const raw = await groqJson(
@@ -185,6 +177,8 @@ export async function POST(req: Request) {
       }
 
       await incrementUsage(userId, "interview_session");
+
+      await recordDailyUse(userId, "interview_session");
 
       return Response.json({
         sessionId: data.id,
@@ -242,6 +236,7 @@ export async function POST(req: Request) {
           tip: String(obj.tip ?? "").trim().slice(0, 400),
         };
       } catch (error) {
+        if (isGroqBusy(error)) return busy();
         captureServerException(error, {
           route: "api/interview",
           extras: { stage: "score-answer" },
@@ -312,6 +307,7 @@ export async function POST(req: Request) {
 
     return Response.json({ overallScore, summary, transcript: answered });
   } catch (error) {
+    if (isGroqBusy(error)) return busy();
     captureServerException(error, { route: "api/interview" });
     return fail("SERVER_ERROR", "Something went wrong with the interview. Try again.", 500);
   }

@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
 import { JOB_SCAN_SYSTEM_PROMPT } from "@/lib/job-system-prompt";
-import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import { getServiceSupabase } from "@/lib/supabase/service";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
 
 const jobScanBodySchema = z.object({ jd: z.string().min(20).max(20000) }).strict();
@@ -40,13 +40,7 @@ export async function POST(req: Request) {
 
   try {
     const gate = await checkFeatureGate(userId, "job_scan");
-    if (!gate.allowed) {
-      return fail(
-        "PLAN_LIMIT_REACHED",
-        "You've used this month's job scans. Upgrade to Pro for more.",
-        403
-      );
-    }
+    if (!gate.allowed) return dailyLimitResponse("job_scan", gate.resetsAt);
 
     let body: unknown;
     try {
@@ -61,15 +55,12 @@ export async function POST(req: Request) {
     }
 
     const { jd } = parsed.data;
-
-    const groq = getGroqClient();
     const messages = [
       { role: "system" as const, content: JOB_SCAN_SYSTEM_PROMPT },
       { role: "user" as const, content: jd },
     ];
 
-    const result = await groq.chat.completions.create({
-      model: DEFAULT_GROQ_MODEL,
+    const result = await createChatCompletion({
       messages,
       temperature: 0.2,
       max_tokens: 800,
@@ -117,8 +108,11 @@ export async function POST(req: Request) {
     }
 
     await incrementUsage(userId, "job_scan");
+
+    await recordDailyUse(userId, "job_scan");
     return Response.json({ content });
   } catch (error) {
+    if (isGroqBusy(error)) return busy();
     captureServerException(error, { route: "api/job-scan" });
     return fail("SERVER_ERROR", "The job scan didn't finish. Try again.", 500);
   }

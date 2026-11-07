@@ -5,9 +5,18 @@ export type SafeFetchErrorCause =
   | "client"
   | "unknown";
 
+import { apiErrorMessage } from "@/lib/usage/client";
+
 export type SafeFetchResult<T> =
   | { ok: true; data: T; status: number }
-  | { ok: false; error: string; status?: number; cause: SafeFetchErrorCause };
+  | {
+      ok: false;
+      error: string;
+      status?: number;
+      cause: SafeFetchErrorCause;
+      /** API error code from the response body, e.g. "DAILY_LIMIT_REACHED" or "BUSY". */
+      code?: string;
+    };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -55,10 +64,13 @@ export async function safeFetchJson<T = any>(
       if (!res.ok) {
         // Try to extract error message
         let msg = res.statusText || "Request failed";
+        let code: string | undefined;
         if (isJsonResponse(res)) {
           try {
             const json = await res.json();
-            msg = json?.message || json?.error || msg;
+            code = typeof json?.error === "string" ? json.error : undefined;
+            // Rebuilds daily-limit messages with a reset time in the reader's zone.
+            msg = apiErrorMessage(json, json?.error || msg);
           } catch {
             // ignore JSON parsing failure
           }
@@ -72,7 +84,7 @@ export async function safeFetchJson<T = any>(
         }
 
         const cause: SafeFetchErrorCause = res.status >= 500 ? "server" : "client";
-        return { ok: false, error: msg, status: res.status, cause };
+        return { ok: false, error: msg, status: res.status, cause, code };
       }
 
       // Parse JSON safely
@@ -88,7 +100,6 @@ export async function safeFetchJson<T = any>(
         }
       }
 
-      // ✅ Fix: cast unknown to T
       return { ok: true, data: data as T, status: res.status };
     } catch (err: unknown) {
       clearTimeout(timeout);

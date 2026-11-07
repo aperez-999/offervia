@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getGroqClient, DEFAULT_GROQ_MODEL } from "@/lib/groq";
+import { createChatCompletion, isGroqBusy } from "@/lib/groq";
 import {
   coverLetterSystemPrompt,
   type CoverLetterTone,
 } from "@/lib/prompts/cover-letter-system";
-import { checkFeatureGate } from "@/lib/usage/featureGate";
+import { checkFeatureGate, dailyLimitResponse, recordDailyUse } from "@/lib/usage/featureGate";
 import { incrementUsage } from "@/lib/usage/increment";
 import { getServiceSupabase } from "@/lib/supabase/service";
 import { readCareerProfile } from "@/lib/profile/read";
 import { buildProfileContext } from "@/lib/profile/career";
-import { fail } from "@/lib/api/response";
+import { busy, fail } from "@/lib/api/response";
 import { captureServerException } from "@/lib/monitoring/sentry";
 import { saveDocument } from "@/lib/documents/save";
 import { extractResumeFile } from "@/lib/files/extract";
@@ -77,13 +77,7 @@ export async function POST(req: Request) {
 
   try {
     const gate = await checkFeatureGate(userId, "cover_letter");
-    if (!gate.allowed) {
-      return fail(
-        "PLAN_LIMIT_REACHED",
-        "You've used this month's cover letters. Upgrade to Pro for more.",
-        403,
-      );
-    }
+    if (!gate.allowed) return dailyLimitResponse("cover_letter", gate.resetsAt);
 
     const contentType = req.headers.get("content-type") || "";
     let resumeTextRaw = "";
@@ -154,10 +148,7 @@ export async function POST(req: Request) {
 
     const supabase = getServiceSupabase();
     const profileContext = buildProfileContext(await readCareerProfile(supabase, userId));
-
-    const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
-      model: DEFAULT_GROQ_MODEL,
+    const completion = await createChatCompletion({
       temperature: 0.7,
       max_tokens: 900,
       messages: [
@@ -188,6 +179,8 @@ export async function POST(req: Request) {
 
     await incrementUsage(userId, "cover_letter");
 
+    await recordDailyUse(userId, "cover_letter");
+
     const docTitle =
       [companyName, roleTitle].filter(Boolean).join(" · ") || "Cover letter";
     await saveDocument({
@@ -200,6 +193,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ content: cleaned, tone });
   } catch (err: unknown) {
+    if (isGroqBusy(err)) return busy();
     captureServerException(err, { route: "api/cover-letter" });
     const msg = err instanceof Error ? err.message : "Cover letter generation failed";
     if (typeof msg === "string" && msg.includes("context_length_exceeded")) {
