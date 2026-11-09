@@ -81,6 +81,9 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   manifest: "/manifest.webmanifest",
+  verification: {
+    google: "M-KvQe9Rn3ly1PzmhQbxYfYy6iB54Ml3yF95dFzhFyQ",
+  },
 };
 
 export default function RootLayout({
