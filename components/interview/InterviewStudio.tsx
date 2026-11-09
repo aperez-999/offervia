@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Reveal } from "@/components/motion/Reveal";
-import { DAILY_LIMITS } from "@/lib/usage/limits";
+import { apiErrorMessage, isDailyLimit } from "@/lib/usage/client";
+import { RemainingToday, useRemainingToday } from "@/components/usage/RemainingToday";
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import {
   DIFFICULTY_OPTIONS,
   FOCUS_OPTIONS,
@@ -170,7 +172,14 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
   );
 }
 
-export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: string }) {
+export default function InterviewStudio({
+  defaultRole = "",
+  allowance = null,
+}: {
+  defaultRole?: string;
+  allowance?: AllowanceSnapshot | null;
+}) {
+  const quota = useRemainingToday(allowance);
   const { toast } = useToast();
 
   const [phase, setPhase] = useState<Phase>("setup");
@@ -187,12 +196,11 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
   const [starting, setStarting] = useState(false);
   const [scoring, setScoring] = useState(false);
   const [finishing, setFinishing] = useState(false);
-  const [limitReached, setLimitReached] = useState(false);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
 
   const [overallScore, setOverallScore] = useState(0);
   const [summary, setSummary] = useState("");
 
-  const limit = DAILY_LIMITS.interview_session;
   const currentFeedback = transcript[index];
   const answeredCount = useMemo(() => transcript.filter(Boolean).length, [transcript]);
 
@@ -212,15 +220,15 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
       return;
     }
     setStarting(true);
-    setLimitReached(false);
+    setLimitMessage(null);
     try {
       const { res, data } = await postInterview({ action: "start", roleTitle: roleTitle.trim(), focus, difficulty });
-      if (data.error === "DAILY_LIMIT_REACHED") {
-        setLimitReached(true);
+      if (isDailyLimit(data)) {
+        setLimitMessage(apiErrorMessage(data, "You've used today's mock interviews."));
         return;
       }
       if (!res.ok) {
-        toast({ title: "Couldn't start", description: String(data.message || "Try again in a moment."), variant: "destructive" });
+        toast({ title: "Couldn't start", description: apiErrorMessage(data, "Try again in a moment."), variant: "destructive" });
         return;
       }
       const qs = (data.questions as string[]) || [];
@@ -230,6 +238,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
       setIndex(0);
       setAnswer("");
       setPhase("active");
+      quota.consume();
     } catch {
       toast({ title: "Network error", description: "Check your connection and try again.", variant: "destructive" });
     } finally {
@@ -299,7 +308,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
     setTranscript([]);
     setOverallScore(0);
     setSummary("");
-    setLimitReached(false);
+    setLimitMessage(null);
   }
 
   // ---- SETUP ----
@@ -320,10 +329,11 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
           </div>
 
           <div className="space-y-6 px-6 py-6 sm:px-8">
-            {limitReached ? (
-              <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
-                <p className="text-sm font-medium text-foreground">
-                  You&apos;ve used today&apos;s {limit} mock interviews. More open up within 24 hours.
+            {limitMessage ? (
+              <div role="status" className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
+                <p className="text-sm font-medium text-foreground">{limitMessage}</p>
+                <p className="mt-0.5 text-sm text-foreground/70">
+                  Your past sessions are below if you want to review your answers in the meantime.
                 </p>
               </div>
             ) : null}
@@ -351,10 +361,8 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
             </div>
 
             <div className="flex flex-col-reverse items-stretch gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-foreground/60">
-                Up to {limit} mock interviews a day
-              </p>
-              <Button onClick={handleStart} disabled={starting} size="lg" className="sm:min-w-44">
+              <RemainingToday feature="interview_session" remaining={quota.remaining} resetsAt={quota.resetsAt} />
+              <Button onClick={handleStart} disabled={starting || quota.blocked} size="lg" className="sm:ml-auto sm:min-w-44">
                 {starting ? (
                   <>
                     <CircleNotch className="size-4 animate-spin" /> Writing your questions…

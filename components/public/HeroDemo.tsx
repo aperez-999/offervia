@@ -1,531 +1,290 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, ChatCircleText, Check, CheckCircle, EnvelopeSimple, FileText, PenNib, Robot } from "@phosphor-icons/react/dist/ssr";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { CalendarDots, Check, X } from "@phosphor-icons/react/dist/ssr";
+import { cn } from "@/lib/utils";
 
 /**
- * Fake product walkthrough on the homepage. A cursor clicks Scan, Tailor,
- * Cover, Coach, and Track. It is real DOM, not a video, and it pauses
- * when reduced motion is on.
+ * The homepage demo: the whole idea in three panels you can read at a glance.
+ * A track across the top fills as it moves from step to step. Every panel has
+ * a fixed height (the before and after states share one grid cell), so the
+ * page never shifts while it plays. It loops while on screen and holds the
+ * finished state when reduced motion is on.
  */
 
-type Step = {
-  key: string;
-  label: string;
-  url: string;
-  icon: typeof FileText;
-};
+const SKILLS = ["React", "TypeScript", "REST APIs", "CI/CD", "Agile"];
+const MISSING = "CI/CD";
+const STEPS = ["Paste a job posting", "See what your resume is missing", "Fix it before you apply"];
 
-const STEPS: Step[] = [
-  { key: "scan", label: "Scan", url: "scanner", icon: FileText },
-  { key: "tailor", label: "Tailor", url: "resume", icon: PenNib },
-  { key: "cover", label: "Cover", url: "cover-letter", icon: EnvelopeSimple },
-  { key: "coach", label: "Coach", url: "coach", icon: ChatCircleText },
-  { key: "track", label: "Track", url: "tracker", icon: CheckCircle },
+const POSTING: Array<string | number> = [
+  "Build our customer dashboard in ",
+  0,
+  " and ",
+  1,
+  ", ship features on ",
+  2,
+  ", own ",
+  3,
+  ", and work in an ",
+  4,
+  " team.",
 ];
 
-const DWELL = 2100;
-const TRAVEL = 620;
-const CLICK = 280;
-const CYCLE = DWELL + TRAVEL + CLICK;
+// When each stage starts within one loop, and how long a loop lasts (ms).
+const STAGE_AT = [0, 600, 2600, 4600];
+const LOOP_MS = 9400;
+const ease = [0.22, 1, 0.36, 1] as const;
 
-const KEYWORDS = ["React", "TypeScript", "REST APIs", "CI/CD", "Agile"];
+/** Two states in one grid cell: the cell is always as tall as the taller one. */
+function Swap({ show, a, b, className }: { show: "a" | "b"; a: React.ReactNode; b: React.ReactNode; className?: string }) {
+  const layer = "col-start-1 row-start-1 transition-[opacity,transform,filter] duration-500 ease-[var(--ease-out-quint)]";
+  return (
+    <div className={cn("grid", className)}>
+      <div className={cn(layer, show === "a" ? "opacity-100" : "pointer-events-none -translate-y-1 opacity-0")} aria-hidden={show !== "a"}>
+        {a}
+      </div>
+      <div
+        className={cn(layer, show === "b" ? "opacity-100 blur-0" : "pointer-events-none translate-y-1.5 opacity-0 blur-[2px]")}
+        aria-hidden={show !== "b"}
+      >
+        {b}
+      </div>
+    </div>
+  );
+}
 
-const BULLETS = [
-  {
-    before: "Worked on the frontend for a web app.",
-    after: "Built 14 React and TypeScript features for the checkout flow; page load dropped from 3.1s to 2.4s.",
-  },
-  {
-    before: "Helped with the team's projects.",
-    after: "Moved billing, auth, and search onto one REST API during two-week sprints.",
-  },
-];
+function MatchRing({ value, label }: { value: number; label: string }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative grid size-[76px] shrink-0 place-items-center">
+      <svg viewBox="0 0 76 76" className="absolute inset-0 -rotate-90" aria-hidden>
+        <circle cx="38" cy="38" r={r} fill="none" stroke="var(--muted)" strokeWidth="7" />
+        <motion.circle
+          cx="38"
+          cy="38"
+          r={r}
+          fill="none"
+          stroke={value >= 1 ? "var(--reward)" : "var(--primary)"}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          initial={false}
+          animate={{ strokeDashoffset: c * (1 - value) }}
+          transition={{ duration: 0.9, ease }}
+        />
+      </svg>
+      <span className="font-display text-lg font-bold tabular-nums text-foreground">{label}</span>
+    </div>
+  );
+}
 
 export default function HeroDemo() {
   const reduce = useReducedMotion();
-  const [step, setStep] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-  const [clicking, setClicking] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const inView = useInView(ref, { amount: 0.3 });
+  // 0: nothing marked yet, 1: skills found, 2: gap shown, 3: bullet fixed.
+  const [stage, setStage] = useState(0);
+  // Bumped each loop so the highlighter swipes play again.
+  const [run, setRun] = useState(0);
 
-  const frameRef = useRef<HTMLDivElement | null>(null);
-  const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const coordsFor = useCallback((i: number) => {
-    const btn = btnRefs.current[i];
-    const frame = frameRef.current;
-    if (!btn || !frame) return null;
-    const b = btn.getBoundingClientRect();
-    const f = frame.getBoundingClientRect();
-    return { x: b.left - f.left + b.width / 2 - 3, y: b.top - f.top + b.height / 2 - 2 };
-  }, []);
-
-  // Rest the cursor on the active tab once layout is measurable.
-  useEffect(() => {
-    if (reduce) return;
-    const id = requestAnimationFrame(() => setCursor(coordsFor(step)));
-    return () => cancelAnimationFrame(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduce]);
-
-  // Self-driving loop: dwell → glide cursor to next tab → click → advance.
   useEffect(() => {
     if (reduce) {
-      setStep(4);
+      setStage(3);
       return;
     }
-    if (paused) return;
-    let t2: ReturnType<typeof setTimeout>;
-    let t3: ReturnType<typeof setTimeout>;
-    const t1 = setTimeout(() => {
-      const next = (step + 1) % STEPS.length;
-      const pos = coordsFor(next);
-      if (pos) setCursor(pos);
-      t2 = setTimeout(() => {
-        setClicking(true);
-        t3 = setTimeout(() => {
-          setClicking(false);
-          setStep(next);
-        }, CLICK);
-      }, TRAVEL);
-    }, DWELL);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, [step, paused, reduce, coordsFor]);
+    if (!inView) return;
+    setStage(0);
+    const timers = STAGE_AT.slice(1).map((at, i) => window.setTimeout(() => setStage(i + 1), at));
+    timers.push(window.setTimeout(() => setRun((r) => r + 1), LOOP_MS));
+    return () => timers.forEach(window.clearTimeout);
+  }, [inView, reduce, run]);
 
-  const goTo = (i: number) => {
-    setStep(i);
-    const pos = coordsFor(i);
-    if (pos) setCursor(pos);
-  };
+  const fixed = stage >= 3;
+  const gap = stage >= 2;
+  // Track fill reaches the centre of the current step's column.
+  const fill = stage === 0 ? 0 : (stage * 2 - 1) / 6;
 
   return (
-    <div
-      ref={frameRef}
-      className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/5 dark:shadow-black/40"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      {/* Self-driving cursor overlay */}
-      {!reduce && cursor && (
+    <div ref={ref} role="group" aria-label="How Offervia works, in three steps">
+      {/* Progress track (desktop) */}
+      <div aria-hidden className="relative mb-5 hidden lg:block">
+        <div className="absolute inset-x-[16.66%] top-1/2 h-1 -translate-y-1/2 rounded-full bg-border" />
         <motion.div
-          aria-hidden
-          className="pointer-events-none absolute left-0 top-0 z-20"
-          animate={{ x: cursor.x, y: cursor.y }}
-          transition={{ duration: TRAVEL / 1000, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <motion.div
-            animate={clicking ? { scale: 0.82 } : { scale: 1 }}
-            transition={{ duration: 0.14, ease: "easeOut" }}
-            className="relative"
-          >
-            <AnimatePresence>
-              {clicking && (
-                <motion.span
-                  key="ripple"
-                  initial={{ scale: 0.4, opacity: 0.5 }}
-                  animate={{ scale: 2.4, opacity: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="absolute -left-1 -top-1 h-6 w-6 rounded-full bg-primary/30"
-                />
-              )}
-            </AnimatePresence>
-            <svg width="20" height="20" viewBox="0 0 24 24" className="drop-shadow-md">
-              <path
-                d="M5 3l14 7-6 2.2L10 19 5 3z"
-                fill="var(--foreground)"
-                stroke="var(--background)"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Browser chrome */}
-      <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-2.5">
-        <div className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-full bg-destructive/70" />
-          <span className="h-3 w-3 rounded-full bg-warning/70" />
-          <span className="h-3 w-3 rounded-full bg-success/70" />
-        </div>
-        <div className="mx-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          offervia.vercel.app/{STEPS[step].url}
-        </div>
-        <span className="hidden rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground sm:inline-flex">
-          Sample data
-        </span>
-      </div>
-
-      {/* Step rail */}
-      <div className="flex items-center gap-1 border-b border-border bg-background px-3 py-2">
-        {STEPS.map((s, i) => {
-          const Icon = s.icon;
-          const active = i === step;
-          const done = i < step;
-          return (
-            <button
-              key={s.key}
-              type="button"
-              ref={(el) => {
-                btnRefs.current[i] = el;
-              }}
-              onClick={() => goTo(i)}
-              aria-current={active ? "step" : undefined}
-              className={[
-                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors pointer-coarse:min-h-11",
-                active
-                  ? "bg-primary/10 text-primary"
-                  : done
-                    ? "text-foreground/70 hover:bg-muted"
-                    : "text-muted-foreground hover:bg-muted",
-              ].join(" ")}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{s.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Stage */}
-      <div className="relative min-h-[320px] bg-background p-5">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={reduce ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduce ? undefined : { opacity: 0, y: -8 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-          >
-            {step === 0 && <ScanPane reduce={!!reduce} />}
-            {step === 1 && <TailorPane reduce={!!reduce} />}
-            {step === 2 && <CoverPane reduce={!!reduce} />}
-            {step === 3 && <CoachPane reduce={!!reduce} />}
-            {step === 4 && <TrackPane reduce={!!reduce} />}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Progress ticks */}
-      <div className="flex gap-1 px-5 pb-4">
-        {STEPS.map((s, i) => (
-          <div key={s.key} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-            <motion.div
-              className="h-full rounded-full bg-primary"
-              initial={false}
-              animate={{ width: i < step ? "100%" : i === step ? "100%" : "0%" }}
-              transition={{
-                duration: i === step && !paused && !reduce ? CYCLE / 1000 : 0.3,
-                ease: "linear",
-              }}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PaneHead({
-  icon: Icon,
-  title,
-  sub,
-  badge,
-}: {
-  icon: typeof FileText;
-  title: string;
-  sub: string;
-  badge?: React.ReactNode;
-}) {
-  return (
-    <div className="mb-4 flex items-start justify-between gap-3">
-      <div className="flex items-center gap-2.5">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="text-xs text-muted-foreground">{sub}</p>
-        </div>
-      </div>
-      {badge}
-    </div>
-  );
-}
-
-function ScanPane({ reduce }: { reduce: boolean }) {
-  const [score, setScore] = useState(reduce ? 87 : 0);
-  useEffect(() => {
-    if (reduce) return;
-    const start = performance.now();
-    let raf = 0;
-    const tick = (t: number) => {
-      const p = Math.min((t - start) / 1100, 1);
-      setScore(Math.round(87 * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduce]);
-
-  return (
-    <div>
-      <PaneHead
-        icon={FileText}
-        title="Job scanner"
-        sub="Checks the posting's requirements against your resume"
-      />
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-        <div className="rounded-xl border border-border bg-muted/30 p-4">
-          <p className="mb-2.5 text-xs font-medium text-foreground">Senior Frontend Engineer</p>
-          <div className="space-y-2">
-            {[96, 82, 88, 70].map((w, i) => (
-              <div
-                key={i}
-                className="h-2.5 rounded-full bg-foreground/10"
-                style={{ width: `${w}%` }}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 sm:flex-col sm:gap-2">
-          <div className="relative grid h-24 w-24 shrink-0 place-items-center">
-            <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--muted)" strokeWidth="8" />
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="var(--primary)"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={2 * Math.PI * 42}
-                strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
-              />
-            </svg>
-            <span className="absolute text-xl font-bold text-foreground tabular-nums">
-              {score}%
-            </span>
-          </div>
-          <p className="text-xs font-medium text-success sm:text-center">Good match</p>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {KEYWORDS.map((k, i) => (
-          <motion.span
-            key={k}
-            initial={reduce ? false : { opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: reduce ? 0 : 0.5 + i * 0.1 }}
-            className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
-          >
-            <Check className="h-3 w-3" />
-            {k}
-          </motion.span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TailorPane({ reduce }: { reduce: boolean }) {
-  return (
-    <div>
-      <PaneHead
-        icon={PenNib}
-        title="Resume Tailor"
-        sub="Rewrites vague bullets using the posting's terms"
-        badge={
-          <span className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2 py-1 text-[11px] font-medium text-success">
-            <Check className="h-3 w-3" />
-            9 of 11 keywords
-          </span>
-        }
-      />
-      <div className="space-y-2.5">
-        {BULLETS.map((b, i) => (
-          <div key={i} className="rounded-xl border border-border bg-card p-3">
-            <div className="flex items-start gap-2">
-              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground line-through">{b.before}</p>
-                <motion.p
-                  initial={reduce ? false : { opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: reduce ? 0 : 0.3 + i * 0.35, duration: 0.4 }}
-                  className="mt-1 text-sm font-medium text-foreground"
-                >
-                  {b.after}
-                </motion.p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CoverPane({ reduce }: { reduce: boolean }) {
-  const lines = [
-    "Dear Hiring Manager,",
-    "Your posting says the checkout rebuild is the team's first project this year.",
-    "I spent the last two years on the same problem at Fieldline, where we cut checkout load time by a fifth.",
-  ];
-  return (
-    <div>
-      <PaneHead
-        icon={EnvelopeSimple}
-        title="Cover letter"
-        sub="Drafted from the posting and your resume"
-        badge={
-          <span className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
-            Draft
-          </span>
-        }
-      />
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="space-y-2.5">
-          {lines.map((l, i) => (
-            <motion.p
-              key={i}
-              initial={reduce ? false : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: reduce ? 0 : i * 0.45, duration: 0.4 }}
-              className={
-                i === 0 ? "text-sm font-medium text-foreground" : "text-sm text-foreground/80"
-              }
-            >
-              {l}
-            </motion.p>
-          ))}
-          <div className="space-y-2 pt-1">
-            <div className="h-2.5 w-[88%] rounded-full bg-foreground/10" />
-            <div className="h-2.5 w-[72%] rounded-full bg-foreground/10" />
-          </div>
-          <motion.p
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: reduce ? 0 : 1.5 }}
-            className="pt-1 text-sm text-foreground/80"
-          >
-            Best,
-            <br />
-            Jordan Rivera
-          </motion.p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CoachPane({ reduce }: { reduce: boolean }) {
-  return (
-    <div>
-      <PaneHead
-        icon={ChatCircleText}
-        title="Interview coach"
-        sub="Practice answers and get notes on them"
-        badge={
-          <span className="inline-flex items-center gap-1 rounded-full border border-info/30 bg-info/10 px-2 py-1 text-[11px] font-medium text-info">
-            STAR method
-          </span>
-        }
-      />
-      <div className="space-y-3">
-        <div className="flex justify-end">
-          <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-3.5 py-2 text-sm text-primary-foreground">
-            How do I answer &ldquo;tell me about a challenge you solved&rdquo;?
-          </div>
-        </div>
-        <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
-            <Robot className="h-4 w-4" />
-          </span>
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: reduce ? 0 : 0.6, duration: 0.4 }}
-            className="max-w-[80%] rounded-2xl rounded-bl-sm border border-border bg-card px-3.5 py-2.5 text-sm text-foreground/90"
-          >
-            Pick one real problem. Spend a sentence on the{" "}
-            <span className="font-medium text-foreground">situation</span>, most of your time on what{" "}
-            <span className="font-medium text-foreground">you did</span>, and end with what{" "}
-            <span className="font-medium text-foreground">changed</span> because of it.
-          </motion.div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TrackPane({ reduce }: { reduce: boolean }) {
-  const cols = [
-    { key: "applied", label: "Applied", tint: "var(--status-applied)", count: 8 },
-    { key: "interviewing", label: "Interviewing", tint: "var(--status-interviewing)", count: 4 },
-    { key: "offer", label: "Offer", tint: "var(--status-offer)", count: 1 },
-  ];
-  return (
-    <div>
-      <PaneHead
-        icon={CheckCircle}
-        title="Application tracker"
-        sub="Where each application stands"
-        badge={
-          <span className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
-            13 active
-          </span>
-        }
-      />
-      <div className="grid grid-cols-3 gap-2">
-        {cols.map((c) => (
-          <div key={c.key} className="rounded-xl border border-border bg-muted/30 p-2">
-            <div className="mb-2 flex items-center justify-between px-1">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full" style={{ background: c.tint }} />
-                <span className="text-[11px] font-medium text-muted-foreground">{c.label}</span>
-              </span>
-              <span className="text-[10px] font-semibold text-muted-foreground">{c.count}</span>
-            </div>
-            {c.key === "interviewing" ? (
-              <motion.div
-                initial={reduce ? false : { opacity: 0, y: 10, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ type: "spring", stiffness: 240, damping: 22, delay: reduce ? 0 : 0.2 }}
-                className="rounded-lg border border-border bg-card p-2.5 shadow-sm"
-              >
-                <p className="text-xs font-semibold text-foreground">Frontend Engineer</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">Northwind Labs</p>
+          className="absolute left-[16.66%] top-1/2 h-1 -translate-y-1/2 rounded-full bg-highlight"
+          initial={false}
+          animate={{ width: `${Math.max(0, fill - 1 / 6) * 100}%` }}
+          transition={{ duration: 0.8, ease }}
+        />
+        <ol className="relative grid grid-cols-3">
+          {STEPS.map((s, i) => {
+            const done = stage >= i + 1;
+            return (
+              <li key={s} className="flex justify-center">
                 <span
-                  className="mt-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                  style={{
-                    background: "color-mix(in oklab, var(--status-interviewing) 14%, transparent)",
-                    color: "var(--status-interviewing)",
-                  }}
+                  className={cn(
+                    "grid size-9 place-items-center rounded-full border-2 font-display text-sm font-bold transition-colors duration-500",
+                    done
+                      ? "border-primary-button bg-primary-button text-primary-button-foreground"
+                      : "border-border bg-background text-muted-foreground"
+                  )}
                 >
-                  <CheckCircle className="h-3 w-3" />
-                  Interview set
+                  {i + 1}
                 </span>
-              </motion.div>
-            ) : (
-              <div className="space-y-1.5 rounded-lg border border-border bg-card p-2.5">
-                <div className="h-2 w-[80%] rounded-full bg-foreground/10" />
-                <div className="h-2 w-[55%] rounded-full bg-foreground/10" />
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* 1. The posting */}
+        <section className="flex flex-col rounded-3xl border border-border bg-card p-6">
+          <StepTitle n={1} active={stage === 1} />
+          <div className="mt-5 flex-1 rounded-2xl border border-border bg-background/60 p-4">
+            <div className="flex items-center gap-3">
+              <span aria-hidden className="grid size-9 place-items-center rounded-xl bg-primary-button font-display text-sm font-bold text-primary-button-foreground">
+                B
+              </span>
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-sm font-semibold text-foreground">Frontend Engineer</p>
+                <p className="truncate text-xs text-muted-foreground">Brightline · Remote</p>
               </div>
-            )}
+            </div>
+            <p key={`posting-${run}`} className="mt-3 text-[15px] leading-relaxed text-foreground/85">
+              {POSTING.map((part, i) =>
+                typeof part === "string" ? (
+                  <span key={i}>{part}</span>
+                ) : stage >= 1 ? (
+                  <span key={i} className="hl" style={{ "--hl-delay": `${part * 150}ms` } as React.CSSProperties}>
+                    {SKILLS[part]}
+                  </span>
+                ) : (
+                  <span key={i}>{SKILLS[part]}</span>
+                )
+              )}
+            </p>
           </div>
-        ))}
+          <p className="mt-4 text-sm text-muted-foreground">Offervia finds the 5 skills it asks for.</p>
+        </section>
+
+        {/* 2. The gap */}
+        <section className="flex flex-col rounded-3xl border border-border bg-card p-6">
+          <StepTitle n={2} active={stage === 2} />
+          <div className="mt-5 flex flex-1 flex-col rounded-2xl border border-border bg-background/60 p-4">
+            <div className="flex items-center gap-4">
+              <MatchRing value={fixed ? 1 : gap ? 0.8 : 0} label={fixed ? "5/5" : gap ? "4/5" : "–/5"} />
+              <Swap
+                show={fixed ? "b" : "a"}
+                className="text-sm"
+                a={
+                  <p className="text-foreground/80">
+                    <span className="font-semibold text-foreground">Missing {MISSING}.</span> Screening software looks for it.
+                  </p>
+                }
+                b={
+                  <p className="text-foreground/80">
+                    <span className="font-semibold text-reward">All 5 covered.</span> Your resume matches what they want.
+                  </p>
+                }
+              />
+            </div>
+            <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Skills">
+              {SKILLS.map((s) => {
+                const missing = s === MISSING && !fixed;
+                return (
+                  <li
+                    key={s}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-medium transition-[background-color,border-color,opacity,color] duration-500",
+                      !gap && "opacity-40",
+                      missing ? "border border-dashed border-warning bg-warning/10 text-foreground" : "hl-soft border border-transparent"
+                    )}
+                  >
+                    {missing ? <X className="size-3.5 text-warning" weight="bold" aria-hidden /> : <Check className="size-3.5" weight="bold" aria-hidden />}
+                    {s}
+                    {missing ? <span className="sr-only"> (missing)</span> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">Compared against your saved resume.</p>
+        </section>
+
+        {/* 3. The fix */}
+        <section className="flex flex-col rounded-3xl border border-border bg-card p-6">
+          <StepTitle n={3} active={stage === 3} />
+          <div className="mt-5 flex flex-1 flex-col gap-3 rounded-2xl border border-border bg-background/60 p-4 text-[15px] leading-relaxed">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Before</p>
+              <p className={cn("mt-1 transition-[color,opacity] duration-500", fixed ? "text-muted-foreground line-through opacity-70" : "text-foreground/85")}>
+                Helped with deployments.
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">After</p>
+              <Swap
+                show={fixed ? "b" : "a"}
+                className="mt-1"
+                a={
+                  <p className="rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+                    A stronger bullet with the missing skill goes here.
+                  </p>
+                }
+                b={
+                  <p key={`after-${run}`} className="text-foreground">
+                    Set up{" "}
+                    {fixed ? (
+                      <span className="hl" style={{ "--hl-delay": "300ms" } as React.CSSProperties}>
+                        CI/CD
+                      </span>
+                    ) : (
+                      "CI/CD"
+                    )}{" "}
+                    with GitHub Actions, cutting release time from a day to 20 minutes.
+                  </p>
+                }
+              />
+            </div>
+          </div>
+          <p
+            className={cn(
+              "mt-4 inline-flex items-center gap-1.5 text-sm transition-colors duration-500",
+              fixed ? "text-foreground/80" : "text-muted-foreground"
+            )}
+          >
+            <CalendarDots className="size-4" aria-hidden />
+            Then track it and follow up in a week.
+          </p>
+        </section>
       </div>
     </div>
+  );
+}
+
+function StepTitle({ n, active }: { n: number; active: boolean }) {
+  return (
+    <h3 className="flex items-start gap-2.5 font-display text-lg font-semibold leading-snug text-foreground">
+      <span
+        className={cn(
+          "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors duration-500 lg:hidden",
+          active ? "bg-primary-button text-primary-button-foreground" : "bg-muted text-muted-foreground"
+        )}
+      >
+        {n}
+      </span>
+      <span className="relative">
+        {STEPS[n - 1]}
+        <span
+          aria-hidden
+          className={cn(
+            "absolute -bottom-1 left-0 h-0.5 w-full origin-left rounded-full bg-primary transition-transform duration-500 ease-[var(--ease-out-quint)]",
+            active ? "scale-x-100" : "scale-x-0"
+          )}
+        />
+      </span>
+    </h3>
   );
 }

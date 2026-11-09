@@ -16,8 +16,8 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { GearSix, Palette, SignOut, UserCircle } from "@phosphor-icons/react/dist/ssr";
-
+import { GearSix, GithubLogo, Palette, SignOut, UserCircle } from "@phosphor-icons/react/dist/ssr";
+import { GITHUB_REPO_URL } from "@/lib/github";
 
 export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -92,6 +92,17 @@ export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
             <GearSix className="h-4 w-4" />
             Settings
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a
+            href={GITHUB_REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <GithubLogo className="h-4 w-4" />
+            Source on GitHub
+          </a>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

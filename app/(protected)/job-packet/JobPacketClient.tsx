@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { postJson } from "@/lib/safe-fetch";
+import { errorTitle } from "@/lib/usage/client";
 import { cn } from "@/lib/utils";
 import {
   clearJobPacketDraft,
@@ -139,12 +140,9 @@ export default function JobPacketClient() {
     setLoadingScan(false);
 
     if (!res.ok) {
-      const message =
-        res.status === 429
-          ? res.error || "You've hit today's free limit for scans."
-          : res.error || "The scan didn't finish. Try again in a minute.";
+      const message = res.error || "The scan didn't finish. Try again in a minute.";
       setError(message);
-      toast({ title: "Scan failed", description: message, variant: "destructive" });
+      toast({ title: errorTitle(res.code, "Scan failed"), description: message, variant: "destructive" });
       return;
     }
 
@@ -219,7 +217,7 @@ export default function JobPacketClient() {
     clearJobPacketDraft();
     setDraft(createEmptyJobPacketDraft());
     setError(null);
-    toast({ variant: "success", title: "Job Packet cleared" });
+    toast({ variant: "success", title: "Started over" });
   }
 
   return (
@@ -232,15 +230,9 @@ export default function JobPacketClient() {
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              4 steps
-            </div>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-              Job Packet
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">New application</h1>
             <p className="mt-1 max-w-2xl text-sm text-foreground/70">
-              Paste a job description and scan it. Then tailor your resume for that job and add it
-              to your tracker. Your progress saves in this browser.
+              One job, start to finish: scan the posting, fit your resume, then add it to your tracker.
             </p>
           </div>
 
@@ -345,7 +337,7 @@ export default function JobPacketClient() {
                   Company name
                 </label>
                 <Input
-                  placeholder="e.g. Stripe"
+                  placeholder="e.g. Duolingo"
                   value={draft.companyName}
                   onChange={(event) => updateDraft({ companyName: event.target.value })}
                   className="border-border bg-background/80 text-foreground placeholder:text-foreground/40"

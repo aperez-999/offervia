@@ -13,13 +13,13 @@ test.describe("auth flows", () => {
   test("signup surfaces an existing-account error for known users", async ({ page }) => {
     await page.goto("/signup");
     await expect(
-      page.getByRole("heading", { name: /create your offervia account/i })
+      page.getByRole("heading", { name: /make your free account/i })
     ).toBeVisible({ timeout: 15_000 });
     await page.getByPlaceholder("Your name").fill("Playwright Existing User");
     await page.getByPlaceholder("you@example.com").fill(E2E_EMAIL!);
-    await page.getByPlaceholder("Enter at least 6 characters").fill(E2E_PASSWORD!);
-    await page.getByPlaceholder("Make sure passwords match").fill(E2E_PASSWORD!);
-    await page.getByRole("button", { name: /^create account$/i }).click();
+    await page.getByPlaceholder("At least 8 characters").fill(E2E_PASSWORD!);
+    await page.getByPlaceholder("Type it again").fill(E2E_PASSWORD!);
+    await page.getByRole("button", { name: /^make my account$/i }).click();
 
     await expect(page.getByText("An account with that email already exists.")).toBeVisible();
   });

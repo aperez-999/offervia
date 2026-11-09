@@ -64,7 +64,7 @@ export function SoftwareApplicationJsonLd() {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-      description: "Free plan with monthly limits. Pro raises the limits.",
+      description: "Free to use.",
     },
     featureList: [
       "Job description scanner",

@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <PageContainer>
-      <PageHeader eyebrow="Library" title="Documents" />
+      <PageHeader title="Saved" />
       <div className="space-y-4">
         <div className="flex gap-2">
           {Array.from({ length: 3 }).map((_, i) => (

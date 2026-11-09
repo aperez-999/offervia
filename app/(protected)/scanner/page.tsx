@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPageMetadata } from "@/lib/metadata";
 import { PageContainer } from "@/components/layout/Page";
+import { readSavedResumeForCurrentUser } from "@/lib/profile/resume-server";
+import { readAllowanceForCurrentUser } from "@/lib/usage/featureGate";
 
 const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), {
   loading: () => (
@@ -18,16 +20,20 @@ const ScannerPanel = dynamic(() => import("@/components/scanner/ScannerPanel"), 
 });
 
 export const metadata: Metadata = createPageMetadata({
-  title: "ATS Keyword Scanner",
+  title: "Keyword scan",
   description: "Compare your resume with a job description to see which keywords match and which are missing.",
   path: "/scanner",
   index: false,
 });
 
-export default function ScannerPage() {
+export default async function ScannerPage() {
+  const [savedResume, allowance] = await Promise.all([
+    readSavedResumeForCurrentUser(),
+    readAllowanceForCurrentUser("job_scan"),
+  ]);
   return (
     <PageContainer>
-      <ScannerPanel />
+      <ScannerPanel savedResume={savedResume} allowance={allowance} />
     </PageContainer>
   );
 }

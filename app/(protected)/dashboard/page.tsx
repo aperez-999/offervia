@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { getUsageSnapshot } from "@/lib/usage/read";
-import { buildScanAnalytics } from "@/lib/analytics/scan-analytics";
 import DashboardClient from "./DashboardClient";
 import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
 import { getCurrentUser } from "@/lib/auth/session";
+import { readSavedResumeForCurrentUser } from "@/lib/profile/resume-server";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Dashboard",
-  description: "See your applications, weekly goal, usage, and next step.",
+  title: "Home",
+  description: "What needs your attention in your job search.",
   path: "/dashboard",
   index: false,
 });
@@ -20,10 +20,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [usage, analytics] = await Promise.all([
+  const [usage, savedResume] = await Promise.all([
     getUsageSnapshot(user.id),
-    buildScanAnalytics(user.id),
+    readSavedResumeForCurrentUser(),
   ]);
 
-  return <DashboardClient usage={usage} analytics={analytics} />;
+  return <DashboardClient usage={usage} hasSavedResume={Boolean(savedResume)} />;
 }

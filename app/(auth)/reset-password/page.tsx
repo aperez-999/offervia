@@ -25,14 +25,14 @@ export default function ResetPasswordPage() {
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
     async function bootstrap() {
-      // ✅ Check if there's already a session (e.g., redirected from Supabase recovery link)
+      // Check if there's already a session (e.g., redirected from Supabase recovery link)
       const { data } = await supabase.auth.getSession();
       if (data?.session) {
         setStatus("ready");
         return;
       }
 
-      // ✅ Listen for Supabase PASSWORD_RECOVERY event
+      // Listen for Supabase PASSWORD_RECOVERY event
       const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "PASSWORD_RECOVERY" && session) {
           setStatus("ready");
@@ -67,7 +67,7 @@ export default function ResetPasswordPage() {
       return;
     }
     if (pw !== pw2) {
-      setError("Passwords do not match.");
+      setError("These don't match.");
       return;
     }
 

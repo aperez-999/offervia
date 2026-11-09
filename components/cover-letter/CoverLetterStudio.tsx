@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Dropzone from "@/components/resume/Dropzone";
+import { SaveResumeHint, SavedResumeNotice } from "@/components/resume/SavedResumeNotice";
+import { RemainingToday, useRemainingToday } from "@/components/usage/RemainingToday";
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import { useToast } from "@/hooks/use-toast";
 import { postJson, postForm, type SafeFetchResult } from "@/lib/safe-fetch";
 import { printAsPdf } from "@/lib/print-pdf";
@@ -15,17 +18,24 @@ import {
   COVER_LETTER_TONES,
   type CoverLetterTone,
 } from "@/lib/prompts/cover-letter-system";
+import { errorTitle } from "@/lib/usage/client";
 
 export default function CoverLetterStudio({
   defaultRole = "",
   defaultCompany = "",
+  savedResume = null,
+  allowance = null,
 }: {
   defaultRole?: string;
   defaultCompany?: string;
+  savedResume?: string | null;
+  allowance?: AllowanceSnapshot | null;
 }) {
+  const quota = useRemainingToday(allowance);
   const { toast } = useToast();
   const reduceMotion = useReducedMotion();
 
+  const [useSaved, setUseSaved] = useState(Boolean(savedResume));
   const [resumeText, setResumeText] = useState("");
   const [resumeMode, setResumeMode] = useState<"paste" | "upload">("paste");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -39,9 +49,10 @@ export default function CoverLetterStudio({
   const [error, setError] = useState<string | null>(null);
 
   const hasResume =
-    resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 100;
+    (useSaved && !!savedResume) ||
+    (resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 100);
   const canGenerate =
-    hasResume && jobDescription.trim().length >= 20 && !generating;
+    hasResume && jobDescription.trim().length >= 20 && !generating && !quota.blocked;
 
   async function handleGenerate() {
     if (!canGenerate) return;
@@ -50,7 +61,7 @@ export default function CoverLetterStudio({
     try {
       let resp: SafeFetchResult<{ content?: string; tone?: string }>;
 
-      if (resumeMode === "upload" && resumeFile) {
+      if (!(useSaved && savedResume) && resumeMode === "upload" && resumeFile) {
         const form = new FormData();
         form.append("file", resumeFile);
         form.append("jobDescription", jobDescription);
@@ -63,7 +74,7 @@ export default function CoverLetterStudio({
       } else {
         resp = await postJson<{ content?: string; tone?: string }>(
           "/api/cover-letter",
-          { resumeText, jobDescription, companyName, roleTitle, tone },
+          { resumeText: useSaved && savedResume ? savedResume : resumeText, jobDescription, companyName, roleTitle, tone },
           { timeoutMs: 45_000 },
         );
       }
@@ -71,20 +82,23 @@ export default function CoverLetterStudio({
       if (!resp.ok) {
         const msg =
           resp.error ||
-          (resp.status === 429
-            ? "Too many requests. Try again in a moment."
-            : "Couldn't write the letter. Wait a moment and try again, or shorten your inputs.");
+          "Couldn't write the letter. Wait a moment and try again, or shorten your inputs.";
         setError(msg);
-        toast({ title: "Letter not generated", description: msg, variant: "destructive" });
+        toast({
+          title: errorTitle(resp.code, "Letter not written"),
+          description: msg,
+          variant: "destructive",
+        });
         return;
       }
 
       setLetter(String(resp.data?.content || ""));
+      quota.consume();
       toast({ variant: "success", title: "Cover letter ready" });
     } catch {
       const msg = "Couldn't reach the server. Check your connection and try again.";
       setError(msg);
-      toast({ title: "Letter not generated", description: msg, variant: "destructive" });
+      toast({ title: "Letter not written", description: msg, variant: "destructive" });
     } finally {
       setGenerating(false);
     }
@@ -150,6 +164,12 @@ export default function CoverLetterStudio({
             </div>
           </div>
 
+          {useSaved && savedResume ? (
+            <div>
+              <p className="mb-1.5 text-sm font-medium text-foreground">Your resume</p>
+              <SavedResumeNotice onUseDifferent={() => setUseSaved(false)} />
+            </div>
+          ) : (
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label
@@ -218,7 +238,9 @@ export default function CoverLetterStudio({
             ) : (
               <Dropzone onFile={(f) => setResumeFile(f)} fileName={undefined} maxSizeMb={5} />
             )}
+            {!savedResume ? <SaveResumeHint /> : null}
           </div>
+          )}
 
           <div>
             <label
@@ -274,10 +296,11 @@ export default function CoverLetterStudio({
               </>
             ) : (
               <>
-                <PenNib className="size-4" /> Generate cover letter
+                <PenNib className="size-4" /> Write my cover letter
               </>
             )}
           </Button>
+          <RemainingToday feature="cover_letter" remaining={quota.remaining} resetsAt={quota.resetsAt} className="text-center" />
 
           {error ? (
             <p className="text-sm text-destructive" role="alert">
@@ -362,7 +385,7 @@ export default function CoverLetterStudio({
         </div>
         {letter && !generating ? (
           <p className="mt-3 text-xs text-foreground/50">
-            AI wrote this draft. Check facts and numbers before you send it.
+            Read it through and check every fact and number before you send it.
           </p>
         ) : null}
       </Reveal>

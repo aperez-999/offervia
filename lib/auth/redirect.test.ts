@@ -16,3 +16,15 @@ describe("sanitizeRedirectPath", () => {
     expect(sanitizeRedirectPath("%E0%A4%A", "/login")).toBe("/login");
   });
 });
+
+describe("nextFromLocation", () => {
+  it("reads a safe next path from the URL and rejects off-site ones", async () => {
+    const { nextFromLocation } = await import("@/lib/auth/redirect");
+    window.history.replaceState(null, "", "/signup?next=%2Fbullet-check");
+    expect(nextFromLocation()).toBe("/bullet-check");
+    window.history.replaceState(null, "", "/signup?next=https%3A%2F%2Fevil.example");
+    expect(nextFromLocation()).toBe("/dashboard");
+    window.history.replaceState(null, "", "/signup");
+    expect(nextFromLocation()).toBe("/dashboard");
+  });
+});

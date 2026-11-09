@@ -16,30 +16,23 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { BookOpen, Books, Briefcase, ChatCircleText, EnvelopeSimple, FileText, GearSix, GraduationCap, Kanban, ListChecks, MagnifyingGlass, MagnifyingGlass as SearchIcon, Microphone, Monitor, Moon, PenNib, Scales, SignOut, SquaresFour, Sun, UserCircle } from "@phosphor-icons/react/dist/ssr";
+import { SECTIONS } from "@/lib/nav";
 import { DISCUSSIONS_URL } from "@/lib/github";
+import { BookOpen, Briefcase, ChatsCircle, EnvelopeSimple, FileText, GearSix, GraduationCap, Kanban, MagnifyingGlass, MagnifyingGlass as SearchIcon, Monitor, Moon, PenNib, SignOut, Sun, UserCircle } from "@phosphor-icons/react/dist/ssr";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
+// Every page from the shared nav config, plus a few shortcuts into the Student Hub.
 export const NAV_ITEMS: Nav[] = [
-  { label: "Dashboard", href: "/dashboard", icon: SquaresFour },
-  { label: "Job Packet", href: "/job-packet", icon: Briefcase },
-  { label: "Resume", href: "/resume", icon: FileText },
-  { label: "Cover Letter", href: "/cover-letter", icon: PenNib },
-  { label: "Scanner", href: "/scanner", icon: SearchIcon },
-  { label: "Coach", href: "/coach", icon: ChatCircleText },
-  { label: "Interview", href: "/interview", icon: Microphone },
-  { label: "Bullet check", href: "/bullet-check", icon: ListChecks },
-  { label: "Compare offers", href: "/offers", icon: Scales },
-  { label: "Tracker", href: "/tracker", icon: Kanban },
-  { label: "Documents", href: "/documents", icon: Books },
-  { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
-  { label: "Templates", href: "/student-hub?tab=templates", icon: EnvelopeSimple },
+  ...SECTIONS.flatMap((section) =>
+    section.tabs.map((tab) => ({ label: tab.label, href: tab.href, icon: section.icon }))
+  ),
+  { label: "Email templates", href: "/student-hub?tab=templates", icon: EnvelopeSimple },
   { label: "Learning resources", href: "/student-hub?tab=resources", icon: BookOpen },
   { label: "Student deals", href: "/student-hub?tab=deals", icon: GraduationCap },
-  { label: "Questions and feedback", href: DISCUSSIONS_URL, icon: EnvelopeSimple },
-  { label: "Settings", href: "/settings", icon: GearSix },
   { label: "Profile", href: "/profile", icon: UserCircle },
+  { label: "Settings", href: "/settings", icon: GearSix },
+  { label: "Questions and feedback", href: DISCUSSIONS_URL, icon: ChatsCircle },
 ];
 
 export default function GlobalCommandMenu() {
@@ -112,7 +105,7 @@ export default function GlobalCommandMenu() {
           <CommandGroup heading="Quick actions">
             <CommandItem onSelect={() => go("/job-packet")}>
               <Briefcase className="mr-2 h-4 w-4" />
-              Start Job Packet
+              Start a new application
             </CommandItem>
             <CommandItem onSelect={() => go("/resume")}>
               <FileText className="mr-2 h-4 w-4" />

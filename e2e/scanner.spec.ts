@@ -4,7 +4,7 @@ import { HAS_AUTH_ENV, login } from "@/e2e/helpers";
 
 // These tests exercise the scanner form's client-side enable guard without
 // triggering an actual AI scan, so they stay fast and never spend Groq quota.
-test.describe("ATS keyword scanner", () => {
+test.describe("keyword scan", () => {
   test.skip(!HAS_AUTH_ENV, "Set E2E_EMAIL and E2E_PASSWORD to enable scanner tests.");
 
   test("scan button stays disabled until resume and job description are long enough", async ({
@@ -15,10 +15,14 @@ test.describe("ATS keyword scanner", () => {
 
     await page.goto("/scanner");
     await expect(
-      page.getByRole("heading", { name: /ats keyword scanner/i }),
+      page.getByRole("heading", { name: /keyword scan/i }),
     ).toBeVisible({ timeout: 15_000 });
 
-    const scanButton = page.getByRole("button", { name: /scan for keywords/i });
+    // If the test account has a saved resume, switch to pasting one for this test.
+    const useDifferent = page.getByRole("button", { name: /use a different one/i });
+    if (await useDifferent.isVisible()) await useDifferent.click();
+
+    const scanButton = page.getByRole("button", { name: /scan this posting/i });
     await expect(scanButton).toBeDisabled();
 
     const resume = page.getByPlaceholder("Paste your resume text here…");

@@ -3,14 +3,16 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { readCareerProfile } from "@/lib/profile/read";
+import { readSavedResume } from "@/lib/profile/resume";
+import { readAllowance } from "@/lib/usage/featureGate";
 import { createPageMetadata } from "@/lib/metadata";
 import { PageContainer, PageHeader } from "@/components/layout/Page";
 import CoverLetterStudio from "@/components/cover-letter/CoverLetterStudio";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Cover Letter",
+  title: "Cover letter",
   description:
-    "Write a cover letter draft from your resume and a job description.",
+    "Write a cover letter for a specific job.",
   path: "/cover-letter",
   index: false,
 });
@@ -37,18 +39,23 @@ export default async function CoverLetterPage({
     redirect("/login");
   }
 
-  const career = await readCareerProfile(supabase, user.id);
+  const [career, saved, allowance] = await Promise.all([
+    readCareerProfile(supabase, user.id),
+    readSavedResume(supabase, user.id),
+    readAllowance(user.id, "cover_letter"),
+  ]);
 
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Cover Letter"
         title="Cover letter"
-        description="Paste your resume and the job description, pick a tone, and get a draft you can edit."
+        description="Write a letter for a specific job, in the tone you want."
       />
       <CoverLetterStudio
         defaultRole={sp.role || career.targetRole}
         defaultCompany={sp.company || ""}
+        savedResume={saved.text}
+        allowance={allowance}
       />
     </PageContainer>
   );

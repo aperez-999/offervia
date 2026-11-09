@@ -1,7 +1,7 @@
 "use client";
 
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import dynamic from "next/dynamic";
-import { ChatCircleText } from "@phosphor-icons/react/dist/ssr";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Chat = dynamic(() => import("./Chat"), {
@@ -51,23 +51,17 @@ const Chat = dynamic(() => import("./Chat"), {
   ),
 });
 
-export default function CoachHub() {
+export default function CoachHub({ allowance = null }: { allowance?: AllowanceSnapshot | null }) {
   return (
     <div className="space-y-6 py-6 sm:py-8">
       <header className="space-y-1.5">
-        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
-          <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
-            <ChatCircleText className="size-5" />
-          </span>
-          AI coach
-        </h1>
-        <p className="max-w-2xl text-sm text-foreground/60">
-          Pick a topic and paste what you&apos;re working on: an interview answer, a resume
-          bullet, a cover letter paragraph, or a career decision.
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Ask a coach</h1>
+        <p className="max-w-2xl text-sm text-foreground/70">
+          Paste an interview answer, a resume bullet, or a question you&apos;re stuck on.
         </p>
       </header>
 
-      <Chat />
+      <Chat allowance={allowance} />
     </div>
   );
 }

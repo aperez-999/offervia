@@ -10,6 +10,10 @@ import { Reveal } from "@/components/motion/Reveal";
 import Dropzone from "@/components/resume/Dropzone";
 import { useToast } from "@/hooks/use-toast";
 import { postForm, postJson, type SafeFetchResult } from "@/lib/safe-fetch";
+import { errorTitle } from "@/lib/usage/client";
+import { SaveResumeHint, SavedResumeNotice } from "@/components/resume/SavedResumeNotice";
+import { RemainingToday, useRemainingToday } from "@/components/usage/RemainingToday";
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import {
   ATS_HISTORY_LS_KEY,
   ATS_RESUME_JD_LS_KEY,
@@ -25,7 +29,7 @@ Requirements: JavaScript, TypeScript, React, HTML, CSS, REST APIs, unit testing 
 Nice to have: Next.js, Tailwind CSS, accessibility (a11y), CI/CD, performance profiling.`;
 
 function scoreLabel(score: number): { label: string; tone: string } {
-  if (score >= 80) return { label: "Strong match", tone: "text-success" };
+  if (score >= 80) return { label: "Strong match", tone: "text-reward" };
   if (score >= 60) return { label: "Good match", tone: "text-primary" };
   if (score >= 40) return { label: "Fair match", tone: "text-warning" };
   return { label: "Needs work", tone: "text-destructive" };
@@ -42,11 +46,19 @@ function loadHistory(): AtsHistoryEntry[] {
   }
 }
 
-export default function ScannerPanel() {
+export default function ScannerPanel({
+  savedResume = null,
+  allowance = null,
+}: {
+  savedResume?: string | null;
+  allowance?: AllowanceSnapshot | null;
+}) {
+  const quota = useRemainingToday(allowance);
   const router = useRouter();
   const { toast } = useToast();
   const reduceMotion = useReducedMotion();
 
+  const [useSaved, setUseSaved] = useState(Boolean(savedResume));
   const [resumeMode, setResumeMode] = useState<"paste" | "upload">("paste");
   const [resumeText, setResumeText] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -61,8 +73,9 @@ export default function ScannerPanel() {
   }, []);
 
   const resumeReady =
-    resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 50;
-  const canScan = resumeReady && jd.trim().length >= 20 && !loading;
+    (useSaved && !!savedResume) ||
+    (resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 50);
+  const canScan = resumeReady && jd.trim().length >= 20 && !loading && !quota.blocked;
 
   const ringColor = useMemo(() => {
     const s = result?.match_score ?? 0;
@@ -94,7 +107,7 @@ export default function ScannerPanel() {
     setError(null);
     try {
       let resp: SafeFetchResult<{ content?: AtsResult }>;
-      if (resumeMode === "upload" && resumeFile) {
+      if (!(useSaved && savedResume) && resumeMode === "upload" && resumeFile) {
         const form = new FormData();
         form.append("file", resumeFile);
         form.append("jd", jd);
@@ -104,19 +117,15 @@ export default function ScannerPanel() {
       } else {
         resp = await postJson<{ content?: AtsResult }>(
           "/api/ats-scan",
-          { resumeText: resumeText.trim(), jd: jd.trim() },
+          { resumeText: (useSaved && savedResume ? savedResume : resumeText).trim(), jd: jd.trim() },
           { timeoutMs: 45_000 },
         );
       }
 
       if (!resp.ok) {
-        const msg =
-          resp.error ||
-          (resp.status === 429
-            ? "Too many scans. Try again in a moment."
-            : "The scan didn't finish. Try again in a moment.");
+        const msg = resp.error || "The scan didn't finish. Try again in a moment.";
         setError(msg);
-        toast({ title: "Scan failed", description: msg, variant: "destructive" });
+        toast({ title: errorTitle(resp.code, "Scan failed"), description: msg, variant: "destructive" });
         return;
       }
 
@@ -129,6 +138,7 @@ export default function ScannerPanel() {
       }
 
       setResult(content);
+      quota.consume();
       pushHistory(content);
       toast({ variant: "info",
         title: `${content.match_score}% keyword match`,
@@ -167,11 +177,10 @@ export default function ScannerPanel() {
     <div className="space-y-6">
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2 text-2xl font-semibold text-foreground">
-          <Target className="size-6 text-primary" /> ATS keyword scanner
+          Keyword scan
         </h1>
         <p className="max-w-2xl text-sm text-foreground/60">
-          Paste your resume and a job description. You&apos;ll see which keywords
-          from the posting your resume already has and which ones are missing.
+          See which skills from the posting your resume already shows, and which are missing.
         </p>
       </header>
 
@@ -179,6 +188,12 @@ export default function ScannerPanel() {
         {/* Inputs */}
         <Reveal className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="space-y-4">
+            {useSaved && savedResume ? (
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-foreground">Your resume</p>
+                <SavedResumeNotice onUseDifferent={() => setUseSaved(false)} />
+              </div>
+            ) : (
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label
@@ -247,7 +262,9 @@ export default function ScannerPanel() {
               ) : (
                 <Dropzone onFile={(f) => setResumeFile(f)} maxSizeMb={5} />
               )}
+              {!savedResume ? <SaveResumeHint /> : null}
             </div>
+            )}
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
@@ -286,10 +303,11 @@ export default function ScannerPanel() {
                 </>
               ) : (
                 <>
-                  <Target className="size-4" /> Scan for keywords
+                  <Target className="size-4" /> Scan this posting
                 </>
               )}
             </Button>
+            <RemainingToday feature="job_scan" remaining={quota.remaining} resetsAt={quota.resetsAt} className="text-center" />
 
             {error ? (
               <p className="text-sm text-destructive" role="alert">
@@ -404,13 +422,13 @@ export default function ScannerPanel() {
                 {result.matched.length > 0 && (
                   <div>
                     <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
-                      <Check className="size-4 text-success" /> Matched keywords
+                      <Check className="size-4 text-reward" weight="bold" /> Matched keywords
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {result.matched.map((k) => (
                         <span
                           key={k}
-                          className="rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
+                          className="hl-soft rounded-full px-2.5 py-1 text-xs font-medium"
                         >
                           {k}
                         </span>

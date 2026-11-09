@@ -32,7 +32,6 @@ export type AtsHistoryEntry = {
 
 export const ATS_HISTORY_LS_KEY = "offervia:atsHistory_v1";
 export const ATS_RESUME_JD_LS_KEY = "offervia:resume:jd_v1";
-export const ATS_RESUME_DESIRED_STEP_LS_KEY = "offervia:resume:desiredStep_v1";
 
 /** Lowercase, replace non-alphanumeric with spaces, collapse whitespace. */
 export function normalizeForMatch(s: string): string {

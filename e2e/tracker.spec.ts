@@ -8,14 +8,14 @@ test.describe("tracker workflow", () => {
   test("signed-in user can quick add and remove an application", async ({ page }) => {
     await login(page);
     await page.goto("/tracker");
-    await expect(page.getByRole("heading", { name: /job tracker/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Tracker", exact: true })).toBeVisible();
 
     const company = uniqueLabel("PW Company");
     const position = uniqueLabel("PW Role");
     const today = new Date().toISOString().slice(0, 10);
 
-    await page.getByPlaceholder("Company").fill(company);
-    await page.getByPlaceholder("Position").fill(position);
+    await page.getByPlaceholder("Company", { exact: true }).fill(company);
+    await page.getByPlaceholder("Position", { exact: true }).fill(position);
     await page.locator('input[type="date"]').first().fill(today);
     await page.getByRole("button", { name: /^add$/i }).click();
 

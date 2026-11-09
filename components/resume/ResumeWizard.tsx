@@ -12,7 +12,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { postForm } from "@/lib/safe-fetch"; // uses your safeFetch helper
+import { postForm } from "@/lib/safe-fetch";
+import { errorTitle } from "@/lib/usage/client";
 import {
   buildTrackerDraftFromPacket,
   hasMeaningfulJobPacketDraft,
@@ -20,6 +21,9 @@ import {
   updateJobPacketDraft,
 } from "@/lib/job-packet";
 import Dropzone from "@/components/resume/Dropzone";
+import { SaveResumeHint, SavedResumeNotice } from "@/components/resume/SavedResumeNotice";
+import { RemainingToday, useRemainingToday } from "@/components/usage/RemainingToday";
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import StepContainer from "@/components/resume/StepContainer";
 import WizardSidebar from "@/components/resume/WizardSidebar";
 import { printHtmlDocument } from "@/lib/print-pdf";
@@ -42,12 +46,23 @@ import {
 
 /* ------------------------------- Component ------------------------------- */
 
-export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: string }) {
+export default function ResumeWizard({
+  defaultRole = "",
+  savedResume = null,
+  allowance = null,
+}: {
+  defaultRole?: string;
+  savedResume?: string | null;
+  allowance?: AllowanceSnapshot | null;
+}) {
+  const quota = useRemainingToday(allowance);
   const router = useRouter();
   const search = useSearchParams();
   const { toast } = useToast();
 
   const [step, setStep] = useState(1);
+  const [useSaved, setUseSaved] = useState(Boolean(savedResume));
+  const usingSaved = useSaved && !!savedResume;
 
   // Step 1: resume
   const [resumeFileName, setResumeFileName] = useState<string>("");
@@ -188,7 +203,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
   }, [resumeFile?.name]);
 
   const progress = useMemo(() => (step / resumeWizardSteps.length) * 100, [step]);
-  const step1Valid = !!resumeFileName;
+  const step1Valid = usingSaved || !!resumeFileName;
   const step3Valid = jd.trim().length >= 20;
 
   /* ------------------------------ Navigation ----------------------------- */
@@ -297,20 +312,16 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
   /* ------------------------------- Generate ------------------------------- */
 
   const handleGenerate = async () => {
-    if (!resumeFile || jd.trim().length < 20) return;
+    if ((!usingSaved && !resumeFile) || jd.trim().length < 20) return;
     setGenerating(true);
     setError(null);
     try {
-      // Debug: confirm file and template flag
-      try {
-        // Attempt to preview text if it's a plain text file; otherwise log filename only
-        if (resumeFile.type.startsWith("text")) {
-          await resumeFile.text();
-        }
-      } catch {}
-
       const fd = new FormData();
-      fd.append("file", resumeFile);
+      if (usingSaved && savedResume) {
+        fd.append("resumeText", savedResume);
+      } else if (resumeFile) {
+        fd.append("file", resumeFile);
+      }
       fd.append("jobDescription", jd);
       // pass targeting + template flag to API
       fd.append("companyName", companyName);
@@ -318,7 +329,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       fd.append("location", location);
       fd.append("companyUrl", companyUrl);
       fd.append("template", templateMode ? "1" : "0");
-      if (resumeText) {
+      if (!usingSaved && resumeText) {
         // Also send parsed text when available so the API can prefer it
         fd.append("resumeText", resumeText);
       }
@@ -329,18 +340,8 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
         { timeoutMs: 45_000 }
       );
 
-      // --- Rate-limit, plan limit & other friendly errors ---
+      // --- Limits and other friendly errors ---
       if (!resp.ok) {
-        if (resp.status === 429) {
-          const msg = resp.error || "You've used today's free tailoring runs. Try again tomorrow.";
-          setError(msg);
-          toast({
-            title: "Daily limit reached",
-            description: msg,
-            variant: "destructive",
-          });
-          return;
-        }
         if (resp.status === 413) {
           const msg = "That file is too large to process. Try a shorter resume or a DOCX.";
           setError(msg);
@@ -351,11 +352,16 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
           resp.error ||
           "Couldn't generate a draft. Wait a moment and try again, or shorten the job description.";
         setError(generic);
-        toast({ title: "Draft not generated", description: generic, variant: "destructive" });
+        toast({
+          title: errorTitle(resp.code, "Draft not generated"),
+          description: generic,
+          variant: "destructive",
+        });
         return;
       }
 
       setAiText(String(resp.data?.content || ""));
+      quota.consume();
       setOutputView("preview");
       setGeneratedWithTemplate(templateMode);
       if (packetContext) {
@@ -476,10 +482,9 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
     <div className="space-y-6">
       {/* Header */}
       <section>
-        <p className="text-xs font-medium text-primary">Step 2 · Tailor</p>
-        <h1 className="mt-1 text-xl sm:text-2xl font-semibold text-foreground">Resume Tailor</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Tailor your resume</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Upload your resume, add the job description, and get a version rewritten for that one role.
+          Add the job description and get a version of your resume that fits this role.
         </p>
       </section>
 
@@ -500,7 +505,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <StepContainer title="Upload resume" description="PDF or DOCX.">
+                <StepContainer title="Your resume" description={usingSaved ? "Starting from the resume saved on your profile." : "PDF or DOCX."}>
               <div className="space-y-3">
                 {(() => {
                   const from = search.get("from") || "";
@@ -541,12 +546,19 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     </div>
                   </div>
                 )}
-                <Dropzone
-                  onFile={onFileSelected}
-                  fileName={resumeFileName}
-                  accept={RESUME_ACCEPTED_TYPES.join(",")}
-                  maxSizeMb={RESUME_MAX_SIZE_MB}
-                />
+                {usingSaved ? (
+                  <SavedResumeNotice onUseDifferent={() => setUseSaved(false)} />
+                ) : (
+                  <>
+                    <Dropzone
+                      onFile={onFileSelected}
+                      fileName={resumeFileName}
+                      accept={RESUME_ACCEPTED_TYPES.join(",")}
+                      maxSizeMb={RESUME_MAX_SIZE_MB}
+                    />
+                    {!savedResume ? <SaveResumeHint /> : null}
+                  </>
+                )}
                 {resumeFileName && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background/60 p-3">
                     <div className="text-sm text-foreground">
@@ -601,7 +613,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     Company name
                   </label>
                   <Input
-                    placeholder="e.g., Stripe"
+                    placeholder="e.g., Duolingo"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     className="border-border bg-background/80 text-foreground placeholder:text-foreground/40"
@@ -729,7 +741,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
               >
               <StepContainer
               title="Tailor and review"
-              description="Your original is on the left. Generate the tailored version on the right, then edit it."
+              description="Your original is on the left. Tailor it on the right, then edit anything that isn't right."
             >
               {/* Preview and AI output side-by-side on wide screens */}
               <div className="grid items-start gap-8 xl:grid-cols-2">
@@ -795,7 +807,11 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                   </div>
 
                   <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-muted shadow-sm">
-                    {resumeFile ? (
+                    {usingSaved && savedResume ? (
+                      <pre className="whitespace-pre-wrap p-5 font-sans text-sm leading-relaxed text-foreground/85">
+                        {savedResume}
+                      </pre>
+                    ) : resumeFile ? (
                       isPdf && previewUrl ? (
                         <iframe
                           key={zoomWidth}
@@ -950,8 +966,8 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         Once your resume and job description are in, generate a draft.
                       </p>
                       <div className="mt-4 flex flex-col gap-1.5 text-xs">
-                        <span className={`inline-flex items-center gap-1.5 ${resumeFile ? "text-success" : "text-foreground/50"}`}>
-                          <CheckCircle className="h-3.5 w-3.5" /> Resume uploaded
+                        <span className={`inline-flex items-center gap-1.5 ${usingSaved || resumeFile ? "text-success" : "text-foreground/50"}`}>
+                          <CheckCircle className="h-3.5 w-3.5" /> Resume added
                         </span>
                         <span className={`inline-flex items-center gap-1.5 ${jd.trim().length >= 20 ? "text-success" : "text-foreground/50"}`}>
                           <CheckCircle className="h-3.5 w-3.5" /> Job description added
@@ -962,18 +978,17 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
 
                   {aiText && (
                     <p className="text-xs text-foreground/60">
-                      AI wrote this draft. Check facts and numbers before you send it.
+                      Read it through and check every fact and number before you send it.
                     </p>
                   )}
 
                   <div className="flex items-center justify-between text-xs text-foreground/60">
                     <span>{aiText.length.toLocaleString()} characters</span>
-                    <span>~{approxTokens(aiText).toLocaleString()} tokens</span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
-                      disabled={generating || !resumeFile || jd.trim().length < 20}
+                      disabled={generating || quota.blocked || (!usingSaved && !resumeFile) || jd.trim().length < 20}
                       onClick={handleGenerate}
                       className="bg-primary-button cursor-pointer text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
@@ -985,10 +1000,11 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       ) : (
                         <>
                           <PenNib className="mr-2 h-4 w-4" />
-                          Generate tailored draft
+                          Tailor my resume
                         </>
                       )}
                     </Button>
+                    <RemainingToday feature="resume_tailor" remaining={quota.remaining} resetsAt={quota.resetsAt} />
 
                     <Button
                       variant="outline"

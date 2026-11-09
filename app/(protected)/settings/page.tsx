@@ -24,9 +24,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
+import DeleteAccount from "@/components/settings/DeleteAccount";
 import { SettingsSkeleton } from "@/components/settings/SettingsSkeleton";
 import { DAILY_LIMITS, FEATURE_COPY, GATED_FEATURES } from "@/lib/usage/limits";
-import DeleteAccount from "@/components/settings/DeleteAccount";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 import { Camera, Check, Database, Gauge, Monitor, Moon, Palette, SlidersHorizontal, Sun, UserCircle } from "@phosphor-icons/react/dist/ssr";
 
@@ -64,7 +64,7 @@ export default function SettingsPage() {
   // ui state
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [working, setWorking] = useState(false); // for export/clear/signout
+  const [working, setWorking] = useState(false); // for export and clear
 
   useEffect(() => {
     (async () => {
@@ -478,7 +478,9 @@ export default function SettingsPage() {
                 {GATED_FEATURES.map((feature) => (
                   <div key={feature} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
                     <dt className="text-foreground/80">{FEATURE_COPY[feature].label}</dt>
-                    <dd className="font-medium tabular-nums text-foreground">{DAILY_LIMITS[feature]} a day</dd>
+                    <dd className="font-medium tabular-nums text-foreground">
+                      {DAILY_LIMITS[feature]} a day
+                    </dd>
                   </div>
                 ))}
               </dl>

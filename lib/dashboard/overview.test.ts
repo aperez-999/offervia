@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyJobPacketDraft } from "@/lib/job-packet";
-import { getDashboardNextAction, getDashboardUsageItems } from "@/lib/dashboard/overview";
+import {
+  applicationRates,
+  dueFollowUps,
+  getDashboardNextAction,
+  localIsoDate,
+  summarizeApplications,
+  type DashboardApp,
+} from "@/lib/dashboard/overview";
 
 describe("getDashboardNextAction", () => {
   it("guides a new user into Job Packet", () => {
@@ -12,7 +19,7 @@ describe("getDashboardNextAction", () => {
       })
     ).toMatchObject({
       href: "/job-packet",
-      cta: "Start packet",
+      cta: "Start",
     });
   });
 
@@ -27,7 +34,7 @@ describe("getDashboardNextAction", () => {
         recentChatsCount: 3,
       })
     ).toMatchObject({
-      title: "Continue your Job Packet",
+      title: "Finish your application",
       href: "/job-packet",
     });
   });
@@ -46,51 +53,63 @@ describe("getDashboardNextAction", () => {
   });
 });
 
-describe("getDashboardUsageItems", () => {
-  it("builds usage rows with threshold states", () => {
-    const items = getDashboardUsageItems({
-      usage: {
-        resumeTailor: 7,
-        coachMessages: 10,
-        jobScans: 2,
-        interviewSessions: 1,
-        coverLetters: 0,
-      },
-      limits: {
-        resume_tailor_per_month: 10,
-        coach_messages_per_month: 10,
-        job_scans_per_month: 20,
-        interview_sessions_per_month: 5,
-        cover_letters_per_month: 3,
-      },
-    });
+const app = (over: Partial<DashboardApp>): DashboardApp => ({
+  id: Math.random().toString(36).slice(2),
+  company: "Acme",
+  position: "Analyst",
+  status: "Applied",
+  applied_on: "2026-11-01",
+  ...over,
+});
 
-    expect(items.map((item) => item.label)).toEqual([
-      "Resume tailors",
-      "Coach messages",
-      "Job scans",
-      "Mock interviews",
-      "Cover letters",
-    ]);
-    expect(items[0].state).toBe("warn");
-    expect(items[1].state).toBe("high");
-    expect(items[2].state).toBe("low");
-    expect(items[3].state).toBe("low");
+describe("summarizeApplications", () => {
+  it("counts statuses and this week's applications", () => {
+    const now = new Date("2026-11-04T12:00:00Z");
+    const s = summarizeApplications(
+      [
+        app({ applied_on: "2026-11-03" }),
+        app({ status: "Interviewing", applied_on: "2026-10-01" }),
+        app({ status: "Offer", applied_on: "2026-10-30" }),
+        app({ status: "Rejected", applied_on: "" }),
+      ],
+      now
+    );
+    expect(s).toEqual({ total: 4, applied: 1, interviewing: 1, offers: 1, thisWeek: 2 });
+  });
+});
+
+describe("applicationRates", () => {
+  it("is zero with no applications", () => {
+    expect(applicationRates([])).toEqual({ responseRate: 0, interviewRate: 0, offerRate: 0 });
   });
 
-  it("marks an effectively-unlimited interview limit as unlimited", () => {
-    const items = getDashboardUsageItems({
-      usage: { resumeTailor: 0, coachMessages: 0, jobScans: 0, interviewSessions: 3, coverLetters: 0 },
-      limits: {
-        resume_tailor_per_month: 150,
-        coach_messages_per_month: 1000,
-        job_scans_per_month: 300,
-        interview_sessions_per_month: 999999,
-        cover_letters_per_month: 100,
-      },
-    });
-    const interview = items.find((item) => item.key === "interview");
-    expect(interview?.unlimited).toBe(true);
-    expect(interview?.pct).toBe(0);
+  it("counts any reply, including rejections, as a response", () => {
+    const r = applicationRates([app({}), app({ status: "Rejected" }), app({ status: "Interviewing" }), app({ status: "Offer" })]);
+    expect(r).toEqual({ responseRate: 75, interviewRate: 25, offerRate: 25 });
+  });
+});
+
+describe("dueFollowUps", () => {
+  it("lists open applications due today or earlier, oldest first", () => {
+    const due = dueFollowUps(
+      [
+        app({ company: "Later", follow_up_date: "2026-11-09" }),
+        app({ company: "Today", follow_up_date: "2026-11-04" }),
+        app({ company: "Old", follow_up_date: "2026-11-01" }),
+        app({ company: "Closed", status: "Rejected", follow_up_date: "2026-11-01" }),
+        app({ company: "None", follow_up_date: null }),
+      ],
+      "2026-11-04"
+    );
+    expect(due.map((d) => [d.app.company, d.label])).toEqual([
+      ["Old", "3 days overdue"],
+      ["Today", "Follow up today"],
+    ]);
+  });
+});
+
+describe("localIsoDate", () => {
+  it("formats in local time", () => {
+    expect(localIsoDate(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
   });
 });

@@ -1,21 +1,10 @@
 import { hasMeaningfulJobPacketDraft, type JobPacketDraft } from "@/lib/job-packet";
-import { usagePct, usageState } from "@/lib/utils";
 
 export type DashboardNextAction = {
   title: string;
   desc: string;
   href: string;
   cta: string;
-};
-
-export type DashboardUsageItem = {
-  key: "resume" | "coach" | "scan" | "interview" | "cover_letter";
-  label: string;
-  used: number;
-  limit: number;
-  pct: number;
-  state: ReturnType<typeof usageState>;
-  unlimited?: boolean;
 };
 
 export function getDashboardNextAction(input: {
@@ -28,39 +17,39 @@ export function getDashboardNextAction(input: {
   if (hasMeaningfulJobPacketDraft(jobPacketDraft) && !jobPacketDraft?.completedAt) {
     if (!jobPacketDraft?.scanResult) {
       return {
-        title: "Continue your Job Packet",
+        title: "Finish your application",
         desc:
           "Your job description is saved. Run the scan next.",
         href: "/job-packet",
-        cta: "Continue packet",
+        cta: "Continue",
       };
     }
 
     if (!jobPacketDraft?.tailoredResume.trim()) {
       return {
-        title: "Finish tailoring this Job Packet",
+        title: "Fit your resume to this job",
         desc:
           "Your scan is done. Next, tailor your resume using the same job description.",
         href: "/job-packet",
-        cta: "Continue packet",
+        cta: "Continue",
       };
     }
 
     return {
-      title: "Add this Job Packet to your tracker",
+      title: "Add this job to your tracker",
       desc: "Your tailored resume is ready. Add the application to your tracker to finish.",
       href: "/job-packet",
-      cta: "Finish packet",
+      cta: "Finish",
     };
   }
 
   if (appsThisWeek === 0) {
     return {
-      title: "Start a Job Packet",
+      title: "Start a new application",
       desc:
-        "Paste a job description. Offervia scans it, helps you tailor your resume, and adds the job to your tracker.",
+        "Paste a job posting, see what your resume is missing, and add the job to your tracker.",
       href: "/job-packet",
-      cta: "Start packet",
+      cta: "Start",
     };
   }
 
@@ -74,78 +63,73 @@ export function getDashboardNextAction(input: {
   }
 
   return {
-    title: "Run a Job Packet",
-    desc: "Scan a job description, tailor your resume, then track the application.",
+    title: "Start a new application",
+    desc: "Paste a posting, fit your resume, and track it.",
     href: "/job-packet",
-    cta: "Start packet",
+    cta: "Start",
   };
 }
 
-export function getDashboardUsageItems(input: {
-  usage: {
-    resumeTailor: number;
-    coachMessages: number;
-    jobScans: number;
-    interviewSessions: number;
-    coverLetters: number;
-  };
-  limits: {
-    resume_tailor_per_month: number;
-    coach_messages_per_month: number;
-    job_scans_per_month: number;
-    interview_sessions_per_month: number;
-    cover_letters_per_month: number;
-  };
-}): DashboardUsageItem[] {
-  const { usage, limits } = input;
-  const UNLIMITED_THRESHOLD = 9999;
-  const interviewUnlimited = limits.interview_sessions_per_month >= UNLIMITED_THRESHOLD;
+export type DashboardStatus = "Applied" | "Interviewing" | "Offer" | "Rejected";
 
-  return [
-    {
-      key: "resume",
-      label: "Resume tailors",
-      used: usage.resumeTailor,
-      limit: limits.resume_tailor_per_month,
-      pct: usagePct(usage.resumeTailor, limits.resume_tailor_per_month),
-      state: usageState(usagePct(usage.resumeTailor, limits.resume_tailor_per_month)),
-    },
-    {
-      key: "coach",
-      label: "Coach messages",
-      used: usage.coachMessages,
-      limit: limits.coach_messages_per_month,
-      pct: usagePct(usage.coachMessages, limits.coach_messages_per_month),
-      state: usageState(usagePct(usage.coachMessages, limits.coach_messages_per_month)),
-    },
-    {
-      key: "scan",
-      label: "Job scans",
-      used: usage.jobScans,
-      limit: limits.job_scans_per_month,
-      pct: usagePct(usage.jobScans, limits.job_scans_per_month),
-      state: usageState(usagePct(usage.jobScans, limits.job_scans_per_month)),
-    },
-    {
-      key: "interview",
-      label: "Mock interviews",
-      used: usage.interviewSessions,
-      limit: limits.interview_sessions_per_month,
-      pct: interviewUnlimited
-        ? 0
-        : usagePct(usage.interviewSessions, limits.interview_sessions_per_month),
-      state: interviewUnlimited
-        ? "low"
-        : usageState(usagePct(usage.interviewSessions, limits.interview_sessions_per_month)),
-      unlimited: interviewUnlimited,
-    },
-    {
-      key: "cover_letter",
-      label: "Cover letters",
-      used: usage.coverLetters,
-      limit: limits.cover_letters_per_month,
-      pct: usagePct(usage.coverLetters, limits.cover_letters_per_month),
-      state: usageState(usagePct(usage.coverLetters, limits.cover_letters_per_month)),
-    },
-  ];
+export type DashboardApp = {
+  id: string;
+  company: string;
+  position: string;
+  status: DashboardStatus;
+  applied_on: string;
+  follow_up_date?: string | null;
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Counts for the "Your search" card. */
+export function summarizeApplications(apps: DashboardApp[], now: Date = new Date()) {
+  const weekAgo = now.getTime() - 7 * DAY_MS;
+  return {
+    total: apps.length,
+    applied: apps.filter((a) => a.status === "Applied").length,
+    interviewing: apps.filter((a) => a.status === "Interviewing").length,
+    offers: apps.filter((a) => a.status === "Offer").length,
+    thisWeek: apps.filter((a) => a.applied_on && Date.parse(a.applied_on) >= weekAgo).length,
+  };
+}
+
+/** Share of applications that heard back, reached interviews, and became offers. */
+export function applicationRates(apps: DashboardApp[]) {
+  const pct = (n: number) => (apps.length > 0 ? Math.round((n / apps.length) * 100) : 0);
+  const count = (s: DashboardStatus) => apps.filter((a) => a.status === s).length;
+  return {
+    responseRate: pct(count("Interviewing") + count("Offer") + count("Rejected")),
+    interviewRate: pct(count("Interviewing")),
+    offerRate: pct(count("Offer")),
+  };
+}
+
+/**
+ * Open applications whose follow-up date is today or earlier, oldest first.
+ * `today` is a YYYY-MM-DD string in the reader's own calendar.
+ */
+export function dueFollowUps(apps: DashboardApp[], today: string) {
+  return apps
+    .filter(
+      (a) =>
+        (a.status === "Applied" || a.status === "Interviewing") &&
+        typeof a.follow_up_date === "string" &&
+        a.follow_up_date.slice(0, 10) <= today
+    )
+    .sort((a, b) => String(a.follow_up_date).localeCompare(String(b.follow_up_date)))
+    .map((app) => {
+      const due = String(app.follow_up_date).slice(0, 10);
+      const days = Math.round((Date.parse(today) - Date.parse(due)) / DAY_MS);
+      return { app, label: days <= 0 ? "Follow up today" : days === 1 ? "1 day overdue" : `${days} days overdue` };
+    });
+}
+
+/** Today's date as YYYY-MM-DD in local time (not UTC). */
+export function localIsoDate(now: Date = new Date()) {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }

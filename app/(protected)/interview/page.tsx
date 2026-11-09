@@ -6,6 +6,7 @@ import { readCareerProfile } from "@/lib/profile/read";
 import { createPageMetadata } from "@/lib/metadata";
 import { PageContainer, PageHeader } from "@/components/layout/Page";
 import InterviewStudio from "@/components/interview/InterviewStudio";
+import { readAllowance } from "@/lib/usage/featureGate";
 import InterviewHistory from "@/components/interview/InterviewHistory";
 import type {
   InterviewDifficulty,
@@ -39,17 +40,19 @@ export default async function InterviewPage() {
     redirect("/login");
   }
 
-  const career = await readCareerProfile(supabase, user.id);
-  const pastSessions = await readPastInterviews(supabase, user.id);
+  const [career, pastSessions, allowance] = await Promise.all([
+    readCareerProfile(supabase, user.id),
+    readPastInterviews(supabase, user.id),
+    readAllowance(user.id, "interview_session"),
+  ]);
 
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Interview Prep"
         title="Mock interview"
-        description="Answer questions for the role you're targeting. Each answer gets a score and notes on what to fix."
+        description="Answer questions for your role and get a score and notes on each one."
       />
-      <InterviewStudio defaultRole={career.targetRole} />
+      <InterviewStudio defaultRole={career.targetRole} allowance={allowance} />
       <InterviewHistory sessions={pastSessions} />
     </PageContainer>
   );

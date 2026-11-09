@@ -391,17 +391,6 @@ export default function TrackerPage() {
     setUpdatingId(null);
   }
 
-  const kpis = useMemo(() => {
-    const byStatus = (value: Application["status"]) => apps.filter((app) => app.status === value).length;
-    return {
-      total: apps.length,
-      applied: byStatus("Applied"),
-      interviewing: byStatus("Interviewing"),
-      offer: byStatus("Offer"),
-      rejected: byStatus("Rejected"),
-    };
-  }, [apps]);
-
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
       setSortDir((current) => (current === "asc" ? "desc" : "asc"));
@@ -509,46 +498,13 @@ export default function TrackerPage() {
     <div className="space-y-8 py-6 sm:py-8">
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Job Tracker</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Tracker</h1>
           <p className="mt-1 text-sm text-foreground/70">
             Every job you&apos;ve applied to and where it stands.
           </p>
         </div>
 
         <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <div className="relative sm:w-64">
-            <SearchIcon className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
-            <Input
-              value={q}
-              onChange={(event) => setQ(event.target.value)}
-              placeholder="Search company or position…"
-              className="border-border bg-background/80 pl-8 text-foreground"
-            />
-          </div>
-          <Select
-            value={String(pageSize)}
-            onValueChange={(value) => {
-              const nextPageSize = Number(value);
-              if (
-                TRACKER_PAGE_SIZE_OPTIONS.includes(
-                  nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]
-                )
-              ) {
-                setPageSize(nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]);
-              }
-            }}
-          >
-            <SelectTrigger className="w-[110px] border-border bg-background/80 text-foreground">
-              <SelectValue placeholder="Rows" />
-            </SelectTrigger>
-            <SelectContent className="border-border bg-card text-foreground">
-              {TRACKER_PAGE_SIZE_OPTIONS.map((value) => (
-                <SelectItem key={value} value={String(value)}>
-                  {value} / page
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Button
             variant="outline"
             onClick={exportCsv}
@@ -658,18 +614,9 @@ export default function TrackerPage() {
         </div>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi title="Total" value={kpis.total} />
-        <Kpi title="Applied" value={kpis.applied} />
-        <Kpi title="Interviewing" value={kpis.interviewing} />
-        <Kpi title="Offers" value={kpis.offer} />
-      </section>
 
       <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <div className="mb-1 text-sm font-medium text-foreground">Quick add</div>
-        <p className="mb-3 text-xs text-foreground/60">
-          Enter the company, position, and date. You can add details later.
-        </p>
+        <div className="mb-2 text-sm font-medium text-foreground">Quick add</div>
         <div className="grid gap-2 sm:grid-cols-5">
           <Input
             placeholder="Company"
@@ -702,7 +649,6 @@ export default function TrackerPage() {
       </section>
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm">
-        <span className="text-sm font-medium text-foreground/70">Filter:</span>
         <Select
           value={statusFilter}
           onValueChange={(value) => {
@@ -711,11 +657,11 @@ export default function TrackerPage() {
             }
           }}
         >
-          <SelectTrigger className="w-40 border-border bg-background/80 text-foreground">
+          <SelectTrigger aria-label="Filter by status" className="w-40 border-border bg-background/80 text-foreground">
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent className="border-border bg-card text-foreground">
-            <SelectItem value="All">All</SelectItem>
+            <SelectItem value="All">All statuses</SelectItem>
             {TRACKER_STATUS_OPTIONS.map((value) => (
               <SelectItem key={value} value={value}>
                 {value}
@@ -724,6 +670,39 @@ export default function TrackerPage() {
           </SelectContent>
         </Select>
 
+        <div className="relative w-full sm:w-64">
+          <SearchIcon className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+          <Input
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
+            placeholder="Search company or position…"
+            className="border-border bg-background/80 pl-8 text-foreground"
+          />
+        </div>
+        <Select
+          value={String(pageSize)}
+          onValueChange={(value) => {
+            const nextPageSize = Number(value);
+            if (
+              TRACKER_PAGE_SIZE_OPTIONS.includes(
+                nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]
+              )
+            ) {
+              setPageSize(nextPageSize as (typeof TRACKER_PAGE_SIZE_OPTIONS)[number]);
+            }
+          }}
+        >
+          <SelectTrigger aria-label="Rows per page" className="w-[110px] border-border bg-background/80 text-foreground">
+            <SelectValue placeholder="Rows" />
+          </SelectTrigger>
+          <SelectContent className="border-border bg-card text-foreground">
+            {TRACKER_PAGE_SIZE_OPTIONS.map((value) => (
+              <SelectItem key={value} value={String(value)}>
+                {value} / page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div
           role="group"
           aria-label="View mode"
@@ -1060,15 +1039,6 @@ export default function TrackerPage() {
           </ConfirmFooter>
         </ConfirmContent>
       </ConfirmDialog>
-    </div>
-  );
-}
-
-function Kpi({ title, value }: { title: string; value: number }) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-      <div className="text-xs font-medium text-foreground/60">{title}</div>
-      <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
     </div>
   );
 }

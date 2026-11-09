@@ -36,3 +36,12 @@ export function buildAuthCallbackUrl(origin: string, nextPath: string) {
   callbackUrl.searchParams.set("next", nextPath);
   return callbackUrl.toString();
 }
+
+/**
+ * The safe `?next=` path from the current browser URL. Read at click time so
+ * pages don't need useSearchParams (and a Suspense boundary) just for this.
+ */
+export function nextFromLocation(fallback = "/dashboard") {
+  if (typeof window === "undefined") return fallback;
+  return sanitizeRedirectPath(new URLSearchParams(window.location.search).get("next"), fallback);
+}

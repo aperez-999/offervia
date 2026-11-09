@@ -23,10 +23,7 @@ export default function PerformanceInsights({
       aria-label="Scan insights"
     >
       <div className="mb-4">
-        <div className="text-xs font-semibold text-foreground/60">
-          Pro
-        </div>
-        <h3 className="mt-1 text-lg font-semibold text-foreground">Scan insights</h3>
+        <h3 className="text-lg font-semibold text-foreground">Scan insights</h3>
         <p className="mt-1 text-sm text-foreground/70">
           How well your resume matches the jobs you scan, over time.
         </p>

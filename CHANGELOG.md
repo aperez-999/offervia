@@ -1,64 +1,37 @@
 # Changelog
 
-All notable changes to Offervia are documented in this file.
+Notable changes to Offervia. Versions follow [semantic versioning](https://semver.org/).
 
-The format is loosely based on [Keep a Changelog](https://keepachangelog.com/),
-and this project uses informal semantic-style versioning.
+## [2.3.0] (unreleased)
 
-## [2.2.0] — 2026-07-08
-
-Feature release. Non-breaking; all database changes are additive.
+First public release.
 
 ### Added
 
-- **Interview Prep.** Text mock interviews. Questions follow the role you enter.
-  Each plan has a monthly cap, and past sessions are saved.
-- **Cover Letter Studio.** Drafts a letter from a pasted resume or an uploaded
-  PDF or DOCX, using the company and role when you provide them.
-- **Saved Documents** — cover letters and tailored resumes are saved to a history
-  you can revisit, copy, and export.
-- **In-app PDF export** — dependency-free print-to-PDF for generated documents.
-- **Application workspace** (`/tracker/[id]`) — a per-job hub to edit company,
-  position, status, applied/follow-up dates, and notes; view related saved
-  documents and the best job-scan match; and deep-link into the resume, cover
-  letter, and scanner tools with role/company prefilled.
-- **Student Hub** — templates, resources, and student deals consolidated into one
-  organized section with a proper loading state.
-- **Career profile.** Target role, seniority, skills, and locations are included
-  when the coach, resume, and cover letter drafts are generated.
-- **Skill-gap insights** — recurring missing skills surfaced on the dashboard.
-- **Daily follow-up reminders** — opt-in in-app panel plus reminder cron, built on
-  existing application dates and the digest infrastructure.
+- **Bullet checker** (`/bullet-check`). Checks resume bullets as you type for weak openers, missing numbers, first person, filler, length, and tense.
+- **Offer compare** (`/offers`). Two or three offers side by side: first-year pay, pay after rent, commute hours, and real hourly pay.
+- **My resume.** Save your resume once on your profile; the keyword scan, resume tailor, and cover letter start from it. Needs `db/migrations/08_saved_resume.sql`.
+- **Delete account** in Settings. It removes the account and everything tied to it after a typed confirmation.
+- **Insights** (`/dashboard/insights`): response and interview rates, the application pipeline, and scan trends.
+- **Daily usage limits** per tool, shown next to the button when you're running low, with the exact time the next use frees up. Failed requests don't count.
+- **Busy fallback.** When the main model is rate limited, requests retry once on `GROQ_FALLBACK_MODEL`.
+- "Suggest it on GitHub" link in the Student Hub, and `npm run check:links` for its links.
 
 ### Changed
 
-- Shared resume file parsing (`lib/files/extract.ts`) and print-to-PDF
-  (`lib/print-pdf.ts`) helpers extracted and reused to remove duplication.
-- Groq client now uses a 30s timeout and automatic retries across all LLM routes,
-  reducing hangs and transient rate-limit failures.
-- Version bumped to 2.2.0.
+- New look: plum and highlighter palette in light and dark mode, Bricolage Grotesque and Atkinson Hyperlegible Next, Phosphor icons, a new logo, favicon, and share image.
+- Simpler navigation: six sections (Home, New application, Resume & letters, Interview prep, Applications, Student Hub) with tabs inside each.
+- A shorter home page and a lighter dashboard that shows what needs attention first.
+- Student Hub content moved to `content/student-hub/` and re-checked. Unfilled template fields read `[your name]` instead of disappearing.
+- Sign-up honors `?next=`, and every protected route keeps its destination through sign-in.
+- New sign-in and sign-up screens, each with its own brand panel. New passwords need at least 8 characters.
+- Privacy and terms are one short page at `/privacy` (`/terms` redirects there). Questions and feedback go to GitHub Discussions instead of a contact form, so SMTP is no longer needed.
+- The home page demo shows the real loop on a posting and a resume: match, fix, track.
+- Database setup is now the three base files plus numbered files in `db/migrations/`, and new installs no longer create the unused `subscriptions` table.
+- `.env.example` lists only the variables the app reads, split into required and optional.
 
 ### Fixed
 
-- Follow-up cron queried a non-existent `applications.role` column (live schema
-  uses `position`), which silently prevented reminders from being sent.
-- Light-mode navbar logo flashed white on refresh before loading.
-
-### Security
-
-- The coach drops any client message that is not from the user or the assistant,
-  so a request cannot sneak in a system instruction.
-- Removed dead/unused Supabase client helper.
-- Verified row-level security across all live tables (anonymous reads return no
-  rows while service-role reads succeed).
-
-### Deployment notes
-
-- Set `CRON_SECRET` in the hosting environment and wire the scheduler; the
-  follow-up reminders and weekly digest fail closed until this is configured.
-- Confirm production environment variables (Stripe live keys, Groq, SMTP, Sentry,
-  Supabase) before release.
-
-## [2.1.0]
-
-- Prior release (baseline before this changelog was introduced).
+- `next build` failed on a Recharts tooltip type and an unescaped apostrophe.
+- The main scanner (`/api/ats-scan`) had no usage limit.
+- The home page scrolled sideways on phones.

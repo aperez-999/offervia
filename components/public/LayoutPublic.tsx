@@ -25,8 +25,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
   }, []);
 
   // Active section highlight (desktop)
-  const [activeId, setActiveId] = useState<string>("features");
-  const sectionIds = useMemo(() => ["features", "how-it-works", "faq"], []);
+  const [activeId, setActiveId] = useState<string>("how-it-works");
+  const sectionIds = useMemo(() => ["how-it-works", "student-hub"], []);
   useEffect(() => {
     const els = sectionIds
       .map((id) => document.getElementById(id))
@@ -93,21 +93,6 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             </button>
 
             <a
-              href="#features"
-              onClick={(e) => {
-                e.preventDefault();
-                smoothScrollTo("features");
-              }}
-              className={[
-                "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
-                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
-                activeId === "features" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
-              ].join(" ")}
-            >
-              Features
-            </a>
-
-            <a
               href="#how-it-works"
               onClick={(e) => {
                 e.preventDefault();
@@ -122,19 +107,20 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               How it works
             </a>
 
+
             <a
-              href="#faq"
+              href="#student-hub"
               onClick={(e) => {
                 e.preventDefault();
-                smoothScrollTo("faq");
+                smoothScrollTo("student-hub");
               }}
               className={[
                 "hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm transition-colors",
                 "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background",
-                activeId === "faq" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
+                activeId === "student-hub" ? "bg-primary/10 text-foreground" : "text-foreground/80 hover:bg-foreground/5",
               ].join(" ")}
             >
-              FAQ
+              Student Hub
             </a>
 
             <a
@@ -211,9 +197,8 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               <div className="mx-auto max-w-7xl px-4 py-3">
                 <div className="grid gap-2 text-sm">
                   {[
-                    { label: "Features", id: "features" },
                     { label: "How it works", id: "how-it-works" },
-                    { label: "FAQ", id: "faq" },
+                    { label: "Student Hub", id: "student-hub" },
                   ].map((x) => (
                     <button
                       key={x.id}

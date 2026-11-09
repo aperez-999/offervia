@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { apiErrorMessage, errorTitle } from "@/lib/usage/client";
+import { RemainingToday, useRemainingToday } from "@/components/usage/RemainingToday";
+import type { AllowanceSnapshot } from "@/lib/usage/limits";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +35,8 @@ interface MsgRow {
 
 /* ------------------------------ Inner chat UI ----------------------------- */
 
-function InnerChat({ mode }: { mode: CoachMode }) {
+function InnerChat({ mode, quota }: { mode: CoachMode; quota: ReturnType<typeof useRemainingToday> }) {
+  const consumeUse = quota.consume;
   const supabase = useMemo(() => getBrowserSupabase(), []);
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
@@ -179,15 +183,13 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         signal: ctrl.signal,
       });
 
-      // Rate limit: show toast and stop
+      // Limits: drop the optimistic message and explain when to try again
       if (res.status === 429) {
         const data = await res.json().catch(() => ({}));
-        const retry = res.headers.get("Retry-After");
-        const mins = retry ? Math.ceil(Number(retry) / 60) : null;
         setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
         toast({
-          title: data?.message || "Too many messages",
-          description: mins ? `Try again in about ${mins} min.` : "Wait a few minutes and try again.",
+          title: errorTitle(data?.error, "Too many messages"),
+          description: apiErrorMessage(data, "Wait a minute and try again."),
           variant: "destructive",
         });
         setController(null);
@@ -234,6 +236,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         );
         return assistantMessage ? [...withUser, { ...assistantMessage, mode }] : withUser;
       });
+      if (assistantMessage) consumeUse();
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") {
         toast({ title: "Reply stopped" });
@@ -253,7 +256,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         scrollToBottom(true);
       }, 0);
     }
-  }, [input, loadMessages, messages, mode, responseMode, sending, toast, userId, scrollToBottom]);
+  }, [input, loadMessages, messages, mode, responseMode, sending, toast, userId, scrollToBottom, consumeUse]);
 
   // regenerate last assistant reply (re-send last user message)
   const regenerate = useCallback(() => {
@@ -424,7 +427,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             <Button
               size="icon"
               onClick={() => void send()}
-              disabled={!userId || loading || !input.trim()}
+              disabled={!userId || loading || !input.trim() || quota.blocked}
               aria-label="Send message"
               className="size-10 shrink-0 cursor-pointer rounded-xl bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
@@ -457,7 +460,8 @@ function InnerChat({ mode }: { mode: CoachMode }) {
               }
             }}
           />
-          <span className="hidden text-xs text-foreground/40 sm:block">
+          <RemainingToday feature="coach" remaining={quota.remaining} resetsAt={quota.resetsAt} />
+          <span className="hidden text-xs text-muted-foreground sm:block">
             Enter to send · Shift+Enter for a new line
           </span>
         </div>
@@ -468,14 +472,21 @@ function InnerChat({ mode }: { mode: CoachMode }) {
 
 /* ------------------------- Default export with sidebar -------------------- */
 
-export default function Chat({ mode = "interview" as CoachMode }: { mode?: CoachMode }) {
+export default function Chat({
+  mode = "interview" as CoachMode,
+  allowance = null,
+}: {
+  mode?: CoachMode;
+  allowance?: AllowanceSnapshot | null;
+}) {
   const [active, setActive] = useState<CoachMode>(mode);
+  const quota = useRemainingToday(allowance);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
       <CoachSidebar active={active} onChange={setActive} />
       <section className="min-w-0 flex-1">
-        <InnerChat mode={active} />
+        <InnerChat mode={active} quota={quota} />
       </section>
     </div>
   );

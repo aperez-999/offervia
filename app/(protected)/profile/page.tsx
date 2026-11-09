@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { captureClientException } from "@/lib/monitoring/sentry";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import MyResumeCard from "@/components/profile/MyResumeCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -253,9 +254,8 @@ export default function ProfilePage() {
   return (
       <PageContainer>
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
-          <p className="text-xs font-medium text-primary">Account</p>
-          <h1 className="mt-1 text-2xl font-semibold text-foreground">Profile</h1>
-          <p className="mt-1 text-sm text-foreground/70">Your avatar, name, and career details.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Profile</h1>
+          <p className="mt-1 text-sm text-foreground/70">Your details, career goals, and My resume.</p>
         </div>
 
         <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
@@ -482,6 +482,8 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          <MyResumeCard />
         </div>
       </PageContainer>
   );

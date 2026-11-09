@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { nextFromLocation } from "@/lib/auth/redirect";
 import { postJson } from "@/lib/safe-fetch";
 import { useToast } from "@/hooks/use-toast";
 import AuthField, { PasswordToggle } from "@/components/auth/AuthField";
@@ -14,11 +15,11 @@ const schema = z
   .object({
     name: z.string().min(1, "Enter your name"),
     email: z.string().email("Enter a valid email"),
-    password: z.string().min(6, "Min 6 characters"),
-    confirm: z.string().min(6, "Min 6 characters"),
+    password: z.string().min(8, "Use at least 8 characters"),
+    confirm: z.string().min(1, "Type your password again"),
   })
   .refine((v) => v.password === v.confirm, {
-    message: "Passwords do not match",
+    message: "These don't match",
     path: ["confirm"],
   });
 
@@ -41,11 +42,12 @@ export default function SignupForm() {
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
+    const next = nextFromLocation();
     const result = await postJson<{ success: true; data: { message: string } }>("/api/auth/signup", {
       name: values.name,
       email: values.email,
       password: values.password,
-      next: "/dashboard",
+      next,
     });
     if (!result.ok) {
       setError(result.error);
@@ -58,7 +60,7 @@ export default function SignupForm() {
       description: result.data.data.message,
     });
     setTimeout(() => {
-      router.replace("/login");
+      router.replace(next === "/dashboard" ? "/login" : `/login?next=${encodeURIComponent(next)}`);
     }, 2000);
   };
 
@@ -92,7 +94,7 @@ export default function SignupForm() {
         icon={Lock}
         type={showPw ? "text" : "password"}
         autoComplete="new-password"
-        placeholder="Enter at least 6 characters"
+        placeholder="At least 8 characters"
         registration={register("password")}
         error={errors.password?.message}
         rightSlot={<PasswordToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />}
@@ -104,7 +106,7 @@ export default function SignupForm() {
         icon={Lock}
         type={showPw2 ? "text" : "password"}
         autoComplete="new-password"
-        placeholder="Make sure passwords match"
+        placeholder="Type it again"
         registration={register("confirm")}
         error={errors.confirm?.message}
         rightSlot={<PasswordToggle shown={showPw2} onToggle={() => setShowPw2((v) => !v)} />}
@@ -120,7 +122,7 @@ export default function SignupForm() {
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
         )}
-        <span>{isSubmitting ? "Creating account…" : "Create account"}</span>
+        <span>{isSubmitting ? "Making your account…" : "Make my account"}</span>
       </button>
     </form>
   );
