@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/auth/AuthLayout";
-import { Lock } from "lucide-react";
+import { Lock } from "@phosphor-icons/react/dist/ssr";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { getAuthErrorMessage } from "@/lib/auth/errors";
 
@@ -164,7 +164,7 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={status === "updating"}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-primary-button p-2 text-white hover:bg-primary-button/90 disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-primary-button p-2 text-primary-button-foreground hover:bg-primary-button/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {status === "updating" && (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

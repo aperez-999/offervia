@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Moon, Sun } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/brand/BrandLogo";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
@@ -46,12 +46,7 @@ export default function AuthLayout({
                 className="group flex items-center"
                 aria-label="Offervia home"
               >
-                <BrandLogo
-                  width={132}
-                  height={33}
-                  priority
-                  className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8"
-                />
+                <BrandLogo className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8" />
               </Link>
               <nav className="hidden items-center gap-2 sm:gap-3 sm:flex">
                 <Link

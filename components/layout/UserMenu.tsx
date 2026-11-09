@@ -16,7 +16,7 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Settings, UserRound, LogOut, Palette } from "lucide-react";
+import { GearSix, Palette, SignOut, UserCircle } from "@phosphor-icons/react/dist/ssr";
 
 
 export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
@@ -83,13 +83,13 @@ export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
 
         <DropdownMenuItem asChild>
           <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
-            <UserRound className="h-4 w-4" />
+            <UserCircle className="h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
-            <Settings className="h-4 w-4" />
+            <GearSix className="h-4 w-4" />
             Settings
           </Link>
         </DropdownMenuItem>
@@ -119,7 +119,7 @@ export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
           onClick={onSignOut}
           className="text-destructive cursor-pointer focus:text-destructive"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <SignOut className="mr-2 h-4 w-4" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

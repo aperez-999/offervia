@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 
 type QA = { q: string; a: string };
 
@@ -51,7 +51,7 @@ function Item({ q, a, idx }: QA & { idx: number }) {
         className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="text-sm font-medium text-foreground">{q}</span>
-        <ChevronDown
+        <CaretDown
           className={`h-4 w-4 shrink-0 text-foreground/50 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
         />
       </button>

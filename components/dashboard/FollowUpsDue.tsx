@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { CalendarClock, ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarDots } from "@phosphor-icons/react/dist/ssr";
 import {
   Card,
   CardContent,
@@ -65,12 +65,12 @@ export default function FollowUpsDue({ apps }: { apps: FollowUpApp[] }) {
 
   return (
     <Reveal>
-      <Card className="border-amber-500/30 bg-amber-500/[0.04] dark:bg-amber-400/[0.03]">
+      <Card className="border-warning/30 bg-warning/[0.04]">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="grid size-8 place-items-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                <CalendarClock className="size-4" />
+              <span className="grid size-8 place-items-center rounded-lg bg-warning/15 text-warning">
+                <CalendarDots className="size-4" />
               </span>
               <div>
                 <CardTitle className="text-base">Follow-ups due</CardTitle>

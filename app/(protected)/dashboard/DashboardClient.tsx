@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Flame, Target } from "lucide-react";
+import { ArrowRight, Fire, Target } from "@phosphor-icons/react/dist/ssr";
 import { AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/motion/Reveal";
 import QuickStart from "@/components/dashboard/QuickStart";
@@ -405,7 +405,7 @@ export default function DashboardClient({
                 </div>
               </div>
               <Link href={nextAction.href} className="shrink-0">
-                <Button className="w-full cursor-pointer bg-primary-button text-white shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
+                <Button className="w-full cursor-pointer bg-primary-button text-primary-button-foreground shadow-sm hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:px-6">
                   {nextAction.cta}
                 </Button>
               </Link>
@@ -515,8 +515,8 @@ export default function DashboardClient({
                   Days in a row with at least one application logged.
                 </p>
               </div>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/15">
-                <Flame className="h-4.5 w-4.5" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-warning ring-1 ring-warning/15">
+                <Fire className="h-4.5 w-4.5" />
               </span>
             </div>
           </Card>
@@ -587,7 +587,7 @@ export default function DashboardClient({
                 cta={
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href="/job-packet">
-                      <Button className="bg-primary-button text-white hover:bg-primary-button/90">Start Job Packet</Button>
+                      <Button className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90">Start Job Packet</Button>
                     </Link>
                     <Link href="/tracker">
                       <Button variant="outline" className="border-border text-foreground hover:bg-foreground/[0.06]">

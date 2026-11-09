@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 export default function BottomCta() {
   return (
@@ -26,7 +26,7 @@ export default function BottomCta() {
 
           <Link
             href="/signup"
-            className="group bg-brand-gradient inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+            className="group bg-primary-button text-primary-button-foreground inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
           >
             Create a free account
             <ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" />

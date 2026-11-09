@@ -137,10 +137,10 @@ export default function PerformanceInsights({
             {analytics.skillGaps.map((gap) => (
               <li
                 key={gap.skill}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-sm text-amber-700 dark:text-amber-400"
+                className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-sm text-warning"
               >
                 <span className="font-medium">{gap.skill}</span>
-                <span className="rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold tabular-nums">
+                <span className="rounded-full bg-warning/20 px-1.5 text-xs font-semibold tabular-nums">
                   {gap.count}
                 </span>
               </li>

@@ -2,13 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  CheckCircle2,
-  ChevronDown,
-  History,
-  Lightbulb,
-  TrendingUp,
-} from "lucide-react";
+import { CaretDown, CheckCircle, ClockCounterClockwise, Lightbulb, TrendUp } from "@phosphor-icons/react/dist/ssr";
 import { Reveal } from "@/components/motion/Reveal";
 import {
   difficultyLabel,
@@ -20,14 +14,14 @@ import {
 const toneChip: Record<ReturnType<typeof scoreBand>["tone"], string> = {
   reward: "bg-reward/10 text-reward border-reward/30",
   primary: "bg-primary/10 text-primary border-primary/30",
-  amber: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  amber: "bg-warning/10 text-warning border-warning/30",
   muted: "bg-foreground/5 text-foreground/60 border-border",
 };
 
 const toneBar: Record<ReturnType<typeof scoreBand>["tone"], string> = {
   reward: "bg-reward",
   primary: "bg-primary",
-  amber: "bg-amber-500",
+  amber: "bg-warning",
   muted: "bg-foreground/30",
 };
 
@@ -75,7 +69,7 @@ export default function InterviewHistory({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background/60 text-primary">
-              <History className="size-5" />
+              <ClockCounterClockwise className="size-5" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-foreground">
@@ -142,7 +136,7 @@ export default function InterviewHistory({
                       <span>{difficultyLabel(s.difficulty)}</span>
                     </div>
                   </div>
-                  <ChevronDown
+                  <CaretDown
                     className={`size-4 shrink-0 text-foreground/40 transition-transform ${open ? "rotate-180" : ""}`}
                   />
                 </button>
@@ -188,7 +182,7 @@ export default function InterviewHistory({
                                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                                   <div>
                                     <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/55">
-                                      <CheckCircle2 className="size-3.5 text-primary" />{" "}
+                                      <CheckCircle className="size-3.5 text-primary" />{" "}
                                       Strengths
                                     </div>
                                     <ul className="mt-1.5 space-y-1">
@@ -210,7 +204,7 @@ export default function InterviewHistory({
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/55">
-                                      <TrendingUp className="size-3.5 text-amber-500" />{" "}
+                                      <TrendUp className="size-3.5 text-warning" />{" "}
                                       To improve
                                     </div>
                                     <ul className="mt-1.5 space-y-1">

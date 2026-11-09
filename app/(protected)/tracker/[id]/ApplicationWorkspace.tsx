@@ -3,17 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Copy,
-  FileText,
-  Loader2,
-  PenLine,
-  Printer,
-  Save,
-  Target,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, CircleNotch, Copy, FileText, FloppyDisk, PenNib, Printer, Target, Trash } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -170,7 +160,7 @@ export default function ApplicationWorkspace({
           onClick={() => setConfirmOpen(true)}
           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
-          <Trash2 className="size-4" /> Delete
+          <Trash className="size-4" /> Delete
         </Button>
       </div>
 
@@ -269,8 +259,8 @@ export default function ApplicationWorkspace({
 
             <div className="mt-4 flex items-center gap-3">
               <Button onClick={save} disabled={!dirty || saving}>
-                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Save changes
+                {saving ? <CircleNotch className="size-4 animate-spin" /> : <FloppyDisk className="size-4" />}
+                FloppyDisk changes
               </Button>
               {dirty ? (
                 <span className="text-xs text-foreground/50">Unsaved changes</span>
@@ -301,11 +291,11 @@ export default function ApplicationWorkspace({
                       className={`grid size-8 shrink-0 place-items-center rounded-lg ${
                         doc.kind === "cover_letter"
                           ? "bg-primary/10 text-primary"
-                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                          : "bg-info/10 text-info"
                       }`}
                     >
                       {doc.kind === "cover_letter" ? (
-                        <PenLine className="size-4" />
+                        <PenNib className="size-4" />
                       ) : (
                         <FileText className="size-4" />
                       )}
@@ -348,7 +338,7 @@ export default function ApplicationWorkspace({
               </Button>
               <Button asChild variant="outline" className="justify-start">
                 <Link href={`/cover-letter${roleQuery}`}>
-                  <PenLine className="size-4" /> Write a cover letter
+                  <PenNib className="size-4" /> Write a cover letter
                 </Link>
               </Button>
               <Button asChild variant="outline" className="justify-start">
@@ -375,7 +365,7 @@ export default function ApplicationWorkspace({
                     {bestScan.missing_skills.slice(0, 8).map((skill) => (
                       <span
                         key={skill}
-                        className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400"
+                        className="rounded-full bg-warning/10 px-2 py-0.5 text-xs text-warning"
                       >
                         {skill}
                       </span>
@@ -401,7 +391,7 @@ export default function ApplicationWorkspace({
               Cancel
             </Button>
             <Button variant="destructive" onClick={remove} disabled={deleting}>
-              {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {deleting ? <CircleNotch className="size-4 animate-spin" /> : <Trash className="size-4" />}
               Delete
             </Button>
           </DialogFooter>

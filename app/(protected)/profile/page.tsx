@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, CircleNotch } from "@phosphor-icons/react/dist/ssr";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
 import { ProfileSkeleton } from "@/components/profile/ProfileSkeleton";
@@ -272,7 +272,7 @@ export default function ProfilePage() {
               >
                 <Avatar className="h-24 w-24 ring-4 ring-card transition-all duration-300 group-hover:ring-primary/40 motion-safe:group-hover:scale-[1.03]">
                   <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-                  <AvatarFallback className="bg-primary-button text-white text-2xl">{initial}</AvatarFallback>
+                  <AvatarFallback className="bg-primary-button text-primary-button-foreground text-2xl">{initial}</AvatarFallback>
                 </Avatar>
                 {/* Hover overlay */}
                 <span className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-full bg-foreground/45 text-white opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100">
@@ -282,7 +282,7 @@ export default function ProfilePage() {
                 {/* Uploading state */}
                 {uploading && (
                   <span className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <CircleNotch className="h-6 w-6 animate-spin text-primary" />
                   </span>
                 )}
               </button>
@@ -305,7 +305,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || loading}
-                  className="w-full bg-primary-button text-white hover:bg-primary-button/90"
+                  className="w-full bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                 >
                   {uploading ? "Uploading…" : "Change avatar"}
                 </Button>
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={saveName}
                   disabled={saving || loading}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save changes"}
                 </Button>
@@ -475,7 +475,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={saveCareer}
                   disabled={savingCareer || loading}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {savingCareer ? "Saving…" : "Save career details"}
                 </Button>

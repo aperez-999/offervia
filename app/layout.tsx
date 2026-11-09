@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster, ToastProvider } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
@@ -14,21 +14,26 @@ import {
 } from "@/lib/site";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Body and UI: designed by the Braille Institute for legibility, which fits a
+// tool people read closely and often on a phone.
+const atkinson = Atkinson_Hyperlegible_Next({
+  variable: "--font-atkinson",
   subsets: ["latin"],
+  // Next has no fallback metrics for this font yet; skip the size-adjusted fallback.
+  adjustFontFallback: false,
+});
+
+// Display: headings only. The variable optical size gives it character at
+// large sizes without getting loud inside the app.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  preload: false,
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
   preload: false,
 });
 
@@ -66,7 +71,7 @@ export const metadata: Metadata = {
     url: getSiteUrl(),
     siteName: SITE_NAME,
     locale: "en_US",
-    images: [{ url: "/og-image.png", width: 1774, height: 887, alt: SITE_SHARE_IMAGE_ALT }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: SITE_SHARE_IMAGE_ALT }],
     type: "website",
   },
   twitter: {
@@ -74,17 +79,6 @@ export const metadata: Metadata = {
     title: SITE_DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
     images: ["/og-image.png"],
-  },
-  icons: {
-    shortcut: ["/favicon.ico"],
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
-      { url: "/icon-64.png", type: "image/png", sizes: "64x64" },
-      { url: "/icon-256.png", type: "image/png", sizes: "256x256" },
-      { url: "/offervia-icon-square.png", type: "image/png", sizes: "694x694" },
-    ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
 };
@@ -96,7 +90,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}>
+      <body className={`${atkinson.variable} ${bricolage.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
         <OrganizationJsonLd />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ToastProvider>

@@ -3,26 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ClipboardCopy,
-  Download,
-  Trash2,
-  Loader2,
-  PenLine,
-  Building2,
-  Briefcase,
-  MapPin,
-  Link as LinkIcon,
-  ExternalLink,
-  FileText,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  CheckCircle2,
-  Eye,
-  Pencil,
-  Printer,
-} from "lucide-react";
+import { ArrowSquareOut, ArrowsOut, Briefcase, Buildings, CheckCircle, CircleNotch, ClipboardText, DownloadSimple, Eye, FileText, Link as LinkIcon, MagnifyingGlassMinus, MagnifyingGlassPlus, MapPin, PenNib, PencilSimple, Printer, Trash } from "@phosphor-icons/react/dist/ssr";
 import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -541,7 +522,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {companyName && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-background/60 px-2 py-0.5 text-xs text-foreground/80">
-                          <Building2 className="h-3 w-3" /> {companyName}
+                          <Buildings className="h-3 w-3" /> {companyName}
                         </span>
                       )}
                       {roleTitle && (
@@ -581,7 +562,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                           className="text-xs underline text-foreground/70 hover:text-foreground"
                           title="Open in new tab"
                         >
-                          Open <ExternalLink className="inline h-3 w-3" />
+                          Open <ArrowSquareOut className="inline h-3 w-3" />
                         </a>
                       )}
                       <Button
@@ -589,7 +570,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         onClick={removeFile}
                         className="border-border text-foreground hover:bg-foreground/[0.06]"
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash className="mr-2 h-4 w-4" />
                         Remove
                       </Button>
                     </div>
@@ -616,7 +597,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1 sm:col-span-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Building2 className="h-4 w-4" />
+                    <Buildings className="h-4 w-4" />
                     Company name
                   </label>
                   <Input
@@ -721,7 +702,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       className="ml-1 h-7 border-border text-foreground hover:bg-foreground/[0.06]"
                       onClick={() => copy(techs.join(", "), "Copied keywords")}
                     >
-                      <ClipboardCopy className="mr-1 h-3.5 w-3.5" /> Copy keywords
+                      <ClipboardText className="mr-1 h-3.5 w-3.5" /> Copy keywords
                     </Button>
                   </div>
                 )}
@@ -772,19 +753,19 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                           >
                             {zoom === "fit" ? (
                               <>
-                                <ZoomIn className="mr-2 h-4 w-4" /> 110%
+                                <MagnifyingGlassPlus className="mr-2 h-4 w-4" /> 110%
                               </>
                             ) : zoom === "110" ? (
                               <>
-                                <ZoomIn className="mr-2 h-4 w-4" /> 125%
+                                <MagnifyingGlassPlus className="mr-2 h-4 w-4" /> 125%
                               </>
                             ) : zoom === "125" ? (
                               <>
-                                <ZoomIn className="mr-2 h-4 w-4" /> 150%
+                                <MagnifyingGlassPlus className="mr-2 h-4 w-4" /> 150%
                               </>
                             ) : (
                               <>
-                                <ZoomOut className="mr-2 h-4 w-4" /> Fit
+                                <MagnifyingGlassMinus className="mr-2 h-4 w-4" /> Fit
                               </>
                             )}
                           </Button>
@@ -795,7 +776,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                             onClick={() => setZoom("fit")}
                             title="Fit to width"
                           >
-                            <Maximize2 className="mr-2 h-4 w-4" />
+                            <ArrowsOut className="mr-2 h-4 w-4" />
                             Fit
                           </Button>
                         </>
@@ -807,13 +788,13 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                           rel="noreferrer"
                           className="text-xs underline text-foreground/70 hover:text-foreground"
                         >
-                          Open in new tab <ExternalLink className="ml-1 inline h-3 w-3" />
+                          Open in new tab <ArrowSquareOut className="ml-1 inline h-3 w-3" />
                         </a>
                       )}
                     </div>
                   </div>
 
-                  <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-neutral-200/70 shadow-sm dark:bg-neutral-800/60 dark:ring-black/10">
+                  <div className="h-[68vh] overflow-auto rounded-xl border border-border bg-muted shadow-sm">
                     {resumeFile ? (
                       isPdf && previewUrl ? (
                         <iframe
@@ -896,7 +877,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                                 : "text-foreground/70 hover:text-foreground"
                             }`}
                           >
-                            <Pencil className="h-3.5 w-3.5" /> Edit
+                            <PencilSimple className="h-3.5 w-3.5" /> Edit
                           </button>
                         </div>
                       )}
@@ -905,7 +886,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       <Button
                         size="sm"
                         disabled={!aiText}
-                        className="h-8 bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         onClick={saveAsPdf}
                         title="Open a print dialog to save as PDF"
                       >
@@ -919,7 +900,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
                         onClick={() => aiText && download(aiText, "tailored-resume.txt")}
                       >
-                        <Download className="mr-1 h-4 w-4" />
+                        <DownloadSimple className="mr-1 h-4 w-4" />
                         .txt
                       </Button>
                       <Button
@@ -929,7 +910,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         className="h-8 border-border text-foreground hover:bg-foreground/[0.06]"
                         onClick={() => aiText && copy(aiText, "Copied draft")}
                       >
-                        <ClipboardCopy className="mr-1 h-4 w-4" />
+                        <ClipboardText className="mr-1 h-4 w-4" />
                         Copy
                       </Button>
                       <Button
@@ -940,7 +921,7 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                         onClick={() => setShowExpanded(true)}
                         title="Expand output"
                       >
-                        <Maximize2 className="mr-1 h-4 w-4" />
+                        <ArrowsOut className="mr-1 h-4 w-4" />
                         Expand
                       </Button>
                     </div>
@@ -970,10 +951,10 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                       </p>
                       <div className="mt-4 flex flex-col gap-1.5 text-xs">
                         <span className={`inline-flex items-center gap-1.5 ${resumeFile ? "text-success" : "text-foreground/50"}`}>
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Resume uploaded
+                          <CheckCircle className="h-3.5 w-3.5" /> Resume uploaded
                         </span>
                         <span className={`inline-flex items-center gap-1.5 ${jd.trim().length >= 20 ? "text-success" : "text-foreground/50"}`}>
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Job description added
+                          <CheckCircle className="h-3.5 w-3.5" /> Job description added
                         </span>
                       </div>
                     </div>
@@ -994,16 +975,16 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                     <Button
                       disabled={generating || !resumeFile || jd.trim().length < 20}
                       onClick={handleGenerate}
-                      className="bg-primary-button cursor-pointer text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      className="bg-primary-button cursor-pointer text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       {generating ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                           Rewriting your resume…
                         </>
                       ) : (
                         <>
-                          <PenLine className="mr-2 h-4 w-4" />
+                          <PenNib className="mr-2 h-4 w-4" />
                           Generate tailored draft
                         </>
                       )}
@@ -1059,14 +1040,14 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
                 <Button
                   onClick={onNext}
                   disabled={(step === 1 && !step1Valid) || (step === 3 && !step3Valid)}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Continue
                 </Button>
               ) : (
                 <Button
                   onClick={() => setStep(1)}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Start over
                 </Button>
@@ -1077,14 +1058,14 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
       </div>
     </div>
     {showExpanded && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4 backdrop-blur-sm">
         <div className="relative flex w-full max-w-4xl max-h-[92vh] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
           <div className="flex items-center justify-between border-b border-border px-5 py-3">
             <h3 className="text-sm font-semibold text-foreground">Tailored resume</h3>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
-                className="h-8 bg-primary-button text-white hover:bg-primary-button/90"
+                className="h-8 bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                 onClick={saveAsPdf}
               >
                 <Printer className="mr-1 h-4 w-4" /> Save as PDF

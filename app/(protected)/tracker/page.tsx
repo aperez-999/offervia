@@ -51,7 +51,7 @@ import {
   type SortKey,
   type TrackerApiRow,
 } from "@/lib/tracker/utils";
-import { ArrowUpDown, Download, LayoutGrid, Rows3, Search as SearchIcon } from "lucide-react";
+import { ArrowsDownUp, DownloadSimple, GridFour, MagnifyingGlass as SearchIcon, Rows } from "@phosphor-icons/react/dist/ssr";
 
 type TrackerListResponse = {
   success: true;
@@ -554,7 +554,7 @@ export default function TrackerPage() {
             onClick={exportCsv}
             className="border-border text-foreground hover:bg-foreground/[0.06]"
           >
-            <Download className="mr-2 h-4 w-4" /> Export CSV
+            <DownloadSimple className="mr-2 h-4 w-4" /> Export CSV
           </Button>
 
           <Dialog
@@ -739,7 +739,7 @@ export default function TrackerPage() {
                 : "text-foreground/60 hover:text-foreground"
             }`}
           >
-            <Rows3 className="h-3.5 w-3.5" />
+            <Rows className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Table</span>
           </button>
           <button
@@ -752,7 +752,7 @@ export default function TrackerPage() {
                 : "text-foreground/60 hover:text-foreground"
             }`}
           >
-            <LayoutGrid className="h-3.5 w-3.5" />
+            <GridFour className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Board</span>
           </button>
         </div>
@@ -782,7 +782,7 @@ export default function TrackerPage() {
                   setDraggingId(null);
                   if (dragged) void moveToStatus(dragged, column.status);
                 }}
-                className={`flex flex-col rounded-2xl border bg-card shadow-sm transition-colors dark:ring-black/10 ${
+                className={`flex flex-col rounded-2xl border bg-card shadow-sm transition-colors ${
                   dragOverStatus === column.status
                     ? "border-primary/60 bg-primary/[0.04]"
                     : "border-border"
@@ -894,25 +894,25 @@ export default function TrackerPage() {
                   className="cursor-pointer whitespace-nowrap text-foreground/70"
                   onClick={() => toggleSort("company")}
                 >
-                  Company <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  Company <ArrowsDownUp className="ml-1 inline h-3 w-3" />
                 </TableHead>
                 <TableHead
                   className="cursor-pointer whitespace-nowrap text-foreground/70"
                   onClick={() => toggleSort("position")}
                 >
-                  Position <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  Position <ArrowsDownUp className="ml-1 inline h-3 w-3" />
                 </TableHead>
                 <TableHead
                   className="cursor-pointer whitespace-nowrap text-foreground/70"
                   onClick={() => toggleSort("status")}
                 >
-                  Status <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  Status <ArrowsDownUp className="ml-1 inline h-3 w-3" />
                 </TableHead>
                 <TableHead
                   className="hidden cursor-pointer whitespace-nowrap text-foreground/70 sm:table-cell"
                   onClick={() => toggleSort("applied_on")}
                 >
-                  Applied on <ArrowUpDown className="ml-1 inline h-3 w-3" />
+                  Applied on <ArrowsDownUp className="ml-1 inline h-3 w-3" />
                 </TableHead>
                 <TableHead className="whitespace-nowrap text-right text-foreground/70">Actions</TableHead>
               </TableRow>

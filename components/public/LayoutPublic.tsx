@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Menu, X } from "lucide-react";
+import { List, Moon, Sun, X } from "@phosphor-icons/react/dist/ssr";
 import { motion, AnimatePresence } from "framer-motion";
 import BrandLogo from "@/components/brand/BrandLogo";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
@@ -76,12 +76,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
             className="group flex items-center"
             aria-label="Offervia home"
           >
-            <BrandLogo
-              width={132}
-              height={32}
-              priority
-              className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8"
-            />
+            <BrandLogo className="h-7 transition-transform group-hover:scale-[1.02] sm:h-8" />
           </Link>
 
           {/* Nav */}
@@ -94,7 +89,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {mobileOpen ? <X className="h-4 w-4" /> : <List className="h-4 w-4" />}
             </button>
 
             <a
@@ -160,7 +155,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
 
             <Link
               href="/signup"
-              className="bg-brand-gradient hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              className="bg-primary-button text-primary-button-foreground hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm font-medium shadow-sm shadow-primary/30 transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             >
               Sign up
             </Link>
@@ -251,7 +246,7 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-brand-gradient rounded-md px-3 py-2 text-center font-medium text-white hover:brightness-110"
+                      className="bg-primary-button text-primary-button-foreground rounded-md px-3 py-2 text-center font-medium hover:brightness-110"
                       onClick={() => setMobileOpen(false)}
                     >
                       Sign up

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check, ListChecks, X } from "lucide-react";
+import { ArrowRight, Check, ListChecks, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 
 export type QuickStartItem = {
@@ -119,7 +119,7 @@ export default function QuickStart({
                       it.done
                         ? "bg-success/15 text-success"
                         : isNext
-                        ? "bg-primary-button text-white"
+                        ? "bg-primary-button text-primary-button-foreground"
                         : "bg-foreground/10 text-foreground/70",
                     ].join(" ")}
                   >

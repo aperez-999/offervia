@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload } from "lucide-react";
+import { UploadSimple } from "@phosphor-icons/react/dist/ssr";
 
 type DropzoneProps = {
   onFile: (file: File) => void;
@@ -27,7 +27,7 @@ export default function Dropzone({
         }}
       />
       <div className="mx-auto flex max-w-md flex-col items-center">
-        <Upload className="mb-2 h-6 w-6 text-foreground/60" />
+        <UploadSimple className="mb-2 h-6 w-6 text-foreground/60" />
         <p className="text-sm text-foreground">
           {fileName ? `Selected: ${fileName}` : "Click to choose your resume"}
         </p>

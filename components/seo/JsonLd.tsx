@@ -22,7 +22,7 @@ function JsonLdScript({ data }: { data: Record<string, unknown> }) {
 /** Organization + WebSite — safe to render site-wide. */
 export function OrganizationJsonLd() {
   const url = getSiteUrl();
-  const logo = absoluteUrl("/offervia-icon-square.png");
+  const logo = absoluteUrl("/apple-icon");
 
   const organization = {
     "@context": "https://schema.org",

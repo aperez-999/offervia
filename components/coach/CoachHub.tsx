@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { MessageSquare } from "lucide-react";
+import { ChatCircleText } from "@phosphor-icons/react/dist/ssr";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Chat = dynamic(() => import("./Chat"), {
@@ -57,7 +57,7 @@ export default function CoachHub() {
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground">
           <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
-            <MessageSquare className="size-5" />
+            <ChatCircleText className="size-5" />
           </span>
           AI coach
         </h1>

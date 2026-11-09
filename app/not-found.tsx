@@ -15,7 +15,7 @@ export default function NotFound() {
         <div className="mt-6">
           <Link
             href="/"
-            className="inline-flex rounded-md bg-primary-button px-4 py-2 text-sm font-medium text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+            className="inline-flex rounded-md bg-primary-button px-4 py-2 text-sm font-medium text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
           >
             Go to home page
           </Link>

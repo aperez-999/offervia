@@ -5,7 +5,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import SignupAside from "@/components/auth/SignupAside";
 import SignupForm from "./_form";
 import Link from "next/link";
-import { Linkedin } from "lucide-react";
+import { LinkedinLogo } from "@phosphor-icons/react/dist/ssr";
 import { useToast } from "@/hooks/use-toast";
 
 type OAuthProvider = "google" | "linkedin_oidc";
@@ -73,7 +73,7 @@ export default function SignupPage() {
           className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 transition-all hover:bg-primary/10 hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title="Sign up with LinkedIn"
         >
-          <Linkedin className="h-4 w-4 text-foreground" aria-hidden="true" />
+          <LinkedinLogo className="h-4 w-4 text-foreground" aria-hidden="true" />
         </button>
       </div>
 

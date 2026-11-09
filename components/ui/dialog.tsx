@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "lucide-react"
+import { X } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils"
 
@@ -38,7 +38,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-overlay backdrop-blur-sm",
         className
       )}
       {...props}
@@ -71,7 +71,7 @@ function DialogContent({
             data-slot="dialog-close"
             className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-md p-1 opacity-70 transition-opacity transition-colors hover:bg-foreground/[0.06] hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
-            <XIcon />
+            <X />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

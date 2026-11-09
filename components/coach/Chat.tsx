@@ -18,13 +18,7 @@ import {
   MAX_CONTEXT_TURNS,
   type DayGroup,
 } from "./chat-utils";
-import {
-  Bot,
-  User,
-  CornerDownRight,
-  RotateCcw,
-  ChevronsDown,
-} from "lucide-react";
+import { ArrowCounterClockwise, ArrowElbowDownRight, CaretDoubleDown, Robot, User } from "@phosphor-icons/react/dist/ssr";
 import CoachSidebar from "./CoachSidebar";
 
 interface MsgRow {
@@ -274,7 +268,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
   const ModeIcon = meta.icon;
 
   return (
-    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:h-[72vh] dark:ring-black/10">
+    <Card className="flex h-[62vh] min-h-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:h-[72vh]">
       <CardHeader className="border-b border-border/60 pb-3">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -326,7 +320,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             onClick={() => scrollToBottom(true)}
             className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
           >
-            <ChevronsDown className="mr-1 h-4 w-4" /> Jump to latest
+            <CaretDoubleDown className="mr-1 h-4 w-4" /> Jump to latest
           </Button>
         )}
 
@@ -367,7 +361,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                             : "bg-primary/10 text-primary ring-primary/20"
                         }`}
                       >
-                        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                        {isUser ? <User className="h-4 w-4" /> : <Robot className="h-4 w-4" />}
                       </span>
                       <div className={`flex min-w-0 max-w-[85%] flex-col ${isUser ? "items-end" : "items-start"}`}>
                         <MessageBubble role={m.role} content={m.content} />
@@ -379,7 +373,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
                               className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                               title="Get a new reply"
                             >
-                              <RotateCcw className="h-3 w-3" /> Try again
+                              <ArrowCounterClockwise className="h-3 w-3" /> Try again
                             </button>
                           )}
                         </div>
@@ -392,7 +386,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
             {sending && (
               <div className="flex items-start gap-2.5">
                 <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
-                  <Bot className="h-4 w-4" />
+                  <Robot className="h-4 w-4" />
                 </span>
                 <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border bg-background/70 px-4 py-3 shadow-sm">
                   <span className="size-2 typing-dot rounded-full bg-primary/60 [animation-delay:-0.32s]" />
@@ -434,7 +428,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
               aria-label="Send message"
               className="size-10 shrink-0 cursor-pointer rounded-xl bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              <CornerDownRight className="h-4 w-4" />
+              <ArrowElbowDownRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button

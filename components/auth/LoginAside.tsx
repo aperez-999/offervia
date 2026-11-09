@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { FileSearch, PenLine, BellRing } from "lucide-react";
+import { BellRinging, FileMagnifyingGlass, PenNib } from "@phosphor-icons/react/dist/ssr";
 
 const STATS = [
   { label: "Applied", value: "12", tone: "text-info", ring: "bg-info/10" },
@@ -10,9 +10,9 @@ const STATS = [
 ];
 
 const ACTIVITY = [
-  { icon: FileSearch, text: "Scanned Senior PM at Northwind Labs", when: "2d ago", accent: false },
-  { icon: PenLine, text: "Tailored resume for Halden & Co.", when: "3d ago", accent: false },
-  { icon: BellRing, text: "Follow up with Brightline on Thursday", when: "Due", accent: true },
+  { icon: FileMagnifyingGlass, text: "Scanned Senior PM at Northwind Labs", when: "2d ago", accent: false },
+  { icon: PenNib, text: "Tailored resume for Halden & Co.", when: "3d ago", accent: false },
+  { icon: BellRinging, text: "Follow up with Brightline on Thursday", when: "Due", accent: true },
 ];
 
 export default function LoginAside() {

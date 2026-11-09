@@ -2,16 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  FileText,
-  PenLine,
-  Mail,
-  MessageSquare,
-  CheckCircle2,
-  ArrowRight,
-  Bot,
-  Check,
-} from "lucide-react";
+import { ArrowRight, ChatCircleText, Check, CheckCircle, EnvelopeSimple, FileText, PenNib, Robot } from "@phosphor-icons/react/dist/ssr";
 
 /**
  * Fake product walkthrough on the homepage. A cursor clicks Scan, Tailor,
@@ -28,10 +19,10 @@ type Step = {
 
 const STEPS: Step[] = [
   { key: "scan", label: "Scan", url: "scanner", icon: FileText },
-  { key: "tailor", label: "Tailor", url: "resume", icon: PenLine },
-  { key: "cover", label: "Cover", url: "cover-letter", icon: Mail },
-  { key: "coach", label: "Coach", url: "coach", icon: MessageSquare },
-  { key: "track", label: "Track", url: "tracker", icon: CheckCircle2 },
+  { key: "tailor", label: "Tailor", url: "resume", icon: PenNib },
+  { key: "cover", label: "Cover", url: "cover-letter", icon: EnvelopeSimple },
+  { key: "coach", label: "Coach", url: "coach", icon: ChatCircleText },
+  { key: "track", label: "Track", url: "tracker", icon: CheckCircle },
 ];
 
 const DWELL = 2100;
@@ -351,7 +342,7 @@ function TailorPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
       <PaneHead
-        icon={PenLine}
+        icon={PenNib}
         title="Resume Tailor"
         sub="Rewrites vague bullets using the posting's terms"
         badge={
@@ -394,7 +385,7 @@ function CoverPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
       <PaneHead
-        icon={Mail}
+        icon={EnvelopeSimple}
         title="Cover letter"
         sub="Drafted from the posting and your resume"
         badge={
@@ -442,7 +433,7 @@ function CoachPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
       <PaneHead
-        icon={MessageSquare}
+        icon={ChatCircleText}
         title="Interview coach"
         sub="Practice answers and get notes on them"
         badge={
@@ -459,7 +450,7 @@ function CoachPane({ reduce }: { reduce: boolean }) {
         </div>
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
-            <Bot className="h-4 w-4" />
+            <Robot className="h-4 w-4" />
           </span>
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 6 }}
@@ -487,7 +478,7 @@ function TrackPane({ reduce }: { reduce: boolean }) {
   return (
     <div>
       <PaneHead
-        icon={CheckCircle2}
+        icon={CheckCircle}
         title="Application tracker"
         sub="Where each application stands"
         badge={
@@ -522,7 +513,7 @@ function TrackPane({ reduce }: { reduce: boolean }) {
                     color: "var(--status-interviewing)",
                   }}
                 >
-                  <CheckCircle2 className="h-3 w-3" />
+                  <CheckCircle className="h-3 w-3" />
                   Interview set
                 </span>
               </motion.div>

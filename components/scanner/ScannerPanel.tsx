@@ -3,17 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  Check,
-  ClipboardCopy,
-  FileText,
-  Lightbulb,
-  Loader2,
-  PenLine,
-  Star,
-  Target,
-  X,
-} from "lucide-react";
+import { Check, CircleNotch, ClipboardText, FileText, Lightbulb, PenNib, Star, Target, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Reveal } from "@/components/motion/Reveal";
@@ -292,7 +282,7 @@ export default function ScannerPanel() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> Comparing keywords…
+                  <CircleNotch className="size-4 animate-spin" /> Comparing keywords…
                 </>
               ) : (
                 <>
@@ -441,7 +431,7 @@ export default function ScannerPanel() {
                         onClick={copyMissing}
                         className="flex items-center gap-1 text-xs font-medium text-foreground/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       >
-                        <ClipboardCopy className="size-3.5" /> Copy
+                        <ClipboardText className="size-3.5" /> Copy
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -492,7 +482,7 @@ export default function ScannerPanel() {
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 border-t border-border pt-4">
                   <Button onClick={tailorResume} className="flex-1">
-                    <PenLine className="size-4" /> Tailor my resume
+                    <PenNib className="size-4" /> Tailor my resume
                   </Button>
                   <Button
                     variant="outline"

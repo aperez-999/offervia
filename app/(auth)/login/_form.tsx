@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { EnvelopeSimple, Lock } from "@phosphor-icons/react/dist/ssr";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +60,7 @@ export default function LoginForm() {
       <AuthField
         id="login-email"
         label="Email"
-        icon={Mail}
+        icon={EnvelopeSimple}
         type="email"
         autoComplete="email"
         placeholder="you@example.com"
@@ -95,7 +95,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-button text-primary-button-foreground px-4 text-sm font-medium shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

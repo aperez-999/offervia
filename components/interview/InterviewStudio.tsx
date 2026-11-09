@@ -3,17 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Lightbulb,
-  Loader2,
-  MessageSquare,
-  Play,
-  RotateCcw,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowCounterClockwise, ArrowRight, ChatCircleText, CheckCircle, CircleNotch, Lightbulb, Play, Target, TrendUp } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +32,7 @@ const toneToClasses: Record<
 > = {
   reward: { ring: "text-reward", text: "text-reward", chip: "bg-reward/10 text-reward border-reward/30" },
   primary: { ring: "text-primary", text: "text-primary", chip: "bg-primary/10 text-primary border-primary/30" },
-  amber: { ring: "text-amber-500", text: "text-amber-500", chip: "bg-amber-500/10 text-amber-600 border-amber-500/30" },
+  amber: { ring: "text-warning", text: "text-warning", chip: "bg-warning/10 text-warning border-warning/30" },
   muted: { ring: "text-foreground/50", text: "text-foreground/60", chip: "bg-foreground/5 text-foreground/60 border-border" },
 };
 
@@ -143,7 +133,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/60">
-            <CheckCircle2 className="size-3.5 text-primary" /> Strengths
+            <CheckCircle className="size-3.5 text-primary" /> Strengths
           </div>
           <ul className="mt-2 space-y-1.5">
             {feedback.strengths.length ? (
@@ -157,7 +147,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
         </div>
         <div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/60">
-            <TrendingUp className="size-3.5 text-amber-500" /> To improve
+            <TrendUp className="size-3.5 text-warning" /> To improve
           </div>
           <ul className="mt-2 space-y-1.5">
             {feedback.improvements.length ? (
@@ -317,7 +307,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
     return (
       <Reveal className="mx-auto w-full max-w-3xl">
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="border-b border-border bg-brand-gradient/[0.03] px-6 py-6 sm:px-8">
+          <div className="border-b border-border bg-primary/[0.04] px-6 py-6 sm:px-8">
             <div className="flex items-center gap-3">
               <span className="inline-flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Target className="size-5" />
@@ -331,7 +321,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
 
           <div className="space-y-6 px-6 py-6 sm:px-8">
             {limitReached ? (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+              <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
                 <p className="text-sm font-medium text-foreground">
                   You&apos;ve used today&apos;s {limit} mock interviews. More open up within 24 hours.
                 </p>
@@ -367,7 +357,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
               <Button onClick={handleStart} disabled={starting} size="lg" className="sm:min-w-44">
                 {starting ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Writing your questions…
+                    <CircleNotch className="size-4 animate-spin" /> Writing your questions…
                   </>
                 ) : (
                   <>
@@ -443,7 +433,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
                 <Button onClick={handleSubmitAnswer} disabled={scoring || answer.trim().length < 1}>
                   {scoring ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" /> Scoring your answer…
+                      <CircleNotch className="size-4 animate-spin" /> Scoring your answer…
                     </>
                   ) : (
                     <>Submit answer</>
@@ -468,7 +458,7 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
                   <Button onClick={handleFinish} disabled={finishing} size="lg">
                     {finishing ? (
                       <>
-                        <Loader2 className="size-4 animate-spin" /> Writing your summary…
+                        <CircleNotch className="size-4 animate-spin" /> Writing your summary…
                       </>
                     ) : (
                       <>See results <ArrowRight className="size-4" /></>
@@ -534,11 +524,11 @@ export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: st
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Button onClick={handleReset} size="lg" variant="outline">
-          <RotateCcw className="size-4" /> New interview
+          <ArrowCounterClockwise className="size-4" /> New interview
         </Button>
         <Button asChild size="lg">
           <Link href="/coach">
-            <MessageSquare className="size-4" /> Practice more with Coach
+            <ChatCircleText className="size-4" /> Practice more with Coach
           </Link>
         </Button>
       </div>

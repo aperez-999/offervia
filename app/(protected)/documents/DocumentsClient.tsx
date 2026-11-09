@@ -3,16 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import {
-  Copy,
-  Download,
-  Printer,
-  Trash2,
-  FileText,
-  PenLine,
-  ChevronDown,
-  Loader2,
-} from "lucide-react";
+import { CaretDown, CircleNotch, Copy, DownloadSimple, FileText, PenNib, Printer, Trash } from "@phosphor-icons/react/dist/ssr";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { printAsPdf, printHtmlDocument } from "@/lib/print-pdf";
 import {
@@ -189,7 +180,7 @@ export default function DocumentsClient() {
         <div className="mt-2 flex flex-wrap justify-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/cover-letter">
-              <PenLine className="size-3.5" /> Write a cover letter
+              <PenNib className="size-3.5" /> Write a cover letter
             </Link>
           </Button>
           <Button asChild size="sm" variant="outline">
@@ -244,11 +235,11 @@ export default function DocumentsClient() {
                   className={`grid size-9 shrink-0 place-items-center rounded-lg ${
                     doc.kind === "cover_letter"
                       ? "bg-primary/10 text-primary"
-                      : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                      : "bg-info/10 text-info"
                   }`}
                 >
                   {doc.kind === "cover_letter" ? (
-                    <PenLine className="size-4" />
+                    <PenNib className="size-4" />
                   ) : (
                     <FileText className="size-4" />
                   )}
@@ -266,7 +257,7 @@ export default function DocumentsClient() {
                     {kindLabel(doc.kind)} · {formatDate(doc.created_at)}
                   </span>
                 </button>
-                <ChevronDown
+                <CaretDown
                   className={`size-4 shrink-0 text-foreground/40 transition-transform ${
                     open ? "rotate-180" : ""
                   }`}
@@ -283,7 +274,7 @@ export default function DocumentsClient() {
                   >
                     <div className="p-4">
                       {doc.kind === "resume" && isLikelyStructuredResume(doc.content) ? (
-                        <div className="max-h-[28rem] overflow-auto rounded-lg bg-neutral-200/70 p-3 dark:bg-neutral-800/60">
+                        <div className="max-h-[28rem] overflow-auto rounded-lg bg-muted p-3">
                           <ResumeDocument text={doc.content} />
                         </div>
                       ) : (
@@ -296,7 +287,7 @@ export default function DocumentsClient() {
                           <Copy className="size-3.5" /> Copy
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => download(doc)}>
-                          <Download className="size-3.5" /> Download .txt
+                          <DownloadSimple className="size-3.5" /> Download .txt
                         </Button>
                         <Button
                           size="sm"
@@ -313,9 +304,9 @@ export default function DocumentsClient() {
                           disabled={deletingId === doc.id}
                         >
                           {deletingId === doc.id ? (
-                            <Loader2 className="size-3.5 animate-spin" />
+                            <CircleNotch className="size-3.5 animate-spin" />
                           ) : (
-                            <Trash2 className="size-3.5" />
+                            <Trash className="size-3.5" />
                           )}
                           Delete
                         </Button>

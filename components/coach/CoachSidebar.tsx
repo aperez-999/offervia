@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, FileText, Mail, Compass, ChevronRight } from "lucide-react";
+import { CaretRight, ChatCircleText, Compass, EnvelopeSimple, FileText } from "@phosphor-icons/react/dist/ssr";
 import type { CoachMode } from "./system-prompts";
 
 type Item = {
@@ -15,7 +15,7 @@ const ITEMS: Item[] = [
     key: "interview",
     label: "Interview practice",
     desc: "Practice questions and answers.",
-    icon: MessageSquare,
+    icon: ChatCircleText,
   },
   {
     key: "resume",
@@ -27,7 +27,7 @@ const ITEMS: Item[] = [
     key: "cover_letter",
     label: "Cover letter help",
     desc: "Openings, examples, tone.",
-    icon: Mail,
+    icon: EnvelopeSimple,
   },
   {
     key: "career",
@@ -85,7 +85,7 @@ export default function CoachSidebar({
                   <span className="block text-xs text-foreground/60 truncate">{desc}</span>
                 </span>
 
-                <ChevronRight
+                <CaretRight
                   className={`h-4 w-4 transition-colors flex-shrink-0
                     ${selected ? "text-primary" : "text-foreground/30 group-hover:text-foreground/50"}
                   `}

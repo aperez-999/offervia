@@ -22,7 +22,7 @@ export function InputField({
   
   return (
     <div className="grid gap-1">
-      <label htmlFor={fieldId} className="text-sm font-medium text-foreground dark:text-white">
+      <label htmlFor={fieldId} className="text-sm font-medium text-foreground">
         {label}
       </label>
       <div className="relative">
@@ -63,7 +63,7 @@ export function TextareaField({
   
   return (
     <div className="grid gap-1">
-      <label htmlFor={fieldId} className="text-sm font-medium text-foreground dark:text-white">
+      <label htmlFor={fieldId} className="text-sm font-medium text-foreground">
         {label}
       </label>
       <div className="relative">

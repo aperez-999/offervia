@@ -1,14 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { cn } from "@/lib/utils";
 
 type AuthFieldProps = {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   registration: UseFormRegisterReturn;
   type?: string;
   placeholder?: string;

@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { FileSearch, FileText, MessageSquare, ClipboardList } from "lucide-react";
+import { ChatCircleText, FileMagnifyingGlass, FileText, Kanban } from "@phosphor-icons/react/dist/ssr";
 
 const BENEFITS = [
   {
-    icon: FileSearch,
+    icon: FileMagnifyingGlass,
     title: "Scan a job posting",
     desc: "See which keywords and skills your resume is missing.",
     chip: "bg-info/10 text-info",
@@ -17,13 +17,13 @@ const BENEFITS = [
     chip: "bg-primary/10 text-primary",
   },
   {
-    icon: MessageSquare,
+    icon: ChatCircleText,
     title: "Practice interview answers",
     desc: "Work through likely questions before the real call.",
     chip: "bg-warning/10 text-warning",
   },
   {
-    icon: ClipboardList,
+    icon: Kanban,
     title: "Track your applications",
     desc: "Know where each one stands and when to follow up.",
     chip: "bg-success/10 text-success",

@@ -28,18 +28,7 @@ import { SettingsSkeleton } from "@/components/settings/SettingsSkeleton";
 import { DAILY_LIMITS, FEATURE_COPY, GATED_FEATURES } from "@/lib/usage/limits";
 import DeleteAccount from "@/components/settings/DeleteAccount";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
-import {
-  UserRound,
-  Palette,
-  SlidersHorizontal,
-  Database,
-  Sun,
-  Moon,
-  Monitor,
-  Check,
-  Camera,
-  Gauge,
-} from "lucide-react";
+import { Camera, Check, Database, Gauge, Monitor, Moon, Palette, SlidersHorizontal, Sun, UserCircle } from "@phosphor-icons/react/dist/ssr";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
 type UserPrefsRow = {
@@ -49,7 +38,7 @@ type UserPrefsRow = {
 };
 
 const SECTIONS = [
-  { id: "profile", label: "Profile", icon: UserRound },
+  { id: "profile", label: "Profile", icon: UserCircle },
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
   { id: "limits", label: "Daily limits", icon: Gauge },
@@ -307,11 +296,11 @@ export default function SettingsPage() {
                 >
                   <Avatar className="h-16 w-16 ring-2 ring-border transition-all duration-300 group-hover:ring-primary/50 motion-safe:group-hover:scale-105">
                     <AvatarImage src={avatarUrl || ""} alt={name || email || "User"} />
-                    <AvatarFallback className="bg-primary-button text-white text-xl">
+                    <AvatarFallback className="bg-primary-button text-primary-button-foreground text-xl">
                       {(name || email || "U").charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-foreground/40 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-foreground/40 text-primary-button-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Camera className="h-5 w-5" />
                   </span>
                 </Link>
@@ -358,7 +347,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={onSave}
                   disabled={saving || loading}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save profile"}
                 </Button>
@@ -467,7 +456,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={onSave}
                   disabled={saving || loading}
-                  className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
                 >
                   {saving ? "Saving…" : "Save settings"}
                 </Button>

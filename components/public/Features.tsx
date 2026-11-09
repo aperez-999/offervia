@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageSquare, FileText, ClipboardList, Briefcase } from "lucide-react";
+import { Briefcase, ChatCircleText, FileText, Kanban } from "@phosphor-icons/react/dist/ssr";
 
 export default function Features() {
   const items = [
@@ -20,7 +20,7 @@ export default function Features() {
       title: "Resume Tailor",
       desc:
         "Upload your resume once. For each job, get a rewritten draft that uses the posting's language and keeps your real experience.",
-      icon: ClipboardList,
+      icon: Kanban,
       bullets: [
         "Make a new draft for every job you apply to",
         "Plain formatting that applicant tracking systems can read",
@@ -31,7 +31,7 @@ export default function Features() {
       title: "Interview coach",
       desc:
         "Practice the questions you're likely to get and get notes on what to cut, what to add, and where your answer loses the thread.",
-      icon: MessageSquare,
+      icon: ChatCircleText,
       bullets: [
         "Starter questions for behavioral, resume, and career topics",
         "Short or detailed feedback, your choice",

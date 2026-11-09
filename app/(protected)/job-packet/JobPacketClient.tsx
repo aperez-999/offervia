@@ -4,18 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Briefcase,
-  Building2,
-  CheckCircle2,
-  ClipboardCopy,
-  Info,
-  Link as LinkIcon,
-  Loader2,
-  MapPin,
-  ScanSearch,
-} from "lucide-react";
+import { ArrowRight, Briefcase, Buildings, CheckCircle, CircleNotch, ClipboardText, Info, Link as LinkIcon, MapPin, Scan } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -264,7 +253,7 @@ export default function JobPacketClient() {
             >
               Clear packet
             </Button>
-            <Button asChild className="bg-primary-button text-white hover:bg-primary-button/90">
+            <Button asChild className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90">
               <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
@@ -295,7 +284,7 @@ export default function JobPacketClient() {
             <Card
               key={step.id}
               className={cn(
-                "rounded-2xl border bg-card shadow-sm transition-colors dark:ring-black/10",
+                "rounded-2xl border bg-card shadow-sm transition-colors",
                 active
                   ? "border-primary/50 ring-primary/20 dark:ring-primary/20"
                   : done
@@ -309,13 +298,13 @@ export default function JobPacketClient() {
                     className={cn(
                       "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
                       done
-                        ? "bg-success text-white"
+                        ? "bg-success text-success-foreground"
                         : active
-                        ? "bg-primary-button text-white"
+                        ? "bg-primary-button text-primary-button-foreground"
                         : "bg-foreground/[0.06] text-foreground/60"
                     )}
                   >
-                    {done ? <CheckCircle2 className="h-4 w-4" /> : step.number}
+                    {done ? <CheckCircle className="h-4 w-4" /> : step.number}
                   </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -352,7 +341,7 @@ export default function JobPacketClient() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1 sm:col-span-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <Building2 className="h-4 w-4" />
+                  <Buildings className="h-4 w-4" />
                   Company name
                 </label>
                 <Input
@@ -425,16 +414,16 @@ export default function JobPacketClient() {
               <Button
                 onClick={() => void runScan()}
                 disabled={!canRunScan || loadingScan}
-                className="bg-primary-button text-white hover:bg-primary-button/90"
+                className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
               >
                 {loadingScan ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                     Scanning…
                   </>
                 ) : (
                   <>
-                    <ScanSearch className="mr-2 h-4 w-4" />
+                    <Scan className="mr-2 h-4 w-4" />
                     Run scan
                   </>
                 )}
@@ -521,7 +510,7 @@ export default function JobPacketClient() {
                     <ul className="mt-2 space-y-1.5 text-sm text-foreground">
                       {draft.scanResult.strengths.map((item) => (
                         <li key={item} className="flex items-start gap-2">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -594,7 +583,7 @@ export default function JobPacketClient() {
                       onClick={() => copy(draft.tailoredResume, "Copied tailored resume")}
                       className="border-border text-foreground hover:bg-foreground/[0.06]"
                     >
-                      <ClipboardCopy className="mr-2 h-4 w-4" />
+                      <ClipboardText className="mr-2 h-4 w-4" />
                       Copy resume
                     </Button>
                     <Button
@@ -616,7 +605,7 @@ export default function JobPacketClient() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={continueToResumeTailor}
-                  className="bg-primary-button text-white hover:bg-primary-button/90"
+                  className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90"
                 >
                   {draft.tailoredResume ? "Edit in Resume Tailor" : "Open Resume Tailor"}
                 </Button>

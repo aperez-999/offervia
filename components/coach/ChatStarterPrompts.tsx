@@ -1,6 +1,6 @@
 "use client";
 
-import { CornerDownRight } from "lucide-react";
+import { ArrowElbowDownRight } from "@phosphor-icons/react/dist/ssr";
 import type { CoachMode } from "./system-prompts";
 import { COACH_MODE_META } from "./chat-config";
 
@@ -32,7 +32,7 @@ export default function ChatStarterPrompts({
             >
               <PromptIcon className="size-4 shrink-0 text-primary" />
               <span className="flex-1">{prompt.text}</span>
-              <CornerDownRight className="size-4 shrink-0 text-foreground/25 transition-colors group-hover:text-primary" />
+              <ArrowElbowDownRight className="size-4 shrink-0 text-foreground/25 transition-colors group-hover:text-primary" />
             </button>
           );
         })}

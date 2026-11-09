@@ -16,52 +16,30 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import {
-  Search,
-  LayoutDashboard,
-  FileText,
-  PenLine,
-  Search as SearchIcon,
-  MessageSquare,
-  ClipboardList,
-  BookOpen,
-  Library,
-  GraduationCap,
-  MicVocal,
-  Settings,
-  UserRound,
-  LogOut,
-  Moon,
-  Sun,
-  Monitor,
-  Mail,
-  Briefcase,
-  ListChecks,
-  Scale,
-} from "lucide-react";
+import { BookOpen, Books, Briefcase, ChatCircleText, EnvelopeSimple, FileText, GearSix, GraduationCap, Kanban, ListChecks, MagnifyingGlass, MagnifyingGlass as SearchIcon, Microphone, Monitor, Moon, PenNib, Scales, SignOut, SquaresFour, Sun, UserCircle } from "@phosphor-icons/react/dist/ssr";
 import { DISCUSSIONS_URL } from "@/lib/github";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
 export const NAV_ITEMS: Nav[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: SquaresFour },
   { label: "Job Packet", href: "/job-packet", icon: Briefcase },
   { label: "Resume", href: "/resume", icon: FileText },
-  { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
+  { label: "Cover Letter", href: "/cover-letter", icon: PenNib },
   { label: "Scanner", href: "/scanner", icon: SearchIcon },
-  { label: "Coach", href: "/coach", icon: MessageSquare },
-  { label: "Interview", href: "/interview", icon: MicVocal },
+  { label: "Coach", href: "/coach", icon: ChatCircleText },
+  { label: "Interview", href: "/interview", icon: Microphone },
   { label: "Bullet check", href: "/bullet-check", icon: ListChecks },
-  { label: "Compare offers", href: "/offers", icon: Scale },
-  { label: "Tracker", href: "/tracker", icon: ClipboardList },
-  { label: "Documents", href: "/documents", icon: Library },
+  { label: "Compare offers", href: "/offers", icon: Scales },
+  { label: "Tracker", href: "/tracker", icon: Kanban },
+  { label: "Documents", href: "/documents", icon: Books },
   { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
-  { label: "Templates", href: "/student-hub?tab=templates", icon: Mail },
+  { label: "Templates", href: "/student-hub?tab=templates", icon: EnvelopeSimple },
   { label: "Learning resources", href: "/student-hub?tab=resources", icon: BookOpen },
   { label: "Student deals", href: "/student-hub?tab=deals", icon: GraduationCap },
-  { label: "Questions and feedback", href: DISCUSSIONS_URL, icon: Mail },
-  { label: "Settings", href: "/settings", icon: Settings },
-  { label: "Profile", href: "/profile", icon: UserRound },
+  { label: "Questions and feedback", href: DISCUSSIONS_URL, icon: EnvelopeSimple },
+  { label: "Settings", href: "/settings", icon: GearSix },
+  { label: "Profile", href: "/profile", icon: UserCircle },
 ];
 
 export default function GlobalCommandMenu() {
@@ -108,7 +86,7 @@ export default function GlobalCommandMenu() {
         className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
         aria-label="Open command palette"
       >
-        <Search className="h-4 w-4" />
+        <MagnifyingGlass className="h-4 w-4" />
         <span className="hidden sm:inline text-xs">Search</span>
         <kbd className="hidden sm:inline rounded border border-border bg-muted px-1.5 py-0.5 text-xs font-medium">⌘K</kbd>
       </button>
@@ -141,7 +119,7 @@ export default function GlobalCommandMenu() {
               Tailor resume
             </CommandItem>
             <CommandItem onSelect={() => go("/cover-letter")}>
-              <PenLine className="mr-2 h-4 w-4" />
+              <PenNib className="mr-2 h-4 w-4" />
               Write cover letter
             </CommandItem>
             <CommandItem onSelect={() => go("/scanner")}>
@@ -149,7 +127,7 @@ export default function GlobalCommandMenu() {
               Scan job description
             </CommandItem>
             <CommandItem onSelect={() => go("/tracker?new=1")}>
-              <ClipboardList className="mr-2 h-4 w-4" />
+              <Kanban className="mr-2 h-4 w-4" />
               Add application
             </CommandItem>
           </CommandGroup>
@@ -180,15 +158,15 @@ export default function GlobalCommandMenu() {
           {/* Account */}
           <CommandGroup heading="Account">
             <CommandItem onSelect={() => go("/settings")}>
-              <Settings className="mr-2 h-4 w-4" />
+              <GearSix className="mr-2 h-4 w-4" />
               Settings
             </CommandItem>
             <CommandItem onSelect={() => go("/profile")}>
-              <UserRound className="mr-2 h-4 w-4" />
+              <UserCircle className="mr-2 h-4 w-4" />
               Profile
             </CommandItem>
             <CommandItem onSelect={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />
+              <SignOut className="mr-2 h-4 w-4" />
               Sign out
             </CommandItem>
           </CommandGroup>

@@ -48,8 +48,8 @@ export function createPageMetadata({
       images: [
         {
           url: absoluteUrl(SITE_SHARE_IMAGE),
-          width: 1774,
-          height: 887,
+          width: 1200,
+          height: 630,
           alt: SITE_SHARE_IMAGE_ALT,
         },
       ],

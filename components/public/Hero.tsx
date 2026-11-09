@@ -29,7 +29,7 @@ export default function Hero() {
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/signup"
-                className="bg-brand-gradient inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                className="bg-primary-button text-primary-button-foreground inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium shadow-sm transition-all hover:brightness-110 motion-safe:active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               >
                 Create a free account
               </Link>

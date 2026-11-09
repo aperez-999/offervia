@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Copy, Download, FileText, Loader2, PenLine, Printer, X } from "lucide-react";
+import { CircleNotch, Copy, DownloadSimple, FileText, PenNib, Printer, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -270,11 +270,11 @@ export default function CoverLetterStudio({
           >
             {generating ? (
               <>
-                <Loader2 className="size-4 animate-spin" /> Writing your letter…
+                <CircleNotch className="size-4 animate-spin" /> Writing your letter…
               </>
             ) : (
               <>
-                <PenLine className="size-4" /> Generate cover letter
+                <PenNib className="size-4" /> Generate cover letter
               </>
             )}
           </Button>
@@ -302,7 +302,7 @@ export default function CoverLetterStudio({
                 <Copy className="size-3.5" /> Copy
               </Button>
               <Button variant="outline" size="sm" onClick={download}>
-                <Download className="size-3.5" /> .txt
+                <DownloadSimple className="size-3.5" /> .txt
               </Button>
               <Button
                 variant="outline"

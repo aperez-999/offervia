@@ -1,31 +1,26 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import {
-  Compass,
-  FileText,
-  Mail,
-  MessageSquare,
-} from "lucide-react";
+import { ChatCircleText, Compass, EnvelopeSimple, FileText } from "@phosphor-icons/react/dist/ssr";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import type { CoachMode } from "./system-prompts";
 
 export type StarterPrompt = {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   text: string;
 };
 
 export const COACH_MODE_META: Record<
   CoachMode,
-  { label: string; icon: LucideIcon; subtitle: string; intro: string; prompts: StarterPrompt[] }
+  { label: string; icon: PhosphorIcon; subtitle: string; intro: string; prompts: StarterPrompt[] }
 > = {
   interview: {
     label: "Interview practice",
-    icon: MessageSquare,
+    icon: ChatCircleText,
     subtitle: "Practice answers you could say out loud in an interview.",
     intro: "Ask for a practice question, or paste an answer you want feedback on.",
     prompts: [
-      { icon: MessageSquare, text: "Help me prepare for a behavioral interview." },
-      { icon: MessageSquare, text: "Ask me a mock interview question." },
+      { icon: ChatCircleText, text: "Help me prepare for a behavioral interview." },
+      { icon: ChatCircleText, text: "Ask me a mock interview question." },
       { icon: FileText, text: "How do I explain a resume gap?" },
     ],
   },
@@ -42,13 +37,13 @@ export const COACH_MODE_META: Record<
   },
   cover_letter: {
     label: "Cover letter help",
-    icon: Mail,
+    icon: EnvelopeSimple,
     subtitle: "Help with openings, examples, and closings.",
     intro: "Paste a paragraph that sounds generic, or ask for help with an opening.",
     prompts: [
-      { icon: Mail, text: "Write a cover letter intro." },
-      { icon: Mail, text: "Explain why I want to join this company." },
-      { icon: Mail, text: "Improve this paragraph." },
+      { icon: EnvelopeSimple, text: "Write a cover letter intro." },
+      { icon: EnvelopeSimple, text: "Explain why I want to join this company." },
+      { icon: EnvelopeSimple, text: "Improve this paragraph." },
     ],
   },
   career: {

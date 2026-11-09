@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AuthLayout from "@/components/auth/AuthLayout";
-import { Mail } from "lucide-react";
+import { EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
 import { postJson } from "@/lib/safe-fetch";
 
 export default function ForgotPasswordPage() {
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
             <label className="text-sm font-medium text-foreground">Email</label>
             <div className="mt-1 relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-foreground/50">
-                <Mail size={16}/>
+                <EnvelopeSimple size={16}/>
               </span>
               <input
                 type="email"
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={status === "sending" || status === "sent"}
-            className="w-full h-10 rounded-md bg-primary-button text-white text-sm font-medium hover:bg-primary-button/90 disabled:opacity-60"
+            className="w-full h-10 rounded-md bg-primary-button text-primary-button-foreground text-sm font-medium hover:bg-primary-button/90 disabled:opacity-60"
           >
             {status === "sending" ? "Sending…" : status === "sent" ? "Email sent" : "Send reset link"}
           </button>

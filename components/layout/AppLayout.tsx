@@ -6,23 +6,7 @@ import BrandLogo from "@/components/brand/BrandLogo";
 import { usePathname, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import {
-  LayoutDashboard,
-  Layers,
-  FileText,
-  PenLine,
-  Search,
-  MessageSquare,
-  MicVocal,
-  ClipboardList,
-  GraduationCap,
-  Library,
-  Menu,
-  X,
-  ArrowRight,
-  ListChecks,
-  Scale,
-} from "lucide-react";
+import { ArrowRight, Books, ChatCircleText, FileText, GraduationCap, Kanban, List, ListChecks, MagnifyingGlass, Microphone, PenNib, Scales, SquaresFour, Stack, X } from "@phosphor-icons/react/dist/ssr";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import UserMenu from "@/components/layout/UserMenu";
@@ -44,30 +28,30 @@ const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalComman
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
 const navGroups: { label?: string; items: NavItem[] }[] = [
-  { items: [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
+  { items: [{ label: "Dashboard", href: "/dashboard", icon: SquaresFour }] },
   {
     label: "Apply",
     items: [
-      { label: "Job Packet", href: "/job-packet", icon: Layers },
+      { label: "Job Packet", href: "/job-packet", icon: Stack },
       { label: "Resume", href: "/resume", icon: FileText },
-      { label: "Cover Letter", href: "/cover-letter", icon: PenLine },
-      { label: "ATS Scanner", href: "/scanner", icon: Search },
+      { label: "Cover Letter", href: "/cover-letter", icon: PenNib },
+      { label: "ATS Scanner", href: "/scanner", icon: MagnifyingGlass },
     ],
   },
   {
     label: "Prepare",
     items: [
-      { label: "Coach", href: "/coach", icon: MessageSquare },
-      { label: "Interview", href: "/interview", icon: MicVocal },
+      { label: "Coach", href: "/coach", icon: ChatCircleText },
+      { label: "Interview", href: "/interview", icon: Microphone },
       { label: "Bullet Check", href: "/bullet-check", icon: ListChecks },
-      { label: "Compare Offers", href: "/offers", icon: Scale },
+      { label: "Compare Offers", href: "/offers", icon: Scales },
     ],
   },
   {
     label: "Organize",
     items: [
-      { label: "Tracker", href: "/tracker", icon: ClipboardList },
-      { label: "Documents", href: "/documents", icon: Library },
+      { label: "Tracker", href: "/tracker", icon: Kanban },
+      { label: "Documents", href: "/documents", icon: Books },
       { label: "Student Hub", href: "/student-hub", icon: GraduationCap },
     ],
   },
@@ -204,7 +188,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="lg:hidden"
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu className="h-5 w-5" />
+              <List className="h-5 w-5" />
               <span className="sr-only">Open menu</span>
             </Button>
             <Link
@@ -212,7 +196,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="flex items-center transition-opacity hover:opacity-90"
               aria-label="Offervia dashboard"
             >
-              <BrandLogo width={132} height={32} priority className="h-7 sm:h-8" />
+              <BrandLogo className="h-7 sm:h-8" />
             </Link>
           </div>
 
@@ -248,7 +232,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+                  className="fixed inset-0 z-50 bg-overlay lg:hidden"
                   onClick={() => setSidebarOpen(false)}
                 />
                 
