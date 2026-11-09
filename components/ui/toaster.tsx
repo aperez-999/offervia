@@ -18,7 +18,6 @@ function resolveDuration(opts: ToastProps): number {
   if (opts.duration) return opts.duration;
   if (opts.action) return 6000;
   if (opts.variant === "destructive") return 5000;
-  if (opts.variant === "upgrade") return 6000;
   return 2800;
 }
 

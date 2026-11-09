@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Copy, Download, FileText, Loader2, PenLine, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,17 +15,14 @@ import {
   COVER_LETTER_TONES,
   type CoverLetterTone,
 } from "@/lib/prompts/cover-letter-system";
-import type { PlanType } from "@/lib/plans";
 
 export default function CoverLetterStudio({
   defaultRole = "",
   defaultCompany = "",
 }: {
-  plan?: PlanType;
   defaultRole?: string;
   defaultCompany?: string;
 }) {
-  const router = useRouter();
   const { toast } = useToast();
   const reduceMotion = useReducedMotion();
 
@@ -46,27 +42,6 @@ export default function CoverLetterStudio({
     resumeMode === "upload" ? !!resumeFile : resumeText.trim().length >= 100;
   const canGenerate =
     hasResume && jobDescription.trim().length >= 20 && !generating;
-
-  function handleLimitReached() {
-    const msg =
-      "You've used this month's cover letters. Upgrade to Pro for more.";
-    setError(msg);
-    toast({
-      title: "Monthly limit reached",
-      description: msg,
-      variant: "upgrade",
-      duration: 8000,
-      action: (
-        <Button
-          size="default"
-          className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          onClick={() => router.push("/upgrade")}
-        >
-          Upgrade to Pro
-        </Button>
-      ),
-    });
-  }
 
   async function handleGenerate() {
     if (!canGenerate) return;
@@ -94,10 +69,6 @@ export default function CoverLetterStudio({
       }
 
       if (!resp.ok) {
-        if (resp.status === 403) {
-          handleLimitReached();
-          return;
-        }
         const msg =
           resp.error ||
           (resp.status === 429

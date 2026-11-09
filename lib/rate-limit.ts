@@ -10,11 +10,9 @@ export type RateLimitKind =
   | "job-scan"
   | "interview"
   | "cover_letter"
+  | "resume_text"
   | "tracker_get"
   | "tracker_write"
-  | "billing_checkout"
-  | "billing_portal"
-  | "contact"
   | "auth_login"
   | "auth_signup"
   | "auth_forgot_password"
@@ -42,7 +40,7 @@ export function getIpUa(req: Request) {
  */
 export async function checkRateLimitForApi(
   req: Request,
-  kind: "coach" | "scanner" | "resume_tailor" | "job-scan" | "interview" | "cover_letter",
+  kind: "coach" | "scanner" | "resume_tailor" | "job-scan" | "interview" | "cover_letter" | "resume_text",
   customLimits?: {
     perMinute?: number;
     perHour?: number;
@@ -163,11 +161,11 @@ export async function enforceRateLimit(
 
 const IP_ONLY_SENTINEL = "00000000-0000-0000-0000-000000000000";
 
-/** Rate limit when you already have userId (e.g. tracker Bearer, billing cookies). */
+/** Rate limit when you already have userId (e.g. tracker Bearer). */
 export async function checkRateLimitWithUserId(
   supabase: SupabaseClient,
   userId: string,
-  kind: "tracker_get" | "tracker_write" | "billing_checkout" | "billing_portal",
+  kind: "tracker_get" | "tracker_write",
   customLimits: { perMinute?: number; perDay?: number }
 ): Promise<RateResult> {
   const windows: RateWindow[] = [
@@ -178,10 +176,10 @@ export async function checkRateLimitWithUserId(
   return enforceRateLimit(supabase, userId, kind, { windows });
 }
 
-/** IP-only rate limit (e.g. contact form). Counts by kind + ip; inserts with sentinel user_id. */
+/** IP-only rate limit (e.g. sign-in). Counts by kind + ip; inserts with sentinel user_id. */
 export async function enforceRateLimitByIp(
   supabase: SupabaseClient,
-  kind: "contact" | "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
+  kind: "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
   ip: string,
   windows: RateWindow[]
 ): Promise<RateResult> {
@@ -223,7 +221,7 @@ export async function enforceRateLimitByIp(
 
 export async function checkRateLimitByIp(
   req: Request,
-  kind: "contact" | "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
+  kind: "auth_login" | "auth_signup" | "auth_forgot_password" | "auth_oauth_start",
   windows: RateWindow[]
 ): Promise<RateResult> {
   const supabase = getServiceSupabase();

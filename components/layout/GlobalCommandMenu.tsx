@@ -39,6 +39,7 @@ import {
   ListChecks,
   Scale,
 } from "lucide-react";
+import { DISCUSSIONS_URL } from "@/lib/github";
 
 type Nav = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -58,7 +59,7 @@ export const NAV_ITEMS: Nav[] = [
   { label: "Templates", href: "/student-hub?tab=templates", icon: Mail },
   { label: "Learning resources", href: "/student-hub?tab=resources", icon: BookOpen },
   { label: "Student deals", href: "/student-hub?tab=deals", icon: GraduationCap },
-  { label: "Contact", href: "/contact", icon: Mail },
+  { label: "Questions and feedback", href: DISCUSSIONS_URL, icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Profile", href: "/profile", icon: UserRound },
 ];
@@ -84,6 +85,10 @@ export default function GlobalCommandMenu() {
 
   const go = (href: string) => {
     setOpen(false);
+    if (/^https?:/.test(href)) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
     router.push(href);
   };
 

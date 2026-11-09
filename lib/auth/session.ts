@@ -2,7 +2,6 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
-import { getUserSubscription, type UserSubscription } from "@/lib/subscription";
 
 export const getCurrentUser = cache(async () => {
   const cookieStore = await cookies();
@@ -19,7 +18,3 @@ export const getCurrentUser = cache(async () => {
 
   return { user, error };
 });
-
-export const getCurrentUserSubscription = cache(
-  async (userId: string): Promise<UserSubscription> => getUserSubscription(userId)
-);

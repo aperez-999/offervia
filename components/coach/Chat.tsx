@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,6 @@ interface MsgRow {
 
 function InnerChat({ mode }: { mode: CoachMode }) {
   const supabase = useMemo(() => getBrowserSupabase(), []);
-  const router = useRouter();
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -203,37 +201,6 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         return;
       }
 
-      // Plan limit: show server message + upgrade CTA
-      if (res.status === 403) {
-        const data = await res.json().catch(() => ({}));
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id));
-        if (data?.error === "PLAN_LIMIT_REACHED") {
-          toast({
-            title: "Monthly limit reached",
-            description: data?.message ?? "You've used this month's coach messages. Upgrade to Pro for more.",
-            variant: "upgrade",
-            duration: 8000,
-            action: (
-              <Button
-                size="default"
-                className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                onClick={() => router.push("/upgrade")}
-              >
-                Upgrade to Pro
-              </Button>
-            ),
-          });
-        } else {
-          toast({
-            title: data?.message ?? data?.error ?? "You don't have access to this.",
-            variant: "destructive",
-          });
-        }
-        setController(null);
-        setSending(false);
-        return;
-      }
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         const message = data?.message ?? data?.error ?? `Message not sent (error ${res.status}). Try again.`;
@@ -292,7 +259,7 @@ function InnerChat({ mode }: { mode: CoachMode }) {
         scrollToBottom(true);
       }, 0);
     }
-  }, [input, loadMessages, messages, mode, responseMode, sending, toast, userId, scrollToBottom, router]);
+  }, [input, loadMessages, messages, mode, responseMode, sending, toast, userId, scrollToBottom]);
 
   // regenerate last assistant reply (re-send last user message)
   const regenerate = useCallback(() => {

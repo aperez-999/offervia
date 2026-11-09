@@ -2,22 +2,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PROTECTED_PREFIXES = [
+export const PROTECTED_PREFIXES = [
   "/dashboard",
+  "/job-packet",
   "/resume",
+  "/cover-letter",
   "/scanner",
   "/coach",
+  "/interview",
   "/tracker",
-  "/resources",
-  "/students",
-  "/templates",
-  "/settings",
-  "/profile",
+  "/documents",
+  "/student-hub",
   "/bullet-check",
   "/offers",
-  "/upcoming",
-  "/job-packet",
-  "/upgrade",
+  "/settings",
+  "/profile",
 ];
 
 export async function middleware(req: NextRequest) {
@@ -76,22 +75,23 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // Must be a static literal for Next.js. middleware.test.ts keeps it in sync
+  // with PROTECTED_PREFIXES and the folders under app/(protected).
   matcher: [
     "/",
     "/dashboard/:path*",
+    "/job-packet/:path*",
     "/resume/:path*",
+    "/cover-letter/:path*",
     "/scanner/:path*",
     "/coach/:path*",
+    "/interview/:path*",
     "/tracker/:path*",
-    "/resources/:path*",
-    "/students/:path*",
-    "/templates/:path*",
-    "/settings/:path*",
-    "/profile/:path*",
+    "/documents/:path*",
+    "/student-hub/:path*",
     "/bullet-check/:path*",
     "/offers/:path*",
-    "/upcoming/:path*",
-    "/job-packet/:path*",
-    "/upgrade/:path*",
+    "/settings/:path*",
+    "/profile/:path*",
   ],
 };

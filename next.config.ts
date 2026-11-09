@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       { source: "/resources", destination: "/student-hub?tab=resources", permanent: false },
       { source: "/students", destination: "/student-hub?tab=deals", permanent: false },
       { source: "/upcoming", destination: "/dashboard", permanent: false },
+      { source: "/terms", destination: "/privacy", permanent: true },
+      { source: "/contact", destination: "https://github.com/aperez-999/offervia/discussions", permanent: false },
     ];
   },
 

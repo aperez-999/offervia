@@ -12,24 +12,11 @@ const serverEnvSchema = z.object({
   GROQ_MODEL: z.string().optional(),
   GROQ_FALLBACK_MODEL: z.string().optional(),
 
-  // Stripe (server-only)
-  STRIPE_SECRET_KEY: nonEmpty.optional(),
-  STRIPE_WEBHOOK_SECRET: nonEmpty.optional(),
-
   // Sentry (server-only)
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
 
-  // Email / contact
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  CONTACT_TO: z.string().optional(),
-  CONTACT_FROM: z.string().optional(),
-  CONTACT_FROM_NAME: z.string().optional(),
-  CONTACT_FROM_EMAIL: z.string().optional(),
 });
 
 let cached: (z.infer<typeof serverEnvSchema> & typeof publicEnv) | null = null;
@@ -44,19 +31,9 @@ export function getServerEnv() {
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     GROQ_MODEL: process.env.GROQ_MODEL,
     GROQ_FALLBACK_MODEL: process.env.GROQ_FALLBACK_MODEL,
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
-    SMTP_HOST: process.env.SMTP_HOST,
-    SMTP_PORT: process.env.SMTP_PORT,
-    SMTP_USER: process.env.SMTP_USER,
-    SMTP_PASS: process.env.SMTP_PASS,
-    CONTACT_TO: process.env.CONTACT_TO,
-    CONTACT_FROM: process.env.CONTACT_FROM,
-    CONTACT_FROM_NAME: process.env.CONTACT_FROM_NAME,
-    CONTACT_FROM_EMAIL: process.env.CONTACT_FROM_EMAIL,
   };
   const parsed = serverEnvSchema.safeParse(raw);
   if (!parsed.success) {

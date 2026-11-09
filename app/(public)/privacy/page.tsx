@@ -1,202 +1,120 @@
 import Link from "next/link";
-import { ShieldCheck, Database, Workflow, Lock, UserCheck, Cookie, RefreshCw, Mail, ArrowUp } from "lucide-react";
-import { SectionCard } from "@/components/ui/SectionCard";
+import Footer from "@/components/public/Footer";
+import { DISCUSSIONS_URL, GITHUB_REPO_URL } from "@/lib/github";
+
+const UPDATED = "November 4, 2026";
+
+function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 border-t border-border pt-8">
+      <h2 id={`${id}-title`} className="font-display text-xl font-semibold text-foreground">
+        {title}
+      </h2>
+      <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/80 [&_li]:pl-1 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+const link = "font-medium text-primary underline-offset-4 hover:underline";
 
 export default function PrivacyPage() {
-  const lastUpdated = "April 27, 2026";
-
-  const sections = [
-    { id: "introduction", title: "Introduction", icon: ShieldCheck },
-    { id: "data-we-collect", title: "Data we collect", icon: Database },
-    { id: "how-data-is-used", title: "How data is used", icon: Workflow },
-    { id: "ai-and-security", title: "Drafts and security", icon: Lock },
-    { id: "user-rights", title: "Your rights", icon: UserCheck },
-    { id: "cookies", title: "Cookies", icon: Cookie },
-    { id: "changes", title: "Changes to this policy", icon: RefreshCw },
-    { id: "contact", title: "Contact", icon: Mail },
-  ];
-
   return (
-    <main className="relative overflow-hidden text-foreground">
-      {/* Token-driven backdrop, consistent with the app */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="brand-glow absolute inset-x-0 -top-24 h-96" />
-      </div>
+    <>
+      <main className="mx-auto max-w-3xl px-4 py-14 sm:py-20">
+        <h1 className="font-display text-[clamp(2rem,4vw,2.75rem)] font-bold tracking-[-0.025em] text-foreground">
+          Privacy and terms
+        </h1>
+        <p className="mt-3 text-[15px] text-foreground/75">
+          The short version: we keep what the app needs to work, we never sell it, and you can export or
+          delete it yourself at any time. Last updated {UPDATED}.
+        </p>
 
-      <div className="mx-auto max-w-5xl px-4 py-16 sm:py-20">
-        {/* Header */}
-        <header className="animate-in fade-in-0 slide-in-from-bottom-3 duration-700 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
-            <ShieldCheck className="h-6 w-6" />
-          </div>
-          <p className="mt-4 text-xs font-semibold text-primary">
-            Legal
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground text-balance sm:text-4xl">
-            Privacy Policy
-          </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-foreground/70">
-            What Offervia collects, how it&apos;s used, and the choices you have. We never sell your data.
-          </p>
-          <div className="mx-auto mt-4 w-fit rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/70">
-            Last updated: {lastUpdated}
-          </div>
-        </header>
+        <div className="mt-10 space-y-10">
+          <Section id="what-we-keep" title="What we keep">
+            <p>When you make an account, we store:</p>
+            <ul>
+              <li>Your email, name, and profile photo, plus anything you add to your profile, including My resume.</li>
+              <li>Applications in your tracker, with their dates and notes.</li>
+              <li>Resumes and cover letters you save, keyword scans, and your interview and coach conversations.</li>
+              <li>Your preferences, and counts of how often you use each tool (used for daily limits).</li>
+              <li>A short log of requests with IP address and browser type, used to stop abuse.</li>
+            </ul>
+            <p>
+              Some things stay only in your browser and never reach our servers: bullet check text, offer
+              comparisons, template details you fill in, and unfinished drafts.
+            </p>
+          </Section>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
-          {/* Sticky TOC (desktop) */}
-          <aside className="sticky top-24 hidden h-fit self-start lg:block animate-in fade-in-0 slide-in-from-left-3 duration-700">
-            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm">
-              <p className="px-3 py-2 text-xs font-semibold text-foreground/50">
-                On this page
-              </p>
-              {sections.map((s) => (
-                <a
-                  key={s.id}
-                  href={`#${s.id}`}
-                  className="group flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/70 transition-colors hover:bg-primary/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <s.icon className="h-4 w-4 text-foreground/40 transition-colors group-hover:text-primary" />
-                  {s.title}
+          <Section id="who-sees-it" title="Who else sees it">
+            <ul>
+              <li>
+                <strong className="text-foreground">Groq</strong> receives the resume text, job descriptions, and
+                messages you send to the scanner, resume tailor, cover letter, mock interview, and coach, so it
+                can write a response. Their own privacy policy covers how they handle it.
+              </li>
+              <li>
+                <strong className="text-foreground">Supabase</strong> stores your account and data, and handles
+                sign-in, including Google or LinkedIn if you use them.
+              </li>
+              <li>
+                <strong className="text-foreground">Vercel</strong> hosts the site and counts page views without
+                cookies. If error reporting is turned on, <strong className="text-foreground">Sentry</strong>{" "}
+                receives technical details when something breaks.
+              </li>
+            </ul>
+            <p>We don&apos;t sell your data, show ads, or share it with anyone else.</p>
+          </Section>
+
+          <Section id="your-control" title="Your control">
+            <ul>
+              <li>
+                Download everything in <Link href="/settings#data" className={link}>Settings → Data &amp; privacy</Link>.
+              </li>
+              <li>
+                Delete your account there too. It removes your account and everything tied to it right away,
+                and it can&apos;t be undone.
+              </li>
+              <li>Edit or remove My resume and your profile details any time on your Profile.</li>
+            </ul>
+            <p>We only use the cookies needed to keep you signed in.</p>
+          </Section>
+
+          <Section id="using-offervia" title="Using Offervia">
+            <ul>
+              <li>Offervia is free and provided as is. It can change or go offline without notice.</li>
+              <li>
+                Rewritten resumes, letters, and feedback can be wrong. Read everything and fix anything
+                that isn&apos;t true before you send it. You&apos;re responsible for what you submit.
+              </li>
+              <li>
+                Some tools have a daily limit so the site stays quick for everyone. Don&apos;t try to get around
+                it or use the site to send spam.
+              </li>
+              <li>
+                The code is open source on{" "}
+                <a href={GITHUB_REPO_URL} className={link} target="_blank" rel="noopener noreferrer">
+                  GitHub
                 </a>
-              ))}
-            </nav>
-          </aside>
-
-          {/* Content */}
-          <article className="space-y-6">
-            {/* Intro callout */}
-            <section
-              id="introduction"
-              className="animate-in fade-in-0 slide-in-from-bottom-3 duration-700 rounded-2xl border border-primary/20 bg-primary/[0.06] p-6 shadow-sm ring-1 ring-primary/15 backdrop-blur"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <h2 className="text-base font-semibold text-foreground">Introduction</h2>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                Offervia is a job search helper. This policy explains what we collect,
-                how we use it, and the choices you have. We do not sell your data.
-              </p>
-            </section>
-
-            {[
-              {
-                id: "data-we-collect",
-                title: "Data we collect",
-                icon: Database,
-                body: (
-                  <>
-                    <p>We collect the data needed to operate Offervia and support your account:</p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5">
-                      <li>Account, profile, and billing-related information needed for sign-in, subscriptions, and support.</li>
-                      <li>User-submitted content used in features such as resume tailoring, job scans, coaching, contact requests, and job tracking.</li>
-                      <li>Server-stored history needed to provide the product experience, including tracker entries, coach messages, job scans, usage counts, and subscription state.</li>
-                      <li>Browser-local drafts and convenience state saved on the device you are using, such as unsent drafts or local history.</li>
-                    </ul>
-                  </>
-                ),
-              },
-              {
-                id: "how-data-is-used",
-                title: "How data is used",
-                icon: Workflow,
-                body: (
-                  <p>
-                    We use your data to run the tools you ask for: resume rewrites, interview
-                    practice, job scans, and the application tracker. Text you submit is sent
-                    from our server to a model provider to produce those drafts. We also look
-                    at overall usage so we can tell when something is broken.
-                  </p>
-                ),
-              },
-              {
-                id: "ai-and-security",
-                title: "Drafts and security",
-                icon: Lock,
-                body: (
-                  <p>
-                    Resumes, job descriptions, and chat messages go through Offervia&apos;s server
-                    to a third-party model so it can write a draft or give feedback. Traffic
-                    is encrypted. Stored data is access-controlled. No setup is perfectly secure.
-                  </p>
-                ),
-              },
-              {
-                id: "user-rights",
-                title: "Your rights",
-                icon: UserCheck,
-                body: (
-                  <p>
-                    You can contact us to request access to your account data or help with deletion requests.
-                    We review privacy and deletion requests as promptly as we can. For any privacy questions,
-                    reach out through our contact page.
-                  </p>
-                ),
-              },
-              {
-                id: "cookies",
-                title: "Cookies",
-                icon: Cookie,
-                body: (
-                  <p>
-                    We may use cookies or similar technologies to keep you signed in, remember preferences, and
-                    measure basic usage. You can control cookies through your browser settings.
-                  </p>
-                ),
-              },
-              {
-                id: "changes",
-                title: "Changes to this policy",
-                icon: RefreshCw,
-                body: (
-                  <p>
-                    We may update this policy as Offervia evolves. We’ll adjust the “Last updated” date above and,
-                    when appropriate, provide additional notice.
-                  </p>
-                ),
-              },
-            ].map((s, i) => (
-              <SectionCard
-                key={s.id}
-                id={s.id}
-                title={s.title}
-                icon={s.icon}
-                className="animate-in fade-in-0 slide-in-from-bottom-3 duration-700"
-                style={{ animationDelay: `${80 + i * 60}ms` }}
-              >
-                {s.body}
-              </SectionCard>
-            ))}
-
-            <SectionCard id="contact" title="Contact" icon={Mail}>
-              <p>
-                Questions about privacy?{" "}
-                <Link
-                  href="/contact"
-                  className="font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
-                >
-                  Contact us
-                </Link>
                 .
-              </p>
-            </SectionCard>
+              </li>
+            </ul>
+          </Section>
 
-            {/* Back to top */}
-            <div className="pt-2">
-              <a
-                href="#"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-primary/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <ArrowUp className="h-3.5 w-3.5" />
-                Back to top
+          <Section id="questions" title="Questions">
+            <p>
+              Ask in{" "}
+              <a href={DISCUSSIONS_URL} className={link} target="_blank" rel="noopener noreferrer">
+                GitHub Discussions
               </a>
-            </div>
-          </article>
+              . Discussions are public, so don&apos;t post your email, resume, or other personal details there.
+              To get or remove your data, use Settings.
+            </p>
+          </Section>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

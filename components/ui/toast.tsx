@@ -1,13 +1,7 @@
 import * as React from "react"
 import { cva } from "class-variance-authority"
-import {
-  AlertCircle,
-  CheckCircle2,
-  Info,
-  Sparkles,
-  X,
-  type LucideIcon,
-} from "lucide-react"
+import { CheckCircle, Info, WarningCircle, X } from "@phosphor-icons/react/dist/ssr";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils"
 
@@ -27,7 +21,6 @@ export type ToastVariant =
   | "success"
   | "destructive"
   | "info"
-  | "upgrade"
 
 export type ToastProps = {
   id?: string
@@ -49,8 +42,6 @@ const toastVariants = cva(
         destructive:
           "border-destructive/25 bg-[color-mix(in_oklch,var(--destructive)_9%,var(--popover))] text-popover-foreground",
         info: "border-info/25 bg-[color-mix(in_oklch,var(--info)_9%,var(--popover))] text-popover-foreground",
-        upgrade:
-          "border-warning/35 bg-[color-mix(in_oklch,var(--warning)_12%,var(--popover))] text-popover-foreground",
       },
     },
     defaultVariants: {
@@ -61,13 +52,12 @@ const toastVariants = cva(
 
 const iconStyles: Record<
   ToastVariant,
-  { Icon: LucideIcon; chip: string }
+  { Icon: PhosphorIcon; chip: string }
 > = {
   default: { Icon: Info, chip: "bg-foreground/[0.07] text-foreground/70" },
-  success: { Icon: CheckCircle2, chip: "bg-success/15 text-success" },
-  destructive: { Icon: AlertCircle, chip: "bg-destructive/15 text-destructive" },
+  success: { Icon: CheckCircle, chip: "bg-success/15 text-success" },
+  destructive: { Icon: WarningCircle, chip: "bg-destructive/15 text-destructive" },
   info: { Icon: Info, chip: "bg-info/15 text-info" },
-  upgrade: { Icon: Sparkles, chip: "bg-warning/20 text-warning" },
 }
 
 const accentBar: Record<ToastVariant, string> = {
@@ -75,7 +65,6 @@ const accentBar: Record<ToastVariant, string> = {
   success: "bg-success",
   destructive: "bg-destructive",
   info: "bg-info",
-  upgrade: "bg-warning",
 }
 
 export function Toast({

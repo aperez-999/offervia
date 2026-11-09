@@ -6,6 +6,9 @@ export const SITE_DEFAULT_TITLE =
 export const SITE_DESCRIPTION =
   "A job search helper for students, new grads, and anyone applying. Check a posting against your resume, rewrite it, draft a cover letter, practice interviews, and track applications.";
 export const SITE_SHARE_IMAGE = "/og-image.png";
+
+export { DISCUSSIONS_URL, GITHUB_REPO_URL, NEW_ISSUE_URL, suggestResourceUrl } from "@/lib/github";
+
 export const SITE_SHARE_IMAGE_ALT =
   "Offervia: turn a job posting into a matching resume, cover letter, and tracked application";
 

@@ -21,25 +21,24 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { PageContainer } from "@/components/layout/Page";
 import { SettingsSkeleton } from "@/components/settings/SettingsSkeleton";
-import ProCrest from "@/components/pro/ProCrest";
+import { DAILY_LIMITS, FEATURE_COPY, GATED_FEATURES } from "@/lib/usage/limits";
+import DeleteAccount from "@/components/settings/DeleteAccount";
 import { switchTheme, originFromEvent } from "@/lib/theme-transition";
 import {
   UserRound,
   Palette,
   SlidersHorizontal,
-  CreditCard,
   Database,
   Sun,
   Moon,
   Monitor,
-  Crown,
   Check,
   Camera,
+  Gauge,
 } from "lucide-react";
 
 type CoachMode = "interview" | "resume" | "cover_letter" | "career";
@@ -53,7 +52,7 @@ const SECTIONS = [
   { id: "profile", label: "Profile", icon: UserRound },
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
-  { id: "plan", label: "Plan & billing", icon: CreditCard },
+  { id: "limits", label: "Daily limits", icon: Gauge },
   { id: "data", label: "Data & privacy", icon: Database },
 ] as const;
 
@@ -72,10 +71,6 @@ export default function SettingsPage() {
   const [weeklyGoal, setWeeklyGoal] = useState<number>(5);
   const [defaultMode, setDefaultMode] = useState<CoachMode>("interview");
 
-  // plan
-  const [plan, setPlan] = useState<"free" | "pro">("free");
-  const [periodEnd, setPeriodEnd] = useState<string | null>(null);
-  const [billingLoading, setBillingLoading] = useState(false);
 
   // ui state
   const [loading, setLoading] = useState(true);
@@ -117,16 +112,6 @@ export default function SettingsPage() {
           if (typeof prefs.weekly_goal === "number") setWeeklyGoal(prefs.weekly_goal);
         }
 
-        // Load subscription/plan (own row via RLS)
-        const { data: sub } = await supabase
-          .from("subscriptions")
-          .select("plan, current_period_end")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (sub) {
-          setPlan((sub.plan as "free" | "pro") ?? "free");
-          setPeriodEnd((sub.current_period_end as string | null) ?? null);
-        }
       } catch {
         toast({ title: "Couldn't load settings", description: "Check your connection and refresh the page.", variant: "destructive" });
       } finally {
@@ -176,24 +161,6 @@ export default function SettingsPage() {
       toast({ title: "Couldn't sign out. Try again.", variant: "destructive" });
     } finally {
       setWorking(false);
-    }
-  }
-
-  async function openBillingPortal() {
-    if (billingLoading) return;
-    setBillingLoading(true);
-    try {
-      const res = await fetch("/api/create-portal-session", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-      toast({ title: data?.message || "Couldn't open the billing portal. Try again.", variant: "destructive" });
-    } catch {
-      toast({ title: "Couldn't open the billing portal. Try again.", variant: "destructive" });
-    } finally {
-      setBillingLoading(false);
     }
   }
 
@@ -261,7 +228,7 @@ export default function SettingsPage() {
 
       toast({ variant: "success", title: "Export downloaded" });
     } catch {
-      toast({ title: "Couldn't export your data", description: "Try again. If it keeps failing, contact support.", variant: "destructive" });
+      toast({ title: "Couldn't export your data", description: "Try again in a moment.", variant: "destructive" });
     } finally {
       setWorking(false);
     }
@@ -298,16 +265,9 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
             <p className="mt-1 text-sm text-foreground/70">
-              Your account, appearance, preferences, plan, and data.
+              Your account, appearance, preferences, and data.
             </p>
           </div>
-          {plan === "pro" ? (
-            <ProCrest size="md" label="Pro plan" />
-          ) : (
-            <Badge className="border border-border bg-background/60 text-foreground/70">
-              Free plan
-            </Badge>
-          )}
         </div>
       </div>
 
@@ -515,53 +475,24 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Plan & billing */}
-          <Card id="plan" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
+          {/* Daily limits */}
+          <Card id="limits" className="scroll-mt-24 rounded-2xl border border-border bg-card shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-foreground">Plan &amp; billing</CardTitle>
+              <CardTitle className="text-foreground">Daily limits</CardTitle>
               <CardDescription className="text-foreground/70">
-                Your current plan and payment details.
+                To keep things quick for everyone, a few tools have a daily limit. Each use frees up
+                again 24 hours after you make it.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-3 rounded-xl border border-border bg-background/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${plan === "pro" ? "bg-reward/15 text-reward" : "bg-foreground/5 text-foreground/60"}`}>
-                    <Crown className="h-5 w-5" />
+            <CardContent>
+              <dl className="divide-y divide-border rounded-xl border border-border">
+                {GATED_FEATURES.map((feature) => (
+                  <div key={feature} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                    <dt className="text-foreground/80">{FEATURE_COPY[feature].label}</dt>
+                    <dd className="font-medium tabular-nums text-foreground">{DAILY_LIMITS[feature]} a day</dd>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">
-                      {plan === "pro" ? "Offervia Pro" : "Free plan"}
-                    </div>
-                    <div className="text-xs text-foreground/60">
-                      {plan === "pro"
-                        ? periodEnd
-                          ? `Renews ${new Date(periodEnd).toLocaleDateString()}`
-                          : "Active subscription"
-                        : "Upgrade to Pro for higher monthly limits."}
-                    </div>
-                  </div>
-                </div>
-                {plan === "pro" ? (
-                  <Button
-                    variant="outline"
-                    onClick={openBillingPortal}
-                    disabled={billingLoading}
-                    className="border-border text-foreground hover:bg-foreground/[0.06]"
-                  >
-                    {billingLoading ? "Opening…" : "Manage billing"}
-                  </Button>
-                ) : (
-                  <Button asChild className="bg-primary-button text-white hover:bg-primary-button/90">
-                    <Link href="/upgrade">Upgrade to Pro</Link>
-                  </Button>
-                )}
-              </div>
-              {plan === "pro" ? (
-                <p className="text-xs text-foreground/60">
-                  Use the billing portal to update your card, download invoices, or cancel. If you cancel, Pro stays active until the end of the current billing period.
-                </p>
-              ) : null}
+                ))}
+              </dl>
             </CardContent>
           </Card>
 
@@ -605,19 +536,7 @@ export default function SettingsPage() {
                 </p>
               </div>
 
-              <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-                <div className="text-sm font-medium text-foreground">Delete account</div>
-                <p className="text-xs text-foreground/60">
-                  To delete your account and its data, contact support.
-                </p>
-                <Button
-                  variant="outline"
-                  asChild
-                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
-                >
-                  <Link href="/contact">Contact support</Link>
-                </Button>
-              </div>
+              <DeleteAccount />
             </CardContent>
           </Card>
         </div>

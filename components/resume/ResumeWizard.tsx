@@ -360,27 +360,6 @@ export default function ResumeWizard({ defaultRole = "" }: { defaultRole?: strin
           });
           return;
         }
-        if (resp.status === 403 && resp.error === "PLAN_LIMIT_REACHED") {
-          const msg =
-            "You've used this month's resume tailoring runs. Upgrade to Pro for more.";
-          setError(msg);
-          toast({
-            title: "Monthly limit reached",
-            description: msg,
-            variant: "upgrade",
-            duration: 8000,
-            action: (
-              <Button
-                size="default"
-                className="cursor-pointer bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                onClick={() => router.push("/upgrade")}
-              >
-                Upgrade to Pro
-              </Button>
-            ),
-          });
-          return;
-        }
         if (resp.status === 413) {
           const msg = "That file is too large to process. Try a shorter resume or a DOCX.";
           setError(msg);

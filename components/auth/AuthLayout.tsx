@@ -60,18 +60,6 @@ export default function AuthLayout({
                 >
                   Privacy
                 </Link>
-                <Link
-                  href="/terms"
-                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
-                >
-                  Terms
-                </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
-                >
-                  Contact
-                </Link>
                 <button
                   aria-label="Toggle theme"
                   onClick={(e) =>
@@ -123,8 +111,6 @@ export default function AuthLayout({
       <footer className="mx-auto flex h-12 max-w-7xl items-center justify-end px-4 text-xs text-foreground/70 sm:px-6 lg:px-8">
         <div className="hidden items-center gap-4 sm:flex">
           <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
-          <Link href="/terms" className="hover:text-foreground">Terms</Link>
-          <Link href="/contact" className="hover:text-foreground">Contact</Link>
         </div>
       </footer>
     </div>

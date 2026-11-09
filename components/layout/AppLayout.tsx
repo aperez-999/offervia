@@ -29,7 +29,7 @@ import UserMenu from "@/components/layout/UserMenu";
 import Footer from "@/components/public/Footer";
 import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
-import ProCrest from "@/components/pro/ProCrest";
+import { GITHUB_REPO_URL } from "@/lib/github";
 
 const GlobalCommandMenu = dynamic(() => import("@/components/layout/GlobalCommandMenu"), {
   ssr: false,
@@ -123,61 +123,27 @@ function NavList({
   );
 }
 
-type PlanType = "free" | "pro";
-
-function PlanCard({
-  plan,
-  onNavigate,
-}: {
-  plan: PlanType;
-  onNavigate?: () => void;
-}) {
-  if (plan === "pro") {
-    return (
-      <div className="rounded-xl border border-reward/30 bg-reward/10 p-3 shadow-sm">
-        <ProCrest size="sm" />
-        <p className="mt-2 text-[13px] font-medium text-foreground">Offervia Pro</p>
-        <p className="mt-0.5 text-xs text-foreground/60">
-          Higher monthly limits and dashboard insights.
-        </p>
-        <Link
-          href="/settings#plan"
-          onClick={onNavigate}
-          className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-reward hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background rounded"
-        >
-          Manage plan
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </Link>
-      </div>
-    );
-  }
-
+function OpenSourceCard() {
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3 shadow-sm">
-      <p className="text-[13px] font-medium text-foreground">Free plan</p>
-      <p className="mt-0.5 text-xs text-foreground/60">
-        Pro raises your monthly limits and adds dashboard insights.
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3">
+      <p className="text-[13px] font-medium text-foreground">Free and open source</p>
+      <p className="mt-0.5 text-xs text-foreground/70">
+        Found a bug or have an idea? Open an issue on GitHub.
       </p>
-      <Button
-        asChild
-        size="sm"
-        className="mt-2.5 h-8 w-full bg-primary-button text-white hover:bg-primary-button/90"
+      <a
+        href={GITHUB_REPO_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2.5 inline-flex items-center gap-1 rounded text-xs font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
       >
-        <Link href="/upgrade" onClick={onNavigate}>
-          Upgrade to Pro
-        </Link>
-      </Button>
+        View on GitHub
+        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+      </a>
     </div>
   );
 }
 
-export default function AppLayout({
-  children,
-  plan = "free",
-}: {
-  children: React.ReactNode;
-  plan?: PlanType;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -252,7 +218,7 @@ export default function AppLayout({
 
           <div className="flex items-center gap-2">
             <GlobalCommandMenu />
-            <UserMenu plan={plan} onSignOut={onSignOut} />
+            <UserMenu onSignOut={onSignOut} />
           </div>
             </div>
           </div>
@@ -268,7 +234,7 @@ export default function AppLayout({
               <NavList pathname={pathname} dense />
 
               <div className="mt-4 border-t border-border pt-3">
-                <PlanCard plan={plan} />
+                <OpenSourceCard />
               </div>
             </div>
           </aside>
@@ -310,7 +276,7 @@ export default function AppLayout({
                     <NavList pathname={pathname} onNavigate={() => setSidebarOpen(false)} />
 
                     <div className="mt-4 border-t border-border pt-4">
-                      <PlanCard plan={plan} onNavigate={() => setSidebarOpen(false)} />
+                      <OpenSourceCard />
                     </div>
                   </div>
                 </motion.aside>

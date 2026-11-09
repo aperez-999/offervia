@@ -153,8 +153,6 @@ export default function JobPacketClient() {
       const message =
         res.status === 429
           ? res.error || "You've hit today's free limit for scans."
-          : res.status === 403 && res.error === "PLAN_LIMIT_REACHED"
-          ? "You've reached your monthly job scan limit. Upgrade to Pro to continue."
           : res.error || "The scan didn't finish. Try again in a minute.";
       setError(message);
       toast({ title: "Scan failed", description: message, variant: "destructive" });

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getUserSubscription } from "@/lib/subscription";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { readCareerProfile } from "@/lib/profile/read";
 import { createPageMetadata } from "@/lib/metadata";
@@ -38,7 +37,6 @@ export default async function CoverLetterPage({
     redirect("/login");
   }
 
-  const subscription = await getUserSubscription(user.id);
   const career = await readCareerProfile(supabase, user.id);
 
   return (
@@ -49,7 +47,6 @@ export default async function CoverLetterPage({
         description="Paste your resume and the job description, pick a tone, and get a draft you can edit."
       />
       <CoverLetterStudio
-        plan={subscription.plan}
         defaultRole={sp.role || career.targetRole}
         defaultCompany={sp.company || ""}
       />

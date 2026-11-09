@@ -16,50 +16,14 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Settings, UserRound, LogOut, Palette, CreditCard, Crown } from "lucide-react";
+import { Settings, UserRound, LogOut, Palette } from "lucide-react";
 
-type PlanType = "free" | "pro";
 
-export default function UserMenu({
-  onSignOut,
-  plan = "free",
-}: {
-  onSignOut: () => void;
-  plan?: PlanType;
-}) {
+export default function UserMenu({ onSignOut }: { onSignOut: () => void }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const { toast } = useToast();
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [billingLoading, setBillingLoading] = useState(false);
-
-  async function openBillingPortal() {
-    if (billingLoading || plan !== "pro") return;
-    setBillingLoading(true);
-    try {
-      const res = await fetch("/api/create-portal-session", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-      toast({
-        title: data?.message || "Couldn't open the billing portal. Try again.",
-        variant: "destructive",
-      });
-    } catch {
-      toast({
-        title: "Couldn't open the billing portal. Try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setBillingLoading(false);
-    }
-  }
-
   useEffect(() => {
     const supabase = getBrowserSupabase();
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -86,27 +50,6 @@ export default function UserMenu({
   return (
     <DropdownMenu>
       <div className="flex items-center gap-2">
-        <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${
-            plan === "pro"
-              ? "border border-reward/40 bg-reward/15 text-reward"
-              : "bg-muted text-muted-foreground"
-          }`}
-          aria-label={plan === "pro" ? "Plan: Pro" : "Plan: Free"}
-        >
-          {plan === "pro" && <Crown className="h-3 w-3" />}
-          {plan === "pro" ? "Pro" : "Free"}
-        </span>
-        {plan === "free" && (
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="h-7 rounded-md border-border px-2 text-xs font-medium text-foreground/80 hover:border-success/30 hover:bg-success/10 hover:text-success"
-          >
-            <Link href="/upgrade">Upgrade</Link>
-          </Button>
-        )}
         <DropdownMenuTrigger asChild>
           <button
             className="inline-flex cursor-pointer h-8 w-8 pointer-coarse:min-h-11 pointer-coarse:min-w-11 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-foreground/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
@@ -171,17 +114,6 @@ export default function UserMenu({
         </DropdownMenuRadioGroup>
 
         <DropdownMenuSeparator />
-
-        {plan === "pro" && (
-          <DropdownMenuItem
-            onClick={openBillingPortal}
-            disabled={billingLoading}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <CreditCard className="h-4 w-4" />
-            {billingLoading ? "Opening…" : "Manage billing"}
-          </DropdownMenuItem>
-        )}
 
         <DropdownMenuItem
           onClick={onSignOut}

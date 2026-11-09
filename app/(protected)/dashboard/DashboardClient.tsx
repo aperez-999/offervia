@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 import { captureClientException } from "@/lib/monitoring/sentry";
 
@@ -17,11 +16,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Flame, Target, X } from "lucide-react";
+import { ArrowRight, Flame, Target } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/motion/Reveal";
 import QuickStart from "@/components/dashboard/QuickStart";
-import ProCrest from "@/components/pro/ProCrest";
 import ErrorView from "@/components/ErrorView";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,7 +31,6 @@ import {
 } from "@/lib/job-packet";
 import {
   getDashboardNextAction,
-  getDashboardUsageItems,
 } from "@/lib/dashboard/overview";
 import {
   ActionCard,
@@ -43,14 +40,6 @@ import {
   SkeletonList,
   StatusBadge,
 } from "@/components/dashboard/dashboard-cards";
-
-type PlanLimits = {
-  resume_tailor_per_month: number;
-  coach_messages_per_month: number;
-  job_scans_per_month: number;
-  interview_sessions_per_month: number;
-  cover_letters_per_month: number;
-};
 
 type Application = {
   id: string;
@@ -85,11 +74,9 @@ const MODE_LABELS: Record<MsgRow["mode"], string> = {
   career: "Career advice",
 };
 
-type PlanType = "free" | "pro";
-
 export type { ScanAnalytics };
 
-function ProHealthStat({
+function HealthStat({
   label,
   value,
   hint,
@@ -99,7 +86,7 @@ function ProHealthStat({
   hint: string;
 }) {
   return (
-    <Card className="rounded-2xl border border-reward/25 bg-card p-4 shadow-sm ring-1 ring-reward/10">
+    <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="text-xs font-medium text-foreground/60">
         {label}
       </div>
@@ -109,7 +96,7 @@ function ProHealthStat({
       </div>
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
         <div
-          className="h-full rounded-full bg-reward transition-all"
+          className="h-full rounded-full bg-primary transition-all"
           style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
         />
       </div>
@@ -134,21 +121,12 @@ const FollowUpsDue = dynamic(
 );
 
 export default function DashboardClient({
-  plan = "free",
   usage,
-  limits,
   analytics = null,
-  periodEnd = null,
 }: {
-  plan?: PlanType;
   usage: UsageSnapshot;
-  limits: PlanLimits;
   analytics?: ScanAnalytics | null;
-  periodEnd?: string | null;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const upgrade = searchParams.get("upgrade");
   const { toast } = useToast();
 
   const supabase = useMemo(() => getBrowserSupabase(), []);
@@ -161,10 +139,6 @@ export default function DashboardClient({
   const [onboardingCompleted, setOnboardingCompleted] = useState<Record<string, boolean>>({});
   const [jobPacketDraft, setJobPacketDraft] = useState<JobPacketDraft | null>(null);
   const [loadError, setLoadError] = useState(false);
-
-  function dismissUpgradeBanner() {
-    router.replace("/dashboard");
-  }
 
   useEffect(() => {
     setJobPacketDraft(readJobPacketDraft());
@@ -333,27 +307,6 @@ export default function DashboardClient({
     [appsThisWeek, jobPacketDraft, recentChats.length]
   );
 
-  const usageItems = useMemo(
-    () =>
-      getDashboardUsageItems({
-        usage: {
-          resumeTailor: usage.resumeTailor,
-          coachMessages: usage.coachMessages,
-          jobScans: usage.jobScans,
-          interviewSessions: usage.interviewSessions,
-          coverLetters: usage.coverLetters,
-        },
-        limits,
-      }),
-    [limits, usage.coachMessages, usage.jobScans, usage.resumeTailor, usage.interviewSessions, usage.coverLetters]
-  );
-
-  const nearingLimit = useMemo(
-    () =>
-      plan === "free" &&
-      usageItems.some((item) => item.state === "warn" || item.state === "high"),
-    [plan, usageItems]
-  );
 
   const onboardingItems = useMemo(() => {
     const items = [
@@ -420,93 +373,31 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-8">
-      {/* Upgrade success / cancel banner */}
-      {upgrade === "success" && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-success">
-          <p className="text-sm font-medium">
-            You&apos;re on Pro now. Your higher monthly limits are active.
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 shrink-0 rounded-full p-0 text-success hover:bg-success/20"
-            onClick={dismissUpgradeBanner}
-            aria-label="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      {upgrade === "cancel" && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 text-muted-foreground">
-          <p className="text-sm">
-            Checkout was canceled. Your plan hasn&apos;t changed.
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 shrink-0 rounded-full p-0 hover:bg-foreground/[0.06]"
-            onClick={dismissUpgradeBanner}
-            aria-label="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
 
       <section>
-        <Card className={
-          plan === "pro"
-            ? "relative overflow-hidden rounded-2xl border border-reward/30 bg-card shadow-md ring-1 ring-reward/10"
-            : "relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm"
-        }>
+        <Card className="relative overflow-hidden rounded-2xl border border-primary/25 bg-card shadow-sm">
           <CardContent className="relative p-5 sm:p-6">
             <div className="max-w-3xl">
-              {plan === "pro" ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <ProCrest size="md" label="Pro member" />
-                  {periodEnd ? (
-                    <span className="text-xs text-foreground/60">
-                      Renews {new Date(periodEnd).toLocaleDateString()}
-                    </span>
-                  ) : null}
-                </div>
-              ) : (
-                <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
-                  Dashboard
-                </Badge>
-              )}
+              <Badge className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/10">
+                Dashboard
+              </Badge>
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 Welcome back,{" "}
-                <span className={plan === "pro" ? "text-reward" : "text-primary"}>{friendlyName}</span>
+                <span className="text-primary">{friendlyName}</span>
               </h1>
               <p className="mt-2 text-sm text-foreground/75 sm:text-base">
-                {plan === "pro"
-                  ? "Here's where your applications stand, plus scan insights and your Pro usage."
-                  : "Here's where your applications stand and what to do next."}
+                Here&apos;s where your applications stand and what to do next.
               </p>
             </div>
 
             {/* Recommended next step: full-width band, CTA inline */}
-            <div className={
-              plan === "pro"
-                ? "mt-5 flex flex-col gap-4 rounded-2xl border border-reward/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
-                : "mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
-            }>
+            <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-background/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div className="flex items-start gap-3">
-                <span className={
-                  plan === "pro"
-                    ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-reward/10 text-reward ring-1 ring-reward/20"
-                    : "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20"
-                }>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
                   <ArrowRight className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
-                  <div className={
-                    plan === "pro"
-                      ? "text-xs font-semibold text-reward/80"
-                      : "text-xs font-semibold text-primary/80"
-                  }>
+                  <div className="text-xs font-semibold text-primary/80">
                     Next step
                   </div>
                   <div className="mt-0.5 text-sm font-medium text-foreground">{nextAction.title}</div>
@@ -553,21 +444,18 @@ export default function DashboardClient({
       </section>
 
       {/* Pro: pipeline health */}
-      {plan === "pro" && !loading && total > 0 ? (
+      {!loading && total > 0 ? (
         <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <ProCrest size="sm" />
-            <div>
-              <div className="text-xs font-semibold text-reward/80">
-                Pipeline health
-              </div>
-              <h2 className="mt-0.5 text-lg font-semibold text-foreground">How your applications are doing</h2>
+          <div>
+            <div className="text-xs font-semibold text-foreground/60">
+              Pipeline health
             </div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">How your applications are doing</h2>
           </div>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-            <ProHealthStat label="Response rate" value={proHealth.responseRate} hint="Applications that got any reply, including rejections" />
-            <ProHealthStat label="Interview rate" value={proHealth.interviewRate} hint="Applications now in the interview stage" />
-            <ProHealthStat label="Offer rate" value={proHealth.offerRate} hint="Applications that became an offer" />
+            <HealthStat label="Response rate" value={proHealth.responseRate} hint="Applications that got any reply, including rejections" />
+            <HealthStat label="Interview rate" value={proHealth.interviewRate} hint="Applications now in the interview stage" />
+            <HealthStat label="Offer rate" value={proHealth.offerRate} hint="Applications that became an offer" />
           </div>
         </section>
       ) : null}
@@ -634,71 +522,21 @@ export default function DashboardClient({
           </Card>
 
           <Card className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-xs font-medium text-foreground/60">
-                  Usage this month
-                </div>
-                <p className="mt-1 text-sm text-foreground/70">
-                  What you&apos;ve used so far this billing cycle.
-                </p>
-              </div>
-              {nearingLimit && plan === "free" ? (
-                <Badge className="border border-warning/30 bg-warning/10 text-warning hover:bg-warning/10">
-                  Near limit
-                </Badge>
-              ) : null}
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {usageItems.map((item) => (
-                <div key={item.key}>
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="text-foreground/80">{item.label}</span>
-                    <span
-                      className={
-                        item.state === "high"
-                          ? "font-medium text-destructive"
-                          : item.state === "warn"
-                          ? "font-medium text-warning"
-                          : "font-medium text-foreground"
-                      }
-                    >
-                      {item.unlimited ? `${item.used} / ∞` : `${item.used} / ${item.limit}`}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-foreground/10">
-                    <div
-                      className={
-                        "h-full rounded-full transition-all " +
-                        (item.state === "high"
-                          ? "bg-destructive"
-                          : item.state === "warn"
-                          ? "bg-warning"
-                          : "bg-primary")
-                      }
-                      style={{ width: `${item.unlimited ? 6 : item.pct}%` }}
-                    />
-                  </div>
+            <div className="text-xs font-medium text-foreground/60">This month</div>
+            <dl className="mt-3 space-y-2 text-sm">
+              {[
+                ["Job scans", usage.jobScans],
+                ["Tailored resumes", usage.resumeTailor],
+                ["Cover letters", usage.coverLetters],
+                ["Mock interviews", usage.interviewSessions],
+                ["Coach messages", usage.coachMessages],
+              ].map(([label, count]) => (
+                <div key={label} className="flex items-center justify-between gap-2">
+                  <dt className="text-foreground/80">{label}</dt>
+                  <dd className="font-medium tabular-nums text-foreground">{count}</dd>
                 </div>
               ))}
-            </div>
-
-            {nearingLimit && plan === "free" ? (
-              <div className="mt-4 flex flex-col gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-foreground/80">
-                  You&apos;re close to a monthly limit. Upgrade to Pro for higher limits.
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-warning/30 bg-warning/10 text-warning hover:bg-warning/20"
-                  onClick={() => router.push("/upgrade")}
-                >
-                  Upgrade
-                </Button>
-              </div>
-            ) : null}
+            </dl>
           </Card>
         </div>
       </section>
@@ -902,8 +740,8 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Pro: Performance Insights */}
-      {plan === "pro" && analytics ? <PerformanceInsights analytics={analytics} /> : null}
+      {/* Scan insights */}
+      {analytics ? <PerformanceInsights analytics={analytics} /> : null}
     </div>
   );
 }

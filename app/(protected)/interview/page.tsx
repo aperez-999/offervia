@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getUserSubscription } from "@/lib/subscription";
 import { createSupabaseServerClient } from "@/lib/supabase/ssr";
 import { readCareerProfile } from "@/lib/profile/read";
 import { createPageMetadata } from "@/lib/metadata";
@@ -40,7 +39,6 @@ export default async function InterviewPage() {
     redirect("/login");
   }
 
-  const subscription = await getUserSubscription(user.id);
   const career = await readCareerProfile(supabase, user.id);
   const pastSessions = await readPastInterviews(supabase, user.id);
 
@@ -51,7 +49,7 @@ export default async function InterviewPage() {
         title="Mock interview"
         description="Answer questions for the role you're targeting. Each answer gets a score and notes on what to fix."
       />
-      <InterviewStudio plan={subscription.plan} defaultRole={career.targetRole} />
+      <InterviewStudio defaultRole={career.targetRole} />
       <InterviewHistory sessions={pastSessions} />
     </PageContainer>
   );

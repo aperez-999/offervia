@@ -1,9 +1,10 @@
 "use client";
 
-import { TriangleAlert, RotateCcw, ClipboardList } from "lucide-react";
+import { ArrowCounterClockwise, Kanban, Warning } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import * as React from "react";
+import { NEW_ISSUE_URL } from "@/lib/github";
 
 type Props = {
   title?: string;
@@ -15,9 +16,9 @@ type Props = {
 
 export default function ErrorView({
   title = "Something went wrong",
-  description = "Try again. If it keeps happening, contact support.",
+  description = "Try again. If it keeps happening, let us know on GitHub.",
   onRetry,
-  supportHref = "/contact",
+  supportHref = NEW_ISSUE_URL,
   errorMessage,
 }: Props) {
   const [copied, setCopied] = React.useState(false);
@@ -37,7 +38,7 @@ export default function ErrorView({
       <CardHeader className="pb-2">
         <div className="flex items-start gap-3">
           <div className="rounded-md bg-foreground/5 p-2">
-            <TriangleAlert className="h-5 w-5 text-primary " />
+            <Warning className="h-5 w-5 text-primary " />
           </div>
           <div>
             <CardTitle className="text-foreground">{title}</CardTitle>
@@ -63,9 +64,9 @@ export default function ErrorView({
           {onRetry && (
             <Button
               onClick={onRetry}
-              className="bg-primary-button text-white hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+              className="bg-primary-button text-primary-button-foreground hover:bg-primary-button/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <ArrowCounterClockwise className="mr-2 h-4 w-4" />
               Try again
             </Button>
           )}
@@ -75,14 +76,16 @@ export default function ErrorView({
             onClick={copyDetails}
             className="border-border text-foreground hover:bg-foreground/[0.06]"
           >
-            <ClipboardList className="mr-2 h-4 w-4" />
+            <Kanban className="mr-2 h-4 w-4" />
             {copied ? "Copied" : "Copy error details"}
           </Button>
           <a
             href={supportHref}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm text-primary underline decoration-primary/50 underline-offset-4 hover:decoration-primary "
           >
-            Contact support
+            Report a problem
           </a>
         </div>
       </CardContent>

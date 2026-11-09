@@ -34,7 +34,6 @@ export default function PublicError({
         title="This page didn't load"
         description="Try again. If it keeps happening, contact support and include the details below."
         onRetry={reset}
-        supportHref="/contact"
         errorMessage={details}
       />
     </div>

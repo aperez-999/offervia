@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Privacy Policy",
-  description: "How Offervia handles your account, the text you submit, and drafts saved in your browser.",
+  title: "Privacy and terms",
+  description: "What Offervia stores, who else sees it, and how to export or delete it.",
   path: "/privacy",
 });
 

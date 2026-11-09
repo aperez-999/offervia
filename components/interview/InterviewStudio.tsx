@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Reveal } from "@/components/motion/Reveal";
-import { PLAN_LIMITS, type PlanType } from "@/lib/plans";
+import { DAILY_LIMITS } from "@/lib/usage/limits";
 import {
   DIFFICULTY_OPTIONS,
   FOCUS_OPTIONS,
@@ -180,13 +180,7 @@ function FeedbackCard({ feedback }: { feedback: AnswerFeedback }) {
   );
 }
 
-export default function InterviewStudio({
-  plan = "free",
-  defaultRole = "",
-}: {
-  plan?: PlanType;
-  defaultRole?: string;
-}) {
+export default function InterviewStudio({ defaultRole = "" }: { defaultRole?: string }) {
   const { toast } = useToast();
 
   const [phase, setPhase] = useState<Phase>("setup");
@@ -208,7 +202,7 @@ export default function InterviewStudio({
   const [overallScore, setOverallScore] = useState(0);
   const [summary, setSummary] = useState("");
 
-  const limit = PLAN_LIMITS[plan].interview_sessions_per_month;
+  const limit = DAILY_LIMITS.interview_session;
   const currentFeedback = transcript[index];
   const answeredCount = useMemo(() => transcript.filter(Boolean).length, [transcript]);
 
@@ -231,7 +225,7 @@ export default function InterviewStudio({
     setLimitReached(false);
     try {
       const { res, data } = await postInterview({ action: "start", roleTitle: roleTitle.trim(), focus, difficulty });
-      if (res.status === 403) {
+      if (data.error === "DAILY_LIMIT_REACHED") {
         setLimitReached(true);
         return;
       }
@@ -339,12 +333,8 @@ export default function InterviewStudio({
             {limitReached ? (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
                 <p className="text-sm font-medium text-foreground">
-                  You&apos;ve used all {limit} mock interviews this month.
+                  You&apos;ve used today&apos;s {limit} mock interviews. More open up within 24 hours.
                 </p>
-                <p className="mt-0.5 text-sm text-foreground/70">Pro has no monthly cap on mock interviews.</p>
-                <Button asChild size="sm" className="mt-3">
-                  <Link href="/upgrade">Upgrade to Pro</Link>
-                </Button>
               </div>
             ) : null}
 
@@ -372,7 +362,7 @@ export default function InterviewStudio({
 
             <div className="flex flex-col-reverse items-stretch gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-foreground/60">
-                {plan === "pro" ? "Pro" : "Free"} plan · {limit >= 9999 ? "Unlimited" : `${limit}/mo`} mock interviews
+                Up to {limit} mock interviews a day
               </p>
               <Button onClick={handleStart} disabled={starting} size="lg" className="sm:min-w-44">
                 {starting ? (

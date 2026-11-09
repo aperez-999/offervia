@@ -142,13 +142,6 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
               FAQ
             </a>
 
-            <Link
-              href="/contact"
-              className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-sm text-foreground/80 hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background"
-            >
-              Contact
-            </Link>
-
             <a
               href="https://github.com/aperez-999/offervia"
               target="_blank"
@@ -239,13 +232,6 @@ export default function LayoutPublic({ children }: { children: React.ReactNode }
                       {x.label}
                     </button>
                   ))}
-                  <Link
-                    href="/contact"
-                    className="rounded-md px-3 py-2 text-foreground/90 hover:bg-foreground/5"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Contact
-                  </Link>
                   <a
                     href="https://github.com/aperez-999/offervia"
                     target="_blank"

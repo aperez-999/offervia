@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AppLayout from "@/components/layout/AppLayout";
-import { getCurrentUser, getCurrentUserSubscription } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: {
@@ -25,8 +25,5 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  const subscription = await getCurrentUserSubscription(user.id);
-  const plan = subscription.plan;
-
-  return <AppLayout plan={plan}>{children}</AppLayout>;
+  return <AppLayout>{children}</AppLayout>;
 }
