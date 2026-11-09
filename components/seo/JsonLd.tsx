@@ -55,7 +55,7 @@ export function SoftwareApplicationJsonLd() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: SITE_NAME,
-    applicationCategory: "BusinessApplication",
+    applicationCategory: "EducationalApplication",
     operatingSystem: "Web",
     url: getSiteUrl(),
     description: SITE_DESCRIPTION,
@@ -67,11 +67,14 @@ export function SoftwareApplicationJsonLd() {
       description: "Free to use.",
     },
     featureList: [
-      "Job description scanner",
+      "Job posting keyword scan",
       "Resume tailoring",
-      "Cover letter drafts",
-      "Interview practice",
+      "Resume bullet checker",
+      "Cover letters",
+      "Mock interviews",
       "Application tracker",
+      "Offer comparison",
+      "Student Hub with templates and student deals",
     ],
   };
 

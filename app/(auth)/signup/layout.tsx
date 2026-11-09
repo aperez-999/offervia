@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Create account",
+  title: "Make a free account",
 };
 
 export default function SignupLayout({ children }: { children: React.ReactNode }) {

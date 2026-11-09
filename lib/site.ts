@@ -2,28 +2,28 @@ import { publicEnv } from "@/lib/env/public";
 
 export const SITE_NAME = "Offervia";
 export const SITE_DEFAULT_TITLE =
-  "Offervia | Resume tailoring, job scanning, and interview practice";
+  "Offervia | Free job search tools for students and new grads";
 export const SITE_DESCRIPTION =
-  "A job search helper for students, new grads, and anyone applying. Check a posting against your resume, rewrite it, draft a cover letter, practice interviews, and track applications.";
+  "Free job search tools for students and new grads. Paste a job posting, see what your resume is missing, and fix it before you apply. Then practice the interview and track every application.";
 export const SITE_SHARE_IMAGE = "/og-image.png";
 
 export { DISCUSSIONS_URL, GITHUB_REPO_URL, NEW_ISSUE_URL, suggestResourceUrl } from "@/lib/github";
 
 export const SITE_SHARE_IMAGE_ALT =
-  "Offervia: turn a job posting into a matching resume, cover letter, and tracked application";
+  "Offervia: see what the job asks for, and show you have it";
 
 /** Primary SEO keywords (used across metadata). */
 export const SITE_KEYWORDS = [
-  "resume tailoring",
-  "ATS resume checker",
-  "job description scanner",
-  "cover letter draft",
-  "interview practice",
+  "free job search tools",
+  "resume keyword scanner",
+  "tailor resume to job description",
+  "resume bullet checker",
+  "cover letter",
+  "mock interview practice",
   "job application tracker",
+  "job offer comparison",
   "student job search",
-  "resume optimizer",
-  "job search tools",
-  "career tools for job seekers",
+  "new grad jobs",
 ];
 
 export function getSiteUrl() {
